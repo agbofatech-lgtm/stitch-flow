@@ -1,0 +1,35 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs>
+<style>
+.c1{fill:#0F6E8C}
+.c2{fill:#0C5C73}
+.c3{fill:#2F8EA6}
+.c4{fill:#6FAFC1}
+.stroke1{stroke:#0C5C73;stroke-width:10;stroke-linecap:round}
+.stroke2{stroke:#2F8EA6;stroke-width:6;stroke-linecap:round}
+</style>
+</defs>
+
+<!-- ambient shapes -->
+<circle cx="260" cy="200" r="120" class="c3"/>
+<circle cx="1350" cy="160" r="100" class="c4"/>
+<ellipse cx="1320" cy="720" rx="220" ry="120" class="c3"/>
+<ellipse cx="260" cy="740" rx="260" ry="140" class="c4"/>
+
+<!-- measuring tape -->
+<g transform="translate(320 360)">
+<path d="M0 80 C300 -120 820 -120 1080 100" class="stroke1" fill="none"/>
+<path d="M0 110 C320 -90 820 -90 1080 130" class="stroke2" fill="none"/>
+
+<!-- tape body -->
+<rect x="420" y="-60" width="260" height="120" rx="30" class="c1"/>
+
+<!-- tick marks -->
+<line x1="460" y1="-40" x2="460" y2="0" class="stroke2"/>
+<line x1="500" y1="-50" x2="500" y2="0" class="stroke2"/>
+<line x1="540" y1="-40" x2="540" y2="0" class="stroke2"/>
+<line x1="580" y1="-50" x2="580" y2="0" class="stroke2"/>
+<line x1="620" y1="-40" x2="620" y2="0" class="stroke2"/>
+</g>
+</svg>

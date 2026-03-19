@@ -1,0 +1,875 @@
+import { BRAND } from '../config/brand';
+import { generateStylePattern, type StylePatternKind } from './patternEngine';
+import type {
+  DesignInspiration,
+  FabricRecord,
+  GarmentMeasurements,
+  Order,
+  ProductionPlan,
+  ProductionStage,
+} from '../types';
+
+type JobSheetExportInput = {
+  order: Order;
+  inspiration?: DesignInspiration | null;
+  selectedFabric?: FabricRecord | null;
+  workspaceName?: string;
+};
+
+type Point = { x: number; y: number };
+
+const MEASUREMENT_LABELS: Record<string, string> = {
+  bust: 'Bust',
+  chest: 'Chest',
+  waist: 'Waist',
+  hip: 'Hip',
+  neck: 'Neck',
+  shoulder: 'Shoulder',
+  backLength: 'Back Length',
+  bustSpan: 'Bust Span',
+  armholeDepth: 'Armhole Depth',
+  sleeve: 'Sleeve',
+  thigh: 'Thigh',
+  knee: 'Knee',
+  ankle: 'Ankle',
+  trouserLength: 'Trouser Length',
+  skirtLength: 'Skirt Length',
+  fullLength: 'Full Length',
+};
+
+function escapeHtml(value?: string | number | null) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function titleCase(value?: string | null) {
+  if (!value) return 'Not set';
+  return value
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function formatDate(value?: Date | string | null) {
+  if (!value) return 'Not set';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Not set';
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
+
+function formatDateTime(value?: Date | string | null) {
+  if (!value) return '—';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
+
+function mapGarmentToPatternKind(garmentType?: string | null): StylePatternKind {
+  switch (garmentType) {
+    case 'shirt':
+    case 'senator':
+      return 'shirt';
+    case 'trouser':
+      return 'trouser';
+    case 'skirt':
+      return 'skirt';
+    case 'kaftan':
+    case 'agbada':
+      return 'kaftan';
+    case 'dress':
+    case 'gown':
+    case 'blouse':
+    case 'custom':
+    case 'bodice':
+    default:
+      return 'bodice';
+  }
+}
+
+function isBodicePattern(value: unknown): value is {
+  controlPoints: Record<string, Point>;
+  points: Point[];
+  measurements: Record<string, number>;
+} {
+  return !!value && typeof value === 'object' && 'controlPoints' in value;
+}
+
+function getPatternMeasurements(order: Order): Partial<GarmentMeasurements> {
+  const snapshot = (order.measurementSnapshot || {}) as Partial<GarmentMeasurements>;
+  const garment = (order.garmentMeasurements || {}) as Partial<GarmentMeasurements>;
+
+  return {
+    bust: garment.bust ?? snapshot.bust ?? snapshot.chest ?? 90,
+    chest: garment.chest ?? snapshot.chest ?? snapshot.bust ?? 90,
+    waist: garment.waist ?? snapshot.waist ?? 72,
+    hip: garment.hip ?? snapshot.hip ?? 100,
+    neck: garment.neck ?? snapshot.neck ?? 36,
+    shoulder: garment.shoulder ?? snapshot.shoulder ?? 12,
+    backLength: garment.backLength ?? snapshot.backLength ?? 40,
+    bustSpan: garment.bustSpan ?? snapshot.bustSpan ?? 11,
+    armholeDepth: garment.armholeDepth ?? snapshot.armholeDepth ?? 22,
+    sleeve: garment.sleeve ?? snapshot.sleeve ?? 24,
+    thigh: garment.thigh ?? snapshot.thigh ?? 58,
+    knee: garment.knee ?? snapshot.knee ?? 42,
+    ankle: garment.ankle ?? snapshot.ankle ?? 28,
+    trouserLength: garment.trouserLength ?? snapshot.trouserLength ?? 108,
+    skirtLength: garment.skirtLength ?? snapshot.skirtLength ?? 75,
+    fullLength: garment.fullLength ?? snapshot.fullLength ?? 135,
+  };
+}
+
+function buildPatternPreviewDataUrl(order: Order): string | null {
+  try {
+    const patternKind = mapGarmentToPatternKind(order.garmentType || order.orderType);
+    const measurements = getPatternMeasurements(order);
+    const pattern = generateStylePattern(patternKind, measurements);
+
+    const basePoints = isBodicePattern(pattern) ? pattern.points : pattern.outline;
+
+    const minX = Math.min(...basePoints.map((point) => point.x));
+    const maxX = Math.max(...basePoints.map((point) => point.x));
+    const minY = Math.min(...basePoints.map((point) => point.y));
+    const maxY = Math.max(...basePoints.map((point) => point.y));
+
+    const width = 640;
+    const height = 460;
+    const padding = 40;
+    const patternWidth = Math.max(maxX - minX, 1);
+    const patternHeight = Math.max(maxY - minY, 1);
+    const scale = Math.min(
+      (width - padding * 2) / patternWidth,
+      (height - padding * 2) / patternHeight
+    );
+
+    const offsetX = (width - patternWidth * scale) / 2 - minX * scale;
+    const offsetY = (height - patternHeight * scale) / 2 - minY * scale;
+
+    const s = (point: Point) => ({
+      x: point.x * scale + offsetX,
+      y: point.y * scale + offsetY,
+    });
+
+    const outlinePoints = isBodicePattern(pattern)
+      ? (() => {
+          const cp = pattern.controlPoints;
+          return [cp.F, cp.A, cp.E, cp.G, cp.J, cp.I, cp.K, cp.D];
+        })()
+      : pattern.outline;
+
+    const outlinePath = outlinePoints
+      .map((point, index) => {
+        const p = s(point);
+        return `${index === 0 ? 'M' : 'L'} ${p.x} ${p.y}`;
+      })
+      .join(' ') + ' Z';
+
+    const guidesSvg = !isBodicePattern(pattern) && pattern.guides?.length
+      ? pattern.guides
+          .slice(0, 4)
+          .map((guide) => {
+            const start = s(guide.start);
+            const end = s(guide.end);
+            return `
+              <line x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" stroke="#7AA8B5" stroke-width="1.2" stroke-dasharray="5 4" />
+              <text x="${end.x + 6}" y="${end.y - 4}" font-size="10" fill="#5B707A">${escapeHtml(
+                guide.label
+              )}</text>
+            `;
+          })
+          .join('')
+      : '';
+
+    const bodiceMarksSvg = isBodicePattern(pattern)
+      ? (() => {
+          const cp = pattern.controlPoints;
+          const marks = [
+            { point: cp.A, label: 'A' },
+            { point: cp.E, label: 'E' },
+            { point: cp.G, label: 'G' },
+            { point: cp.H, label: 'H' },
+            { point: cp.I, label: 'I' },
+            { point: cp.K, label: 'K' },
+          ];
+
+          const dartLeft = s(cp.dartLeft);
+          const dartTip = s(cp.dartTip);
+          const dartRight = s(cp.dartRight);
+
+          const dots = marks
+            .map(({ point, label }) => {
+              const p = s(point);
+              return `
+                <circle cx="${p.x}" cy="${p.y}" r="3" fill="#0F6E8C" />
+                <text x="${p.x + 6}" y="${p.y - 6}" font-size="10" fill="#0F6E8C" font-weight="700">${label}</text>
+              `;
+            })
+            .join('');
+
+          return `
+            <path d="M ${dartLeft.x} ${dartLeft.y} L ${dartTip.x} ${dartTip.y} L ${dartRight.x} ${dartRight.y}" fill="none" stroke="#1C8AA8" stroke-width="1.5" />
+            ${dots}
+          `;
+        })()
+      : '';
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+        <rect width="100%" height="100%" fill="#ffffff" />
+        <rect x="10" y="10" width="${width - 20}" height="${height - 20}" rx="18" fill="#F8FBFD" stroke="#D8EAF0" />
+        <path d="${outlinePath}" fill="#DDEFF4" stroke="#0F6E8C" stroke-width="2.2" />
+        ${guidesSvg}
+        ${bodiceMarksSvg}
+        <text x="24" y="32" font-size="14" font-weight="700" fill="#0F6E8C">${escapeHtml(
+          titleCase(order.garmentType || order.orderType || 'Pattern')
+        )} Preview</text>
+      </svg>
+    `;
+
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  } catch {
+    return null;
+  }
+}
+
+function renderMeasurementsTable(order: Order) {
+  const snapshot = (order.measurementSnapshot || {}) as Record<string, unknown>;
+
+  const rows = Object.entries(snapshot)
+    .filter(([key, value]) => key !== 'notes' && value !== undefined && value !== null && value !== '')
+    .map(
+      ([key, value]) => `
+        <tr>
+          <td>${escapeHtml(MEASUREMENT_LABELS[key] || titleCase(key))}</td>
+          <td>${escapeHtml(String(value))}</td>
+        </tr>
+      `
+    )
+    .join('');
+
+  if (!rows) {
+    return `<div class="empty-card">No measurement snapshot saved.</div>`;
+  }
+
+  return `
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Measurement</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function renderCuttingList(plan?: ProductionPlan | null) {
+  if (!plan?.cuttingList?.length) {
+    return `<div class="empty-card">No cutting list available.</div>`;
+  }
+
+  const rows = plan.cuttingList
+    .map(
+      (piece) => `
+        <tr>
+          <td>${escapeHtml(piece.name)}</td>
+          <td>${escapeHtml(String(piece.quantity))}</td>
+          <td>${piece.cutOnFold ? 'Yes' : 'No'}</td>
+          <td>${escapeHtml(piece.fabric ? titleCase(piece.fabric) : '—')}</td>
+          <td>${escapeHtml(piece.notes || '—')}</td>
+        </tr>
+      `
+    )
+    .join('');
+
+  return `
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Piece</th>
+          <th>Qty</th>
+          <th>Fold</th>
+          <th>Fabric</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function renderSewingChecklist(plan?: ProductionPlan | null) {
+  if (!plan?.sewingChecklist?.length) {
+    return `<div class="empty-card">No sewing checklist available.</div>`;
+  }
+
+  return plan.sewingChecklist
+    .map(
+      (step) => `
+        <div class="list-card">
+          <div class="step-row">
+            <div class="step-badge">${escapeHtml(String(step.step))}</div>
+            <div>
+              <div class="card-title">${escapeHtml(step.title)}</div>
+              <div class="muted">${escapeHtml(titleCase(step.category))}</div>
+            </div>
+          </div>
+          <p>${escapeHtml(step.description)}</p>
+        </div>
+      `
+    )
+    .join('');
+}
+
+function renderFitRisks(plan?: ProductionPlan | null) {
+  if (!plan?.fitRisks?.length) {
+    return `<div class="empty-card">No fit-risk warnings recorded.</div>`;
+  }
+
+  return plan.fitRisks
+    .map(
+      (risk) => `
+        <div class="list-card risk-${escapeHtml(risk.severity || 'low')}">
+          <div class="card-title">${escapeHtml(risk.title)}</div>
+          <p>${escapeHtml(risk.description)}</p>
+          ${
+            risk.recommendation
+              ? `<p><strong>Recommendation:</strong> ${escapeHtml(risk.recommendation)}</p>`
+              : ''
+          }
+        </div>
+      `
+    )
+    .join('');
+}
+
+function renderTailorNotes(plan?: ProductionPlan | null) {
+  if (!plan?.tailorNotes?.length) {
+    return `<div class="empty-card">No tailor notes recorded.</div>`;
+  }
+
+  return `
+    <div class="two-col-list">
+      ${plan.tailorNotes
+        .map(
+          (note) => `
+            <div class="list-card">
+              <p>${escapeHtml(note)}</p>
+            </div>
+          `
+        )
+        .join('')}
+    </div>
+  `;
+}
+
+function renderProductionStages(stages?: ProductionStage[] | null) {
+  if (!stages?.length) {
+    return `<div class="empty-card">No production stages initialized.</div>`;
+  }
+
+  const rows = stages
+    .map(
+      (stage) => `
+        <tr>
+          <td>${escapeHtml(stage.label)}</td>
+          <td>${escapeHtml(titleCase(stage.status))}</td>
+          <td>${escapeHtml(formatDateTime(stage.startedAt))}</td>
+          <td>${escapeHtml(formatDateTime(stage.completedAt))}</td>
+          <td>${escapeHtml(formatDateTime(stage.skippedAt))}</td>
+          <td>${escapeHtml(stage.notes || '—')}</td>
+        </tr>
+      `
+    )
+    .join('');
+
+  return `
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Status</th>
+          <th>Started</th>
+          <th>Completed</th>
+          <th>Skipped</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+export function exportOrderJobSheetPdf({
+  order,
+  inspiration,
+  selectedFabric,
+  workspaceName,
+}: JobSheetExportInput) {
+  const patternPreviewUrl = buildPatternPreviewDataUrl(order);
+  const title = `${order.orderNumber} - ${BRAND.productName} Job Sheet`;
+
+  const fabricEstimate = order.productionPlan?.fabricEstimate;
+  const customerName = order.customer?.fullName || 'No customer';
+  const customerPhone = order.customer?.phone || 'Not set';
+  const customerEmail = order.customer?.email || 'Not set';
+
+  const printWindow = window.open('', '_blank', 'width=1200,height=900');
+  if (!printWindow) return;
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>${escapeHtml(title)}</title>
+        <style>
+          * { box-sizing: border-box; }
+          body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 28px;
+            color: #1f2937;
+            background: #ffffff;
+          }
+          .page {
+            max-width: 1100px;
+            margin: 0 auto;
+          }
+          .hero {
+            border: 1px solid #dbeafe;
+            background: linear-gradient(135deg, #0F6E8C 0%, #117793 55%, #0C5C74 100%);
+            color: white;
+            border-radius: 22px;
+            padding: 24px;
+            margin-bottom: 22px;
+          }
+          .hero h1 {
+            margin: 8px 0 6px;
+            font-size: 28px;
+          }
+          .hero p {
+            margin: 0;
+            color: rgba(255,255,255,0.92);
+          }
+          .pill-row {
+            margin-top: 14px;
+          }
+          .pill {
+            display: inline-block;
+            margin: 0 8px 8px 0;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.14);
+            font-size: 12px;
+            font-weight: 700;
+          }
+          .section {
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            overflow: hidden;
+          }
+          .section-head {
+            padding: 14px 18px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+          }
+          .section-body {
+            padding: 18px;
+          }
+          .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+          }
+          .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+          }
+          .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+          }
+          .stat {
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 14px;
+          }
+          .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #64748b;
+            font-weight: 700;
+          }
+          .stat-value {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+          }
+          .table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          .table th,
+          .table td {
+            border: 1px solid #e5e7eb;
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 13px;
+          }
+          .table th {
+            background: #f8fafc;
+            color: #334155;
+            font-weight: 700;
+          }
+          .visual-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+          }
+          .visual-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            padding: 14px;
+            background: #ffffff;
+          }
+          .visual-card h4 {
+            margin: 0 0 10px;
+            font-size: 14px;
+            color: #0f172a;
+          }
+          .visual-card img {
+            width: 100%;
+            max-height: 360px;
+            object-fit: contain;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: #ffffff;
+          }
+          .empty-card {
+            border: 1px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 13px;
+            color: #64748b;
+            background: #f8fafc;
+          }
+          .list-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 14px;
+            background: #ffffff;
+            margin-bottom: 12px;
+          }
+          .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 6px;
+          }
+          .muted {
+            font-size: 12px;
+            color: #64748b;
+          }
+          .step-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+          }
+          .step-badge {
+            width: 30px;
+            height: 30px;
+            border-radius: 999px;
+            background: #0F6E8C;
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          .two-col-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+          }
+          .risk-high {
+            border-color: #fecaca;
+            background: #fef2f2;
+          }
+          .risk-medium {
+            border-color: #fde68a;
+            background: #fffbeb;
+          }
+          .risk-low {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+          }
+          .footer-note {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #64748b;
+            text-align: center;
+          }
+          @media print {
+            body {
+              padding: 0;
+            }
+            .page {
+              max-width: none;
+            }
+            .section,
+            .hero,
+            .visual-card,
+            .stat,
+            .list-card {
+              break-inside: avoid;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="page">
+          <div class="hero">
+            <div class="pill">Tailor Pack / Job Sheet</div>
+            <h1>${escapeHtml(order.orderNumber)}</h1>
+            <p>${escapeHtml(workspaceName || BRAND.productName)} • ${escapeHtml(
+              titleCase(order.garmentType || order.orderType || 'custom')
+            )}</p>
+
+            <div class="pill-row">
+              <span class="pill">Customer: ${escapeHtml(customerName)}</span>
+              <span class="pill">Status: ${escapeHtml(titleCase(order.status))}</span>
+              <span class="pill">Due: ${escapeHtml(formatDate(order.dueDate))}</span>
+              <span class="pill">Created: ${escapeHtml(formatDate(order.createdAt))}</span>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">Customer + Order Details</div>
+            <div class="section-body">
+              <div class="grid-4">
+                <div class="stat">
+                  <div class="stat-label">Customer</div>
+                  <div class="stat-value">${escapeHtml(customerName)}</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-label">Phone</div>
+                  <div class="stat-value">${escapeHtml(customerPhone)}</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-label">Email</div>
+                  <div class="stat-value">${escapeHtml(customerEmail)}</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-label">Garment</div>
+                  <div class="stat-value">${escapeHtml(
+                    titleCase(order.garmentType || order.orderType || 'custom')
+                  )}</div>
+                </div>
+              </div>
+
+              <div class="grid-3" style="margin-top: 14px;">
+                <div class="stat">
+                  <div class="stat-label">Order Type</div>
+                  <div class="stat-value">${escapeHtml(order.orderType || 'Not set')}</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-label">Selected Fabric</div>
+                  <div class="stat-value">${escapeHtml(
+                    selectedFabric
+                      ? `${selectedFabric.name} (${titleCase(selectedFabric.fabricType)})`
+                      : 'Not linked'
+                  )}</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-label">Design Inspiration</div>
+                  <div class="stat-value">${escapeHtml(
+                    inspiration?.title || 'Not linked'
+                  )}</div>
+                </div>
+              </div>
+
+              ${
+                order.notes
+                  ? `
+                    <div class="list-card" style="margin-top: 14px;">
+                      <div class="card-title">Order Notes</div>
+                      <p>${escapeHtml(order.notes)}</p>
+                    </div>
+                  `
+                  : ''
+              }
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">Measurements</div>
+            <div class="section-body">
+              ${renderMeasurementsTable(order)}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">Visual Reference</div>
+            <div class="section-body">
+              <div class="visual-grid">
+                <div class="visual-card">
+                  <h4>Inspiration Image</h4>
+                  ${
+                    inspiration?.imageUrl
+                      ? `<img src="${escapeHtml(inspiration.imageUrl)}" alt="Inspiration image" />`
+                      : `<div class="empty-card">No inspiration image linked.</div>`
+                  }
+                </div>
+
+                <div class="visual-card">
+                  <h4>Pattern Preview</h4>
+                  ${
+                    patternPreviewUrl
+                      ? `<img src="${patternPreviewUrl}" alt="Pattern preview" />`
+                      : `<div class="empty-card">Pattern preview could not be generated from saved order data.</div>`
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">Fabric Requirement</div>
+            <div class="section-body">
+              <div class="grid-4">
+                <div class="stat">
+                  <div class="stat-label">Main Fabric</div>
+                  <div class="stat-value">${escapeHtml(
+                    fabricEstimate
+                      ? `${fabricEstimate.mainFabricQty} ${fabricEstimate.unit}`
+                      : 'Not available'
+                  )}</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-label">Fabric Type</div>
+                  <div class="stat-value">${escapeHtml(
+                    fabricEstimate?.fabricType ? titleCase(fabricEstimate.fabricType) : 'Not available'
+                  )}</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-label">Lining</div>
+                  <div class="stat-value">${escapeHtml(
+                    fabricEstimate?.liningQty
+                      ? `${fabricEstimate.liningQty} ${fabricEstimate.unit}`
+                      : 'Not required'
+                  )}</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-label">Interfacing</div>
+                  <div class="stat-value">${escapeHtml(
+                    fabricEstimate?.interfacingQty
+                      ? `${fabricEstimate.interfacingQty} ${fabricEstimate.unit}`
+                      : 'Not required'
+                  )}</div>
+                </div>
+              </div>
+
+              ${
+                fabricEstimate?.notes?.length
+                  ? `
+                    <div style="margin-top: 14px;">
+                      ${fabricEstimate.notes
+                        .map(
+                          (note) => `
+                            <div class="list-card">
+                              <p>${escapeHtml(note)}</p>
+                            </div>
+                          `
+                        )
+                        .join('')}
+                    </div>
+                  `
+                  : ''
+              }
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">Cutting List</div>
+            <div class="section-body">
+              ${renderCuttingList(order.productionPlan)}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">Sewing Checklist</div>
+            <div class="section-body">
+              ${renderSewingChecklist(order.productionPlan)}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">Fit-Risk Warnings</div>
+            <div class="section-body">
+              ${renderFitRisks(order.productionPlan)}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">Tailor Notes</div>
+            <div class="section-body">
+              ${renderTailorNotes(order.productionPlan)}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">Production Stage Checklist</div>
+            <div class="section-body">
+              ${renderProductionStages(order.productionStages)}
+            </div>
+          </div>
+
+          <div class="footer-note">
+            Exported from ${escapeHtml(BRAND.productName)} by ${escapeHtml(BRAND.parentName)}
+          </div>
+        </div>
+
+        <script>
+          window.onload = function () {
+            window.print();
+          };
+        </script>
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+}
+
+
+

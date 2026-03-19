@@ -1,0 +1,24 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs>
+<style>
+.c1{fill:#0F6E8C}
+.c2{fill:#0C5C73}
+.c3{fill:#2F8EA6}
+.c4{fill:#6FAFC1}
+.stroke1{stroke:#0C5C73;stroke-width:10;stroke-linecap:round}
+.stroke2{stroke:#2F8EA6;stroke-width:6;stroke-linecap:round}
+</style>
+</defs>
+
+<circle cx="260" cy="180" r="120" class="c3"/>
+<circle cx="1350" cy="160" r="100" class="c4"/>
+
+<g transform="translate(420 380) rotate(-20)">
+<rect x="0" y="-8" width="800" height="16" rx="8" class="c2"/>
+<circle cx="820" cy="0" r="16" class="c4"/>
+
+<path d="M-200 120 C200 -100 700 -40 1000 -200" class="stroke2"/>
+<path d="M-200 160 C200 -60 700 20 1000 -140" class="stroke2"/>
+</g>
+</svg>
