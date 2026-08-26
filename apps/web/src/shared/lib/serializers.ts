@@ -1,4 +1,4 @@
-﻿const ISO_DATE_REGEX =
+const ISO_DATE_REGEX =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 
 const DATE_FIELD_NAMES = new Set([

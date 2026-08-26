@@ -1,4 +1,4 @@
-﻿import { featureRequestRepository } from '@modules/repositories/featureRequestRepository';
+import { featureRequestRepository } from '@modules/repositories/featureRequestRepository';
 import { auditLogService } from './auditLogService';
 
 export const featureRequestService = {

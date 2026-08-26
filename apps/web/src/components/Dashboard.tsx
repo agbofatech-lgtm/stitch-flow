@@ -1,4 +1,4 @@
-﻿import { useMemo, type ElementType, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ElementType, type ReactNode } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   DollarSign,
@@ -14,6 +14,12 @@ import {
 } from 'lucide-react';
 import { format, isToday, isPast } from 'date-fns';
 import { formatCurrency, safeCurrency } from '@shared/utils/currency';
+import { getDashboardSummary, type DashboardSummary } from '@shared/utils/dashboardApi';
+import { API_BASE } from '@shared/utils/api';
+import { getDashboardDataBundle } from '@shared/utils/dashboardDataApi';
+import { getPaymentsAnalytics, type PaymentsAnalytics } from '@shared/utils/paymentsAnalyticsApi';
+import type { ApiOrder } from '@shared/api/orders';
+import type { ApiInvoice } from '@shared/api/invoices';
 import { BRAND } from '../config/brand';
 import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
 import scissorsSoft from '@shared/assets/scissors-soft.svg';
@@ -21,6 +27,7 @@ import measuringTapeSoft from '@shared/assets/measuring-tape-soft.svg';
 import sewingMachineSoft from '@shared/assets/sewing-machine-soft.svg';
 import tailoringSoft from '@shared/assets/tailoring-soft.svg';
 import symbolSoft from '@shared/assets/symbol-soft.svg';
+import { DashboardSummaryCard } from './DashboardSummaryCard';
 
 const ACTIVE_ORDER_STATUSES = new Set(['draft', 'in_progress', 'ready']);
 
@@ -32,10 +39,6 @@ const interactiveFocusClass =
 
 export function Dashboard() {
   const {
-    dashboardSummary,
-    orders,
-    invoices,
-    payments,
     customers,
     currentMember,
     currentWorkspace,
@@ -45,15 +48,69 @@ export function Dashboard() {
     getLowStockMaterials,
   } = useApp();
 
+  const [realSummary, setRealSummary] = useState<DashboardSummary | null>(null);
+  const [realOrders, setRealOrders] = useState<ApiOrder[]>([]);
+  const [realInvoices, setRealInvoices] = useState<ApiInvoice[]>([]);
+  const [paymentsAnalytics, setPaymentsAnalytics] = useState<PaymentsAnalytics | null>(null);
+
+  useEffect(() => {
+    async function loadSummary() {
+      try {
+        const summary = await getDashboardSummary();
+        setRealSummary(summary);
+      } catch (error) {
+        console.error('Failed to load dashboard summary:', error);
+      }
+    }
+
+    void loadSummary();
+  }, []);
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      try {
+        const data = await getDashboardDataBundle();
+        setRealOrders(data.orders);
+        setRealInvoices(data.invoices);
+      } catch (error) {
+        console.error('Failed to load dashboard order/invoice data:', error);
+      }
+    }
+
+    void loadDashboardData();
+  }, []);
+
+  useEffect(() => {
+    async function loadPaymentsAnalytics() {
+      try {
+        const data = await getPaymentsAnalytics();
+        setPaymentsAnalytics(data);
+      } catch (error) {
+        console.error('Failed to load payments analytics:', error);
+      }
+    }
+
+    void loadPaymentsAnalytics();
+  }, []);
+
   const workspaceCurrency = currentWorkspace?.defaultCurrency || 'GHS';
   const workspaceName = currentWorkspace?.name || 'your workspace';
   const firstName = getFirstName(currentMember?.user?.fullName);
 
-  const recentOrders = useMemo(() => orders.slice(-5).reverse(), [orders]);
+  const customerNameById = useMemo(() => {
+    return new Map((customers || []).map((customer) => [customer.id, customer.fullName]));
+  }, [customers]);
+
+  const recentOrders = useMemo(() => realOrders.slice(0, 5), [realOrders]);
 
   const overdueInvoices = useMemo(
-    () => invoices.filter((invoice) => invoice.status === 'overdue'),
-    [invoices]
+    () =>
+      realInvoices.filter((invoice) => {
+        if (invoice.status === 'overdue') return true;
+        if (!invoice.dueDate) return false;
+        return new Date(invoice.dueDate).getTime() < Date.now() && invoice.balanceDue > 0;
+      }),
+    [realInvoices]
   );
 
   const lowStockMaterials = useMemo(
@@ -63,11 +120,11 @@ export function Dashboard() {
 
   const ordersDueToday = useMemo(
     () =>
-      orders.filter((order) => {
+      realOrders.filter((order) => {
         const dueDate = getValidDate(order.dueDate);
         return !!dueDate && isToday(dueDate) && ACTIVE_ORDER_STATUSES.has(order.status);
       }),
-    [orders]
+    [realOrders]
   );
 
   const inventorySummary = useMemo(() => {
@@ -100,58 +157,29 @@ export function Dashboard() {
     };
   }, [fabricRecords]);
 
-  const weeklyRevenue = useMemo(() => {
-    const today = startOfDay(new Date());
-    const last7Days = Array.from({ length: 7 }, (_, index) => addDays(today, index - 6));
+  const weeklyRevenue = paymentsAnalytics ?? {
+    bars: [
+      { label: 'S', value: 0 },
+      { label: 'S', value: 0 },
+      { label: 'M', value: 0 },
+      { label: 'T', value: 0 },
+      { label: 'W', value: 0 },
+      { label: 'T', value: 0 },
+      { label: 'F', value: 0 },
+    ],
+    thisWeekTotal: 0,
+    previousWeekTotal: 0,
+    trendPercent: 0,
+    hasRevenue: false,
+  };
 
-    const capturedPayments = payments.filter(
-      (payment) => payment.paymentStatus === 'captured'
-    );
+  const maxRevenueBarValue = Math.max(...((weeklyRevenue?.bars ?? [])?.map(item => item.value) ?? []), 0);
 
-    const totals = last7Days.map((day) =>
-      capturedPayments.reduce((sum, payment) => {
-        const paymentDate = getPaymentDate(payment);
-        if (!paymentDate || !sameDay(paymentDate, day)) return sum;
-        return sum + payment.amount;
-      }, 0)
-    );
-
-    const maxValue = Math.max(...totals, 0);
-
-    const bars = totals.map((value, index) => ({
-      label: format(last7Days[index], 'EEE').charAt(0),
-      value,
-      height: maxValue > 0 ? Math.max(16, Math.round((value / maxValue) * 100)) : 16,
-    }));
-
-    const thisWeekTotal = totals.reduce((sum, value) => sum + value, 0);
-
-    const previous7Days = Array.from({ length: 7 }, (_, index) => addDays(today, index - 13));
-    const previousWeekTotal = previous7Days.reduce((sum, day) => {
-      return (
-        sum +
-        capturedPayments.reduce((innerSum, payment) => {
-          const paymentDate = getPaymentDate(payment);
-          if (!paymentDate || !sameDay(paymentDate, day)) return innerSum;
-          return innerSum + payment.amount;
-        }, 0)
-      );
-    }, 0);
-
-    const trendPercent =
-      previousWeekTotal > 0
-        ? ((thisWeekTotal - previousWeekTotal) / previousWeekTotal) * 100
-        : thisWeekTotal > 0
-        ? 100
-        : 0;
-
-    return {
-      bars,
-      thisWeekTotal,
-      trendPercent,
-      hasRevenue: thisWeekTotal > 0 || previousWeekTotal > 0,
-    };
-  }, [payments]);
+  const displayCustomerCount = realSummary?.totalCustomers ?? customers.length;
+  const displayOrderCount = realSummary?.totalOrders ?? realOrders.length;
+  const displayRevenue = realSummary?.totalRevenue ?? 0;
+  const displayPendingBalances = realSummary?.pendingBalances ?? 0;
+  const displayDueAlerts = realSummary?.dueAlerts ?? 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 p-4 lg:p-8">
@@ -224,8 +252,8 @@ export function Dashboard() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <TopInfoCard label="Customers" value={String(customers.length)} icon={Users} />
-              <TopInfoCard label="Orders" value={String(orders.length)} icon={Package} />
+              <TopInfoCard label="Customers" value={String(displayCustomerCount)} icon={Users} />
+              <TopInfoCard label="Orders" value={String(displayOrderCount)} icon={Package} />
               <TopInfoCard
                 label="Low Stock"
                 value={String(lowStockMaterials.length)}
@@ -238,6 +266,10 @@ export function Dashboard() {
               />
             </div>
           </div>
+        </div>
+
+        <div className="mb-8">
+          <DashboardSummaryCard />
         </div>
 
         {lowStockMaterials.length > 0 && (
@@ -259,7 +291,7 @@ export function Dashboard() {
                         key={item.id}
                         className="rounded-full bg-white px-3 py-1 text-xs font-medium text-amber-800 shadow-sm"
                       >
-                        {item.name} â€¢ {item.quantityInStock} {item.unit}
+                        {item.name} � {item.quantityInStock} {item.unit}
                       </span>
                     ))}
                   </div>
@@ -280,34 +312,34 @@ export function Dashboard() {
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <MetricCard
             title="Total Revenue"
-            value={formatCurrency(dashboardSummary?.totalRevenue ?? 0, workspaceCurrency)}
+            value={formatCurrency(displayRevenue, workspaceCurrency)}
             icon={DollarSign}
             color="green"
-            subtitle="Captured payments"
+            subtitle="Real database revenue"
             onClick={() => setView('invoices')}
           />
           <MetricCard
             title="Pending Balances"
-            value={formatCurrency(dashboardSummary?.pendingBalances ?? 0, workspaceCurrency)}
+            value={formatCurrency(displayPendingBalances, workspaceCurrency)}
             icon={Clock}
             color="amber"
-            subtitle="Unpaid invoice balances"
+            subtitle="Real unpaid invoice balances"
             onClick={() => setView('invoices')}
           />
           <MetricCard
             title="Due Alerts"
-            value={String(dashboardSummary?.dueAlerts ?? 0)}
+            value={String(displayDueAlerts)}
             icon={AlertTriangle}
             color="red"
-            subtitle="Orders & invoices due"
+            subtitle="Real overdue / due-now items"
             onClick={() => setView('orders')}
           />
           <MetricCard
             title="Active Customers"
-            value={String(customers.length)}
+            value={String(displayCustomerCount)}
             icon={Users}
             color="brand"
-            subtitle="Studio customer base"
+            subtitle="Real customer count"
             onClick={() => setView('customers')}
           />
         </div>
@@ -375,10 +407,10 @@ export function Dashboard() {
             </div>
 
             {ordersDueToday.length === 0 ? (
-              <p className="text-sm text-slate-500">No orders due today ðŸŽ‰</p>
+              <p className="text-sm text-slate-500">No orders due today ??</p>
             ) : (
               <div className="space-y-3">
-                {ordersDueToday.map((order) => (
+                {(ordersDueToday || []).map((order) => (
                   <button
                     key={order.id}
                     type="button"
@@ -388,7 +420,9 @@ export function Dashboard() {
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="font-medium text-slate-900">{order.orderNumber}</p>
-                        <p className="text-sm text-slate-500">{order.customer?.fullName || 'â€”'}</p>
+                        <p className="text-sm text-slate-500">
+                          {customerNameById.get(order.customerId) || '�'}
+                        </p>
                       </div>
 
                       <span
@@ -416,10 +450,10 @@ export function Dashboard() {
             </div>
 
             {overdueInvoices.length === 0 ? (
-              <p className="text-sm text-slate-500">All invoices are up to date âœ“</p>
+              <p className="text-sm text-slate-500">All invoices are up to date ?</p>
             ) : (
               <div className="space-y-3">
-                {overdueInvoices.map((invoice) => {
+                {(overdueInvoices || []).map((invoice) => {
                   const dueDate = getValidDate(invoice.dueDate);
 
                   return (
@@ -433,7 +467,7 @@ export function Dashboard() {
                         <div>
                           <p className="font-medium text-slate-900">{invoice.invoiceNumber}</p>
                           <p className="text-sm text-slate-500">
-                            Due: {dueDate ? format(dueDate, 'MMM d, yyyy') : 'â€”'}
+                            Due: {dueDate ? format(dueDate, 'MMM d, yyyy') : '�'}
                           </p>
                         </div>
 
@@ -493,7 +527,7 @@ export function Dashboard() {
                 </thead>
 
                 <tbody className="divide-y divide-slate-100">
-                  {recentOrders.map((order) => {
+                  {(recentOrders || []).map((order) => {
                     const dueDate = getValidDate(order.dueDate);
 
                     return (
@@ -507,15 +541,17 @@ export function Dashboard() {
                             {order.orderNumber}
                           </button>
                         </td>
-                        <td className="py-3 text-slate-600">{order.customer?.fullName || 'â€”'}</td>
-                        <td className="py-3 text-slate-600">{order.orderType || 'â€”'}</td>
+                        <td className="py-3 text-slate-600">
+                          {customerNameById.get(order.customerId) || '�'}
+                        </td>
+                        <td className="py-3 text-slate-600">{order.orderType || '�'}</td>
                         <td className="py-3 text-slate-600">
                           {dueDate ? (
                             <span className={getDueDateClass(dueDate, order.status)}>
                               {format(dueDate, 'MMM d, yyyy')}
                             </span>
                           ) : (
-                            'â€”'
+                            '�'
                           )}
                         </td>
                         <td className="py-3">
@@ -556,14 +592,20 @@ export function Dashboard() {
               >
                 <div className="space-y-4">
                   <div className="flex h-32 items-end gap-2">
-                    {weeklyRevenue.bars.map((bar, index) => (
+                    {(weeklyRevenue?.bars ?? [])?.map((bar, index) => (
                       <div
                         key={`${bar.label}-${index}`}
                         className="flex flex-1 flex-col items-center gap-1"
                       >
                         <div
                           className="w-full rounded-t bg-[#0F6E8C]"
-                          style={{ height: `${bar.height}%` }}
+                          style={{
+                            height: `${
+                              maxRevenueBarValue > 0
+                                ? Math.max(16, Math.round((bar.value / maxRevenueBarValue) * 100))
+                                : 16
+                            }%`,
+                          }}
                           title={`${bar.label}: ${formatCurrency(bar.value, workspaceCurrency)}`}
                         />
                         <span className="text-xs text-slate-400">{bar.label}</span>
@@ -577,6 +619,10 @@ export function Dashboard() {
                       <p className="font-semibold text-slate-900">
                         {formatCurrency(weeklyRevenue.thisWeekTotal, workspaceCurrency)}
                       </p>
+
+                      <p className="text-xs text-slate-400">
+                        Prev: {formatCurrency(weeklyRevenue.previousWeekTotal, workspaceCurrency)}
+                      </p>
                     </div>
 
                     <span
@@ -586,7 +632,7 @@ export function Dashboard() {
                     >
                       <TrendingUp className="h-4 w-4" />
                       {weeklyRevenue.trendPercent >= 0 ? '+' : ''}
-                      {weeklyRevenue.trendPercent.toFixed(1)}%
+                      {(weeklyRevenue.trendPercent ?? 0).toFixed(1)}%
                     </span>
                   </div>
 
@@ -891,32 +937,5 @@ function getDueDateClass(dueDate: Date, status?: string) {
   return '';
 }
 
-function startOfDay(date: Date) {
-  const next = new Date(date);
-  next.setHours(0, 0, 0, 0);
-  return next;
-}
 
-function addDays(date: Date, amount: number) {
-  const next = new Date(date);
-  next.setDate(next.getDate() + amount);
-  return next;
-}
 
-function sameDay(a: Date, b: Date) {
-  return startOfDay(a).getTime() === startOfDay(b).getTime();
-}
-
-function getPaymentDate(payment: {
-  capturedAt?: string | Date | null;
-  paidAt?: string | Date | null;
-  createdAt?: string | Date | null;
-  paymentDate?: string | Date | null;
-}) {
-  return (
-    getValidDate(payment.capturedAt) ||
-    getValidDate(payment.paidAt) ||
-    getValidDate(payment.createdAt) ||
-    getValidDate(payment.paymentDate)
-  );
-}

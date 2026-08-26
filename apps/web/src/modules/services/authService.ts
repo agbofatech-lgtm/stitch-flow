@@ -1,4 +1,4 @@
-﻿import { userRepository } from '@modules/repositories/userRepository';
+import { userRepository } from '@modules/repositories/userRepository';
 import { licenseRepository } from '@modules/repositories/licenseRepository';
 import { refreshTokenRepository } from '@modules/repositories/refreshTokenRepository';
 import { ApiError } from '@shared/utils/apiError';

@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   BadgeInfo,
   CheckCircle2,
@@ -402,7 +402,7 @@ export function CustomerDetail({
                 {editingProfileId ? 'Edit Measurement Profile' : 'Create Measurement Profile'}
               </h3>
               <p className="mt-1 text-sm text-slate-500">
-                Name profiles by fit or garment use, like â€œFitted Gownâ€ or â€œSenator Setâ€.
+                Name profiles by fit or garment use, like “Fitted Gown” or “Senator Set”.
               </p>
             </div>
 
@@ -462,7 +462,7 @@ export function CustomerDetail({
               </div>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {MEASUREMENT_FIELDS.map((field) => (
+                {(MEASUREMENT_FIELDS ?? []).map((field) => (
                   <div
                     key={field.key}
                     className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
@@ -536,7 +536,7 @@ export function CustomerDetail({
           </div>
         ) : (
           <div className="space-y-4">
-            {profiles.map((profile) => {
+            {(profiles ?? []).map((profile) => {
               const highlights = getProfileHighlights(profile);
 
               return (
@@ -557,7 +557,7 @@ export function CustomerDetail({
 
                       {highlights.length > 0 && (
                         <div className="flex flex-wrap gap-2">
-                          {highlights.map((item) => (
+                          {(highlights ?? []).map((item) => (
                             <span
                               key={`${profile.id}-${item.label}`}
                               className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200"

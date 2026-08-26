@@ -1,4 +1,4 @@
-﻿import { licenseRepository } from '@modules/repositories/licenseRepository';
+import { licenseRepository } from '@modules/repositories/licenseRepository';
 import { ApiError } from '@shared/utils/apiError';
 import { getTierFeatures } from '@shared/utils/features';
 import { auditLogService } from './auditLogService';

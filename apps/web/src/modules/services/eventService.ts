@@ -1,4 +1,4 @@
-﻿import { eventRepository } from '@modules/repositories/eventRepository';
+import { eventRepository } from '@modules/repositories/eventRepository';
 import { auditLogService } from './auditLogService';
 
 export const eventService = {

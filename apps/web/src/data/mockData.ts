@@ -1,4 +1,4 @@
-﻿import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   Tier,
   Workspace,
@@ -72,8 +72,8 @@ export const users: User[] = [
   },
   {
     id: '10000000-0000-0000-0000-000000000002',
-    fullName: 'James Wilson',
-    email: 'james@tailorshop.com',
+    fullName: 'Assistant',
+    email: '',
     isActive: true,
     createdAt: new Date('2024-02-01'),
   },
@@ -85,7 +85,7 @@ export const users: User[] = [
 export const workspaces: Workspace[] = [
   {
     id: '20000000-0000-0000-0000-000000000001',
-    name: 'Mitchell Tailoring Studio',
+    name: 'My Workspace',
     tierId: tiers[2].id,
     tier: tiers[2],
     billingStatus: 'active',
@@ -1026,3 +1026,7 @@ export function calculateDashboardSummary(): DashboardSummary {
     overdueOrders,
   };
 }
+
+
+
+

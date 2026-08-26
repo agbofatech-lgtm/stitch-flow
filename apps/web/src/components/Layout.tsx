@@ -1,4 +1,4 @@
-﻿import { useApp } from '../context/AppContext';
+import { useApp } from '../context/AppContext';
 import {
   LayoutDashboard,
   Users,
@@ -123,7 +123,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
         <nav className="overflow-y-auto px-3 py-3">
           <div className="space-y-1.5">
-            {navItems.map((item) => {
+            {(navItems ?? []).map((item) => {
               const isActive = currentView === item.id;
               const Icon = item.icon;
 
@@ -176,7 +176,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
               <div className="min-w-0 flex-1 text-left">
                 <p className="truncate text-sm font-medium text-slate-900">
-                  {currentMember.user.fullName}
+                  {currentWorkspace.ownerName || currentMember.user.fullName || 'Owner'}
                 </p>
                 <p className="text-xs capitalize text-slate-500">{currentMember.role}</p>
               </div>
@@ -293,3 +293,9 @@ export function Layout({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
+
+
+
+
+

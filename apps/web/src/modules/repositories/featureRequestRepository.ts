@@ -1,4 +1,4 @@
-﻿import { query } from '../config/db';
+import { query } from '../config/db';
 
 export const featureRequestRepository = {
   async create(data: { userId: string | null; title: string; description: string; status: string }) {

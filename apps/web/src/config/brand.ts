@@ -1,4 +1,4 @@
-﻿export const BRAND = {
+export const BRAND = {
   productName: 'StitchFlow',
   parentName: 'AGBOFA Technology Ltd',
   tagline: 'Tailoring Business Platform',

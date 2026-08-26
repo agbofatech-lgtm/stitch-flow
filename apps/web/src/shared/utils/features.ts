@@ -1,4 +1,4 @@
-﻿export function getTierFeatures(tier: string) {
+export function getTierFeatures(tier: string) {
   switch (tier) {
     case 'enterprise':
       return {

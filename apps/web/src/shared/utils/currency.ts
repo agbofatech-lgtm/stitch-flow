@@ -1,4 +1,4 @@
-﻿import { CurrencyCode } from '../types';
+import { CurrencyCode } from '../types';
 
 export function safeCurrency(
   currency?: string,

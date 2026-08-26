@@ -1,4 +1,4 @@
-﻿import {
+import {
   useMemo,
   useState,
   type ElementType,
@@ -93,7 +93,7 @@ export function Materials() {
     }, 0);
 
     const uniqueMaterialsUsed = new Set(
-      currentMonthUsage.map((usage) => usage.fabricRecordId)
+      (currentMonthUsage ?? []).map((usage) => usage.fabricRecordId)
     ).size;
 
     return {
@@ -114,7 +114,7 @@ export function Materials() {
   }, [fabricRecords]);
 
   const reorderSuggestions = useMemo(() => {
-    return lowStockMaterials.map((material) => {
+    return (lowStockMaterials ?? []).map((material) => {
       const reorderLevel = material.reorderLevel || 0;
       const targetStock = Math.max(reorderLevel * 2, reorderLevel + 5);
       const suggestedQuantity = Math.max(0, targetStock - material.quantityInStock);
@@ -152,11 +152,11 @@ export function Materials() {
 
   const filteredMaterials = useMemo(() => {
     return fabricRecords.filter((material) => {
-      const query = search.toLowerCase();
+      const query = (search ?? "").toLowerCase();
       const matchesSearch =
-        material.name.toLowerCase().includes(query) ||
-        material.fabricType.toLowerCase().includes(query) ||
-        material.color.toLowerCase().includes(query) ||
+        (material.name ?? "").toLowerCase().includes(query) ||
+        (material.fabricType ?? "").toLowerCase().includes(query) ||
+        (material.color ?? "").toLowerCase().includes(query) ||
         (material.supplier || '').toLowerCase().includes(query);
 
       const isInactive = material.isActive === false;
@@ -295,7 +295,7 @@ export function Materials() {
           </div>
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {reorderSuggestions.map((item) => (
+            {(reorderSuggestions ?? []).map((item) => (
               <div
                 key={item.id}
                 className="rounded-2xl border border-amber-100 bg-white p-4"
@@ -304,7 +304,7 @@ export function Materials() {
                   <div>
                     <h3 className="font-semibold text-slate-900">{item.name}</h3>
                     <p className="text-sm text-slate-500">
-                      {capitalize(item.fabricType)} â€¢ {item.color}
+                      {capitalize(item.fabricType)} • {item.color}
                     </p>
                   </div>
 
@@ -412,7 +412,7 @@ export function Materials() {
       </div>
 
       <div className="space-y-4">
-        {filteredMaterials.map((material) => {
+        {(filteredMaterials ?? []).map((material) => {
           const usageMeta = monthlyUsageByMaterial.get(material.id);
           const monthlyConsumed = usageMeta?.quantity || 0;
           const monthlyUsageCount = usageMeta?.usageCount || 0;

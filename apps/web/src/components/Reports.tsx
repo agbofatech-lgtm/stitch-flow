@@ -1,4 +1,4 @@
-﻿import { useMemo, useState, type ElementType, type ReactNode } from 'react';
+import { useMemo, useState, type ElementType, type ReactNode } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   BarChart3,
@@ -284,7 +284,7 @@ export function Reports() {
         }
       : null;
 
-    const materialInsights = fabricRecords.map((material) => {
+    const materialInsights = (fabricRecords ?? []).map((material) => {
       const totalUsed = usageByMaterialMap.get(material.id) || 0;
       const totalCostUsed = costByMaterialMap.get(material.id) || 0;
       const isInactive = material.isActive === false;
@@ -404,7 +404,7 @@ export function Reports() {
     const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
     const baseMonth = new Date(currentYear, currentMonth - 5, 1);
 
-    const revenueByMonth = monthLabels.map((_, index) => {
+    const revenueByMonth = (monthLabels ?? []).map((_, index) => {
       const monthDate = new Date(
         baseMonth.getFullYear(),
         baseMonth.getMonth() + index,
@@ -428,7 +428,7 @@ export function Reports() {
     });
 
     const weekLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const revenueByWeek = weekLabels.map((label, index) => {
+    const revenueByWeek = (weekLabels ?? []).map((label, index) => {
       const dayStart = new Date(startOfWeek);
       dayStart.setDate(startOfWeek.getDate() + index);
       dayStart.setHours(0, 0, 0, 0);
@@ -458,7 +458,7 @@ export function Reports() {
       .filter((invoice) => ['sent', 'partial', 'overdue'].includes(invoice.status))
       .reduce((sum, invoice) => sum + invoice.balanceDue, 0);
 
-    const overdueTrend = monthLabels.map((_, index) => {
+    const overdueTrend = (monthLabels ?? []).map((_, index) => {
       const monthDate = new Date(
         baseMonth.getFullYear(),
         baseMonth.getMonth() + index,
@@ -481,7 +481,7 @@ export function Reports() {
       return { label: monthLabels[index], value: amount };
     });
 
-    const completionTrend = monthLabels.map((_, index) => {
+    const completionTrend = (monthLabels ?? []).map((_, index) => {
       const monthDate = new Date(
         baseMonth.getFullYear(),
         baseMonth.getMonth() + index,
@@ -502,7 +502,7 @@ export function Reports() {
       return { label: monthLabels[index], value: count };
     });
 
-    const overdueOrdersTrend = monthLabels.map((_, index) => {
+    const overdueOrdersTrend = (monthLabels ?? []).map((_, index) => {
       const monthDate = new Date(
         baseMonth.getFullYear(),
         baseMonth.getMonth() + index,
@@ -647,7 +647,7 @@ export function Reports() {
               />
               <TopInfoCard
                 label="Completion"
-                value={`${reportData.completionRate.toFixed(0)}%`}
+                value={`${(reportData.completionRate ?? 0).toFixed(0)}%`}
                 icon={CheckCircle2}
               />
             </div>
@@ -815,7 +815,7 @@ export function Reports() {
                 <ChartCard
                   title="Stage Distribution"
                   subtitle="Current stage counts"
-                  data={productionKpis.ordersByStage.map((item) => ({
+                  data={(productionKpis.ordersByStage ?? []).map((item) => ({
                     label: item.stage,
                     value: item.count,
                   }))}
@@ -837,7 +837,7 @@ export function Reports() {
 
                 <div className="rounded-2xl bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
                   {productionKpis.averageTurnaroundDays > 0
-                    ? `${productionKpis.averageTurnaroundDays.toFixed(1)} days avg`
+                    ? `${(productionKpis.averageTurnaroundDays ?? 0).toFixed(1)} days avg`
                     : 'No delivered orders'}
                 </div>
               </div>
@@ -847,7 +847,7 @@ export function Reports() {
                   title="Average Turnaround"
                   value={
                     productionKpis.averageTurnaroundDays > 0
-                      ? `${productionKpis.averageTurnaroundDays.toFixed(1)} days`
+                      ? `${(productionKpis.averageTurnaroundDays ?? 0).toFixed(1)} days`
                       : 'N/A'
                   }
                   subtitle="Created to delivered"
@@ -858,7 +858,7 @@ export function Reports() {
                   value={productionKpis.topBottleneck?.stage || 'N/A'}
                   subtitle={
                     productionKpis.topBottleneck
-                      ? `${productionKpis.topBottleneck.averageDays.toFixed(1)} avg days`
+                      ? `${(productionKpis.topBottleneck.averageDays ?? 0).toFixed(1)} avg days`
                       : 'No completed stage timing yet'
                   }
                   tone="amber"
@@ -938,13 +938,13 @@ export function Reports() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 bg-white">
-                          {productionKpis.materialConsumption.map((item) => (
+                          {(productionKpis.materialConsumption ?? []).map((item) => (
                             <tr key={item.garmentType}>
                               <td className="px-4 py-3 text-sm font-medium text-slate-900">
                                 {item.garmentType}
                               </td>
                               <td className="px-4 py-3 text-sm text-slate-600">
-                                {item.totalQuantity.toFixed(2)} {item.unitLabel}
+                                {(item.totalQuantity ?? 0).toFixed(2)} {item.unitLabel}
                               </td>
                               <td className="px-4 py-3 text-sm text-slate-600">
                                 {item.usageCount}
@@ -1055,7 +1055,7 @@ export function Reports() {
                 />
               ) : (
                 <div className="space-y-3">
-                  {reportData.topCustomers.map((entry, index) => (
+                  {(reportData.topCustomers ?? []).map((entry, index) => (
                     <RankedCustomerCard
                       key={entry.customer.id}
                       rank={index + 1}
@@ -1103,7 +1103,7 @@ export function Reports() {
                 />
               ) : (
                 <div className="space-y-3">
-                  {reportData.repeatCustomers.map((entry) => (
+                  {(reportData.repeatCustomers ?? []).map((entry) => (
                     <div
                       key={entry.customer.id}
                       className="rounded-2xl border border-slate-200 bg-white p-4"
@@ -1111,7 +1111,7 @@ export function Reports() {
                       <div className="mb-3">
                         <p className="font-semibold text-slate-900">{entry.customer.fullName}</p>
                         <p className="text-sm text-slate-500">
-                          Repeat client â€¢ {entry.ordersCount} orders
+                          Repeat client • {entry.ordersCount} orders
                         </p>
                       </div>
 
@@ -1153,7 +1153,7 @@ export function Reports() {
                   </h3>
 
                   <div className="space-y-3">
-                    {reportData.customersWithPendingBalances.map((entry) => (
+                    {(reportData.customersWithPendingBalances ?? []).map((entry) => (
                       <div
                         key={entry.customer.id}
                         className="flex items-center justify-between rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3"
@@ -1230,7 +1230,7 @@ export function Reports() {
                 />
               ) : (
                 <div className="space-y-3">
-                  {reportData.mostUsedMaterials.map((entry, index) => (
+                  {(reportData.mostUsedMaterials ?? []).map((entry, index) => (
                     <div
                       key={entry.material.id}
                       className="rounded-2xl border border-slate-200 bg-white p-4"
@@ -1243,7 +1243,7 @@ export function Reports() {
                         <div>
                           <p className="font-semibold text-slate-900">{entry.material.name}</p>
                           <p className="text-sm text-slate-500">
-                            {entry.material.fabricType} â€¢ {entry.material.color}
+                            {entry.material.fabricType} • {entry.material.color}
                           </p>
                         </div>
                       </div>
@@ -1280,10 +1280,10 @@ export function Reports() {
                 emptyIcon={Archive}
                 emptyTitle="No slow-moving materials"
                 emptyDescription="All active materials have some recorded usage."
-                items={reportData.slowMovingMaterials.map((entry) => ({
+                items={(reportData.slowMovingMaterials ?? []).map((entry) => ({
                   key: entry.material.id,
                   name: entry.material.name,
-                  subtitle: `${entry.material.fabricType} â€¢ ${entry.material.color}`,
+                  subtitle: `${entry.material.fabricType} • ${entry.material.color}`,
                   value: `${entry.material.quantityInStock} ${entry.material.unit}`,
                   helper: 'No tracked usage',
                   tone: 'amber',
@@ -1295,10 +1295,10 @@ export function Reports() {
                 emptyIcon={Warehouse}
                 emptyTitle="No inactive materials"
                 emptyDescription="All materials are currently active."
-                items={reportData.inactiveMaterials.map((entry) => ({
+                items={(reportData.inactiveMaterials ?? []).map((entry) => ({
                   key: entry.material.id,
                   name: entry.material.name,
-                  subtitle: `${entry.material.fabricType} â€¢ ${entry.material.color}`,
+                  subtitle: `${entry.material.fabricType} • ${entry.material.color}`,
                   value: `${entry.material.quantityInStock} ${entry.material.unit}`,
                   helper: 'Inactive stock',
                   tone: 'gray',
@@ -1311,7 +1311,7 @@ export function Reports() {
                   emptyIcon={AlertTriangle}
                   emptyTitle=""
                   emptyDescription=""
-                  items={reportData.lowStockMaterials.map((entry) => ({
+                  items={(reportData.lowStockMaterials ?? []).map((entry) => ({
                     key: entry.material.id,
                     name: entry.material.name,
                     subtitle: `Reorder level: ${entry.material.reorderLevel} ${entry.material.unit}`,
@@ -1376,7 +1376,7 @@ export function Reports() {
                 />
               ) : (
                 <div className="space-y-3">
-                  {reportData.bestSellingOrderTypes.map((item, index) => (
+                  {(reportData.bestSellingOrderTypes ?? []).map((item, index) => (
                     <div
                       key={item.name}
                       className="rounded-2xl border border-slate-200 bg-white p-4"
@@ -1682,7 +1682,7 @@ function ChartCard({
   data: Array<{ label: string; value: number }>;
   tone: 'brand' | 'sky' | 'amber';
 }) {
-  const max = Math.max(...data.map((item) => item.value), 1);
+  const max = Math.max(...(data ?? []).map((item) => item.value), 1);
 
   const barTones = {
     brand: 'bg-[#0F6E8C]',
@@ -1698,7 +1698,7 @@ function ChartCard({
       </div>
 
       <div className="flex h-48 items-end gap-3">
-        {data.map((item) => (
+        {(data ?? []).map((item) => (
           <div key={item.label} className="flex flex-1 flex-col items-center gap-2">
             <div className="flex h-36 w-full items-end">
               <div
@@ -1868,7 +1868,7 @@ function RankedCustomerCard({
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:min-w-[420px]">
-        {metrics.map((metric) => (
+        {(metrics ?? []).map((metric) => (
           <MiniMetric
             key={metric.label}
             label={metric.label}
@@ -1919,7 +1919,7 @@ function ListBlock({
         />
       ) : (
         <div className="space-y-3">
-          {items.map((item) => {
+          {(items ?? []).map((item) => {
             const classes = toneStyles[item.tone];
             const parts = classes.split(' ');
             return (
@@ -1988,11 +1988,11 @@ function HorizontalStageBars({
     sampleSize: number;
   }>;
 }) {
-  const max = Math.max(...data.map((item) => item.averageDays), 1);
+  const max = Math.max(...(data ?? []).map((item) => item.averageDays), 1);
 
   return (
     <div className="space-y-4">
-      {data.map((item) => (
+      {(data ?? []).map((item) => (
         <div key={item.stage}>
           <div className="mb-2 flex items-center justify-between gap-3">
             <div>
@@ -2004,7 +2004,7 @@ function HorizontalStageBars({
             </div>
             <div className="text-right">
               <p className="font-semibold text-slate-900">
-                {item.averageDays.toFixed(1)} days
+                {(item.averageDays ?? 0).toFixed(1)} days
               </p>
               <p className="text-xs text-slate-500">Average duration</p>
             </div>

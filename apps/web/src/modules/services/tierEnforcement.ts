@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Tier Enforcement Service
  *
  * Enforces Basic vs Pro vs Studio plan restrictions at both UI and logic level.

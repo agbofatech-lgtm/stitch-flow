@@ -1,4 +1,4 @@
-package com.tailorstudio.app;
+package com.stitchflow.app;
 
 import com.getcapacitor.BridgeActivity;
 

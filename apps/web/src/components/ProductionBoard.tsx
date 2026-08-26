@@ -1,4 +1,5 @@
-﻿import { useMemo, useState, type ElementType, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ElementType } from 'react';
+import { useApp } from '../context/AppContext';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -19,12 +20,14 @@ import {
   RotateCcw,
   Layers,
 } from 'lucide-react';
-import { useApp } from '../context/AppContext';
 import { exportOrderJobSheetPdf } from '@modules/services/jobSheetExport';
 import {
   getHighestOrderAlertSeverity,
   getOrderAlerts,
 } from '@shared/utils/productionAlerts';
+import { fetchOrders, type ApiOrder } from '@shared/api/orders';
+import { getCustomers, type ApiCustomer } from '@shared/utils/customerApi';
+import { API_BASE } from '@shared/utils/api';
 import type {
   Order,
   OrderAlert,
@@ -35,6 +38,7 @@ import type {
   ProductionStageStatus,
   StageOverdueAlert,
 } from '../types';
+
 
 const STAGE_TEMPLATES: Array<{ code: ProductionStageCode; label: string }> = [
   { code: 'measurement', label: 'Measurement' },
@@ -52,7 +56,35 @@ type BoardFilter = 'all' | 'in_progress' | 'ready' | 'delivered' | 'overdue';
 type StageAction = 'start' | 'complete' | 'skip' | 'reopen';
 type AlertSeverityLevel = 'none' | 'info' | 'warning' | 'critical';
 
-type EnrichedOrder = Order & {
+type ProductionOrder = {
+  id: string;
+  customerId: string;
+  customer?: { fullName?: string } | null;
+  assignedTo?: string | null;
+  orderNumber: string;
+  status: Order['status'];
+  orderType: string;
+  garmentType?: string | null;
+  fitType?: string | null;
+  dueDate: Date | null;
+  notes: string;
+  styleNotes?: string | null;
+  subtotal: number;
+  taxTotal: number;
+  discountTotal: number;
+  totalAmount: number;
+  currency?: string;
+  createdAt?: Date | null;
+  measurementSnapshot?: Record<string, unknown> | null;
+  garmentMeasurements?: Record<string, unknown> | null;
+  productionPlan?: ProductionPlan | null;
+  productionStages?: ProductionStage[];
+  inspirationAnalysis?: Record<string, unknown> | null;
+  selectedFabricId?: string | null;
+  designInspirationId?: string | null;
+};
+
+type EnrichedOrder = ProductionOrder & {
   productionStages: ProductionStage[];
   progress: number;
   stageSummary: string;
@@ -62,33 +94,230 @@ type EnrichedOrder = Order & {
   hasIssues: boolean;
 };
 
-export function ProductionBoard() {
-  const {
-    orders,
-    selectedOrderId,
-    selectOrder,
-    updateOrder,
-    canPerform,
-    fabricRecords,
-    designInspirations,
-    currentWorkspace,
-    getOrderMaterialUsages,
-  } = useApp();
+type ApiProductionStage = {
+  id: string;
+  code: ProductionStageCode;
+  label: string;
+  sequence: number;
+  status: ProductionStageStatus;
+  startedAt: string | null;
+  completedAt: string | null;
+  skippedAt: string | null;
+  reopenedAt: string | null;
+  notes: string;
+  assignedTo: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
 
+type StageTransitionResponse = {
+  orderStatus: Order['status'];
+  productionStages: ApiProductionStage[];
+};
+
+type StageNoteResponse = {
+  productionStages: ApiProductionStage[];
+};
+
+function mapApiProductionStages(stages?: unknown): ProductionStage[] {
+  if (!Array.isArray(stages)) return [];
+
+  return stages
+    .filter((stage): stage is ApiProductionStage => {
+      return (
+        typeof stage === 'object' &&
+        stage !== null &&
+        'code' in stage &&
+        'label' in stage &&
+        'status' in stage
+      );
+    })
+    .map((stage) => ({
+      code: stage.code,
+      label: stage.label,
+      status: stage.status,
+      startedAt: stage.startedAt || null,
+      completedAt: stage.completedAt || null,
+      skippedAt: stage.skippedAt || null,
+      reopenedAt: stage.reopenedAt || null,
+      notes: stage.notes || '',
+    }));
+}
+
+async function transitionProductionStage(
+  orderId: string,
+  stageCode: ProductionStageCode,
+  action: StageAction,
+  note?: string
+): Promise<StageTransitionResponse> {
+  const response = await fetch(
+    `${API_BASE}/orders/${encodeURIComponent(orderId)}/production-stages/${encodeURIComponent(stageCode)}/transition`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action, note }),
+    }
+  );
+
+  if (!response.ok) {
+    const payload = (await safeJson(response)) as { message?: string } | null;
+    throw new Error(payload?.message || 'Failed to update production stage');
+  }
+
+  return (await response.json()) as StageTransitionResponse;
+}
+
+async function saveProductionStageNote(
+  orderId: string,
+  stageCode: ProductionStageCode,
+  note: string
+): Promise<StageNoteResponse> {
+  const response = await fetch(
+    `${API_BASE}/orders/${encodeURIComponent(orderId)}/production-stages/${encodeURIComponent(stageCode)}/note`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ note }),
+    }
+  );
+
+  if (!response.ok) {
+    const payload = (await safeJson(response)) as { message?: string } | null;
+    throw new Error(payload?.message || 'Failed to save production stage note');
+  }
+
+  return (await response.json()) as StageNoteResponse;
+}
+
+async function safeJson(response: Response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export function ProductionBoard() {
+  const { currentWorkspace } = useApp();
+  const [orders, setOrders] = useState<ProductionOrder[]>([]);
+  const [customers, setCustomers] = useState<ApiCustomer[]>([]);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [filter, setFilter] = useState<BoardFilter>('all');
   const [search, setSearch] = useState('');
   const [noteDrafts, setNoteDrafts] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [mutating, setMutating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const canManageOrders = canPerform('manage_orders');
+  function applyProductionStageUpdate(
+    orderId: string,
+    updates: {
+      status?: Order['status'];
+      productionStages: ProductionStage[];
+    }
+  ) {
+    setOrders((current) =>
+      (current ?? []).map((order) =>
+        order.id === orderId
+          ? {
+              ...order,
+              ...(updates.status ? { status: updates.status } : {}),
+              productionStages: updates.productionStages,
+            }
+          : order
+      )
+    );
+  }
+
+  async function loadData() {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const orderData = await fetchOrders();
+
+      let customerData: ApiCustomer[] = [];
+      try {
+        customerData = await getCustomers();
+      } catch (error) {
+        console.warn('Customer fetch failed, continuing without customers', error);
+      }
+
+      const customerMap = new Map((customerData ?? []).map((customer) => [customer.id, customer]));
+
+      const mappedOrders: ProductionOrder[] = (orderData ?? []).map((order: ApiOrder) => ({
+        id: order.id,
+        customerId: order.customerId,
+        customer: customerMap.get(order.customerId)
+          ? { fullName: customerMap.get(order.customerId)?.fullName }
+          : null,
+        assignedTo: order.assignedTo || null,
+        orderNumber: order.orderNumber,
+        status: order.status as Order['status'],
+        orderType: order.orderType,
+        garmentType:
+          order.garmentType || order.orderType?.toLowerCase().replace(/\s+/g, '_') || null,
+        fitType: order.fitType || null,
+        dueDate: order.dueDate ? new Date(order.dueDate) : null,
+        notes: order.notes || '',
+        styleNotes: order.styleNotes || null,
+        subtotal: order.subtotal || 0,
+        taxTotal: order.taxTotal || 0,
+        discountTotal: order.discountTotal || 0,
+        totalAmount: order.totalAmount,
+        currency: order.currency,
+        createdAt: order.createdAt ? new Date(order.createdAt) : null,
+        measurementSnapshot: (order.measurementSnapshot as Record<string, unknown>) || null,
+        garmentMeasurements: (order.garmentMeasurements as Record<string, unknown>) || null,
+        productionPlan: (order.productionPlan as ProductionPlan) || null,
+        productionStages:
+          mapApiProductionStages(order.productionStages) ||
+          buildStagesFromStatus(order.status as Order['status']),
+        inspirationAnalysis: (order.inspirationAnalysis as Record<string, unknown>) || null,
+        selectedFabricId: order.selectedFabricId || null,
+        designInspirationId: order.designInspirationId || null,
+      }));
+
+      setOrders(
+        (mappedOrders ?? []).map((order) => ({
+          ...order,
+          productionStages:
+            order.productionStages && order.productionStages.length > 0
+              ? ensureStages(order.productionStages)
+              : buildStagesFromStatus(order.status),
+        }))
+      );
+      setCustomers(customerData);
+
+      setSelectedOrderId((current) => {
+        if (current && mappedOrders.some((order) => order.id === current)) {
+          return current;
+        }
+        return mappedOrders[0]?.id || null;
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load production board');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadData();
+  }, []);
 
   const enrichedOrders = useMemo<EnrichedOrder[]>(() => {
-    return orders.map((order) => {
+    return (orders ?? []).map((order) => {
       const stages = ensureStages(order.productionStages);
       const progress = getStageProgress(stages);
       const stageSummary = getStageSummary(stages);
       const overdue = isOrderOverdue(order);
       const alertSummary = getOrderAlerts({
-        ...order,
+        ...(order as unknown as Order),
         productionStages: stages,
       });
       const alertSeverity = getHighestOrderAlertSeverity(alertSummary.alerts);
@@ -113,8 +342,8 @@ export function ProductionBoard() {
     return enrichedOrders.filter((order) => {
       const matchesSearch =
         !term ||
-        order.orderNumber.toLowerCase().includes(term) ||
-        order.orderType.toLowerCase().includes(term) ||
+        (order.orderNumber ?? "").toLowerCase().includes(term) ||
+        (order.orderType ?? "").toLowerCase().includes(term) ||
         (order.customer?.fullName || '').toLowerCase().includes(term) ||
         (order.garmentType || '').toLowerCase().includes(term);
 
@@ -122,10 +351,7 @@ export function ProductionBoard() {
 
       switch (filter) {
         case 'in_progress':
-          return (
-            order.status === 'in_progress' ||
-            order.productionStages.some((stage) => stage.status === 'active')
-          );
+          return order.status === 'in_progress';
         case 'ready':
           return order.status === 'ready';
         case 'delivered':
@@ -140,9 +366,7 @@ export function ProductionBoard() {
   }, [enrichedOrders, filter, search]);
 
   const selectedOrder =
-    enrichedOrders.find((order) => order.id === selectedOrderId) ||
-    filteredOrders[0] ||
-    null;
+    enrichedOrders.find((order) => order.id === selectedOrderId) || filteredOrders[0] || null;
 
   const summary = useMemo(() => {
     const ready = enrichedOrders.filter((order) => order.status === 'ready').length;
@@ -150,11 +374,7 @@ export function ProductionBoard() {
     const overdue = enrichedOrders.filter(
       (order) => order.overdue || order.alertSummary.hasOverdueStages
     ).length;
-    const inProgress = enrichedOrders.filter(
-      (order) =>
-        order.status === 'in_progress' ||
-        order.productionStages.some((stage) => stage.status === 'active')
-    ).length;
+    const inProgress = enrichedOrders.filter((order) => order.status === 'in_progress').length;
     const issues = enrichedOrders.filter((order) => order.hasIssues).length;
 
     return {
@@ -168,107 +388,81 @@ export function ProductionBoard() {
   }, [enrichedOrders]);
 
   const handleSelectOrder = (orderId: string) => {
-    selectOrder(orderId);
+    setSelectedOrderId(orderId);
   };
 
-  const handleStageAction = (
-    order: Order,
+  const handleStageAction = async (
+    order: ProductionOrder,
     stageCode: ProductionStageCode,
     action: StageAction
   ) => {
-    const currentStages = ensureStages(order.productionStages);
-    const updatedStages = applyStageAction(currentStages, stageCode, action);
-    const nextOrderStatus = deriveOrderStatus(updatedStages);
+    try {
+      setMutating(true);
+      setError(null);
 
-    updateOrder(order.id, {
-      productionStages: updatedStages,
-      status: nextOrderStatus,
-    });
+      const result = await transitionProductionStage(order.id, stageCode, action);
+
+      applyProductionStageUpdate(order.id, {
+        status: result.orderStatus,
+        productionStages: ensureStages(mapApiProductionStages(result.productionStages)),
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update production stage');
+    } finally {
+      setMutating(false);
+    }
   };
 
-  const handleQuickAction = (order: Order) => {
+  const handleQuickAction = async (order: ProductionOrder) => {
     const stages = ensureStages(order.productionStages);
     const currentIndex = getCurrentOpenStageIndex(stages);
 
     if (currentIndex === -1) return;
 
     const currentStage = stages[currentIndex];
-    const action: StageAction =
-      currentStage.status === 'active' ? 'complete' : 'start';
+    const action: StageAction = currentStage.status === 'active' ? 'complete' : 'start';
 
-    handleStageAction(order, currentStage.code, action);
+    await handleStageAction(order, currentStage.code, action);
   };
 
-  const handleStageNoteSave = (order: Order, stageCode: ProductionStageCode) => {
+  const handleStageNoteSave = async (order: ProductionOrder, stageCode: ProductionStageCode) => {
     const key = `${order.id}:${stageCode}`;
-    const noteValue = noteDrafts[key] ?? '';
-    const currentStages = ensureStages(order.productionStages);
+    const draftValue = noteDrafts[key];
 
-    const updatedStages = currentStages.map((stage) =>
-      stage.code === stageCode
-        ? {
-            ...stage,
-            notes: noteValue.trim() || undefined,
-          }
-        : stage
-    );
+    if (draftValue === undefined) return;
 
-    updateOrder(order.id, {
-      productionStages: updatedStages,
-    });
+    const existingStage = ensureStages(order.productionStages).find((stage) => stage.code === stageCode);
+    const currentValue = existingStage?.notes || '';
+    const nextValue = draftValue.trim();
+
+    if (nextValue === currentValue.trim()) return;
+
+    try {
+      setMutating(true);
+      setError(null);
+
+      const result = await saveProductionStageNote(order.id, stageCode, nextValue);
+
+      applyProductionStageUpdate(order.id, {
+        productionStages: ensureStages(mapApiProductionStages(result.productionStages)),
+      });
+
+      setNoteDrafts((current) => {
+        const next = { ...current };
+        delete next[key];
+        return next;
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save stage note');
+    } finally {
+      setMutating(false);
+    }
   };
 
-  const selectedPlan = selectedOrder?.productionPlan || null;
   const selectedStages = selectedOrder?.productionStages || [];
-  const currentOpenStageIndex = selectedOrder
-    ? getCurrentOpenStageIndex(selectedStages)
-    : -1;
+  const currentOpenStageIndex = selectedOrder ? getCurrentOpenStageIndex(selectedStages) : -1;
   const currentOpenStage =
     currentOpenStageIndex >= 0 ? selectedStages[currentOpenStageIndex] : null;
-
-  const selectedFabric = useMemo(() => {
-    if (!selectedOrder?.selectedFabricId) return null;
-    return (
-      fabricRecords.find((item) => item.id === selectedOrder.selectedFabricId) || null
-    );
-  }, [selectedOrder, fabricRecords]);
-
-  const linkedInspiration = useMemo(() => {
-    if (!selectedOrder?.designInspirationId) return null;
-    return (
-      designInspirations.find(
-        (item) => item.id === selectedOrder.designInspirationId
-      ) || null
-    );
-  }, [selectedOrder, designInspirations]);
-
-  const selectedOrderMaterialUsages = useMemo(() => {
-    if (!selectedOrder) return [];
-    return getOrderMaterialUsages(selectedOrder.id);
-  }, [selectedOrder, getOrderMaterialUsages]);
-
-  const plannedMainFabricQty = selectedPlan?.fabricEstimate?.mainFabricQty || 0;
-
-  const allocatedFabricQty = useMemo(() => {
-    if (!selectedOrder || !selectedFabric) return 0;
-
-    return selectedOrderMaterialUsages
-      .filter((usage) => usage.fabricRecordId === selectedFabric.id)
-      .reduce((sum, usage) => sum + usage.quantityUsed, 0);
-  }, [selectedOrder, selectedFabric, selectedOrderMaterialUsages]);
-
-  const remainingFabricToReserve = Math.max(
-    plannedMainFabricQty - allocatedFabricQty,
-    0
-  );
-
-  const hasStockShortage =
-    !!selectedFabric && remainingFabricToReserve > selectedFabric.quantityInStock;
-
-  const isLowStock =
-    !!selectedFabric &&
-    typeof selectedFabric.reorderLevel === 'number' &&
-    selectedFabric.quantityInStock <= selectedFabric.reorderLevel;
 
   const overdueStageMap = useMemo<Record<ProductionStageCode, StageOverdueAlert>>(() => {
     if (!selectedOrder?.alertSummary.overdueStages.length) {
@@ -285,12 +479,42 @@ export function ProductionBoard() {
     if (!selectedOrder) return;
 
     exportOrderJobSheetPdf({
-      order: selectedOrder,
-      inspiration: linkedInspiration,
-      selectedFabric,
-      workspaceName: currentWorkspace.name,
+      order: selectedOrder as unknown as Order,
+      inspiration: null,
+      selectedFabric: null,
+      workspaceName: currentWorkspace.name || 'StitchFlow',
+      logoUrl: currentWorkspace.logoUrl || null,
+      brandColor: currentWorkspace.brandColor || '#0F6E8C',
+      phone: currentWorkspace.phone || '',
+      email: currentWorkspace.email || '',
+      address: currentWorkspace.address || '',
+      useLogoAsWatermark: !!currentWorkspace.useLogoAsWatermark,
     });
   };
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-500">
+          Loading production board...
+        </div>
+      </div>
+    );
+  }
+
+  if (error && orders.length === 0) {
+    return (
+      <div className="p-6">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
+          <div>
+            <p className="font-medium">{error}</p>
+            <p className="mt-1 text-xs text-red-600">Orders source: {`${API_BASE}/orders`}</p>
+            <p className="mt-1 text-xs text-red-600">Customers source: {`${API_BASE}/customers`}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
@@ -303,13 +527,10 @@ export function ProductionBoard() {
                 Workshop Operations
               </div>
 
-              <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
-                Production Board
-              </h1>
+              <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">Production Board</h1>
 
               <p className="mt-3 max-w-2xl text-sm text-white/90 lg:text-base">
-                Move orders from measurement to delivery with real stage actions,
-                timestamps, notes, material readiness, and intelligent production alerts.
+                Move orders from measurement to delivery with real backend stage persistence.
               </p>
             </div>
 
@@ -321,6 +542,16 @@ export function ProductionBoard() {
             </div>
           </div>
         </div>
+
+        {error && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div>
+              <p className="font-medium">{error}</p>
+              <p className="mt-1 text-xs text-red-600">Orders source: {`${API_BASE}/orders`}</p>
+              <p className="mt-1 text-xs text-red-600">Customers source: {`${API_BASE}/customers`}</p>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
           <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 shadow-xl backdrop-blur-sm">
@@ -344,21 +575,13 @@ export function ProductionBoard() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <FilterButton
-                    label="All"
-                    active={filter === 'all'}
-                    onClick={() => setFilter('all')}
-                  />
+                  <FilterButton label="All" active={filter === 'all'} onClick={() => setFilter('all')} />
                   <FilterButton
                     label="In Progress"
                     active={filter === 'in_progress'}
                     onClick={() => setFilter('in_progress')}
                   />
-                  <FilterButton
-                    label="Ready"
-                    active={filter === 'ready'}
-                    onClick={() => setFilter('ready')}
-                  />
+                  <FilterButton label="Ready" active={filter === 'ready'} onClick={() => setFilter('ready')} />
                   <FilterButton
                     label="Overdue"
                     active={filter === 'overdue'}
@@ -379,7 +602,7 @@ export function ProductionBoard() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {filteredOrders.map((order) => (
+                  {(filteredOrders ?? []).map((order) => (
                     <button
                       key={order.id}
                       type="button"
@@ -391,19 +614,15 @@ export function ProductionBoard() {
                     >
                       <div className="mb-3 flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            {order.orderNumber}
-                          </p>
+                          <p className="text-sm font-semibold text-slate-900">{order.orderNumber}</p>
                           <p className="mt-1 text-xs text-slate-500">
-                            {order.customer?.fullName || 'No customer'} â€¢{' '}
-                            {titleCase(order.garmentType || order.orderType || 'custom')}
+                            {order.customer?.fullName || 'No customer'} �{' '}
+                            {titleCase(order.orderType || 'custom')}
                           </p>
                         </div>
 
                         <span
-                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getOrderBadgeClasses(
-                            order
-                          )}`}
+                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getOrderBadgeClasses(order)}`}
                         >
                           {order.overdue ? 'Overdue' : titleCase(order.status)}
                         </span>
@@ -473,20 +692,13 @@ export function ProductionBoard() {
                           {selectedOrder.orderNumber}
                         </span>
                         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                          {titleCase(selectedOrder.garmentType || selectedOrder.orderType || 'custom')}
+                          {titleCase(selectedOrder.orderType || 'custom')}
                         </span>
                         <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${getOrderBadgeClasses(
-                            selectedOrder
-                          )}`}
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${getOrderBadgeClasses(selectedOrder)}`}
                         >
                           {selectedOrder.overdue ? 'Overdue' : titleCase(selectedOrder.status)}
                         </span>
-                        {selectedOrder.alertSummary.isBlocked && (
-                          <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
-                            Blocked
-                          </span>
-                        )}
                       </div>
 
                       <h2 className="text-2xl font-bold text-slate-900">
@@ -494,7 +706,7 @@ export function ProductionBoard() {
                       </h2>
 
                       <p className="mt-2 text-sm text-slate-500">
-                        Due date: {formatDate(selectedOrder.dueDate)} â€¢ Current stage:{' '}
+                        Due date: {formatDate(selectedOrder.dueDate)} � Current stage:{' '}
                         {selectedOrder.stageSummary}
                       </p>
                     </div>
@@ -511,10 +723,10 @@ export function ProductionBoard() {
 
                       <button
                         type="button"
-                        onClick={() => handleQuickAction(selectedOrder)}
-                        disabled={!canManageOrders || !currentOpenStage}
+                        onClick={() => void handleQuickAction(selectedOrder)}
+                        disabled={!currentOpenStage || mutating}
                         className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                          canManageOrders && currentOpenStage
+                          currentOpenStage && !mutating
                             ? 'bg-[#0F6E8C] text-white hover:bg-[#0C5C74]'
                             : 'cursor-not-allowed bg-slate-100 text-slate-400'
                         }`}
@@ -545,7 +757,7 @@ export function ProductionBoard() {
                       </div>
 
                       <div className="space-y-3">
-                        {selectedOrder.alertSummary.alerts.map((alert, index) => (
+                        {(selectedOrder.alertSummary.alerts ?? []).map((alert, index) => (
                           <AlertBanner key={`${alert.code}-${index}`} alert={alert} />
                         ))}
                       </div>
@@ -561,101 +773,27 @@ export function ProductionBoard() {
                       tone="brand"
                     />
                     <InfoStatCard
-                      title="Cutting Pieces"
-                      value={String(selectedPlan?.cuttingList.length || 0)}
-                      subtitle="Prepared list"
+                      title="Order Status"
+                      value={titleCase(selectedOrder.status)}
+                      subtitle="Persisted in backend"
                       icon={Scissors}
                       tone="amber"
                     />
                     <InfoStatCard
-                      title="Sewing Steps"
-                      value={String(selectedPlan?.sewingChecklist.length || 0)}
-                      subtitle="Checklist items"
+                      title="Total Amount"
+                      value={`${selectedOrder.currency || 'GHS'} ${selectedOrder.totalAmount}`}
+                      subtitle="Order value"
                       icon={Ruler}
                       tone="indigo"
                     />
                     <InfoStatCard
-                      title="Fit Warnings"
-                      value={String(selectedPlan?.fitRisks.length || 0)}
-                      subtitle="Watch points"
+                      title="Alerts"
+                      value={String(selectedOrder.alertSummary.alerts.length)}
+                      subtitle="Production signals"
                       icon={AlertTriangle}
                       tone="rose"
                     />
                   </div>
-
-                  <section className="mt-6 rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
-                    <div className="mb-4 flex items-center gap-2">
-                      <Layers className="h-5 w-5 text-[#0F6E8C]" />
-                      <h3 className="text-lg font-semibold text-slate-900">
-                        Material Readiness
-                      </h3>
-                    </div>
-
-                    {!selectedPlan ? (
-                      <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
-                        No production plan has been attached to this order yet.
-                      </div>
-                    ) : !selectedOrder.selectedFabricId || !selectedFabric ? (
-                      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                        No fabric has been linked to this order yet. Link a fabric before cutting.
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-                          <SnapshotMiniCard label="Fabric" value={selectedFabric.name} />
-                          <SnapshotMiniCard
-                            label="Planned Main Qty"
-                            value={`${plannedMainFabricQty} ${selectedPlan.fabricEstimate.unit}`}
-                          />
-                          <SnapshotMiniCard
-                            label="Allocated / Logged"
-                            value={`${allocatedFabricQty} ${selectedFabric.unit}`}
-                          />
-                          <SnapshotMiniCard
-                            label="Available Now"
-                            value={`${selectedFabric.quantityInStock} ${selectedFabric.unit}`}
-                          />
-                        </div>
-
-                        {remainingFabricToReserve <= 0 ? (
-                          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                            Fabric requirement for this order has already been allocated or logged.
-                          </div>
-                        ) : hasStockShortage ? (
-                          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-                            Planned requirement exceeds current stock. Remaining requirement:{' '}
-                            <span className="font-semibold">
-                              {remainingFabricToReserve} {selectedFabric.unit}
-                            </span>
-                            , available stock:{' '}
-                            <span className="font-semibold">
-                              {selectedFabric.quantityInStock} {selectedFabric.unit}
-                            </span>
-                            .
-                          </div>
-                        ) : (
-                          <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">
-                            Enough stock is available for the remaining planned requirement:{' '}
-                            <span className="font-semibold">
-                              {remainingFabricToReserve} {selectedFabric.unit}
-                            </span>
-                            .
-                          </div>
-                        )}
-
-                        {isLowStock && (
-                          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                            Low-stock warning: {selectedFabric.name} is at or below reorder level.
-                            Reorder level:{' '}
-                            <span className="font-semibold">
-                              {selectedFabric.reorderLevel} {selectedFabric.unit}
-                            </span>
-                            .
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </section>
 
                   <section className="mt-6 rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
                     <div className="mb-4 flex items-center gap-2">
@@ -664,34 +802,23 @@ export function ProductionBoard() {
                     </div>
 
                     <div className="space-y-4">
-                      {selectedOrder.productionStages.map((stage, index) => {
+                      {(selectedOrder.productionStages ?? []).map((stage, index) => {
                         const noteKey = `${selectedOrder.id}:${stage.code}`;
                         const draftValue = noteDrafts[noteKey] ?? stage.notes ?? '';
                         const isCurrentStage = currentOpenStageIndex === index;
-                        const canStart =
-                          canManageOrders &&
-                          stage.status === 'pending' &&
-                          isCurrentStage;
-                        const canComplete =
-                          canManageOrders &&
-                          stage.status === 'active' &&
-                          isCurrentStage;
+                        const canStart = stage.status === 'pending' && isCurrentStage;
+                        const canComplete = stage.status === 'active' && isCurrentStage;
                         const canSkip =
-                          canManageOrders &&
-                          (stage.status === 'pending' || stage.status === 'active') &&
-                          isCurrentStage;
+                          (stage.status === 'pending' || stage.status === 'active') && isCurrentStage;
                         const canReopen =
-                          canManageOrders &&
-                          (stage.status === 'completed' || stage.status === 'skipped');
+                          stage.status === 'completed' || stage.status === 'skipped';
                         const overdueStage = overdueStageMap[stage.code];
 
                         return (
                           <div
                             key={stage.code}
                             className={`rounded-[24px] border bg-white p-4 ${
-                              overdueStage
-                                ? 'border-red-200 ring-1 ring-red-100'
-                                : 'border-slate-200'
+                              overdueStage ? 'border-red-200 ring-1 ring-red-100' : 'border-slate-200'
                             }`}
                           >
                             <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -719,8 +846,7 @@ export function ProductionBoard() {
 
                                   {overdueStage && (
                                     <span className="rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-700">
-                                      {overdueStage.daysOverdue} day
-                                      {overdueStage.daysOverdue === 1 ? '' : 's'} overdue
+                                      {overdueStage.daysOverdue} day{overdueStage.daysOverdue === 1 ? '' : 's'} overdue
                                     </span>
                                   )}
                                 </div>
@@ -731,47 +857,32 @@ export function ProductionBoard() {
                                   <StageMeta label="Skipped" value={formatDateTime(stage.skippedAt)} />
                                   <StageMeta label="Reopened" value={formatDateTime(stage.reopenedAt)} />
                                 </div>
-
-                                {overdueStage && (
-                                  <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 p-3 text-xs text-red-800">
-                                    Expected by {formatDate(overdueStage.expectedBy)} based on a{' '}
-                                    {overdueStage.expectedDurationDays}-day allowance for this stage.
-                                  </div>
-                                )}
                               </div>
 
                               <div className="flex flex-wrap gap-2">
                                 <StageActionButton
                                   label="Start"
                                   icon={Play}
-                                  disabled={!canStart}
-                                  onClick={() =>
-                                    handleStageAction(selectedOrder, stage.code, 'start')
-                                  }
+                                  disabled={!canStart || mutating}
+                                  onClick={() => void handleStageAction(selectedOrder, stage.code, 'start')}
                                 />
                                 <StageActionButton
                                   label="Complete"
                                   icon={CheckCircle2}
-                                  disabled={!canComplete}
-                                  onClick={() =>
-                                    handleStageAction(selectedOrder, stage.code, 'complete')
-                                  }
+                                  disabled={!canComplete || mutating}
+                                  onClick={() => void handleStageAction(selectedOrder, stage.code, 'complete')}
                                 />
                                 <StageActionButton
                                   label="Skip"
                                   icon={SkipForward}
-                                  disabled={!canSkip}
-                                  onClick={() =>
-                                    handleStageAction(selectedOrder, stage.code, 'skip')
-                                  }
+                                  disabled={!canSkip || mutating}
+                                  onClick={() => void handleStageAction(selectedOrder, stage.code, 'skip')}
                                 />
                                 <StageActionButton
                                   label="Reopen"
                                   icon={RotateCcw}
-                                  disabled={!canReopen}
-                                  onClick={() =>
-                                    handleStageAction(selectedOrder, stage.code, 'reopen')
-                                  }
+                                  disabled={!canReopen || mutating}
+                                  onClick={() => void handleStageAction(selectedOrder, stage.code, 'reopen')}
                                 />
                               </div>
                             </div>
@@ -784,8 +895,8 @@ export function ProductionBoard() {
                                   [noteKey]: e.target.value,
                                 }))
                               }
-                              onBlur={() => handleStageNoteSave(selectedOrder, stage.code)}
-                              placeholder={`Add ${stage.label.toLowerCase()} notes...`}
+                              onBlur={() => void handleStageNoteSave(selectedOrder, stage.code)}
+                              placeholder={`Add ${(stage.label ?? "").toLowerCase()} notes...`}
                               rows={3}
                               className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-sky-300"
                             />
@@ -795,128 +906,27 @@ export function ProductionBoard() {
                     </div>
                   </section>
 
-                  <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-                    <PlanCard
-                      title="Cutting List"
-                      emptyText="No cutting list linked yet."
-                      items={selectedPlan?.cuttingList || []}
-                      renderItem={(piece: CuttingLike, index: number) => (
-                        <div
-                          key={`${piece.name}-${index}`}
-                          className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="font-semibold text-slate-900">{piece.name}</p>
-                              <p className="mt-1 text-sm text-slate-500">
-                                Qty: {piece.quantity}
-                                {piece.cutOnFold ? ' â€¢ Cut on fold' : ''}
-                                {piece.fabric ? ` â€¢ ${titleCase(piece.fabric)}` : ''}
-                              </p>
-                            </div>
-                            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                          </div>
-                          {piece.notes && (
-                            <p className="mt-2 text-sm text-slate-600">{piece.notes}</p>
-                          )}
-                        </div>
-                      )}
-                    />
-
-                    <PlanCard
-                      title="Sewing Checklist"
-                      emptyText="No sewing checklist linked yet."
-                      items={selectedPlan?.sewingChecklist || []}
-                      renderItem={(step: SewingLike) => (
-                        <div
-                          key={step.step}
-                          className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                        >
-                          <div className="mb-2 flex items-center gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0F6E8C] text-sm font-bold text-white">
-                              {step.step}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-slate-900">{step.title}</p>
-                              <p className="text-xs uppercase tracking-wide text-slate-400">
-                                {step.category}
-                              </p>
-                            </div>
-                          </div>
-                          <p className="text-sm leading-6 text-slate-600">{step.description}</p>
-                        </div>
-                      )}
-                    />
-                  </div>
-
-                  <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-                    <section className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
-                      <div className="mb-4 flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5 text-amber-600" />
-                        <h3 className="text-lg font-semibold text-slate-900">Fit Risk Warnings</h3>
-                      </div>
-
-                      {!selectedPlan?.fitRisks?.length ? (
-                        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                          No fit warnings recorded for this order yet.
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {selectedPlan.fitRisks.map((risk, index) => (
-                            <div
-                              key={`${risk.title}-${index}`}
-                              className={`rounded-2xl border p-4 ${getRiskClasses(risk.severity)}`}
-                            >
-                              <div className="mb-2 flex items-center justify-between gap-3">
-                                <p className="font-semibold">{risk.title}</p>
-                                <span className="rounded-full bg-white/70 px-2.5 py-1 text-xs font-semibold capitalize">
-                                  {risk.severity}
-                                </span>
-                              </div>
-                              <p className="text-sm">{risk.description}</p>
-                              {risk.recommendation && (
-                                <p className="mt-2 text-sm font-medium">
-                                  Recommendation: {risk.recommendation}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </section>
-
-                    <section className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
-                      <div className="mb-4 flex items-center gap-2">
-                        <Truck className="h-5 w-5 text-[#0F6E8C]" />
-                        <h3 className="text-lg font-semibold text-slate-900">Tailor Notes</h3>
-                      </div>
-
-                      {!selectedPlan?.tailorNotes?.length ? (
-                        <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
-                          No tailor notes linked yet.
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {selectedPlan.tailorNotes.map((note, index) => (
-                            <div
-                              key={`${note}-${index}`}
-                              className="rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600"
-                            >
-                              {note}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </section>
-                  </div>
-
                   <section className="mt-6 rounded-[24px] border border-slate-200 bg-white p-5">
                     <div className="mb-4 flex items-center gap-2">
                       <Shirt className="h-5 w-5 text-[#0F6E8C]" />
-                      <h3 className="text-lg font-semibold text-slate-900">Production Plan Snapshot</h3>
+                      <h3 className="text-lg font-semibold text-slate-900">Order Notes</h3>
                     </div>
 
-                    <PlanSnapshot plan={selectedPlan} />
+                    <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 whitespace-pre-wrap">
+                      {selectedOrder.notes || 'No saved order-wide notes yet.'}
+                    </div>
+                  </section>
+
+                  <section className="mt-6 rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
+                    <div className="mb-4 flex items-center gap-2">
+                      <Layers className="h-5 w-5 text-[#0F6E8C]" />
+                      <h3 className="text-lg font-semibold text-slate-900">Phase B Notice</h3>
+                    </div>
+
+                    <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">
+                      Production stages now use persistent backend transitions and stage-specific notes.
+                      Order notes remain separate from workshop stage notes.
+                    </div>
                   </section>
                 </div>
               </>
@@ -928,11 +938,36 @@ export function ProductionBoard() {
   );
 }
 
-type CuttingLike = NonNullable<ProductionPlan['cuttingList']>[number];
-type SewingLike = NonNullable<ProductionPlan['sewingChecklist']>[number];
+function buildStagesFromStatus(status: Order['status']): ProductionStage[] {
+  return ensureStages().map((stage, index) => {
+    if (status === 'draft') {
+      return {
+        ...stage,
+        status: index === 0 ? 'active' : 'pending',
+      };
+    }
+
+    if (status === 'in_progress') {
+      if (index < 2) return { ...stage, status: 'completed' };
+      if (index === 2) return { ...stage, status: 'active' };
+      return { ...stage, status: 'pending' };
+    }
+
+    if (status === 'ready') {
+      if (stage.code === 'delivered') return { ...stage, status: 'pending' };
+      return { ...stage, status: 'completed' };
+    }
+
+    if (status === 'delivered') {
+      return { ...stage, status: 'completed' };
+    }
+
+    return stage;
+  });
+}
 
 function ensureStages(existing?: ProductionStage[] | null): ProductionStage[] {
-  return STAGE_TEMPLATES.map((template) => {
+  return (STAGE_TEMPLATES ?? []).map((template) => {
     const found = existing?.find((stage) => stage.code === template.code);
 
     return {
@@ -946,97 +981,6 @@ function ensureStages(existing?: ProductionStage[] | null): ProductionStage[] {
       notes: found?.notes || '',
     };
   });
-}
-
-function applyStageAction(
-  stages: ProductionStage[],
-  stageCode: ProductionStageCode,
-  action: StageAction
-): ProductionStage[] {
-  const now = new Date();
-  const next = ensureStages(stages).map((stage) => ({ ...stage }));
-  const targetIndex = next.findIndex((stage) => stage.code === stageCode);
-
-  if (targetIndex === -1) return next;
-
-  if (action === 'reopen') {
-    return next.map((stage, index) => {
-      if (index < targetIndex) return stage;
-
-      if (index === targetIndex) {
-        return {
-          ...stage,
-          status: 'pending',
-          startedAt: null,
-          completedAt: null,
-          skippedAt: null,
-          reopenedAt: now,
-        };
-      }
-
-      return {
-        ...stage,
-        status: 'pending',
-        startedAt: null,
-        completedAt: null,
-        skippedAt: null,
-        reopenedAt: null,
-      };
-    });
-  }
-
-  next.forEach((stage, index) => {
-    if (index !== targetIndex && stage.status === 'active') {
-      stage.status = 'pending';
-      stage.startedAt = null;
-    }
-  });
-
-  const target = next[targetIndex];
-
-  if (action === 'start') {
-    target.status = 'active';
-    target.startedAt = target.startedAt || now;
-    target.skippedAt = null;
-    return next;
-  }
-
-  if (action === 'complete') {
-    target.status = 'completed';
-    target.startedAt = target.startedAt || now;
-    target.completedAt = now;
-    target.skippedAt = null;
-
-    const nextIndex = targetIndex + 1;
-    if (nextIndex < next.length && next[nextIndex].status === 'pending') {
-      next[nextIndex] = {
-        ...next[nextIndex],
-        status: 'active',
-        startedAt: next[nextIndex].startedAt || now,
-      };
-    }
-
-    return next;
-  }
-
-  if (action === 'skip') {
-    target.status = 'skipped';
-    target.completedAt = null;
-    target.skippedAt = now;
-
-    const nextIndex = targetIndex + 1;
-    if (nextIndex < next.length && next[nextIndex].status === 'pending') {
-      next[nextIndex] = {
-        ...next[nextIndex],
-        status: 'active',
-        startedAt: next[nextIndex].startedAt || now,
-      };
-    }
-
-    return next;
-  }
-
-  return next;
 }
 
 function getCurrentOpenStageIndex(stages: ProductionStage[]) {
@@ -1069,24 +1013,7 @@ function getStageSummary(stages: ProductionStage[]) {
   return 'Completed';
 }
 
-function deriveOrderStatus(stages: ProductionStage[]): Order['status'] {
-  const deliveredStage = stages.find((stage) => stage.code === 'delivered');
-  const readyStage = stages.find((stage) => stage.code === 'ready');
-  const hasProgress = stages.some(
-    (stage) =>
-      stage.status === 'active' ||
-      stage.status === 'completed' ||
-      stage.status === 'skipped'
-  );
-
-  if (deliveredStage?.status === 'completed') return 'delivered';
-  if (readyStage?.status === 'completed') return 'ready';
-  if (hasProgress) return 'in_progress';
-
-  return 'draft';
-}
-
-function isOrderOverdue(order: Order) {
+function isOrderOverdue(order: { dueDate?: Date | string | null; status: Order['status'] }) {
   if (!order.dueDate) return false;
   if (order.status === 'delivered' || order.status === 'cancelled') return false;
 
@@ -1112,10 +1039,10 @@ function formatDate(value?: Date | string | null) {
 }
 
 function formatDateTime(value?: Date | string | null) {
-  if (!value) return 'â€”';
+  if (!value) return '�';
 
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'â€”';
+  if (Number.isNaN(date.getTime())) return '�';
 
   return new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
@@ -1146,12 +1073,6 @@ function getStageBadgeClasses(status: ProductionStageStatus) {
   if (status === 'active') return 'bg-sky-50 text-[#0F6E8C]';
   if (status === 'skipped') return 'bg-slate-100 text-slate-600';
   return 'bg-amber-50 text-amber-700';
-}
-
-function getRiskClasses(severity?: string) {
-  if (severity === 'high') return 'border-red-200 bg-red-50 text-red-800';
-  if (severity === 'medium') return 'border-amber-200 bg-amber-50 text-amber-800';
-  return 'border-slate-200 bg-slate-50 text-slate-700';
 }
 
 function getAlertChipClasses(severity: OrderAlert['severity']) {
@@ -1263,9 +1184,7 @@ function FilterButton({
       type="button"
       onClick={onClick}
       className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
-        active
-          ? 'bg-[#0F6E8C] text-white shadow-md'
-          : 'bg-white text-slate-600 hover:bg-sky-50'
+        active ? 'bg-[#0F6E8C] text-white shadow-md' : 'bg-white text-slate-600 hover:bg-sky-50'
       }`}
     >
       <Filter className="mr-1.5 inline h-4 w-4" />
@@ -1311,8 +1230,7 @@ function StageMeta({
 }) {
   return (
     <div className="rounded-xl bg-slate-50 px-3 py-2">
-      <span className="font-medium text-slate-600">{label}:</span>{' '}
-      <span>{value}</span>
+      <span className="font-medium text-slate-600">{label}:</span> <span>{value}</span>
     </div>
   );
 }
@@ -1353,81 +1271,13 @@ function InfoStatCard({
   );
 }
 
-function PlanCard<T>({
-  title,
-  emptyText,
-  items,
-  renderItem,
-}: {
-  title: string;
-  emptyText: string;
-  items: T[];
-  renderItem: (item: T, index: number) => ReactNode;
-}) {
-  return (
-    <section className="rounded-[24px] border border-slate-200 bg-white p-5">
-      <h3 className="mb-4 text-lg font-semibold text-slate-900">{title}</h3>
 
-      {items.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-          {emptyText}
-        </div>
-      ) : (
-        <div className="space-y-3">{items.map(renderItem)}</div>
-      )}
-    </section>
-  );
-}
 
-function PlanSnapshot({ plan }: { plan: ProductionPlan | null }) {
-  if (!plan) {
-    return (
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-        No production plan has been attached to this order yet.
-      </div>
-    );
-  }
 
-  return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <SnapshotMiniCard label="Garment" value={titleCase(plan.garmentType)} />
-      <SnapshotMiniCard
-        label="Main Fabric"
-        value={`${plan.fabricEstimate.mainFabricQty} ${plan.fabricEstimate.unit}`}
-      />
-      <SnapshotMiniCard
-        label="Lining"
-        value={
-          plan.fabricEstimate.liningQty
-            ? `${plan.fabricEstimate.liningQty} ${plan.fabricEstimate.unit}`
-            : 'Not required'
-        }
-      />
-      <SnapshotMiniCard
-        label="Interfacing"
-        value={
-          plan.fabricEstimate.interfacingQty
-            ? `${plan.fabricEstimate.interfacingQty} ${plan.fabricEstimate.unit}`
-            : 'Not required'
-        }
-      />
-    </div>
-  );
-}
 
-function SnapshotMiniCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-2xl bg-slate-50 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-        {label}
-      </p>
-      <p className="mt-2 text-sm font-bold text-slate-900">{value}</p>
-    </div>
-  );
-}
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { ArrowRight, Lock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
@@ -97,7 +97,7 @@ export function FeatureGate({
               type="button"
               onClick={() =>
                 window.alert(
-                  `${requiredTier.name} plan â€¢ ${requiredTier.shortLabel}\n\nThis opens the upgrade flow in a full billing setup.`
+                  `${requiredTier.name} plan • ${requiredTier.shortLabel}\n\nThis opens the upgrade flow in a full billing setup.`
                 )
               }
               className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#0F6E8C] px-3 py-2 text-sm font-medium text-white transition hover:bg-[#0C5C74]"
@@ -123,7 +123,7 @@ export function FeatureGate({
         type="button"
         onClick={() =>
           window.alert(
-            `${requiredTier.name} plan â€¢ ${requiredTier.shortLabel}\n\nThis opens the upgrade flow in a full billing setup.`
+            `${requiredTier.name} plan • ${requiredTier.shortLabel}\n\nThis opens the upgrade flow in a full billing setup.`
           )
         }
         className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#0F6E8C] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#0C5C74]"

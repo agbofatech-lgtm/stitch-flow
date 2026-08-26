@@ -1,4 +1,5 @@
 import { BRAND } from '../../config/brand';
+import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
 import { generateStylePattern, type StylePatternKind } from './patternEngine';
 import type {
   DesignInspiration,
@@ -14,6 +15,10 @@ type JobSheetExportInput = {
   inspiration?: DesignInspiration | null;
   selectedFabric?: FabricRecord | null;
   workspaceName?: string;
+  logoUrl?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
 };
 
 type Point = { x: number; y: number };
@@ -423,6 +428,10 @@ export function exportOrderJobSheetPdf({
   inspiration,
   selectedFabric,
   workspaceName,
+  logoUrl,
+  phone,
+  email,
+  address,
 }: JobSheetExportInput) {
   const patternPreviewUrl = buildPatternPreviewDataUrl(order);
   const title = `${order.orderNumber} - ${BRAND.productName} Job Sheet`;
@@ -431,6 +440,17 @@ export function exportOrderJobSheetPdf({
   const customerName = order.customer?.fullName || 'No customer';
   const customerPhone = order.customer?.phone || 'Not set';
   const customerEmail = order.customer?.email || 'Not set';
+  const assignedTailor = order.assignedTo || 'Not assigned';
+  const paymentStatus =
+    (order as any).balanceDue !== undefined
+      ? Number((order as any).balanceDue) > 0
+        ? 'Pending Balance'
+        : 'Paid'
+      : 'Not linked';
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(order.orderNumber || "")}`;
+  const resolvedBrandColor = brandColor || '#0F6E8C';
+
+
 
   const printWindow = window.open('', '_blank', 'width=1200,height=900');
   if (!printWindow) return;
@@ -454,7 +474,7 @@ export function exportOrderJobSheetPdf({
           }
           .hero {
             border: 1px solid #dbeafe;
-            background: linear-gradient(135deg, #0F6E8C 0%, #117793 55%, #0C5C74 100%);
+            background: linear-gradient(135deg,  0%,  55%, #0C5C74 100%);
             color: white;
             border-radius: 22px;
             padding: 24px;
@@ -657,21 +677,48 @@ export function exportOrderJobSheetPdf({
         </style>
       </head>
       <body>
-        <div class="page">
+        <div class="page" style="position:relative;">
+  ${
+    useLogoAsWatermark && logoUrl
+      ? `<img src="${logoUrl}" style="position:absolute; top:240px; left:50%; transform:translateX(-50%); width:320px; opacity:0.035; pointer-events:none; z-index:0;" />`
+      : ''
+  }
           <div class="hero">
-            <div class="pill">Tailor Pack / Job Sheet</div>
-            <h1>${escapeHtml(order.orderNumber)}</h1>
-            <p>${escapeHtml(workspaceName || BRAND.productName)} â€¢ ${escapeHtml(
-              titleCase(order.garmentType || order.orderType || 'custom')
-            )}</p>
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      ${
+        logoUrl
+          ? `<img src="${logoUrl}" style="height:56px; width:auto; max-width:110px; border-radius:10px; background:white; padding:4px;" />`
+          : `<img src="${stitchflowLogo}" style="height:56px; width:auto; max-width:110px; border-radius:10px; background:white; padding:4px;" />`
+      }
+      <div>
+        <h1 style="margin:0;">${escapeHtml(workspaceName || BRAND.productName)}</h1>
+        <p style="margin:2px 0 0; font-size:12px;">
+          ${escapeHtml(phone || '')} ${phone ? '•' : ''}
+          ${escapeHtml(email || '')}
+        </p>
+        <p style="margin:2px 0 0; font-size:12px;">
+          ${escapeHtml(address || '')}
+        </p>
+      </div>
+    </div>
 
-            <div class="pill-row">
-              <span class="pill">Customer: ${escapeHtml(customerName)}</span>
-              <span class="pill">Status: ${escapeHtml(titleCase(order.status))}</span>
-              <span class="pill">Due: ${escapeHtml(formatDate(order.dueDate))}</span>
-              <span class="pill">Created: ${escapeHtml(formatDate(order.createdAt))}</span>
-            </div>
-          </div>
+    <div style="text-align:right;">
+      <div class="pill">JOB CARD</div>
+      <h2 style="margin:4px 0 0;">${escapeHtml(order.orderNumber)}</h2>
+    </div>
+  </div>
+
+  <div class="pill-row">
+    <span class="pill">Customer: ${escapeHtml(customerName)}</span>
+    <span class="pill">Status: ${escapeHtml(titleCase(order.status))}</span>
+<span class="pill" style="background:${paymentStatus === 'Paid' ? 'rgba(34,197,94,0.22)' : 'rgba(245,158,11,0.22)'};">
+  Payment: ${escapeHtml(paymentStatus)}
+</span>
+    <span class="pill">Due: ${escapeHtml(formatDate(order.dueDate))}</span>
+  </div>
+</div>
+            
 
           <div class="section">
             <div class="section-head">Customer + Order Details</div>
@@ -854,7 +901,44 @@ export function exportOrderJobSheetPdf({
             </div>
           </div>
 
-          <div class="footer-note">
+          <div class="section">
+  <div class="section-head">Verification + Sign-Off</div>
+  <div class="section-body">
+    <div class="grid-2">
+
+      <div class="visual-card">
+        <h4>Job QR</h4>
+        <img src="" style="width:140px; height:140px;" />
+        <p class="muted">Scan to verify job details</p>
+      </div>
+
+      <div class="visual-card">
+        <h4>Signatures</h4>
+
+        <div style="margin-top:20px;">
+          <div style="margin-bottom:25px;">
+            <div class="muted">Tailor Signature</div>
+            <div style="border-bottom:1px solid #999; height:20px;"></div>
+          </div>
+
+          <div style="margin-bottom:25px;">
+            <div class="muted">Quality Check</div>
+            <div style="border-bottom:1px solid #999; height:20px;"></div>
+          </div>
+
+          <div>
+            <div class="muted">Customer Collection</div>
+            <div style="border-bottom:1px solid #999; height:20px;"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="footer-note">
             Exported from ${escapeHtml(BRAND.productName)} by ${escapeHtml(BRAND.parentName)}
           </div>
         </div>
@@ -870,6 +954,26 @@ export function exportOrderJobSheetPdf({
 
   printWindow.document.close();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

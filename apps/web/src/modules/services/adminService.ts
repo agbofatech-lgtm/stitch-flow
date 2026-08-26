@@ -1,4 +1,4 @@
-﻿import { userRepository } from '@modules/repositories/userRepository';
+import { userRepository } from '@modules/repositories/userRepository';
 import { eventRepository } from '@modules/repositories/eventRepository';
 import { licenseRepository } from '@modules/repositories/licenseRepository';
 import { featureRequestRepository } from '@modules/repositories/featureRequestRepository';

@@ -1,4 +1,4 @@
-﻿import { ApiError } from '@shared/utils/apiError';
+import { ApiError } from '@shared/utils/apiError';
 import { syncRepository } from '@modules/repositories/syncRepository';
 import { auditLogService } from './auditLogService';
 

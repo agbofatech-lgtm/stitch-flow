@@ -1,4 +1,4 @@
-﻿import type { TierCode } from '../types';
+import type { TierCode } from '../types';
 
 export type MonetizedFeature =
   | 'basicReports'

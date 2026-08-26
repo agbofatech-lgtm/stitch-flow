@@ -1,4 +1,4 @@
-﻿import { STORAGE_KEYS, STORAGE_VERSION } from './storageKeys';
+import { STORAGE_KEYS, STORAGE_VERSION } from './storageKeys';
 import { deserializeFromStorage, serializeForStorage } from './serializers';
 import { createSeedData, type PersistedAppData } from './seedData';
 

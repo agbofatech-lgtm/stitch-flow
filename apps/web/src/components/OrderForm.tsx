@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   Calendar,
@@ -177,7 +177,7 @@ function profileToSnapshot(profile?: CustomerMeasurementProfile | null): Partial
 
 function buildInitialStages(existing?: ProductionStage[] | null): ProductionStage[] {
   if (existing?.length) {
-    return DEFAULT_PRODUCTION_STAGES.map((stage, index) => {
+    return (DEFAULT_PRODUCTION_STAGES ?? []).map((stage, index) => {
       const found = existing.find((item) => item.code === stage.code);
       return (
         found || {
@@ -194,7 +194,7 @@ function buildInitialStages(existing?: ProductionStage[] | null): ProductionStag
     });
   }
 
-  return DEFAULT_PRODUCTION_STAGES.map((stage, index) => ({
+  return (DEFAULT_PRODUCTION_STAGES ?? []).map((stage, index) => ({
     code: stage.code,
     label: stage.label,
     status: index === 0 ? 'active' : 'pending',
@@ -472,7 +472,7 @@ export function OrderForm({
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
                 >
                   <option value="">Select customer</option>
-                  {customers.map((customer) => (
+                  {(customers ?? []).map((customer) => (
                     <option key={customer.id} value={customer.id}>
                       {customer.fullName}
                     </option>
@@ -496,7 +496,7 @@ export function OrderForm({
                   }}
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
                 >
-                  {GARMENT_OPTIONS.map((option) => (
+                  {(GARMENT_OPTIONS ?? []).map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -591,7 +591,7 @@ export function OrderForm({
                 Total Amount
               </p>
               <p className="mt-2 text-xl font-bold text-slate-900">
-                {totalAmount.toFixed(2)} {currentWorkspace.defaultCurrency || 'GHS'}
+                {(totalAmount ?? 0).toFixed(2)} {currentWorkspace.defaultCurrency || 'GHS'}
               </p>
             </div>
 
@@ -628,7 +628,7 @@ export function OrderForm({
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300 disabled:cursor-not-allowed disabled:bg-slate-100"
                 >
                   <option value="">Select profile</option>
-                  {profiles.map((profile) => (
+                  {(profiles ?? []).map((profile) => (
                     <option key={profile.id} value={profile.id}>
                       {profile.label}
                     </option>
@@ -657,7 +657,7 @@ export function OrderForm({
             )}
 
             <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {SNAPSHOT_FIELDS.map((field) => (
+              {(SNAPSHOT_FIELDS ?? []).map((field) => (
                 <div
                   key={field.key}
                   className="rounded-2xl border border-slate-200 bg-white p-3"
@@ -702,7 +702,7 @@ export function OrderForm({
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
                 >
                   <option value="">No inspiration linked</option>
-                  {designInspirations.map((item) => (
+                  {(designInspirations ?? []).map((item) => (
                     <option key={item.id} value={item.id}>
                       {item.title}
                     </option>
@@ -722,9 +722,9 @@ export function OrderForm({
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
                 >
                   <option value="">No fabric selected</option>
-                  {fabricRecords.map((fabric) => (
+                  {(fabricRecords ?? []).map((fabric) => (
                     <option key={fabric.id} value={fabric.id}>
-                      {fabric.name} â€¢ {titleCase(fabric.fabricType)} â€¢ {fabric.quantityInStock}{' '}
+                      {fabric.name} • {titleCase(fabric.fabricType)} • {fabric.quantityInStock}{' '}
                       {fabric.unit}
                     </option>
                   ))}
@@ -747,7 +747,7 @@ export function OrderForm({
               </div>
             ) : (
               <div className="space-y-3">
-                {alerts.map((alert) => (
+                {(alerts ?? []).map((alert) => (
                   <div
                     key={alert.id}
                     className={`rounded-2xl border p-4 ${
@@ -771,7 +771,7 @@ export function OrderForm({
             </div>
 
             <div className="space-y-3">
-              {DEFAULT_PRODUCTION_STAGES.map((stage, index) => (
+              {(DEFAULT_PRODUCTION_STAGES ?? []).map((stage, index) => (
                 <div
                   key={stage.code}
                   className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"

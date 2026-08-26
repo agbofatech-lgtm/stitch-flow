@@ -1,4 +1,4 @@
-﻿import { auditLogRepository } from '@modules/repositories/auditLogRepository';
+import { auditLogRepository } from '@modules/repositories/auditLogRepository';
 
 export const auditLogService = {
   async log(data: {

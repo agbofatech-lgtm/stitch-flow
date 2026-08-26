@@ -1,4 +1,4 @@
-﻿import {
+import {
   Point,
   BodicePatternResult,
   BodiceControlPoints,

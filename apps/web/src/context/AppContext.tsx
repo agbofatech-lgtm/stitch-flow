@@ -1,4 +1,4 @@
-﻿import {
+import {
   createContext,
   useContext,
   useState,
@@ -182,8 +182,22 @@ function mergeGarmentMeasurements(
 }
 
 function resolveWorkspace(workspaceId: string, tierCode: TierCode): Workspace {
+  const fallbackTier = tiers.find((item) => item.code === tierCode) || tiers[0];
+
   const baseWorkspace =
-    workspaces.find((workspace) => workspace.id === workspaceId) || workspaces[0];
+    workspaces.find((workspace) => workspace.id === workspaceId) || {
+      id: workspaceId,
+      name: 'My Workspace',
+      tier: fallbackTier,
+      tierId: fallbackTier.id,
+      defaultCurrency: 'GHS',
+      phone: '',
+      email: '',
+      address: '',
+      logoUrl: null,
+      brandColor: '#0F6E8C',
+      useLogoAsWatermark: false,
+    };
 
   const tier = tiers.find((item) => item.code === tierCode) || baseWorkspace.tier;
 
@@ -195,17 +209,22 @@ function resolveWorkspace(workspaceId: string, tierCode: TierCode): Workspace {
 }
 
 function resolveMember(workspaceId: string, memberId: string): WorkspaceMember {
-  const exactMatch = workspaceMembers.find(
-    (member) => member.workspaceId === workspaceId && member.id === memberId
-  );
-
-  if (exactMatch) return exactMatch;
-
-  const ownerMatch = workspaceMembers.find(
-    (member) => member.workspaceId === workspaceId && member.role === 'owner'
-  );
-
-  return ownerMatch || workspaceMembers[0];
+  return {
+    id: memberId || 'dynamic-owner',
+    workspaceId,
+    userId: 'local-user',
+    role: 'owner',
+    user: {
+      id: 'local-user',
+      fullName: 'Klenam Kendra',
+      email: 'studio@example.com',
+      phone: '+233240000000',
+    },
+    canManageCustomers: true,
+    canManageOrders: true,
+    canManagePayments: true,
+    joinedAt: new Date(),
+  } as WorkspaceMember;
 }
 
 function getCuttingStageStatus(
@@ -229,7 +248,7 @@ function getAutoCuttingUsage(
       usage.orderId === orderId &&
       usage.fabricRecordId === fabricRecordId &&
       typeof usage.notes === 'string' &&
-      usage.notes.includes(AUTO_CUTTING_DEDUCTION_NOTE)
+      (usage.notes ?? "").includes(AUTO_CUTTING_DEDUCTION_NOTE)
   );
 }
 
@@ -393,14 +412,14 @@ function hydrateCustomersWithProfiles(
   customers: Customer[],
   profiles: CustomerMeasurementProfile[]
 ): Customer[] {
-  return customers.map((customer) => attachProfilesToCustomer(customer, profiles));
+  return (customers ?? []).map((customer) => attachProfilesToCustomer(customer, profiles));
 }
 
 function hydrateOrdersWithCustomers(
   orders: Order[],
   customers: Customer[]
 ): Order[] {
-  return orders.map((order) => {
+  return (orders ?? []).map((order) => {
     const customer = customers.find((item) => item.id === order.customerId) || order.customer;
 
     return {
@@ -427,7 +446,7 @@ function stripEmbeddedProfileCollections(customer: Customer): Customer {
 }
 
 function stripCustomersForStorage(customers: Customer[]): Customer[] {
-  return customers.map(stripEmbeddedProfileCollections);
+  return (customers ?? []).map(stripEmbeddedProfileCollections);
 }
 
 function buildInitialState(): AppState {
@@ -453,7 +472,7 @@ function buildInitialState(): AppState {
     hydratedCustomers
   );
 
-  const normalizedPatternLibrary = persisted.patternLibrary.map(normalizePatternLibraryItem);
+  const normalizedPatternLibrary = (persisted.patternLibrary ?? []).map(normalizePatternLibraryItem);
 
   return {
     currentView: 'dashboard',
@@ -556,6 +575,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const updateWorkspaceProfile = useCallback(
     (updates: {
+      ownerName?: string;
       name?: string;
       defaultCurrency?: CurrencyCode;
       phone?: string;
@@ -826,7 +846,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       >
     ) => {
       setState((prev) => {
-        const customers = prev.customers.map((customer) =>
+        const customers = (prev.customers ?? []).map((customer) =>
           customer.id === customerId ? { ...customer, ...updates } : customer
         );
 
@@ -916,7 +936,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const existingOrder = prev.orders.find((order) => order.id === orderId);
       if (!existingOrder) return prev;
 
-      const orders = prev.orders.map((order) =>
+      const orders = (prev.orders ?? []).map((order) =>
         order.id === orderId
           ? {
               ...order,
@@ -999,7 +1019,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
           nextMaterialUsages = [...prev.materialUsages, autoUsage];
 
-          nextFabricRecords = prev.fabricRecords.map((item) =>
+          nextFabricRecords = (prev.fabricRecords ?? []).map((item) =>
             item.id === selectedFabricId
               ? {
                   ...item,
@@ -1042,7 +1062,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setState((prev) => {
         const payments = [...prev.payments, newPayment];
 
-        const invoices = prev.invoices.map((invoice) => {
+        const invoices = (prev.invoices ?? []).map((invoice) => {
           if (invoice.id !== data.invoiceId) return invoice;
 
           const paidAmount = invoice.paidAmount + data.amount;
@@ -1109,11 +1129,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setState((prev) => {
         const measurementProfiles = [newProfile, ...prev.measurementProfiles];
 
-        const customers = prev.customers.map((customer) => {
+        const customers = (prev.customers ?? []).map((customer) => {
           if (customer.id !== newProfile.customerId) return customer;
 
           const currentIds = customer.measurementProfileIds || [];
-          const nextIds = currentIds.includes(newProfile.id)
+          const nextIds = (currentIds ?? "").includes(newProfile.id)
             ? currentIds
             : [newProfile.id, ...currentIds];
 
@@ -1132,7 +1152,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         });
 
         const normalizedProfiles = newProfile.isDefault
-          ? measurementProfiles.map((item) =>
+          ? (measurementProfiles ?? []).map((item) =>
               item.customerId === newProfile.customerId
                 ? { ...item, isDefault: item.id === newProfile.id }
                 : item
@@ -1166,7 +1186,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const existingProfile = prev.measurementProfiles.find((profile) => profile.id === profileId);
         if (!existingProfile) return prev;
 
-        const nextProfiles = prev.measurementProfiles.map((profile) => {
+        const nextProfiles = (prev.measurementProfiles ?? []).map((profile) => {
           if (profile.id !== profileId) return profile;
 
           return {
@@ -1184,18 +1204,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
         const measurementProfiles =
           updates.isDefault === true
-            ? nextProfiles.map((profile) =>
+            ? (nextProfiles ?? []).map((profile) =>
                 profile.customerId === existingProfile.customerId
                   ? { ...profile, isDefault: profile.id === profileId }
                   : profile
               )
             : nextProfiles;
 
-        const customers = prev.customers.map((customer) => {
+        const customers = (prev.customers ?? []).map((customer) => {
           if (customer.id !== existingProfile.customerId) return customer;
 
           const currentIds = customer.measurementProfileIds || [];
-          const nextIds = currentIds.includes(profileId) ? currentIds : [profileId, ...currentIds];
+          const nextIds = (currentIds ?? "").includes(profileId) ? currentIds : [profileId, ...currentIds];
 
           return {
             ...customer,
@@ -1210,7 +1230,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           };
         });
 
-        const orders = prev.orders.map((order) =>
+        const orders = (prev.orders ?? []).map((order) =>
           order.selectedMeasurementProfileId === profileId
             ? {
                 ...order,
@@ -1265,7 +1285,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           (profile) => profile.customerId === existingProfile.customerId
         ) || null;
 
-      const customers = prev.customers.map((customer) => {
+      const customers = (prev.customers ?? []).map((customer) => {
         if (customer.id !== existingProfile.customerId) return customer;
 
         const nextIds = (customer.measurementProfileIds || []).filter((id) => id !== profileId);
@@ -1280,7 +1300,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         };
       });
 
-      const orders = prev.orders.map((order) =>
+      const orders = (prev.orders ?? []).map((order) =>
         order.selectedMeasurementProfileId === profileId
           ? {
               ...order,
@@ -1345,7 +1365,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           capturedAt: new Date(),
         };
 
-        const orders = prev.orders.map((item) =>
+        const orders = (prev.orders ?? []).map((item) =>
           item.id === orderId
             ? {
                 ...item,
@@ -1538,7 +1558,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           analysis: currentInspirationAnalysis || undefined,
         });
 
-      const orders = prev.orders.map((order) =>
+      const orders = (prev.orders ?? []).map((order) =>
         order.id === orderId
           ? {
               ...order,
@@ -1566,7 +1586,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       );
 
       const designInspirations = selectedInspiration
-        ? prev.designInspirations.map((item) =>
+        ? (prev.designInspirations ?? []).map((item) =>
             item.id === selectedInspiration.id
               ? {
                   ...item,
@@ -1610,7 +1630,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ? inferGarmentTypeFromInspiration(inspiration, prev.selectedGarmentType)
           : prev.selectedGarmentType;
 
-        const orders = prev.orders.map((order) =>
+        const orders = (prev.orders ?? []).map((order) =>
           order.id === orderId
             ? {
                 ...order,
@@ -1621,7 +1641,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             : order
         );
 
-        const designInspirations = prev.designInspirations.map((item) =>
+        const designInspirations = (prev.designInspirations ?? []).map((item) =>
           item.id === designInspirationId
             ? {
                 ...item,
@@ -1654,7 +1674,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setState((prev) => {
         const nextCustomers = hydrateCustomersWithProfiles(prev.customers, prev.measurementProfiles);
         const orders = hydrateOrdersWithCustomers(
-          prev.orders.map((order) =>
+          (prev.orders ?? []).map((order) =>
             order.id === orderId
               ? { ...order, selectedFabricId: fabricRecordId }
               : order
@@ -1677,7 +1697,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setState((prev) => {
         const nextCustomers = hydrateCustomersWithProfiles(prev.customers, prev.measurementProfiles);
         const orders = hydrateOrdersWithCustomers(
-          prev.orders.map((order) =>
+          (prev.orders ?? []).map((order) =>
             order.id === orderId
               ? { ...order, selectedPatternId: patternLibraryId }
               : order
@@ -1724,7 +1744,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ) => {
       setState((prev) => ({
         ...prev,
-        patternLibrary: prev.patternLibrary.map((item) =>
+        patternLibrary: (prev.patternLibrary ?? []).map((item) =>
           item.id === patternLibraryId
             ? normalizePatternLibraryItem({
                 ...item,
@@ -1742,7 +1762,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState((prev) => {
       const nextCustomers = hydrateCustomersWithProfiles(prev.customers, prev.measurementProfiles);
       const orders = hydrateOrdersWithCustomers(
-        prev.orders.map((order) =>
+        (prev.orders ?? []).map((order) =>
           order.selectedPatternId === patternLibraryId
             ? { ...order, selectedPatternId: null }
             : order
@@ -1781,7 +1801,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (fabricRecordId: string, updates: Partial<FabricRecord>) => {
       setState((prev) => ({
         ...prev,
-        fabricRecords: prev.fabricRecords.map((item) =>
+        fabricRecords: (prev.fabricRecords ?? []).map((item) =>
           item.id === fabricRecordId
             ? { ...item, ...updates, updatedAt: new Date() }
             : item
@@ -1795,7 +1815,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState((prev) => {
       const nextCustomers = hydrateCustomersWithProfiles(prev.customers, prev.measurementProfiles);
       const orders = hydrateOrdersWithCustomers(
-        prev.orders.map((order) =>
+        (prev.orders ?? []).map((order) =>
           order.selectedFabricId === fabricRecordId
             ? { ...order, selectedFabricId: null }
             : order
@@ -1859,7 +1879,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setState((prev) => ({
         ...prev,
         materialUsages: [...prev.materialUsages, newUsage],
-        fabricRecords: prev.fabricRecords.map((item) =>
+        fabricRecords: (prev.fabricRecords ?? []).map((item) =>
           item.id === data.fabricRecordId
             ? {
                 ...item,
@@ -1883,7 +1903,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return {
         ...prev,
         materialUsages: prev.materialUsages.filter((item) => item.id !== usageId),
-        fabricRecords: prev.fabricRecords.map((item) =>
+        fabricRecords: (prev.fabricRecords ?? []).map((item) =>
           item.id === usage.fabricRecordId
             ? {
                 ...item,
@@ -1972,4 +1992,10 @@ export function useApp() {
   }
   return context;
 }
+
+
+
+
+
+
 

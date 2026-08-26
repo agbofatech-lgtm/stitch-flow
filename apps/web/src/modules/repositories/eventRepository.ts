@@ -1,4 +1,4 @@
-﻿import { query } from '../config/db';
+import { query } from '../config/db';
 
 export const eventRepository = {
   async createBatch(events: any[]) {

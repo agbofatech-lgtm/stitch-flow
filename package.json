@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@bull-board/api": "^6.20.5",
-    "@bull-board/express": "^6.20.5"
+    "@bull-board/express": "^6.20.5",
+    "cors": "^2.8.6"
   },
   "version": "1.0.0",
   "description": "Production-ready Express + TypeScript + PostgreSQL backend for StitchFlow.",
@@ -21,8 +22,11 @@
     "doc": "docs",
     "test": "tests"
   },
-  "devDependencies": {},
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "express": "^5.2.1",
+    "http-proxy-middleware": "^4.0.0"
+  }
 }

@@ -1,4 +1,4 @@
-﻿export type TierCode = 'BASIC' | 'PRO' | 'STUDIO';
+export type TierCode = 'BASIC' | 'PRO' | 'STUDIO';
 export type BillingStatus = 'trial' | 'active' | 'past_due' | 'cancelled';
 export type UserRole = 'owner' | 'assistant';
 
@@ -912,3 +912,4 @@ export interface AppContextShape {
   getOrderMaterialUsages: (orderId: string) => OrderMaterialUsage[];
   getLowStockMaterials: () => FabricRecord[];
 }
+

@@ -1,4 +1,4 @@
-﻿import { query } from '../config/db';
+import { query } from '../config/db';
 
 export const refreshTokenRepository = {
   async create(userId: string, token: string, expiresAt: Date) {

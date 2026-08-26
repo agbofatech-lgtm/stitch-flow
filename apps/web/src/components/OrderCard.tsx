@@ -1,4 +1,4 @@
-﻿import { useMemo, type MouseEvent, type ReactNode } from 'react';
+import { useMemo, type MouseEvent, type ReactNode } from 'react';
 import {
   AlertTriangle,
   Calendar,
@@ -229,7 +229,7 @@ export function OrderCard({
           </div>
 
           <div className="mb-3 flex flex-wrap gap-2">
-            {stages.map((stage) => (
+            {(stages ?? []).map((stage) => (
               <span
                 key={stage.code}
                 className={`rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -242,7 +242,7 @@ export function OrderCard({
                     : 'bg-slate-200 text-slate-600'
                 }`}
               >
-                {stage.status === 'completed' ? 'âœ“ ' : ''}
+                {stage.status === 'completed' ? '✓ ' : ''}
                 {stage.label}
               </span>
             ))}
@@ -270,7 +270,7 @@ export function OrderCard({
 
           {materialUsages.length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              {materialUsages.map((usage) => {
+              {(materialUsages ?? []).map((usage) => {
                 const material = fabricRecords.find((f) => f.id === usage.fabricRecordId);
 
                 return (
@@ -280,7 +280,7 @@ export function OrderCard({
                     onClick={stop}
                   >
                     <span>
-                      {material?.name || 'Material'} â€¢ {usage.quantityUsed} {usage.unit}
+                      {material?.name || 'Material'} • {usage.quantityUsed} {usage.unit}
                     </span>
 
                     {onDeleteMaterialUsage && (
@@ -461,7 +461,7 @@ function renderMeasurementChips(
 
 function getNormalizedStages(stages?: ProductionStage[]): ProductionStage[] {
   if (stages && stages.length > 0) {
-    return DEFAULT_PRODUCTION_STAGES.map((defaultStage) => {
+    return (DEFAULT_PRODUCTION_STAGES ?? []).map((defaultStage) => {
       const existing = stages.find((stage) => stage.code === defaultStage.code);
 
       return (
@@ -479,7 +479,7 @@ function getNormalizedStages(stages?: ProductionStage[]): ProductionStage[] {
     });
   }
 
-  return DEFAULT_PRODUCTION_STAGES.map((stage) => ({
+  return (DEFAULT_PRODUCTION_STAGES ?? []).map((stage) => ({
     code: stage.code,
     label: stage.label,
     status: 'pending' as const,

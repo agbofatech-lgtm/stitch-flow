@@ -1,4 +1,4 @@
-﻿import {
+import {
   useMemo,
   useState,
   type ElementType,
@@ -30,6 +30,11 @@ import {
 } from 'lucide-react';
 import { format, isToday, isPast } from 'date-fns';
 import { formatCurrency, safeCurrency } from '@shared/utils/currency';
+import {
+  fetchOrderProductionStages,
+  transitionOrderProductionStage,
+  type ApiProductionStage,
+} from '@shared/api/productionStages';
 import {
   FabricRecord,
   MaterialUnit,
@@ -238,17 +243,19 @@ export function Orders() {
   const [materialOrderId, setMaterialOrderId] = useState<string | null>(null);
   const [orderFormMode, setOrderFormMode] = useState<'create' | 'edit' | null>(null);
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  const [stageActionOrderId, setStageActionOrderId] = useState<string | null>(null);
+  const [stageActionError, setStageActionError] = useState<string | null>(null);
 
   const workspaceCurrency = currentWorkspace.defaultCurrency || 'GHS';
 
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
       const matchesSearch =
-        o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
-        (o.customer?.fullName || '').toLowerCase().includes(search.toLowerCase()) ||
-        o.orderType.toLowerCase().includes(search.toLowerCase()) ||
-        (o.notes || '').toLowerCase().includes(search.toLowerCase()) ||
-        (o.garmentType || '').toLowerCase().includes(search.toLowerCase());
+        (o.orderNumber ?? "").toLowerCase().includes((search ?? "").toLowerCase()) ||
+        (o.customer?.fullName || '').toLowerCase().includes((search ?? "").toLowerCase()) ||
+        (o.orderType ?? "").toLowerCase().includes((search ?? "").toLowerCase()) ||
+        (o.notes || '').toLowerCase().includes((search ?? "").toLowerCase()) ||
+        (o.garmentType || '').toLowerCase().includes((search ?? "").toLowerCase());
 
       const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
 
@@ -282,48 +289,71 @@ export function Orders() {
     };
   }, [orders]);
 
-  const handleAdvanceStage = (orderId: string, existingStages?: ProductionStage[]) => {
-    const normalizedStages = getNormalizedStages(existingStages);
-    const nextPendingIndex = normalizedStages.findIndex((stage) => stage.status !== 'completed');
+  function mapApiStageToLocalStage(stage: ApiProductionStage): ProductionStage {
+    return {
+      code: stage.code,
+      label: stage.label,
+      status: stage.status,
+      startedAt: stage.startedAt ? new Date(stage.startedAt) : null,
+      completedAt: stage.completedAt ? new Date(stage.completedAt) : null,
+      skippedAt: stage.skippedAt ? new Date(stage.skippedAt) : null,
+      reopenedAt: stage.reopenedAt ? new Date(stage.reopenedAt) : null,
+      notes: stage.notes || '',
+      assignedTo: stage.assignedTo || null,
+    } as ProductionStage;
+  }
 
-    if (nextPendingIndex === -1) return;
+  const handleInitializeWorkflow = async (orderId: string) => {
+    try {
+      setStageActionError(null);
+      setStageActionOrderId(orderId);
 
-    const updatedStages = normalizedStages.map((stage, index) => {
-      if (index < nextPendingIndex) return { ...stage, status: 'completed' as const };
-      if (index === nextPendingIndex) {
-        return {
-          ...stage,
-          status: 'completed' as const,
-          completedAt: new Date(),
-        };
-      }
-      return stage;
-    });
+      const stages = await fetchOrderProductionStages(orderId);
 
-    const allCompleted = updatedStages.every((stage) => stage.status === 'completed');
-    const deliveredCompleted =
-      updatedStages.find((s) => s.code === 'delivered')?.status === 'completed';
-    const readyCompleted = updatedStages.find((s) => s.code === 'ready')?.status === 'completed';
-
-    let nextStatus: 'draft' | 'in_progress' | 'ready' | 'delivered' | 'cancelled' = 'draft';
-
-    if (deliveredCompleted || allCompleted) nextStatus = 'delivered';
-    else if (readyCompleted) nextStatus = 'ready';
-    else if (updatedStages.some((stage) => stage.status === 'completed')) nextStatus = 'in_progress';
-
-    updateOrder(orderId, {
-      productionStages: updatedStages,
-      status: nextStatus,
-    });
+      updateOrder(orderId, {
+        productionStages: (stages ?? []).map(mapApiStageToLocalStage),
+        status: 'in_progress',
+      });
+    } catch (err) {
+      setStageActionError(
+        err instanceof Error ? err.message : 'Failed to initialize workflow'
+      );
+    } finally {
+      setStageActionOrderId(null);
+    }
   };
 
-  const handleInitializeWorkflow = (orderId: string) => {
-    const initializedStages = buildInitialProductionStages();
+  const handleAdvanceStage = async (order: Order) => {
+    try {
+      setStageActionError(null);
+      setStageActionOrderId(order.id);
 
-    updateOrder(orderId, {
-      productionStages: initializedStages,
-      status: 'in_progress',
-    });
+      const normalizedStages = getNormalizedStages(order.productionStages);
+      const nextStage = normalizedStages.find((stage) => stage.status !== 'completed');
+
+      if (!nextStage) {
+        return;
+      }
+
+      const action = nextStage.status === 'active' ? 'complete' : 'start';
+
+      const result = await transitionOrderProductionStage(
+        order.id,
+        nextStage.code,
+        action
+      );
+
+      updateOrder(order.id, {
+        productionStages: (result.productionStages ?? []).map(mapApiStageToLocalStage),
+        status: result.orderStatus as Order['status'],
+      });
+    } catch (err) {
+      setStageActionError(
+        err instanceof Error ? err.message : 'Failed to update production stage'
+      );
+    } finally {
+      setStageActionOrderId(null);
+    }
   };
 
   const selectedMaterialOrder = materialOrderId
@@ -354,7 +384,7 @@ export function Orders() {
 
           <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
           <p className="mt-1 text-slate-500">
-            {orders.length} total orders â€¢ linked to customers, garments, measurements, design work, and materials
+            {orders.length} total orders � linked to customers, garments, measurements, design work, and materials
           </p>
         </div>
 
@@ -366,6 +396,12 @@ export function Orders() {
           New Order
         </button>
       </div>
+
+      {stageActionError && (
+        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {stageActionError}
+        </div>
+      )}
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <SummaryCard
@@ -414,7 +450,7 @@ export function Orders() {
 
         <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm xl:w-auto">
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {statusFilters.map((status) => (
+            {(statusFilters ?? []).map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
@@ -437,7 +473,7 @@ export function Orders() {
       </div>
 
       <div className="space-y-4">
-        {filteredOrders.map((order) => {
+        {(filteredOrders ?? []).map((order) => {
           const isDue =
             order.dueDate &&
             (isToday(new Date(order.dueDate)) ||
@@ -453,6 +489,13 @@ export function Orders() {
           const linkedInspiration = designInspirations.find(
             (item) => item.id === order.designInspirationId
           );
+          const isStageUpdating = stageActionOrderId === order.id;
+          const nextStageActionLabel =
+            nextStage?.status === 'active'
+              ? `Complete ${nextStage.label}`
+              : nextStage
+              ? `Start ${nextStage.label}`
+              : '';
 
           const topBarClass =
             order.status === 'delivered'
@@ -557,7 +600,7 @@ export function Orders() {
                   </div>
 
                   <div className="mb-3 flex flex-wrap gap-2">
-                    {stages.map((stage) => (
+                    {(stages ?? []).map((stage) => (
                       <span
                         key={stage.code}
                         className={`rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -568,8 +611,8 @@ export function Orders() {
                             : 'bg-slate-200 text-slate-600'
                         }`}
                       >
-                        {stage.status === 'completed' ? 'âœ“ ' : ''}
-                        {stage.status === 'active' ? 'â€¢ ' : ''}
+                        {stage.status === 'completed' ? '? ' : ''}
+                        {stage.status === 'active' ? '� ' : ''}
                         {stage.label}
                       </span>
                     ))}
@@ -598,7 +641,7 @@ export function Orders() {
 
                   {materialUsages.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
-                      {materialUsages.map((usage) => {
+                      {(materialUsages ?? []).map((usage) => {
                         const material = fabricRecords.find((f) => f.id === usage.fabricRecordId);
                         return (
                           <div
@@ -607,7 +650,7 @@ export function Orders() {
                             onClick={(e) => e.stopPropagation()}
                           >
                             <span>
-                              {material?.name || 'Material'} â€¢ {usage.quantityUsed} {usage.unit}
+                              {material?.name || 'Material'} � {usage.quantityUsed} {usage.unit}
                             </span>
                             <button
                               onClick={() => deleteMaterialUsage(usage.id)}
@@ -653,11 +696,12 @@ export function Orders() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleInitializeWorkflow(order.id);
+                        void handleInitializeWorkflow(order.id);
                       }}
-                      className="rounded-xl bg-sky-100 px-3 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-200"
+                      disabled={isStageUpdating}
+                      className="rounded-xl bg-sky-100 px-3 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-200 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      Start Workflow
+                      {isStageUpdating ? 'Starting...' : 'Start Workflow'}
                     </button>
                   )}
 
@@ -665,11 +709,12 @@ export function Orders() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleAdvanceStage(order.id, order.productionStages);
+                        void handleAdvanceStage(order);
                       }}
-                      className="rounded-xl bg-[#0F6E8C]/10 px-3 py-1.5 text-xs font-medium text-[#0F6E8C] hover:bg-[#0F6E8C]/20"
+                      disabled={isStageUpdating}
+                      className="rounded-xl bg-[#0F6E8C]/10 px-3 py-1.5 text-xs font-medium text-[#0F6E8C] hover:bg-[#0F6E8C]/20 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      Complete {nextStage.label}
+                      {isStageUpdating ? 'Updating...' : nextStageActionLabel}
                     </button>
                   )}
 
@@ -808,6 +853,7 @@ function OrderFormModal({
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     if (!form.customerId) {
       setError('Please select a customer.');
@@ -824,48 +870,27 @@ function OrderFormModal({
       return;
     }
 
-    const measurementSnapshot = parseMeasurementValues(form.measurements);
-    const linkedInspiration =
-      form.designInspirationId
-        ? inspirations.find((item) => item.id === form.designInspirationId) || null
-        : null;
     const linkedFabric =
       form.selectedFabricId
         ? materials.find((item) => item.id === form.selectedFabricId) || null
         : null;
 
-    const inspirationSource =
-      form.designInspirationId
-        ? (linkedInspiration
-            ? {
-                id: linkedInspiration.id,
-                title: linkedInspiration.title,
-                category: linkedInspiration.category as Order['designInspirationId'],
-              }
-            : null)
-        : null;
-
-    const fullInspiration =
-      form.designInspirationId
-        ? materials && inspirations
-          ? undefined
-          : undefined
-        : undefined;
-
     const matchingInspiration =
       form.designInspirationId
-        ? (inspirations.find((item) => item.id === form.designInspirationId) as any) || null
+        ? inspirations.find((item) => item.id === form.designInspirationId) || null
         : null;
 
+    const measurementSnapshot = parseMeasurementValues(form.measurements);
+
     const analysis = analyzeDesignInspiration(
-      matchingInspiration || undefined,
+      (matchingInspiration as any) || undefined,
       form.garmentType
     );
 
     const productionPlan = generateProductionPlan({
       garmentType: form.garmentType,
       measurements: measurementSnapshot,
-      inspiration: matchingInspiration || undefined,
+      inspiration: (matchingInspiration as any) || undefined,
       analysis,
       selectedFabric: linkedFabric || undefined,
     });
@@ -874,7 +899,9 @@ function OrderFormModal({
       customerId: form.customerId,
       assignedTo: form.assignedTo.trim() || null,
       orderNumber: form.orderNumber.trim(),
-      status: 'in_progress',
+      status:
+        existingOrder?.status ||
+        (existingOrder?.productionStages?.length ? 'in_progress' : 'draft'),
       orderType: form.orderType.trim(),
       dueDate: form.dueDate ? new Date(form.dueDate) : null,
       notes: form.notes.trim(),
@@ -932,7 +959,7 @@ function OrderFormModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5">
+        <form id="order-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5">
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
             <div className="space-y-6">
               <section className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
@@ -951,7 +978,7 @@ function OrderFormModal({
                       className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
                     >
                       <option value="">Select customer</option>
-                      {customers.map((customer) => (
+                      {(customers ?? []).map((customer) => (
                         <option key={customer.id} value={customer.id}>
                           {customer.fullName}
                         </option>
@@ -988,7 +1015,7 @@ function OrderFormModal({
                       }
                       className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
                     >
-                      {GARMENT_OPTIONS.map((option) => (
+                      {(GARMENT_OPTIONS ?? []).map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
@@ -1022,7 +1049,7 @@ function OrderFormModal({
                     <input
                       value={form.currency}
                       onChange={(e) =>
-                        setForm((prev) => ({ ...prev, currency: e.target.value.toUpperCase() }))
+                        setForm((prev) => ({ ...prev, currency: (e.target.value ?? "").toUpperCase() }))
                       }
                       className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm uppercase text-slate-700 outline-none focus:border-sky-300"
                     />
@@ -1115,7 +1142,7 @@ function OrderFormModal({
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {measurementFields.map((field) => (
+                  {(measurementFields ?? []).map((field) => (
                     <FormField key={field.key} label={`${field.label} (${field.unit})`}>
                       <input
                         type="number"
@@ -1157,9 +1184,9 @@ function OrderFormModal({
                       className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
                     >
                       <option value="">No inspiration linked</option>
-                      {inspirations.map((item) => (
+                      {(inspirations ?? []).map((item) => (
                         <option key={item.id} value={item.id}>
-                          {item.title} â€¢ {titleCase(item.category)}
+                          {item.title} � {titleCase(item.category)}
                         </option>
                       ))}
                     </select>
@@ -1178,7 +1205,7 @@ function OrderFormModal({
                         .filter((item) => item.isActive !== false)
                         .map((material) => (
                           <option key={material.id} value={material.id}>
-                            {material.name} â€¢ {material.quantityInStock} {material.unit}
+                            {material.name} � {material.quantityInStock} {material.unit}
                           </option>
                         ))}
                     </select>
@@ -1276,12 +1303,8 @@ function OrderFormModal({
               Cancel
             </button>
             <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                const formEl = (e.currentTarget.closest('div')?.previousElementSibling as HTMLFormElement | null);
-                formEl?.requestSubmit();
-              }}
+              type="submit"
+              form="order-form"
               className="rounded-2xl bg-[#0F6E8C] px-4 py-3 font-semibold text-white hover:bg-[#0C5C74]"
             >
               {mode === 'create' ? 'Create Order' : 'Save Changes'}
@@ -1380,9 +1403,9 @@ function AddMaterialToOrderModal({
               {activeMaterials.length === 0 ? (
                 <option value="">No materials available</option>
               ) : (
-                activeMaterials.map((material) => (
+                (activeMaterials ?? []).map((material) => (
                   <option key={material.id} value={material.id}>
-                    {material.name} â€¢ {material.quantityInStock} {material.unit} left
+                    {material.name} � {material.quantityInStock} {material.unit} left
                   </option>
                 ))
               )}
@@ -1567,7 +1590,7 @@ function renderMeasurementChips(
 
 function getNormalizedStages(stages?: ProductionStage[]): ProductionStage[] {
   if (stages && stages.length > 0) {
-    return DEFAULT_PRODUCTION_STAGES.map((defaultStage) => {
+    return (DEFAULT_PRODUCTION_STAGES ?? []).map((defaultStage) => {
       const existing = stages.find((stage) => stage.code === defaultStage.code);
       return (
         existing || {
@@ -1581,7 +1604,7 @@ function getNormalizedStages(stages?: ProductionStage[]): ProductionStage[] {
     });
   }
 
-  return DEFAULT_PRODUCTION_STAGES.map((stage) => ({
+  return (DEFAULT_PRODUCTION_STAGES ?? []).map((stage) => ({
     code: stage.code,
     label: stage.label,
     status: 'pending' as const,
@@ -1591,7 +1614,7 @@ function getNormalizedStages(stages?: ProductionStage[]): ProductionStage[] {
 }
 
 function buildInitialProductionStages(): ProductionStage[] {
-  return DEFAULT_PRODUCTION_STAGES.map((stage, index) => ({
+  return (DEFAULT_PRODUCTION_STAGES ?? []).map((stage, index) => ({
     code: stage.code,
     label: stage.label,
     status: index === 0 ? ('active' as const) : ('pending' as const),
@@ -1637,7 +1660,7 @@ function buildMeasurementDraft(
   const entries = Object.entries(snapshot).filter(([, value]) => typeof value === 'number');
 
   return Object.fromEntries(
-    entries.map(([key, value]) => [key, String(value)])
+    (entries ?? []).map(([key, value]) => [key, String(value)])
   ) as Partial<Record<MeasurementKey, string>>;
 }
 

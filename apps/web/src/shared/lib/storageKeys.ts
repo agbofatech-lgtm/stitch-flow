@@ -1,4 +1,4 @@
-﻿export const STORAGE_NAMESPACE = 'stitchflow';
+export const STORAGE_NAMESPACE = 'stitchflow';
 export const STORAGE_VERSION = '2026-03-15.1';
 
 export const STORAGE_KEYS = {

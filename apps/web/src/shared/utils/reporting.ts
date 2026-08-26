@@ -1,4 +1,4 @@
-﻿export type ReportingDatePreset =
+export type ReportingDatePreset =
   | 'last7Days'
   | 'last30Days'
   | 'thisMonth'

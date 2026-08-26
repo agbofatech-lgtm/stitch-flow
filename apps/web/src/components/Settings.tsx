@@ -1,4 +1,4 @@
-ï»¿import { useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Crown,
@@ -19,10 +19,16 @@ import {
   Info,
 } from 'lucide-react';
 import { FEATURE_COMPARISON } from '@modules/services/tierEnforcement';
-import { workspaceMembers } from '@data/mockData';
 import type { CurrencyCode } from '../types';
 import { BRAND } from '../config/brand';
 import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
+import { fetchSettings, updateSetting } from '@shared/api/settings';
+import {
+  fetchWorkspaceMembers,
+  createWorkspaceMember,
+  deleteWorkspaceMember,
+  type ApiWorkspaceMember,
+} from '@shared/api/workspaceMembers';
 export function Settings() {
   const {
     currentWorkspace,
@@ -34,12 +40,24 @@ export function Settings() {
     updateWorkspaceProfile,
   } = useApp();
 
-  const members = workspaceMembers.filter((m) => m.workspaceId === currentWorkspace.id);
   const canManageBilling = canPerform('manage_billing');
   const canManageAssistants = canPerform('manage_assistants');
   const logoInputRef = useRef<HTMLInputElement | null>(null);
+  const effectiveWorkspaceId = currentWorkspace.id || 'default-workspace';
+
+  const [members, setMembers] = useState<ApiWorkspaceMember[]>([]);
+
+  const [assistantForm, setAssistantForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    canManageCustomers: true,
+    canManageOrders: true,
+    canManagePayments: false,
+  });
 
   const [profileForm, setProfileForm] = useState({
+    ownerName: '',
     name: currentWorkspace.name || '',
     defaultCurrency: currentWorkspace.defaultCurrency || 'GHS',
     phone: currentWorkspace.phone || '',
@@ -47,31 +65,216 @@ export function Settings() {
     address: currentWorkspace.address || '',
   });
 
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsMessage, setSettingsMessage] = useState<string | null>(null);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadBackendSettings = async () => {
+      try {
+        setSettingsLoading(true);
+        setSettingsError(null);
+
+        const settings = await fetchSettings();
+
+        if (!active) return;
+
+        const workspaceProfile =
+          (settings.workspace_profile as Record<string, unknown> | undefined) || {};
+        const branding =
+          (settings.branding as Record<string, unknown> | undefined) || {};
+
+        const backendMembers = await fetchWorkspaceMembers(effectiveWorkspaceId);
+        if (!active) return;
+        setMembers(backendMembers);
+
+        setProfileForm((prev) => ({
+          ...prev,
+          name: String(workspaceProfile.name ?? prev.name ?? ''),
+          defaultCurrency: String(
+            workspaceProfile.defaultCurrency ?? prev.defaultCurrency ?? 'GHS'
+          ),
+          phone: String(workspaceProfile.phone ?? prev.phone ?? ''),
+          email: String(workspaceProfile.email ?? prev.email ?? ''),
+          address: String(workspaceProfile.address ?? prev.address ?? ''),
+          ownerName: String(workspaceProfile.ownerName ?? ''),
+        }));
+
+        updateWorkspaceProfile({
+          ownerName: String(workspaceProfile.ownerName ?? ''),
+          name: String(workspaceProfile.name ?? currentWorkspace.name ?? ''),
+          defaultCurrency: String(
+            workspaceProfile.defaultCurrency ?? currentWorkspace.defaultCurrency ?? 'GHS'
+          ) as CurrencyCode,
+          phone: String(workspaceProfile.phone ?? currentWorkspace.phone ?? ''),
+          email: String(workspaceProfile.email ?? currentWorkspace.email ?? ''),
+          address: String(workspaceProfile.address ?? currentWorkspace.address ?? ''),
+        });
+
+        updateWorkspaceBranding({
+          brandColor: String(
+            branding.brandColor ?? currentWorkspace.brandColor ?? BRAND.colors.primary
+          ),
+          logoUrl:
+            typeof branding.logoUrl === 'string'
+              ? branding.logoUrl
+              : currentWorkspace.logoUrl ?? null,
+          useLogoAsWatermark:
+            typeof branding.useLogoAsWatermark === 'boolean'
+              ? branding.useLogoAsWatermark
+              : !!currentWorkspace.useLogoAsWatermark,
+        });
+      } catch (error) {
+        if (!active) return;
+        setSettingsError(
+          error instanceof Error ? error.message : 'Failed to load backend settings'
+        );
+      } finally {
+        if (active) {
+          setSettingsLoading(false);
+        }
+      }
+    };
+
+    void loadBackendSettings();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleLogoUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
+      const logoUrl = (event.target?.result as string) || null;
+
       updateWorkspaceBranding({
-        logoUrl: (event.target?.result as string) || null,
+        logoUrl,
       });
+
+      try {
+        setSettingsSaving(true);
+        setSettingsError(null);
+        setSettingsMessage(null);
+
+        await updateSetting('branding', {
+          logoUrl,
+          brandColor: currentWorkspace.brandColor || BRAND.colors.primary,
+          useLogoAsWatermark: !!currentWorkspace.useLogoAsWatermark,
+        });
+
+        setSettingsMessage('Logo uploaded and saved.');
+      } catch (error) {
+        setSettingsError(
+          error instanceof Error ? error.message : 'Failed to save uploaded logo'
+        );
+      } finally {
+        setSettingsSaving(false);
+      }
     };
     reader.readAsDataURL(file);
   };
 
-  const handleSaveProfile = () => {
-    updateWorkspaceProfile({
-      name: profileForm.name,
-      defaultCurrency: profileForm.defaultCurrency as CurrencyCode,
-      phone: profileForm.phone,
-      email: profileForm.email,
-      address: profileForm.address,
-    });
+  const handleAddAssistant = async () => {
+    try {
+      setSettingsSaving(true);
+      setSettingsError(null);
+      setSettingsMessage(null);
+
+      if (!assistantForm.fullName.trim()) {
+        setSettingsError('Assistant name is required.');
+        return;
+      }
+
+      if (!assistantForm.email.trim() && !assistantForm.phone.trim()) {
+        setSettingsError('Provide either assistant email or phone number.');
+        return;
+      }
+
+      const created = await createWorkspaceMember({
+        workspaceId: effectiveWorkspaceId,
+        fullName: assistantForm.fullName.trim(),
+        email: assistantForm.email.trim(),
+        phone: assistantForm.phone.trim(),
+        role: 'assistant',
+        canManageCustomers: assistantForm.canManageCustomers,
+        canManageOrders: assistantForm.canManageOrders,
+        canManagePayments: assistantForm.canManagePayments,
+      });
+
+      setMembers((prev) => [...prev, created]);
+      setAssistantForm({
+        fullName: '',
+        email: '',
+        phone: '',
+        canManageCustomers: true,
+        canManageOrders: true,
+        canManagePayments: false,
+      });
+      setSettingsMessage('Assistant added successfully.');
+    } catch (error) {
+      setSettingsError(
+        error instanceof Error ? error.message : 'Failed to add assistant'
+      );
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+
+  const handleDeleteAssistant = async (memberId: string) => {
+    try {
+      setSettingsSaving(true);
+      setSettingsError(null);
+      setSettingsMessage(null);
+
+      await deleteWorkspaceMember(memberId);
+      setMembers((prev) => prev.filter((member) => member.id !== memberId));
+      setSettingsMessage('Assistant removed.');
+    } catch (error) {
+      setSettingsError(
+        error instanceof Error ? error.message : 'Failed to remove assistant'
+      );
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+  const handleSaveProfile = async () => {
+    try {
+      setSettingsSaving(true);
+      setSettingsError(null);
+      setSettingsMessage(null);
+
+      const payload = {
+        ownerName: profileForm.ownerName,
+        name: profileForm.name,
+        defaultCurrency: profileForm.defaultCurrency as CurrencyCode,
+        phone: profileForm.phone,
+        email: profileForm.email,
+        address: profileForm.address,
+      };
+
+      updateWorkspaceProfile(payload);
+
+      await updateSetting('workspace_profile', payload);
+
+      setSettingsMessage('Company profile saved.');
+    } catch (error) {
+      setSettingsError(
+        error instanceof Error ? error.message : 'Failed to save company profile'
+      );
+    } finally {
+      setSettingsSaving(false);
+    }
   };
 
   const planKey = tierSimulation as keyof typeof FEATURE_COMPARISON;
-  const currentPlan = FEATURE_COMPARISON[planKey];
+  const currentPlan = FEATURE_COMPARISON[planKey] || FEATURE_COMPARISON.BASIC;
 
   const planColors =
     tierSimulation === 'STUDIO'
@@ -122,6 +325,23 @@ export function Settings() {
           </div>
         </div>
 
+        {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
+          <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+            {settingsLoading && (
+              <p className="text-sm text-slate-600">Loading backend settings...</p>
+            )}
+            {settingsSaving && (
+              <p className="text-sm text-[#0F6E8C]">Saving settings...</p>
+            )}
+            {settingsMessage && (
+              <p className="text-sm text-green-700">{settingsMessage}</p>
+            )}
+            {settingsError && (
+              <p className="text-sm text-red-700">{settingsError}</p>
+            )}
+          </div>
+        )}
+
         <div className="mb-6 rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-slate-900">Company Profile</h2>
@@ -132,6 +352,21 @@ export function Settings() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
+  <label className="mb-1 flex items-center gap-2 text-sm font-medium text-slate-700">
+    <Users className="h-4 w-4 text-slate-400" />
+    Owner Name
+  </label>
+  <input
+    type="text"
+    value={profileForm.ownerName || ''}
+    onChange={(e) =>
+      setProfileForm((prev) => ({ ...prev, ownerName: e.target.value }))
+    }
+    className="w-full rounded-xl border border-slate-200 px-3 py-2.5"
+    placeholder="Enter owner name"
+  />
+</div>
+<div className="md:col-span-2">
               <label className="mb-1 flex items-center gap-2 text-sm font-medium text-slate-700">
                 <Building2 className="h-4 w-4 text-slate-400" />
                 Company Name
@@ -143,7 +378,7 @@ export function Settings() {
                   setProfileForm((prev) => ({ ...prev, name: e.target.value }))
                 }
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
-                placeholder="Mitchell Tailoring Studio"
+                placeholder="Enter company name"
               />
             </div>
 
@@ -227,6 +462,23 @@ export function Settings() {
             </button>
           </div>
         </div>
+
+        {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
+          <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+            {settingsLoading && (
+              <p className="text-sm text-slate-600">Loading backend settings...</p>
+            )}
+            {settingsSaving && (
+              <p className="text-sm text-[#0F6E8C]">Saving settings...</p>
+            )}
+            {settingsMessage && (
+              <p className="text-sm text-green-700">{settingsMessage}</p>
+            )}
+            {settingsError && (
+              <p className="text-sm text-red-700">{settingsError}</p>
+            )}
+          </div>
+        )}
 
         <div className="mb-6 rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
           <div className="mb-4 flex items-start justify-between gap-4">
@@ -333,6 +585,23 @@ export function Settings() {
           )}
         </div>
 
+        {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
+          <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+            {settingsLoading && (
+              <p className="text-sm text-slate-600">Loading backend settings...</p>
+            )}
+            {settingsSaving && (
+              <p className="text-sm text-[#0F6E8C]">Saving settings...</p>
+            )}
+            {settingsMessage && (
+              <p className="text-sm text-green-700">{settingsMessage}</p>
+            )}
+            {settingsError && (
+              <p className="text-sm text-red-700">{settingsError}</p>
+            )}
+          </div>
+        )}
+
         <div className="mb-6 rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-slate-900">Branding</h2>
@@ -384,11 +653,27 @@ export function Settings() {
                       </button>
 
                       <button
-                        onClick={() =>
+                        onClick={async () => {
                           updateWorkspaceBranding({
                             logoUrl: null,
-                          })
-                        }
+                          });
+
+                          try {
+                            await updateSetting('branding', {
+                              logoUrl: null,
+                              brandColor: currentWorkspace.brandColor || BRAND.colors.primary,
+                              useLogoAsWatermark: !!currentWorkspace.useLogoAsWatermark,
+                            });
+
+                            setSettingsMessage('Logo removed.');
+                          } catch (error) {
+                            setSettingsError(
+                              error instanceof Error
+                                ? error.message
+                                : 'Failed to remove logo'
+                            );
+                          }
+                        }}
                         className="flex items-center justify-center rounded-xl bg-red-50 px-3 py-2 text-red-600 hover:bg-red-100"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -422,21 +707,53 @@ export function Settings() {
                         <input
                           type="color"
                           value={currentWorkspace.brandColor || BRAND.colors.primary}
-                          onChange={(e) =>
+                          onChange={async (e) => {
+                            const brandColor = e.target.value;
+
                             updateWorkspaceBranding({
-                              brandColor: e.target.value,
-                            })
-                          }
+                              brandColor,
+                            });
+
+                            try {
+                              await updateSetting('branding', {
+                                logoUrl: currentWorkspace.logoUrl || null,
+                                brandColor,
+                                useLogoAsWatermark: !!currentWorkspace.useLogoAsWatermark,
+                              });
+                            } catch (error) {
+                              setSettingsError(
+                                error instanceof Error
+                                  ? error.message
+                                  : 'Failed to save brand color'
+                              );
+                            }
+                          }}
                           className="h-11 w-14 cursor-pointer rounded border border-slate-200 bg-white p-1"
                         />
                         <input
                           type="text"
                           value={currentWorkspace.brandColor || BRAND.colors.primary}
-                          onChange={(e) =>
+                          onChange={async (e) => {
+                            const brandColor = e.target.value;
+
                             updateWorkspaceBranding({
-                              brandColor: e.target.value,
-                            })
-                          }
+                              brandColor,
+                            });
+
+                            try {
+                              await updateSetting('branding', {
+                                logoUrl: currentWorkspace.logoUrl || null,
+                                brandColor,
+                                useLogoAsWatermark: !!currentWorkspace.useLogoAsWatermark,
+                              });
+                            } catch (error) {
+                              setSettingsError(
+                                error instanceof Error
+                                  ? error.message
+                                  : 'Failed to save brand color'
+                              );
+                            }
+                          }}
                           className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
                           placeholder="#0F6E8C"
                         />
@@ -447,11 +764,27 @@ export function Settings() {
                       <input
                         type="checkbox"
                         checked={!!currentWorkspace.useLogoAsWatermark}
-                        onChange={(e) =>
+                        onChange={async (e) => {
+                          const useLogoAsWatermark = e.target.checked;
+
                           updateWorkspaceBranding({
-                            useLogoAsWatermark: e.target.checked,
-                          })
-                        }
+                            useLogoAsWatermark,
+                          });
+
+                          try {
+                            await updateSetting('branding', {
+                              logoUrl: currentWorkspace.logoUrl || null,
+                              brandColor: currentWorkspace.brandColor || BRAND.colors.primary,
+                              useLogoAsWatermark,
+                            });
+                          } catch (error) {
+                            setSettingsError(
+                              error instanceof Error
+                                ? error.message
+                                : 'Failed to save watermark setting'
+                            );
+                          }
+                        }}
                         className="mt-1"
                       />
                       <div>
@@ -471,15 +804,32 @@ export function Settings() {
                 <div className="rounded-2xl border border-slate-200 bg-white p-4">
                   <h3 className="mb-2 font-medium text-slate-900">How it works</h3>
                   <ul className="space-y-2 text-sm text-slate-600">
-                    <li>â€¢ Your uploaded logo appears in invoice PDF exports.</li>
-                    <li>â€¢ Watermark uses the same uploaded logo.</li>
-                    <li>â€¢ Brand color can be reused across branded export styling.</li>
+                    <li>• Your uploaded logo appears in invoice PDF exports.</li>
+                    <li>• Watermark uses the same uploaded logo.</li>
+                    <li>• Brand color can be reused across branded export styling.</li>
                   </ul>
                 </div>
               </div>
             </div>
           )}
         </div>
+
+        {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
+          <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+            {settingsLoading && (
+              <p className="text-sm text-slate-600">Loading backend settings...</p>
+            )}
+            {settingsSaving && (
+              <p className="text-sm text-[#0F6E8C]">Saving settings...</p>
+            )}
+            {settingsMessage && (
+              <p className="text-sm text-green-700">{settingsMessage}</p>
+            )}
+            {settingsError && (
+              <p className="text-sm text-red-700">{settingsError}</p>
+            )}
+          </div>
+        )}
 
         <div className="mb-6 rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
           <div className="mb-4 flex items-center gap-2">
@@ -503,6 +853,23 @@ export function Settings() {
           </div>
         </div>
 
+        {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
+          <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+            {settingsLoading && (
+              <p className="text-sm text-slate-600">Loading backend settings...</p>
+            )}
+            {settingsSaving && (
+              <p className="text-sm text-[#0F6E8C]">Saving settings...</p>
+            )}
+            {settingsMessage && (
+              <p className="text-sm text-green-700">{settingsMessage}</p>
+            )}
+            {settingsError && (
+              <p className="text-sm text-red-700">{settingsError}</p>
+            )}
+          </div>
+        )}
+
         <div className="mb-6 rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
           <h2 className="mb-4 text-lg font-semibold text-slate-900">Plan Comparison</h2>
 
@@ -519,7 +886,7 @@ export function Settings() {
                 {FEATURE_COMPARISON.STUDIO.name}
               </div>
 
-              {FEATURE_COMPARISON.BASIC.features.map((feature, i) => (
+              {(FEATURE_COMPARISON.BASIC.features ?? []).map((feature, i) => (
                 <div key={`row-${i}`} className="contents">
                   <div className="border-t border-slate-100 py-2">{feature.name}</div>
 
@@ -552,6 +919,23 @@ export function Settings() {
           </div>
         </div>
 
+        {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
+          <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+            {settingsLoading && (
+              <p className="text-sm text-slate-600">Loading backend settings...</p>
+            )}
+            {settingsSaving && (
+              <p className="text-sm text-[#0F6E8C]">Saving settings...</p>
+            )}
+            {settingsMessage && (
+              <p className="text-sm text-green-700">{settingsMessage}</p>
+            )}
+            {settingsError && (
+              <p className="text-sm text-red-700">{settingsError}</p>
+            )}
+          </div>
+        )}
+
         <div className="mb-6 rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
@@ -559,7 +943,7 @@ export function Settings() {
               <p className="text-sm text-slate-500">
                 {members.length} member{members.length !== 1 && 's'}
                 {featureAccess.canInviteAssistant.limit !== undefined &&
-                  ` â€¢ ${featureAccess.canInviteAssistant.limit} assistant seats available`}
+                  ` • ${featureAccess.canInviteAssistant.limit} assistant seats available`}
               </p>
             </div>
 
@@ -591,8 +975,99 @@ export function Settings() {
             </div>
           )}
 
-          <div className="space-y-3">
-            {members.map((member) => (
+          {canManageAssistants && featureAccess.canInviteAssistant.allowed && (
+  <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <h3 className="mb-3 font-medium text-slate-900">Invite Assistant</h3>
+
+    <div className="grid gap-3 md:grid-cols-2">
+      <input
+        type="text"
+        placeholder="Assistant full name"
+        value={assistantForm.fullName}
+        onChange={(e) =>
+          setAssistantForm((prev) => ({ ...prev, fullName: e.target.value }))
+        }
+        className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
+      />
+
+      <input
+        type="email"
+        placeholder="assistant@email.com (optional)"
+        value={assistantForm.email}
+        onChange={(e) =>
+          setAssistantForm((prev) => ({ ...prev, email: e.target.value }))
+        }
+        className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
+      />
+
+      <input
+        type="text"
+        placeholder="+233 24 000 0000 (optional)"
+        value={assistantForm.phone}
+        onChange={(e) =>
+          setAssistantForm((prev) => ({ ...prev, phone: e.target.value }))
+        }
+        className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
+      />
+    </div>
+
+    <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-700">
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={assistantForm.canManageCustomers}
+          onChange={(e) =>
+            setAssistantForm((prev) => ({
+              ...prev,
+              canManageCustomers: e.target.checked,
+            }))
+          }
+        />
+        Customers
+      </label>
+
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={assistantForm.canManageOrders}
+          onChange={(e) =>
+            setAssistantForm((prev) => ({
+              ...prev,
+              canManageOrders: e.target.checked,
+            }))
+          }
+        />
+        Orders
+      </label>
+
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={assistantForm.canManagePayments}
+          onChange={(e) =>
+            setAssistantForm((prev) => ({
+              ...prev,
+              canManagePayments: e.target.checked,
+            }))
+          }
+        />
+        Payments
+      </label>
+    </div>
+
+    <div className="mt-4">
+      <button
+        onClick={handleAddAssistant}
+        type="button"
+        className="rounded-xl bg-[#0F6E8C] px-4 py-2.5 font-medium text-white shadow-sm transition hover:bg-[#0C5C74]"
+      >
+        Add Assistant
+      </button>
+    </div>
+  </div>
+)}
+<div className="space-y-3">
+            {(members ?? []).filter((member) => member.role === 'assistant').map((member) => (
               <div
                 key={member.id}
                 className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/80 p-4"
@@ -622,11 +1097,21 @@ export function Settings() {
 
                 <div className="flex items-center gap-3">
                   {member.role === 'assistant' && (
-                    <div className="space-x-2 text-xs text-slate-400">
-                      {member.canManageCustomers && <span>Customers</span>}
-                      {member.canManageOrders && <span>Orders</span>}
-                      {member.canManagePayments && <span>Payments</span>}
-                    </div>
+                    <>
+                      <div className="space-x-2 text-xs text-slate-400">
+                        {member.canManageCustomers && <span>Customers</span>}
+                        {member.canManageOrders && <span>Orders</span>}
+                        {member.canManagePayments && <span>Payments</span>}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteAssistant(member.id)}
+                        className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100"
+                      >
+                        Remove
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -695,3 +1180,57 @@ export function Settings() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

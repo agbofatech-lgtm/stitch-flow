@@ -1,4 +1,4 @@
-﻿import {
+import {
   useState,
   useRef,
   useEffect,
@@ -478,17 +478,17 @@ function normalizeProfileTypeToGarment(
   const value = profileType?.trim().toLowerCase();
   if (!value) return null;
 
-  if (value.includes('shirt')) return 'shirt';
-  if (value.includes('senator')) return 'senator';
-  if (value.includes('trouser') || value.includes('pants')) return 'trouser';
-  if (value.includes('skirt')) return 'skirt';
-  if (value.includes('kaftan')) return 'kaftan';
-  if (value.includes('agbada')) return 'agbada';
-  if (value.includes('gown')) return 'gown';
-  if (value.includes('dress')) return 'dress';
-  if (value.includes('blouse')) return 'blouse';
-  if (value.includes('bodice')) return 'bodice';
-  if (value.includes('custom')) return 'custom';
+  if ((value ?? "").includes('shirt')) return 'shirt';
+  if ((value ?? "").includes('senator')) return 'senator';
+  if ((value ?? "").includes('trouser') || (value ?? "").includes('pants')) return 'trouser';
+  if ((value ?? "").includes('skirt')) return 'skirt';
+  if ((value ?? "").includes('kaftan')) return 'kaftan';
+  if ((value ?? "").includes('agbada')) return 'agbada';
+  if ((value ?? "").includes('gown')) return 'gown';
+  if ((value ?? "").includes('dress')) return 'dress';
+  if ((value ?? "").includes('blouse')) return 'blouse';
+  if ((value ?? "").includes('bodice')) return 'bodice';
+  if ((value ?? "").includes('custom')) return 'custom';
 
   return null;
 }
@@ -1098,10 +1098,10 @@ function mapShapeToCanvas(
     ...(shape.accents?.flatMap((guide) => [guide.start, guide.end]) || []),
   ];
 
-  const minX = Math.min(...allPoints.map((point) => point.x));
-  const maxX = Math.max(...allPoints.map((point) => point.x));
-  const minY = Math.min(...allPoints.map((point) => point.y));
-  const maxY = Math.max(...allPoints.map((point) => point.y));
+  const minX = Math.min(...(allPoints ?? []).map((point) => point.x));
+  const maxX = Math.max(...(allPoints ?? []).map((point) => point.x));
+  const minY = Math.min(...(allPoints ?? []).map((point) => point.y));
+  const maxY = Math.max(...(allPoints ?? []).map((point) => point.y));
 
   const shapeWidth = Math.max(maxX - minX, 1);
   const shapeHeight = Math.max(maxY - minY, 1);
@@ -1120,7 +1120,7 @@ function mapShapeToCanvas(
   });
 
   return {
-    outline: shape.outline.map(mapPoint),
+    outline: (shape.outline ?? []).map(mapPoint),
     guides: shape.guides?.map((guide) => ({
       ...guide,
       start: mapPoint(guide.start),
@@ -1288,7 +1288,7 @@ function buildUpperGarmentShape(options: {
     guides.push({
       start: { x: cx + shoulderHalf + sleeveProj - wristInset - 8, y: cuffY + 1 },
       end: { x: cx + shoulderHalf + sleeveProj - wristInset, y: cuffY + 1 },
-      label: `Wrist ${aroundWrist.toFixed(0)}cm`,
+      label: `Wrist ${(aroundWrist ?? 0).toFixed(0)}cm`,
     });
   }
 
@@ -1925,7 +1925,7 @@ export function DesignStudio() {
         return next;
       });
 
-      if (CORE_MEASUREMENT_KEYS.includes(key)) {
+      if ((CORE_MEASUREMENT_KEYS ?? "").includes(key)) {
         setDesignMeasurements({
           [key]: value,
         } as Partial<BodyMeasurements>);
@@ -2520,10 +2520,10 @@ export function DesignStudio() {
         ? activePattern.points
         : activePattern.outline;
 
-      const minX = Math.min(...basePoints.map((point) => point.x));
-      const maxX = Math.max(...basePoints.map((point) => point.x));
-      const minY = Math.min(...basePoints.map((point) => point.y));
-      const maxY = Math.max(...basePoints.map((point) => point.y));
+      const minX = Math.min(...(basePoints ?? []).map((point) => point.x));
+      const maxX = Math.max(...(basePoints ?? []).map((point) => point.x));
+      const minY = Math.min(...(basePoints ?? []).map((point) => point.y));
+      const maxY = Math.max(...(basePoints ?? []).map((point) => point.y));
 
       const patternWidth = Math.max(maxX - minX, 1);
       const patternHeight = Math.max(maxY - minY, 1);
@@ -2551,12 +2551,12 @@ export function DesignStudio() {
         : activePattern.outline;
 
       ctx.save();
-      traceClosedPath(ctx, outlinePoints.map(s));
+      traceClosedPath(ctx, (outlinePoints ?? []).map(s));
 
-      const left = Math.min(...outlinePoints.map((point) => s(point).x));
-      const right = Math.max(...outlinePoints.map((point) => s(point).x));
-      const top = Math.min(...outlinePoints.map((point) => s(point).y));
-      const bottom = Math.max(...outlinePoints.map((point) => s(point).y));
+      const left = Math.min(...(outlinePoints ?? []).map((point) => s(point).x));
+      const right = Math.max(...(outlinePoints ?? []).map((point) => s(point).x));
+      const top = Math.min(...(outlinePoints ?? []).map((point) => s(point).y));
+      const bottom = Math.max(...(outlinePoints ?? []).map((point) => s(point).y));
 
       renderFabricFill({
         ctx,
@@ -2574,7 +2574,7 @@ export function DesignStudio() {
 
       ctx.strokeStyle = '#0F6E8C';
       ctx.lineWidth = 2;
-      traceClosedPath(ctx, outlinePoints.map(s));
+      traceClosedPath(ctx, (outlinePoints ?? []).map(s));
       ctx.stroke();
 
       if (isBodicePattern(activePattern)) {
@@ -2614,7 +2614,7 @@ export function DesignStudio() {
         ctx.font = '11px Inter, sans-serif';
         const bustMidX = (s(cp.A).x + s(cp.B).x) / 2;
         ctx.fillText(
-          `${activePattern.measurements.quarterBust.toFixed(1)}cm`,
+          `${(activePattern.measurements.quarterBust ?? 0).toFixed(1)}cm`,
           bustMidX - 18,
           s(cp.A).y - 10
         );
@@ -2657,10 +2657,10 @@ export function DesignStudio() {
 
       const shape = mapShapeToCanvas(rawShape, width, height, 42);
       const allOutline = shape.outline;
-      const left = Math.min(...allOutline.map((point) => point.x));
-      const right = Math.max(...allOutline.map((point) => point.x));
-      const top = Math.min(...allOutline.map((point) => point.y));
-      const bottom = Math.max(...allOutline.map((point) => point.y));
+      const left = Math.min(...(allOutline ?? []).map((point) => point.x));
+      const right = Math.max(...(allOutline ?? []).map((point) => point.x));
+      const top = Math.min(...(allOutline ?? []).map((point) => point.y));
+      const bottom = Math.max(...(allOutline ?? []).map((point) => point.y));
 
       drawGrid(Math.max(18, scale * 3.3));
 
@@ -2718,7 +2718,7 @@ export function DesignStudio() {
         measurements.aroundWrist
       ) {
         ctx.fillText(
-          `${measurements.aroundWrist.toFixed(0)}cm Around Wrist`,
+          `${(measurements.aroundWrist ?? 0).toFixed(0)}cm Around Wrist`,
           left + 8,
           bottom - 10
         );
@@ -2768,7 +2768,7 @@ export function DesignStudio() {
                   This order is missing some important design details
                 </p>
                 <div className="mt-3 flex flex-col gap-2">
-                  {orderAlerts.map((alert) => (
+                  {(orderAlerts ?? []).map((alert) => (
                     <div
                       key={alert.id}
                       className="flex flex-col gap-2 rounded-2xl border border-amber-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
@@ -2971,9 +2971,9 @@ export function DesignStudio() {
                           }}
                           className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-sky-300"
                         >
-                          {GARMENT_OPTIONS.map((option) => (
+                          {(GARMENT_OPTIONS ?? []).map((option) => (
                             <option key={option.value} value={option.value}>
-                              {option.label} â€” {option.helper}
+                              {option.label} — {option.helper}
                             </option>
                           ))}
                         </select>
@@ -2989,9 +2989,9 @@ export function DesignStudio() {
                           className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-sky-300"
                         >
                           <option value="">No order selected</option>
-                          {orders.map((order) => (
+                          {(orders ?? []).map((order) => (
                             <option key={order.id} value={order.id}>
-                              {order.orderNumber} â€” {order.orderType} â€”{' '}
+                              {order.orderNumber} — {order.orderType} —{' '}
                               {order.customer?.fullName || 'No customer'}
                             </option>
                           ))}
@@ -3008,9 +3008,9 @@ export function DesignStudio() {
                           className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-sky-300"
                         >
                           <option value="">No inspiration selected</option>
-                          {designInspirations.map((item) => (
+                          {(designInspirations ?? []).map((item) => (
                             <option key={item.id} value={item.id}>
-                              {item.title} â€” {capitalize(item.category)}
+                              {item.title} — {capitalize(item.category)}
                             </option>
                           ))}
                         </select>
@@ -3090,11 +3090,11 @@ export function DesignStudio() {
                                 ? 'Select a measurement profile'
                                 : 'No customer profiles available'}
                             </option>
-                            {customerMeasurementProfiles.map((profile) => (
+                            {(customerMeasurementProfiles ?? []).map((profile) => (
                               <option key={profile.id} value={profile.id}>
                                 {profile.label}
-                                {profile.profileType ? ` â€” ${capitalize(profile.profileType)}` : ''}
-                                {profile.isDefault ? ' â€” Default' : ''}
+                                {profile.profileType ? ` — ${capitalize(profile.profileType)}` : ''}
+                                {profile.isDefault ? ' — Default' : ''}
                               </option>
                             ))}
                           </select>
@@ -3166,7 +3166,7 @@ export function DesignStudio() {
                     </h3>
 
                     <div className="space-y-4">
-                      {selectedMeasurementFields.map((field) => {
+                      {(selectedMeasurementFields ?? []).map((field) => {
                         const currentValue = measurements[field.key] ?? field.min;
 
                         return (
@@ -3350,7 +3350,7 @@ export function DesignStudio() {
                       Quick Fabric Colors
                     </h3>
                     <div className="grid grid-cols-3 gap-3">
-                      {FABRIC_PATTERNS.map((fabric) => (
+                      {(FABRIC_PATTERNS ?? []).map((fabric) => (
                         <button
                           key={fabric.name}
                           onClick={() => setSelectedFabric(fabric)}
@@ -3384,9 +3384,9 @@ export function DesignStudio() {
                       className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-sky-300"
                     >
                       <option value="">No inventory fabric selected</option>
-                      {fabricRecords.map((fabric) => (
+                      {(fabricRecords ?? []).map((fabric) => (
                         <option key={fabric.id} value={fabric.id}>
-                          {fabric.name} â€¢ {capitalize(fabric.fabricType)} â€¢ {fabric.color}
+                          {fabric.name} • {capitalize(fabric.fabricType)} • {fabric.color}
                         </option>
                       ))}
                     </select>
@@ -3479,7 +3479,7 @@ export function DesignStudio() {
                           }
                           className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-sky-300"
                         >
-                          {DESIGN_CATEGORIES.map((category) => (
+                          {(DESIGN_CATEGORIES ?? []).map((category) => (
                             <option key={category} value={category}>
                               {capitalize(category)}
                             </option>
@@ -3496,7 +3496,7 @@ export function DesignStudio() {
                           }
                           className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-sky-300"
                         >
-                          {FABRIC_TYPES.map((fabricType) => (
+                          {(FABRIC_TYPES ?? []).map((fabricType) => (
                             <option key={fabricType} value={fabricType}>
                               {capitalize(fabricType)}
                             </option>
@@ -3540,7 +3540,7 @@ export function DesignStudio() {
                         }
                         className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-sky-300"
                       >
-                        {FIT_TYPES.map((fitType) => (
+                        {(FIT_TYPES ?? []).map((fitType) => (
                           <option key={fitType} value={fitType}>
                             {capitalize(fitType)}
                           </option>
@@ -3942,7 +3942,7 @@ export function DesignStudio() {
                           </div>
                         ) : (
                           <div className="space-y-3">
-                            {productionPlan.fitRisks.map((risk: any, index: number) => (
+                            {(productionPlan.fitRisks ?? []).map((risk: any, index: number) => (
                               <div
                                 key={`${risk.title}-${index}`}
                                 className={`rounded-2xl border p-4 ${getSeverityClasses(
