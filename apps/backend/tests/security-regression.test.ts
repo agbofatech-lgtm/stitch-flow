@@ -15,6 +15,17 @@ import { app } from '../src/app';
 import { query } from '../src/config/db';
 import { registerUser, asUser } from './helpers';
 
+// ---------------------------------------------------------------------------
+// Windows environment fix: ensure npx is in PATH for child process spawns
+// ---------------------------------------------------------------------------
+if (process.platform === 'win32') {
+  const nodeBinDir = 'C:\\nvm4w\\nodejs';
+  const pathEnv = process.env.PATH || '';
+  if (!pathEnv.split(';').includes(nodeBinDir)) {
+    process.env.PATH = nodeBinDir + ';' + pathEnv;
+  }
+}
+
 const PORT = 5598;
 const BASE = `http://127.0.0.1:${PORT}`;
 const ALLOWED_ORIGIN = 'https://app.stitchflow.example';
@@ -117,6 +128,7 @@ describe('Phase 6 — production configuration (live server)', () => {
         SHUTDOWN_TIMEOUT_MS: '3000',
       },
       stdio: 'ignore',
+      shell: true, // <-- ADDED FOR WINDOWS
     });
     // Wait for the listener.
     for (let i = 0; i < 60; i++) {
@@ -220,6 +232,7 @@ describe('Phase 6 — production configuration (live server)', () => {
         LOG_LEVEL: 'warn',
       },
       stdio: 'ignore',
+      shell: true, // <-- ADDED FOR WINDOWS
     });
     // wait for start
     for (let i = 0; i < 60; i++) {
