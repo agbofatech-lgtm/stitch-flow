@@ -65,18 +65,24 @@ function safeText(value?: string | null, fallback = '—') {
 }
 
 function toLineItems(invoice: ApiInvoice): InvoiceLineItem[] {
+  const invoiceRecord = invoice as ApiInvoice & Record<string, unknown>;
   const candidateSources = [
-    (invoice as any).items,
-    (invoice as any).lineItems,
-    (invoice as any).invoiceItems,
-    (invoice as any).summaryItems,
+    invoiceRecord.items,
+    invoiceRecord.lineItems,
+    invoiceRecord.invoiceItems,
+    invoiceRecord.summaryItems,
   ];
 
   for (const source of candidateSources) {
     if (!Array.isArray(source) || source.length === 0) continue;
 
     const mapped = source
-      .map((item: any) => {
+      .map((raw) => {
+        const item = raw as Record<string, unknown> & {
+          quantity?: number; qty?: number; unitPrice?: number; rate?: number;
+          price?: number; amount?: number; label?: string; description?: string;
+          name?: string; title?: string;
+        };
         const quantity = Number(item.quantity ?? item.qty ?? 1);
         const unitPrice = Number(item.unitPrice ?? item.rate ?? item.price ?? item.amount ?? 0);
         const amount = Number(item.amount ?? quantity * unitPrice);
@@ -98,7 +104,7 @@ function toLineItems(invoice: ApiInvoice): InvoiceLineItem[] {
 
   return [
     {
-      label: safeText((invoice as any).orderType, 'Tailoring Work'),
+      label: safeText(invoiceRecord.orderType as string | undefined, 'Tailoring Work'),
       description: safeText(invoice.notes, ''),
       quantity: 1,
       unitPrice: Number(invoice.totalAmount || 0),
@@ -132,8 +138,7 @@ export async function downloadInvoicePdf(
   const logoSource = branding?.logoUrl || stitchflowLogo;
   const logoDataUrl = await loadImageAsDataUrl(logoSource);
   const lineItems = toLineItems(invoice);
-  const paymentStamp =
-    Number(invoice.balanceDue || 0) > 0 ? 'PENDING' : 'PAID';
+  // (payment stamp text derives from balance at render time)
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -143,10 +148,19 @@ export async function downloadInvoicePdf(
   if (branding?.useLogoAsWatermark && logoDataUrl) {
     try {
       doc.saveGraphicsState();
-      (doc as any).setGState?.(new (doc as any).GState({ opacity: 0.045 }));
+      // jsPDF ships GState at runtime without type declarations; narrowly
+      // scoped structural cast (documented external-library exception).
+      const gstateDoc = doc as unknown as {
+        setGState?: (state: unknown) => void;
+        GState?: new (options: { opacity: number }) => unknown;
+      };
+      if (gstateDoc.setGState && gstateDoc.GState) {
+        gstateDoc.setGState(new gstateDoc.GState({ opacity: 0.045 }));
+      }
       doc.addImage(logoDataUrl, getImageFormat(logoDataUrl), 58, 95, 82, 82);
       doc.restoreGraphicsState();
     } catch {
+      // jsPDF image embedding is best-effort; PDF remains valid without it
     }
   }
 
@@ -157,6 +171,7 @@ export async function downloadInvoicePdf(
     try {
       doc.addImage(logoDataUrl, getImageFormat(logoDataUrl), left + 2, 16, 22, 22);
     } catch {
+      // jsPDF image embedding is best-effort; PDF remains valid without it
     }
   }
 
@@ -208,7 +223,7 @@ export async function downloadInvoicePdf(
 
   doc.setFontSize(9);
   doc.setTextColor(100, 116, 139);
-  doc.text(`Customer ID: ${safeText((invoice as any).customerId)}`, left + 4, 81);
+  doc.text(`Customer ID: ${safeText(invoice.customerId)}`, left + 4, 81);
 
   doc.setFontSize(10);
   doc.setTextColor(brandColor);

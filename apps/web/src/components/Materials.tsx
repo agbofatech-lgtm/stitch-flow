@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useApp } from '../context/AppContext';
+import type { AppContextShape, FabricRecord, FabricType, MaterialUnit } from '../types';
 import { BRAND } from '../config/brand';
 import {
   Package,
@@ -704,6 +705,8 @@ function FilterChip({
   );
 }
 
+type FabricModalInput = Parameters<AppContextShape['addFabricRecord']>[0];
+
 function MaterialModal({
   title,
   material,
@@ -711,9 +714,9 @@ function MaterialModal({
   onSubmit,
 }: {
   title: string;
-  material?: any | null;
+  material?: FabricRecord | null;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: FabricModalInput) => void;
 }) {
   const [formData, setFormData] = useState({
     name: material?.name || '',
@@ -765,7 +768,7 @@ function MaterialModal({
               <input
                 value={formData.fabricType}
                 onChange={(e) =>
-                  setFormData((s) => ({ ...s, fabricType: e.target.value }))
+                  setFormData((s) => ({ ...s, fabricType: e.target.value as FabricType }))
                 }
                 className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
               />
@@ -817,7 +820,7 @@ function MaterialModal({
             <Field label="Unit">
               <input
                 value={formData.unit}
-                onChange={(e) => setFormData((s) => ({ ...s, unit: e.target.value }))}
+                onChange={(e) => setFormData((s) => ({ ...s, unit: e.target.value as MaterialUnit }))}
                 className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
               />
             </Field>

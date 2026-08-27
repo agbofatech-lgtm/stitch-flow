@@ -6,6 +6,13 @@ import { bootstrapOfflineFoundation } from "./offline/bootstrap";
 
 void bootstrapOfflineFoundation();
 
+// Service-worker registration (fail-safe: the app never depends on it).
+if ('serviceWorker' in navigator) {
+  import('virtual:pwa-register')
+    .then(({ registerSW }) => registerSW({ immediate: true }))
+    .catch(() => undefined);
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />

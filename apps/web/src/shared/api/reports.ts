@@ -76,6 +76,7 @@ async function parseJson<T>(response: Response): Promise<T> {
           message = text;
         }
       } catch {
+        // response body unavailable; fall through to the generic message
       }
     }
 

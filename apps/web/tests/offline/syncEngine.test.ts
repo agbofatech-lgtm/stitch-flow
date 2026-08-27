@@ -22,18 +22,28 @@ const WS = 'ws-test';
  * event lanes with duplicate acknowledgement, /sync/changes with
  * seq-cursor pagination.
  */
+type MockChange = {
+  seq: string;
+  entity: string;
+  entityId: string;
+  operation: string;
+  payload: Record<string, unknown>;
+  occurredAt: string;
+  clientMutationId: string | null;
+};
+
 class MockServer {
   seq = 0;
-  changes: Array<{ seq: string; entity: string; entityId: string; operation: string; payload: any; occurredAt: string; clientMutationId: string | null }> = [];
-  processed = new Map<string, any>();
-  payments = new Map<string, any>();
-  usages = new Map<string, any>();
+  changes: MockChange[] = [];
+  processed = new Map<string, boolean>();
+  payments = new Map<string, Record<string, unknown>>();
+  usages = new Map<string, Record<string, unknown>>();
   failNextRequests = 0;
   respond401Once = false;
   refreshShouldSucceed = true;
   requestLog: string[] = [];
 
-  addChange(entity: string, entityId: string, operation: string, payload: any, cmid: string | null = null) {
+  addChange(entity: string, entityId: string, operation: string, payload: Record<string, unknown>, cmid: string | null = null) {
     this.seq += 1;
     this.changes.push({
       seq: String(this.seq), entity, entityId, operation, payload,
@@ -65,7 +75,7 @@ class MockServer {
 
     if (url.includes('/sync/mutations')) {
       const body = JSON.parse(String(init?.body));
-      const results = body.mutations.map((m: any) => {
+      const results = body.mutations.map((m: { clientMutationId: string; entity: string; entityId: string; operation: string; payload: Record<string, unknown> }) => {
         if (['payments', 'order_material_usages', 'invoices'].includes(m.entity)) {
           return { clientMutationId: m.clientMutationId, status: 'rejected', code: 'USE_EVENT_ENDPOINT' };
         }
@@ -200,11 +210,13 @@ describe('Cursor safety (§11, §42)', () => {
 
     // Poison one change: payload that breaks structured clone (a function)
     const poisoned = server.changes.map((c) =>
-      c.entityId === 'boom' ? { ...c, payload: { id: 'boom', bad: () => 1 } } : c
+      c.entityId === 'boom'
+        ? { ...c, payload: { id: 'boom', bad: () => 1 } as unknown as Record<string, unknown> }
+        : c
     );
 
     await expect(
-      applyDeltaBatch(WS, poisoned as any, '2')
+      applyDeltaBatch(WS, poisoned as Parameters<typeof applyDeltaBatch>[1], '2')
     ).rejects.toBeTruthy();
 
     // transaction rolled back: neither row exists, cursor still 0

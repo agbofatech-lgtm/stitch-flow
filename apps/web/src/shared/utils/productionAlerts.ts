@@ -116,7 +116,7 @@ function hasNumericMeasurement(
   });
 }
 
-function hasTextMeasurement(
+function _hasTextMeasurement(
   source: SnapshotWithProfileMeta | null,
   keys: string[]
 ): boolean {

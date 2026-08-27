@@ -21,7 +21,12 @@ async function flush() {
   const stamp = (rows: Array<Record<string, unknown>> | undefined) =>
     (rows || [])
       .filter((row) => typeof row.id === 'string')
-      .map((row) => ({ ...row, id: row.id as string, workspaceId, deletedAt: (row as any).deletedAt ?? null }));
+      .map((row) => ({
+        ...row,
+        id: row.id as string,
+        workspaceId,
+        deletedAt: (row as { deletedAt?: string | null }).deletedAt ?? null,
+      }));
 
   try {
     await db.transaction(

@@ -44,6 +44,7 @@ import {
   GarmentType,
   Order,
   OrderMeasurementSnapshot,
+  DesignInspiration,
 } from '../types';
 import {
   analyzeDesignInspiration,
@@ -884,14 +885,15 @@ function OrderFormModal({
     const measurementSnapshot = parseMeasurementValues(form.measurements);
 
     const analysis = analyzeDesignInspiration(
-      (matchingInspiration as any) || undefined,
+      // Trimmed inspiration shape; the analyzer reads optional fields only.
+      (matchingInspiration ?? undefined) as unknown as DesignInspiration | undefined,
       form.garmentType
     );
 
     const productionPlan = generateProductionPlan({
       garmentType: form.garmentType,
       measurements: measurementSnapshot,
-      inspiration: (matchingInspiration as any) || undefined,
+      inspiration: (matchingInspiration ?? undefined) as unknown as DesignInspiration | undefined,
       analysis,
       selectedFabric: linkedFabric || undefined,
     });

@@ -12,7 +12,7 @@ class MemoryStorage {
   clear() { this.map.clear(); }
 }
 
-const globalAny = globalThis as any;
+const globalAny = globalThis as unknown as Record<string, unknown> & { window?: Record<string, unknown> };
 if (!globalAny.window) globalAny.window = globalAny;
 if (!globalAny.window.localStorage) {
   globalAny.window.localStorage = new MemoryStorage();

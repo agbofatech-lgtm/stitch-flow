@@ -302,7 +302,9 @@ export function syncNow(
   inFlight = (async (): Promise<SyncResult> => {
     const run = () => runSync(workspaceId, fetchImpl);
     try {
-      const locks = (globalThis.navigator as any)?.locks;
+      const locks = (globalThis.navigator as Navigator & {
+        locks?: { request: (name: string, cb: () => Promise<SyncResult>) => Promise<SyncResult> };
+      } | undefined)?.locks;
       if (locks?.request) {
         return await locks.request('stitchflow-sync', run);
       }

@@ -26,7 +26,7 @@ import {
 } from '@shared/api/invoices';
 import {
   fetchInvoicePayments,
-  createPayment,
+  submitPaymentWithOfflineFallback,
   type ApiPayment,
 } from '@shared/api/payments';
 import { getCustomers, type ApiCustomer } from '@shared/utils/customerApi';
@@ -43,10 +43,11 @@ export function Invoices() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<ApiInvoice | null>(null);
   const [paymentInvoice, setPaymentInvoice] = useState<ApiInvoice | null>(null);
+  const [offlineNotice, setOfflineNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-const [items, setItems] = useState([
+const [_items, _setItems] = useState([
   { description: '', quantity: 1, unitPrice: 0, total: 0 },
 ]);
 
@@ -124,6 +125,17 @@ const [items, setItems] = useState([
 
   return (
     <div className="p-4 lg:p-8">
+      {offlineNotice && (
+        <div className="mb-4 flex items-start justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          <span>{offlineNotice}</span>
+          <button
+            onClick={() => setOfflineNotice(null)}
+            className="shrink-0 rounded-lg px-2 py-0.5 text-amber-700 hover:bg-amber-100"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-sm font-medium text-[#0F6E8C]">
@@ -365,7 +377,18 @@ const [items, setItems] = useState([
           invoice={paymentInvoice}
           onClose={() => setPaymentInvoice(null)}
           onSubmit={async (payload) => {
-            await createPayment(payload);
+            const result = await submitPaymentWithOfflineFallback(
+              currentWorkspace.id,
+              payload as Parameters<typeof submitPaymentWithOfflineFallback>[1]
+            );
+            if (result.status === 'queued-offline') {
+              // Honest offline UX: locally saved, NOT server-confirmed.
+              setOfflineNotice(
+                'Payment saved locally and will sync automatically when you are back online. It is not yet server-confirmed.'
+              );
+            } else {
+              setOfflineNotice(null);
+            }
             await loadData();
             setPaymentInvoice(null);
           }}
@@ -819,7 +842,7 @@ function PaymentModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-const [items, setItems] = useState([
+const [_items, _setItems] = useState([
   { description: '', quantity: 1, unitPrice: 0, total: 0 },
 ]);
 

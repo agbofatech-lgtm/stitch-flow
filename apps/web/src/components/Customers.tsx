@@ -60,7 +60,7 @@ export function Customers() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>('Customers screen mounted');
+  const [_debugInfo, setDebugInfo] = useState<string>('Customers screen mounted');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<ApiCustomer | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<ApiCustomer | null>(null);

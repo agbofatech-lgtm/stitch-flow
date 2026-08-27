@@ -48,6 +48,22 @@ export function clearAuthTokens() {
   }
 }
 
+/**
+ * Reads the workspaceId claim from the stored access token (base64 decode,
+ * client-side only; the server never trusts this and re-verifies membership
+ * on every request). Used to scope local sync state after login.
+ */
+export function getAuthWorkspaceId(): string | null {
+  const token = getAccessToken();
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return typeof payload.workspaceId === 'string' ? payload.workspaceId : null;
+  } catch {
+    return null;
+  }
+}
+
 export function getAuthHeaders(): Record<string, string> {
   const token = getAccessToken();
   return token ? { Authorization: `Bearer ${token}` } : {};

@@ -15,7 +15,6 @@ import {
 import { format, isToday, isPast } from 'date-fns';
 import { formatCurrency, safeCurrency } from '@shared/utils/currency';
 import { getDashboardSummary, type DashboardSummary } from '@shared/utils/dashboardApi';
-import { API_BASE } from '@shared/utils/api';
 import { getDashboardDataBundle } from '@shared/utils/dashboardDataApi';
 import { getPaymentsAnalytics, type PaymentsAnalytics } from '@shared/utils/paymentsAnalyticsApi';
 import type { ApiOrder } from '@shared/api/orders';

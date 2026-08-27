@@ -2,7 +2,19 @@ import jsPDF from 'jspdf';
 import { format } from 'date-fns';
 import type { Order } from '../../types';
 
-export async function downloadJobCardPdf(order: Order, branding: any) {
+type JobCardBranding = {
+  workspaceName?: string | null;
+  logoUrl?: string | null;
+  brandColor?: string | null;
+  phone?: string | null;
+  email?: string | null;
+};
+
+type OrderWithMaterials = Order & {
+  materials?: Array<{ name?: string | null; quantity?: number | string | null }>;
+};
+
+export async function downloadJobCardPdf(order: Order, branding: JobCardBranding) {
   const doc = new jsPDF();
 
   const left = 14;
@@ -60,8 +72,9 @@ export async function downloadJobCardPdf(order: Order, branding: any) {
 
   y += 6;
 
-  if ((order as any).materials?.length) {
-    (order as any).materials.forEach((m: any) => {
+  const orderMaterials = (order as OrderWithMaterials).materials;
+  if (orderMaterials?.length) {
+    orderMaterials.forEach((m) => {
       doc.setFontSize(9);
       doc.text(`${m.name} - ${m.quantity}`, left, y);
       y += 5;

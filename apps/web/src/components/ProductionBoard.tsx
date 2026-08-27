@@ -206,7 +206,7 @@ async function safeJson(response: Response) {
 export function ProductionBoard() {
   const { currentWorkspace } = useApp();
   const [orders, setOrders] = useState<ProductionOrder[]>([]);
-  const [customers, setCustomers] = useState<ApiCustomer[]>([]);
+  const [_customers, setCustomers] = useState<ApiCustomer[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [filter, setFilter] = useState<BoardFilter>('all');
   const [search, setSearch] = useState('');

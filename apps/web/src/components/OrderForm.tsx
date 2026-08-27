@@ -4,7 +4,6 @@ import {
   Calendar,
   ClipboardList,
   Layers,
-  Package,
   Ruler,
   Save,
   Scissors,
