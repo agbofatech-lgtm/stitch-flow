@@ -60,13 +60,17 @@ let refreshInFlight: Promise<boolean> | null = null;
  * single refresh. On failure the queue of local work is NOT discarded — the
  * caller simply stays in offline/unauthenticated mode.
  */
-async function tryRefreshTokens(): Promise<boolean> {
+export async function refreshAuthTokens(fetchImpl: typeof fetch = fetch): Promise<boolean> {
+  return tryRefreshTokens(fetchImpl);
+}
+
+async function tryRefreshTokens(fetchImpl: typeof fetch = fetch): Promise<boolean> {
   if (!refreshInFlight) {
     refreshInFlight = (async () => {
       const refreshToken = getRefreshToken();
       if (!refreshToken) return false;
       try {
-        const res = await fetch(`${API_BASE}/auth/refresh`, {
+        const res = await fetchImpl(`${API_BASE}/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refreshToken }),
