@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { query, pool } from '../config/db';
 import { auditLogService } from '../services/auditLogService';
 import { timelineService } from '../services/timelineService';
+import { outboxService } from '../services/platformServices';
 import { recordSyncChange, recordSyncChangeTx } from '../services/syncChangeLog';
 
 /**
@@ -229,6 +230,9 @@ appointmentRoutes.patch('/:id', async (req, res) => {
       newStatus === 'COMPLETED' ? 'APPOINTMENT_COMPLETED'
       : rescheduled ? 'APPOINTMENT_RESCHEDULED'
       : null;
+    if (timelineEvent === 'APPOINTMENT_COMPLETED') {
+      void outboxService.record({ workspaceId: req.workspaceId!, eventType: 'APPOINTMENT_COMPLETED', entityType: 'appointment', entityId: req.params.id, payload: { completedAt: new Date().toISOString() } }).catch(() => undefined);
+    }
     if (timelineEvent) {
       void timelineService.record({
         workspaceId: req.workspaceId!, customerId: appt.customer_id,

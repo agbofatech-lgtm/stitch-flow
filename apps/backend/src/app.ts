@@ -23,6 +23,10 @@ import { billingRoutes } from './routes/billingRoutes';
 import { crmRoutes } from './routes/crmRoutes';
 import { referralRoutes } from './routes/referralRoutes';
 import { appointmentRoutes } from './routes/appointmentRoutes';
+import { usageRoutes } from './routes/usageRoutes';
+import { supportRoutes } from './routes/supportRoutes';
+import { platformRoutes } from './routes/platformRoutes';
+import { portalLoginRoutes, portalRoutes } from './routes/portalRoutes';
 
 /**
  * Canonical StitchFlow Express application.
@@ -101,6 +105,17 @@ app.use('/settings', authMiddleware, requireWorkspace, settingsRoutes);
 app.use('/crm', authMiddleware, requireWorkspace, crmRoutes);
 app.use('/referrals', authMiddleware, requireWorkspace, referralRoutes);
 app.use('/appointments', authMiddleware, requireWorkspace, appointmentRoutes);
+
+// Phase 7 — usage intelligence + support (workspace-scoped).
+app.use('/usage', authMiddleware, requireWorkspace, usageRoutes);
+app.use('/support', authMiddleware, requireWorkspace, supportRoutes);
+
+// Phase 7 — developer control plane (PLATFORM roles only; legacy site
+// 'admin' counts as bootstrap platform_owner, workspace roles never do).
+app.use('/platform', platformRoutes);
+
+// Phase 7 — customer portal: SEPARATE auth boundary (portal audience).
+app.use('/portal', portalLoginRoutes, portalRoutes);
 
 // Commercial routes (Phase 5): per-route middleware — the webhook is
 // signature-verified rather than JWT-authenticated; everything else is

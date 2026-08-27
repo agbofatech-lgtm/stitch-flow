@@ -11,9 +11,17 @@ module.exports = [
   'license_devices',
   'refresh_tokens',
   'audit_logs',
+  // Phase 7 intelligence/platform (after workspaces/users/customers deps)
+  'usage_events',
+  'error_records',
+  'incidents',
+  'integration_outbox',
   'subscriptions',
   'billing_events',
   'customers',
+  'support_cases',       // FK → customers
+  'customer_feedback',   // FK → customers
+  'portal_customers',    // FK → customers
   'customer_notes',
   'customer_preferences',
   'customer_timeline_entries',

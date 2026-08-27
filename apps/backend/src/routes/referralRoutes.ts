@@ -3,6 +3,7 @@ import { query, pool } from '../config/db';
 import { ApiError } from '../utils/apiError';
 import { auditLogService } from '../services/auditLogService';
 import { timelineService } from '../services/timelineService';
+import { outboxService } from '../services/platformServices';
 import { recordSyncChange } from '../services/syncChangeLog';
 
 /**
@@ -184,6 +185,9 @@ for (const target of ['invite', 'register', 'convert', 'reward', 'cancel'] as co
       });
       await client.query('COMMIT');
 
+      if (STATUS === 'CONVERTED') {
+        void outboxService.record({ workspaceId: req.workspaceId!, eventType: 'REFERRAL_CONVERTED', entityType: 'referral', entityId: req.params.id, payload: { state: 'CONVERTED' } }).catch(() => undefined);
+      }
       if (STATUS === 'CONVERTED' && current.rows[0].referrer_customer_id) {
         void timelineService.record({
           workspaceId: req.workspaceId!, customerId: current.rows[0].referrer_customer_id,

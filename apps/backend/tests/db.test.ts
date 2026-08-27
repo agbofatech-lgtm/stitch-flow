@@ -27,6 +27,7 @@ describe('Database foundation', () => {
       '011_commercial_foundation.sql',
       '012_phase6_audit_correlation.sql',
       '013_phase7_customer_growth.sql',
+      '014_phase7_intelligence.sql',
     ]);
   });
 

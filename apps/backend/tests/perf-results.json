@@ -5,47 +5,47 @@
     "orders": 200,
     "syncChanges": 200
   },
-  "measuredAt": "2026-08-27T18:28:46.051Z",
+  "measuredAt": "2026-08-27T19:06:08.071Z",
   "health": {
     "live": {
       "n": 200,
-      "p50": 1.27,
-      "p95": 1.46,
-      "p99": 3.07,
-      "max": 4.86
+      "p50": 1.28,
+      "p95": 1.48,
+      "p99": 3.48,
+      "max": 9.75
     },
     "readyWithDbProbe": {
       "n": 100,
-      "p50": 1.54,
-      "p95": 2.03,
-      "p99": 2.39,
-      "max": 3.9
+      "p50": 1.57,
+      "p95": 1.7,
+      "p99": 3.14,
+      "max": 3.51
     }
   },
   "apiCustomerList300Rows": {
     "n": 50,
-    "p50": 5.31,
-    "p95": 7.98,
-    "p99": 9.78,
-    "max": 9.78
+    "p50": 5.18,
+    "p95": 7.18,
+    "p99": 8.08,
+    "max": 8.08
   },
   "apiDashboardSummary": {
     "n": 30,
-    "p50": 3.57,
-    "p95": 6.7,
-    "p99": 20.28,
-    "max": 20.28
+    "p50": 3.31,
+    "p95": 5.16,
+    "p99": 21.23,
+    "max": 21.23
   },
   "syncDeltaPull200": {
     "n": 30,
-    "p50": 4.33,
-    "p95": 5.36,
-    "p99": 6.11,
-    "max": 6.11
+    "p50": 4.59,
+    "p95": 6.59,
+    "p99": 6.68,
+    "max": 6.68
   },
   "syncMutationBatch50": {
-    "totalMs": 68.62,
-    "perMutationMs": 1.37
+    "totalMs": 72.87,
+    "perMutationMs": 1.46
   },
   "explainAnalyze": {
     "customerListByWorkspace": {
@@ -53,21 +53,21 @@
         "idx_customers_workspace_id"
       ],
       "chosenPlan": "Sort -> Bitmap Heap Scan -> Bitmap Index Scan",
-      "executionMs": 0.171
+      "executionMs": 0.162
     },
     "syncDeltaPull": {
       "indexesPresent": [
         "idx_sync_changes_workspace_seq"
       ],
       "chosenPlan": "Limit -> Index Scan",
-      "executionMs": 0.071
+      "executionMs": 0.073
     },
     "auditByWorkspace": {
       "indexesPresent": [
         "idx_audit_logs_workspace_id"
       ],
       "chosenPlan": "Limit -> Sort -> Index Scan",
-      "executionMs": 0.015
+      "executionMs": 0.045
     }
   },
   "frontendBundle": {
