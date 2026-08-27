@@ -157,6 +157,11 @@ export function loadAppStorage(
 }
 
 export function saveAppStorage(data: PersistedAppData): PersistedAppData {
+  // Phase 3.5: mirror every snapshot into IndexedDB (fire-and-forget).
+  void import('../../db/appStateBridge')
+    .then((bridge) => bridge.mirrorSnapshotToIndexedDb(data))
+    .catch(() => undefined);
+
   (Object.keys(FIELD_TO_STORAGE_KEY) as PersistedField[]).forEach((field) => {
     writeValue(FIELD_TO_STORAGE_KEY[field], data[field]);
   });

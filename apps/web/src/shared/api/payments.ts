@@ -31,6 +31,8 @@ export type PaymentPayload = {
   paymentStatus?: string;
   paidAt?: string;
   notes?: string;
+  /** Idempotency key: server guarantees at most one payment per (workspace, id). */
+  clientMutationId?: string;
 };
 
 export async function fetchPayments(): Promise<ApiPayment[]> {

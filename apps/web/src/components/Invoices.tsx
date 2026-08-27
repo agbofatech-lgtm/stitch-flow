@@ -810,6 +810,7 @@ function PaymentModal({
     referenceCode: string;
     paymentStatus: string;
     notes: string;
+    clientMutationId?: string;
   }) => Promise<void>;
 }) {
   const [amount, setAmount] = useState(String(invoice.balanceDue));
@@ -850,6 +851,9 @@ const [items, setItems] = useState([
         referenceCode: `PAY-${Date.now()}`,
         paymentStatus: 'captured',
         notes,
+        // Phase 3.5: idempotency key so a retried submission cannot create
+        // a second financial event (server enforces uniqueness).
+        clientMutationId: crypto.randomUUID(),
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to record payment');
