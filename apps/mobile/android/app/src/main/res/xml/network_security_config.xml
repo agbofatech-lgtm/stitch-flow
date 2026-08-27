@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Phase 6 production hardening: NO cleartext traffic permitted anywhere.
+     The previous dev-era config allowed cleartext to a hardcoded LAN IP
+     (10.64.37.239) — removed. All backend communication must use HTTPS.
+     Local development against an emulator/laptop uses debug overrides
+     (e.g. android:debugOverlays / separate debug manifest), never this
+     release configuration. -->
 <network-security-config>
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">10.64.37.239</domain>
-    </domain-config>
+    <base-config cleartextTrafficPermitted="false" />
 </network-security-config>

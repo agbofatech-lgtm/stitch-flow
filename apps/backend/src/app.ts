@@ -59,7 +59,7 @@ app.use(requestCorrelation);
 // (Phase 5). Behavior of JSON parsing is otherwise unchanged.
 app.use(
   express.json({
-    limit: process.env.MAX_PAYLOAD_SIZE || '10mb',
+    limit: process.env.MAX_PAYLOAD_SIZE || '1mb',
     verify: (req, _res, buf) => {
       (req as express.Request).rawBody = buf;
     },

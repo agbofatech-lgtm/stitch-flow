@@ -1,28 +1,21 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
+/**
+ * Root Capacitor reference config — aligned with the authoritative app
+ * platform under apps/mobile (Phase 6). The previous stale entry
+ * ("Tailor Studio" / com.tailorstudio.app / HTTP scheme) was never the
+ * shipping configuration and has been corrected so no tooling run from
+ * the repository root can accidentally build with the wrong identity.
+ *
+ * The shipping Android platform lives in apps/mobile/android
+ * (applicationId com.stitchflow.app, versionName 1.0.0).
+ */
 const config: CapacitorConfig = {
-  appId: 'com.tailorstudio.app',
-  appName: 'Tailor Studio',
-  webDir: 'dist',
+  appId: 'com.stitchflow.app',
+  appName: 'StitchFlow',
+  webDir: 'apps/web/dist',
   server: {
-    androidScheme: 'https'
-  },
-  plugins: {
-    SplashScreen: {
-      launchShowDuration: 2000,
-      backgroundColor: '#1e40af',
-      showSpinner: false,
-    },
-    Keyboard: {
-      resize: 'body',
-      resizeOnFullScreen: true,
-    },
-  },
-  android: {
-    allowMixedContent: true,
-  },
-  ios: {
-    contentInset: 'automatic',
+    androidScheme: 'https',
   },
 };
 
