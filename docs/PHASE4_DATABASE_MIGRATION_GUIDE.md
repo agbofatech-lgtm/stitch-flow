@@ -1,0 +1,7 @@
+# PHASE 4 DATABASE MIGRATION GUIDE
+System: ordered SQL files in apps/backend/migrations (001–010), applied by scripts/run-migrations.js — tracked in schema_migrations, one transaction per migration, lexicographic ordering, --verify mode, idempotent (applied files skipped). Startup runs verifySchema() (fail-fast, NO runtime DDL).
+Development: DATABASE_URL=postgres://… npm run migrate (workspace apps/backend). Fresh dev DB: create DB → migrate → start.
+Test: jest globalSetup boots embedded PostgreSQL, runs the real runner fresh every time — the migration path is exercised on every test run.
+Staging/production: 1) take a backup (see PHASE4_BACKUP_RECOVERY.md); 2) run `node scripts/run-migrations.js --verify` to inspect pending; 3) run the runner from a single operator host (per-migration transactions; concurrent runs are not locked — run one at a time; add pg_advisory_lock if multiple deployers are ever possible — documented P3); 4) re-run --verify (expect 0 pending); 5) start app (verifySchema gates boot).
+Failure handling: a failing migration rolls back ITS OWN transaction and aborts the run; earlier applied migrations stay recorded; fix forward with a new migration — never edit applied files. Rollback strategy: restore from the pre-migration backup (DDL down-migrations are intentionally not maintained).
+Rules: never reset/drop production; never renumber or edit applied migrations; new changes = new NNN_*.sql file.
