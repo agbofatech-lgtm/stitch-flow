@@ -61,6 +61,31 @@ type StudioSaveBody = {
 
 const orderRoutes = Router();
 
+/**
+ * Phase 6 input hardening: reject malformed dates/numerics with a 400
+ * BEFORE they reach PostgreSQL (a driver error would surface as a
+ * sanitized-but-misleading 500).
+ */
+function isValidOptionalDate(value: unknown): boolean {
+  if (value === null || value === undefined || value === '') return true;
+  return !Number.isNaN(new Date(String(value)).getTime());
+}
+
+function isValidOptionalNumber(value: unknown): boolean {
+  if (value === null || value === undefined || value === '') return true;
+  return Number.isFinite(Number(value));
+}
+
+function orderInputRejections(body: Record<string, unknown>): string | null {
+  if (!isValidOptionalDate(body.dueDate)) return 'dueDate must be a valid date';
+  for (const field of ['subtotal', 'taxTotal', 'discountTotal', 'totalAmount'] as const) {
+    if (!isValidOptionalNumber(body[field])) {
+      return `${field} must be a finite number`;
+    }
+  }
+  return null;
+}
+
 function isProductionStageCode(value: string): value is ProductionStageCode {
   return [
     'measurement',
@@ -286,6 +311,11 @@ orderRoutes.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
+    const rejection = orderInputRejections(req.body ?? {});
+    if (rejection) {
+      return res.status(400).json({ message: rejection });
+    }
+
     const customerCheck = await query(
       `SELECT id FROM customers WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NULL`,
       [customerId, req.workspaceId]
@@ -425,6 +455,11 @@ orderRoutes.put('/:id', async (req, res) => {
 
     if (!customerId || !orderNumber || !orderType) {
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const rejection = orderInputRejections(req.body ?? {});
+    if (rejection) {
+      return res.status(400).json({ message: rejection });
     }
 
     // Phase 6: previous status captured so status transitions are audited
