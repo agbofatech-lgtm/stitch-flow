@@ -84,6 +84,19 @@ const QUERIES = {
     FROM processed_mutations
     GROUP BY client_mutation_id
     HAVING COUNT(DISTINCT workspace_id) > 1`,
+  // ---- Phase 7 domains ----------------------------------------------------
+  'referential/orphan_appointment_customer': `
+    SELECT a.id, a.customer_id FROM appointments a
+    LEFT JOIN customers c ON c.id = a.customer_id
+    WHERE a.deleted_at IS NULL AND c.id IS NULL`,
+  'referential/orphan_fitting_customer': `
+    SELECT f.id, f.customer_id FROM fittings f
+    LEFT JOIN customers c ON c.id = f.customer_id
+    WHERE f.deleted_at IS NULL AND c.id IS NULL`,
+  'referential/orphan_referral_referrer': `
+    SELECT r.id, r.referrer_customer_id FROM referrals r
+    LEFT JOIN customers c ON c.id = r.referrer_customer_id
+    WHERE r.referrer_customer_id IS NOT NULL AND c.id IS NULL`,
   // ---- Referential -------------------------------------------------------
   'referential/orphan_order_customer': `
     SELECT o.id, o.customer_id FROM orders o

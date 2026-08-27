@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query, pool } from '../config/db';
 import { recordSyncChangeTx } from '../services/syncChangeLog';
+import { timelineService } from '../services/timelineService';
 import { auditLogService } from '../services/auditLogService';
 
 type PaymentRow = {
@@ -280,6 +281,15 @@ paymentRoutes.post('/', async (req, res) => {
     });
 
     const row = paymentResult.rows[0];
+
+    // Phase 7: customer timeline (business event; best-effort, non-fatal —
+    // never blocks or fails the financial transaction).
+    void timelineService.record({
+      workspaceId: req.workspaceId!, customerId: row.customer_id,
+      eventType: 'PAYMENT_RECORDED', actorUserId: req.user!.sub,
+      entityType: 'payment', entityId: row.id,
+      metadata: { amount: Number(row.amount), method: row.method },
+    });
 
     res.status(201).json({
       id: row.id,

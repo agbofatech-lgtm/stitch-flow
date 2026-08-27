@@ -3,6 +3,7 @@ import { query, pool } from '../config/db';
 import { recordSyncChange, recordSyncChangeTx } from '../services/syncChangeLog';
 import { entitlementService } from '../services/entitlementService';
 import { auditLogService } from '../services/auditLogService';
+import { timelineService } from '../services/timelineService';
 import { ApiError } from '../utils/apiError';
 
 type CustomerRow = {
@@ -168,6 +169,13 @@ customerRoutes.post('/', async (req, res, next) => {
 
     await client.query('COMMIT');
 
+    // Phase 7: customer timeline (business event; best-effort, non-fatal).
+    void timelineService.record({
+      workspaceId: req.workspaceId!, customerId: row.id,
+      eventType: 'CUSTOMER_CREATED', actorUserId: req.user!.sub,
+      entityType: 'customer', entityId: row.id,
+    });
+
     return res.status(201).json({
       id: row.id,
       fullName: row.full_name,
@@ -234,6 +242,13 @@ customerRoutes.put('/:id', async (req, res) => {
       entityId: row.id,
       operation: 'update',
       payload: { id: row.id, fullName, phone, email, address, notes },
+    });
+
+    // Phase 7: customer timeline (business event; best-effort, non-fatal).
+    void timelineService.record({
+      workspaceId: req.workspaceId!, customerId: row.id,
+      eventType: 'CUSTOMER_UPDATED', actorUserId: req.user!.sub,
+      entityType: 'customer', entityId: row.id,
     });
 
     // Phase 6: audit trail.

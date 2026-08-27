@@ -162,8 +162,17 @@ describe('Phase 6 — backup / restore verification', () => {
 
     // Schema/migrations: restore target was migrated by the real runner.
     const migrations = await pool2.query(`SELECT name FROM schema_migrations ORDER BY name`);
-    expect(migrations.rows.map((r: { name: string }) => r.name)).toContain('012_phase6_audit_correlation.sql');
-    expect(migrations.rows.length).toBe(12);
+    const appliedNames = migrations.rows.map((r: { name: string }) => r.name);
+    expect(appliedNames).toContain('012_phase6_audit_correlation.sql');
+    expect(appliedNames).toContain('013_phase7_customer_growth.sql');
+    // The restore target is migrated by the REAL runner: every migration
+    // file in the repository must be applied there.
+    const fs = require('fs');
+    const migrationFiles = fs
+      .readdirSync(path.join(__dirname, '..', 'migrations'))
+      .filter((f: string) => f.endsWith('.sql'))
+      .sort();
+    expect(appliedNames).toEqual(migrationFiles);
 
     // Tenancy: exactly one non-default workspace, owner membership intact.
     const ws = await pool2.query(`SELECT id, name FROM workspaces WHERE id = 'ws-restore-1'`);

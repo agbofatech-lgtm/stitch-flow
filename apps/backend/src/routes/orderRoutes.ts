@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { query } from '../config/db';
 import { recordSyncChange } from '../services/syncChangeLog';
 import { auditLogService } from '../services/auditLogService';
+import { timelineService } from '../services/timelineService';
 import {
   getOrderProductionStages,
   saveOrderProductionStageNote,
@@ -414,6 +415,17 @@ orderRoutes.post('/', async (req, res) => {
       metadata: { orderNumber, orderType, totalAmount, currency },
     });
 
+    // Phase 7: customer timeline (business event; best-effort, non-fatal).
+    void timelineService.record({
+      workspaceId: req.workspaceId!,
+      customerId,
+      eventType: 'ORDER_CREATED',
+      actorUserId: req.user!.sub,
+      entityType: 'order',
+      entityId: id,
+      metadata: { orderNumber },
+    });
+
     res.status(201).json(mapOrderRow(result.rows[0]));
   } catch (err) {
     console.error(err);
@@ -547,9 +559,17 @@ orderRoutes.put('/:id', async (req, res) => {
       payload: mapOrderRow(result.rows[0]) as unknown as Record<string, unknown>,
     });
 
-    // Phase 6: audit trail — status transitions are first-class events.
+    // Phase 7: customer timeline — status transitions.
     const statusChanged =
       previous.rows.length > 0 && previous.rows[0].status !== result.rows[0].status;
+    if (statusChanged) {
+      void timelineService.record({
+        workspaceId: req.workspaceId!, customerId,
+        eventType: 'ORDER_STATUS_CHANGED', actorUserId: req.user!.sub,
+        entityType: 'order', entityId: id,
+        metadata: { from: previous.rows[0].status, to: result.rows[0].status },
+      });
+    }
     await auditLogService.log({
       userId: req.user!.sub,
       workspaceId: req.workspaceId,

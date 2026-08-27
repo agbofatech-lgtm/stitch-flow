@@ -20,6 +20,9 @@ import { materialRoutes } from './routes/materialRoutes';
 import { reportRoutes } from './routes/reportRoutes';
 import { settingsRoutes } from './routes/settingsRoutes';
 import { billingRoutes } from './routes/billingRoutes';
+import { crmRoutes } from './routes/crmRoutes';
+import { referralRoutes } from './routes/referralRoutes';
+import { appointmentRoutes } from './routes/appointmentRoutes';
 
 /**
  * Canonical StitchFlow Express application.
@@ -92,6 +95,12 @@ app.use('/payments', authMiddleware, requireWorkspace, paymentRoutes);
 app.use('/materials', authMiddleware, requireWorkspace, materialRoutes);
 app.use('/reports', authMiddleware, requireWorkspace, reportRoutes);
 app.use('/settings', authMiddleware, requireWorkspace, settingsRoutes);
+
+// Phase 7: customer experience / CRM / growth domains — authenticated +
+// workspace-scoped like the other business routes.
+app.use('/crm', authMiddleware, requireWorkspace, crmRoutes);
+app.use('/referrals', authMiddleware, requireWorkspace, referralRoutes);
+app.use('/appointments', authMiddleware, requireWorkspace, appointmentRoutes);
 
 // Commercial routes (Phase 5): per-route middleware — the webhook is
 // signature-verified rather than JWT-authenticated; everything else is
