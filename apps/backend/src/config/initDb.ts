@@ -1,87 +1,49 @@
 import { query } from './db';
 
-export async function initDb() {
-  await query(`
-    CREATE TABLE IF NOT EXISTS customers (
-      id TEXT PRIMARY KEY,
-      full_name TEXT NOT NULL,
-      phone TEXT NOT NULL DEFAULT '',
-      email TEXT NOT NULL DEFAULT '',
-      address TEXT NOT NULL DEFAULT '',
-      notes TEXT NOT NULL DEFAULT '',
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-  `);
+/**
+ * Schema verification (replaces the legacy runtime table creation).
+ *
+ * The database schema is owned exclusively by the SQL migrations in
+ * `apps/backend/migrations`, applied via `npm run migrate`
+ * (scripts/run-migrations.js). A fresh database must be migrated before the
+ * server starts; this check fails fast with a clear message instead of
+ * letting requests hit missing tables.
+ */
+const REQUIRED_TABLES = [
+  'schema_migrations',
+  'users',
+  'licenses',
+  'refresh_tokens',
+  'audit_logs',
+  'sync_changes',
+  'customers',
+  'orders',
+  'invoices',
+  'invoice_items',
+  'payments',
+  'fabric_records',
+  'order_material_usages',
+  'app_settings',
+  'workspace_members',
+  'order_production_stages',
+];
 
-  await query(`
-    CREATE TABLE IF NOT EXISTS orders (
-      id TEXT PRIMARY KEY,
-      customer_id TEXT NOT NULL,
-      order_number TEXT NOT NULL,
-      status TEXT NOT NULL,
-      order_type TEXT NOT NULL,
-      due_date TIMESTAMPTZ,
-      notes TEXT NOT NULL DEFAULT '',
-      total_amount NUMERIC NOT NULL,
-      currency TEXT NOT NULL DEFAULT 'GHS',
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      CONSTRAINT fk_customer
-        FOREIGN KEY(customer_id)
-        REFERENCES customers(id)
-        ON DELETE CASCADE
-    );
-  `);
+export async function verifySchema() {
+  const result = await query<{ table_name: string }>(
+    `
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+    `
+  );
 
-  await query(`
-    CREATE TABLE IF NOT EXISTS invoices (
-      id TEXT PRIMARY KEY,
-      customer_id TEXT NOT NULL,
-      order_id TEXT,
-      invoice_number TEXT NOT NULL,
-      status TEXT NOT NULL,
-      due_date TIMESTAMPTZ,
-      total_amount NUMERIC NOT NULL,
-      amount_paid NUMERIC NOT NULL DEFAULT 0,
-      balance_due NUMERIC NOT NULL DEFAULT 0,
-      currency TEXT NOT NULL DEFAULT 'GHS',
-      notes TEXT NOT NULL DEFAULT '',
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      CONSTRAINT fk_invoice_customer
-        FOREIGN KEY(customer_id)
-        REFERENCES customers(id)
-        ON DELETE CASCADE,
-      CONSTRAINT fk_invoice_order
-        FOREIGN KEY(order_id)
-        REFERENCES orders(id)
-        ON DELETE SET NULL
-    );
-  `);
+  const present = new Set(result.rows.map((row) => row.table_name));
+  const missing = REQUIRED_TABLES.filter((table) => !present.has(table));
 
-  await query(`
-    CREATE TABLE IF NOT EXISTS payments (
-      id TEXT PRIMARY KEY,
-      invoice_id TEXT NOT NULL,
-      customer_id TEXT NOT NULL,
-      order_id TEXT,
-      amount NUMERIC NOT NULL,
-      method TEXT NOT NULL,
-      reference_code TEXT NOT NULL,
-      payment_status TEXT NOT NULL DEFAULT 'captured',
-      paid_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      notes TEXT NOT NULL DEFAULT '',
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      CONSTRAINT fk_payment_invoice
-        FOREIGN KEY(invoice_id)
-        REFERENCES invoices(id)
-        ON DELETE CASCADE,
-      CONSTRAINT fk_payment_customer
-        FOREIGN KEY(customer_id)
-        REFERENCES customers(id)
-        ON DELETE CASCADE,
-      CONSTRAINT fk_payment_order
-        FOREIGN KEY(order_id)
-        REFERENCES orders(id)
-        ON DELETE SET NULL
+  if (missing.length > 0) {
+    throw new Error(
+      `Database schema is not migrated. Missing tables: ${missing.join(', ')}. ` +
+        'Run "npm run migrate" against DATABASE_URL before starting the server.'
     );
-  `);
+  }
 }

@@ -1,6 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { env } from './config/env';
+import { requestLogger } from './middleware/requestLogger';
+import { notFound } from './middleware/notFound';
+import { errorHandler } from './middleware/errorHandler';
+import apiRoutes from './routes/index';
 import { dashboardRoutes } from './routes/dashboardRoutes';
 import { customerRoutes } from './routes/customerRoutes';
 import { orderRoutes } from './routes/orderRoutes';
@@ -10,6 +15,12 @@ import { materialRoutes } from './routes/materialRoutes';
 import { reportRoutes } from './routes/reportRoutes';
 import { settingsRoutes } from './routes/settingsRoutes';
 
+/**
+ * Canonical StitchFlow Express application.
+ *
+ * Single execution path: server.ts boots this app. The previous mock server
+ * (hardcoded data) has been removed from the runtime path.
+ */
 export const app = express();
 
 app.use(
@@ -22,24 +33,9 @@ app.use(
 app.use(helmet());
 app.use(express.json({ limit: process.env.MAX_PAYLOAD_SIZE || '10mb' }));
 
-app.use((req, res, next) => {
-  const startedAt = Date.now();
-
-  res.on('finish', () => {
-    console.log(
-      '[API]',
-      req.method,
-      req.originalUrl,
-      '->',
-      res.statusCode,
-      '(' + (Date.now() - startedAt) + 'ms)',
-      'origin=' + (req.headers.origin || '-'),
-      'ua=' + (req.headers['user-agent'] || '-')
-    );
-  });
-
-  next();
-});
+if (env.NODE_ENV !== 'test') {
+  app.use(requestLogger);
+}
 
 app.get('/', (_req, res) => {
   res.json({
@@ -47,12 +43,10 @@ app.get('/', (_req, res) => {
   });
 });
 
-app.get('/health', (_req, res) => {
-  res.status(200).json({
-    status: 'ok',
-  });
-});
+// Platform routes: auth, licenses, events, feature-requests, sync, admin, health
+app.use('/', apiRoutes);
 
+// Business routes (existing StitchFlow modules, preserved as-is)
 app.use('/dashboard', dashboardRoutes);
 app.use('/customers', customerRoutes);
 app.use('/orders', orderRoutes);
@@ -61,3 +55,6 @@ app.use('/payments', paymentRoutes);
 app.use('/materials', materialRoutes);
 app.use('/reports', reportRoutes);
 app.use('/settings', settingsRoutes);
+
+app.use(notFound);
+app.use(errorHandler);

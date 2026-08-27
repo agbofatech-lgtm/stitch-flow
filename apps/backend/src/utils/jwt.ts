@@ -1,4 +1,5 @@
 import jwt, { type SignOptions } from 'jsonwebtoken';
+import crypto from 'crypto';
 import { env } from '../config/env';
 
 type TokenPayload = {
@@ -20,7 +21,11 @@ export function signAccessToken(payload: TokenPayload) {
 }
 
 export function signRefreshToken(payload: TokenPayload) {
-  return jwt.sign(payload, env.REFRESH_TOKEN_SECRET, {
+  // `jti` makes every refresh token unique even when two tokens are issued
+  // for the same user within the same second (same payload + iat would
+  // otherwise produce identical JWT strings and violate the
+  // refresh_tokens.token UNIQUE constraint).
+  return jwt.sign({ ...payload, jti: crypto.randomUUID() }, env.REFRESH_TOKEN_SECRET, {
     expiresIn: REFRESH_TOKEN_TTL
   });
 }

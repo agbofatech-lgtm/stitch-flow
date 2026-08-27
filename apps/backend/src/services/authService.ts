@@ -101,12 +101,33 @@ export const authService = {
       throw new ApiError(401, 'INVALID_REFRESH_TOKEN', 'Refresh token is invalid');
     }
 
-    const accessToken = signAccessToken({
-      sub: user.id,
-      email: user.email,
-      role: user.role
-    });
+    // Refresh-token rotation: the presented token is revoked and a new one
+    // is issued alongside the new access token, so a stolen refresh token
+    // cannot be replayed after its first legitimate use.
+    await refreshTokenRepository.revoke(refreshToken);
 
-    return { accessToken };
+    const newPayload = { sub: user.id, email: user.email, role: user.role };
+    const accessToken = signAccessToken(newPayload);
+    const newRefreshToken = signRefreshToken(newPayload);
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    await refreshTokenRepository.create(user.id, newRefreshToken, expiresAt);
+
+    return { accessToken, refreshToken: newRefreshToken };
+  },
+
+  async logout(refreshToken: string) {
+    const stored = await refreshTokenRepository.find(refreshToken);
+    if (stored) {
+      await refreshTokenRepository.revoke(refreshToken);
+      await auditLogService.log({
+        userId: stored.user_id,
+        action: 'user_logged_out',
+        entityType: 'user',
+        entityId: stored.user_id
+      });
+    }
+
+    // Idempotent: logging out an unknown/already-revoked token is a no-op.
+    return { success: true };
   }
 };
