@@ -10,7 +10,8 @@
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
     "lint": "tsc --noEmit",
-    "migrate": "node ./scripts/run-migrations.js"
+    "migrate": "node ./scripts/run-migrations.js",
+    "integrity:check": "node ./scripts/integrity-check.js"
   },
   "dependencies": {
     "@types/cors": "^2.8.17",
