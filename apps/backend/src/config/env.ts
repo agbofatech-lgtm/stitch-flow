@@ -12,6 +12,11 @@ function getEnv(name: string, fallback?: string): string {
   return value;
 }
 
+/** Optional variable: empty string means "not configured" (no throw). */
+function getOptionalEnv(name: string, fallback = ''): string {
+  return process.env[name] ?? fallback;
+}
+
 export const env = {
   NODE_ENV: getEnv('NODE_ENV', 'development'),
   PORT: Number(getEnv('PORT', '3000')),
@@ -29,4 +34,16 @@ export const env = {
   FREE_DEVICE_LIMIT: Number(getEnv('FREE_DEVICE_LIMIT', '1')),
   PRO_DEVICE_LIMIT: Number(getEnv('PRO_DEVICE_LIMIT', '2')),
   ENTERPRISE_DEVICE_LIMIT: Number(getEnv('ENTERPRISE_DEVICE_LIMIT', '5')),
+
+  // --- Phase 5: commercial configuration (SERVER-ONLY) ------------------
+  /** Trial length in days for new workspaces (business configuration). */
+  TRIAL_DAYS: getEnv('TRIAL_DAYS', '14'),
+  /** Plan whose features a trial grants (BASIC | PRO | STUDIO). */
+  TRIAL_PLAN_CODE: getEnv('TRIAL_PLAN_CODE', 'STUDIO'),
+  /** Billing provider selection: 'paystack' | 'none'. Tests always use the test provider. */
+  BILLING_PROVIDER: getOptionalEnv('BILLING_PROVIDER', 'none'),
+  /** Paystack secret key — SERVER-ONLY, never VITE_*, never committed. */
+  PAYSTACK_SECRET_KEY: getOptionalEnv('PAYSTACK_SECRET_KEY'),
+  /** Deterministic signing secret for the test billing provider (test fixture, not a credential). */
+  TEST_BILLING_SECRET: getOptionalEnv('TEST_BILLING_SECRET', 'stitchflow-test-billing-secret'),
 };

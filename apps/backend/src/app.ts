@@ -17,6 +17,7 @@ import { paymentRoutes } from './routes/paymentRoutes';
 import { materialRoutes } from './routes/materialRoutes';
 import { reportRoutes } from './routes/reportRoutes';
 import { settingsRoutes } from './routes/settingsRoutes';
+import { billingRoutes } from './routes/billingRoutes';
 
 /**
  * Canonical StitchFlow Express application.
@@ -45,7 +46,16 @@ app.use(
 );
 
 app.use(helmet());
-app.use(express.json({ limit: process.env.MAX_PAYLOAD_SIZE || '10mb' }));
+// Raw body is captured for billing webhook signature verification
+// (Phase 5). Behavior of JSON parsing is otherwise unchanged.
+app.use(
+  express.json({
+    limit: process.env.MAX_PAYLOAD_SIZE || '10mb',
+    verify: (req, _res, buf) => {
+      (req as express.Request).rawBody = buf;
+    },
+  })
+);
 
 if (env.NODE_ENV !== 'test') {
   app.use(requestLogger);
@@ -73,6 +83,11 @@ app.use('/payments', authMiddleware, requireWorkspace, paymentRoutes);
 app.use('/materials', authMiddleware, requireWorkspace, materialRoutes);
 app.use('/reports', authMiddleware, requireWorkspace, reportRoutes);
 app.use('/settings', authMiddleware, requireWorkspace, settingsRoutes);
+
+// Commercial routes (Phase 5): per-route middleware — the webhook is
+// signature-verified rather than JWT-authenticated; everything else is
+// authenticated + workspace-scoped inside billingRoutes.
+app.use('/billing', billingRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

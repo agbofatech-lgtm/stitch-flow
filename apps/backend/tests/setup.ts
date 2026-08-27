@@ -2,6 +2,8 @@ import { pool, query } from '../src/config/db';
 
 /** Tables reset between tests (schema_migrations is preserved). */
 const TABLES = [
+  'billing_events',
+  'subscriptions',
   'processed_mutations',
   'order_material_usages',
   'order_production_stage_events',

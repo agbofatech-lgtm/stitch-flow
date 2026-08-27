@@ -43,3 +43,26 @@ export const eventsRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false
 });
+
+/**
+ * Phase 5: commercial API limiter — protects plan/entitlement/checkout
+ * endpoints from abuse without hampering normal client refreshes.
+ */
+export const billingRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: testing ? 10000 : 120,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+/**
+ * Phase 5: webhook limiter — deliberately lenient so legitimate provider
+ * retries and duplicate deliveries are never broken (Step 29); the
+ * signature check is the authenticity gate, this only caps request storms.
+ */
+export const webhookRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: testing ? 10000 : 600,
+  standardHeaders: true,
+  legacyHeaders: false
+});

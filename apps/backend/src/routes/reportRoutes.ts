@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { query } from '../config/db';
+import { entitlementService } from '../services/entitlementService';
+import { ApiError } from '../utils/apiError';
 
 type RevenueRow = {
   total_revenue: string | null;
@@ -216,8 +218,12 @@ reportRoutes.get('/overdue-orders', async (req, res) => {
   }
 });
 
-reportRoutes.get('/low-stock-materials', async (req, res) => {
+reportRoutes.get('/low-stock-materials', async (req, res, next) => {
   try {
+    // Phase 5: premium report — server-authoritative feature gate
+    // (STUDIO: lowStockAlerts). Throws FEATURE_NOT_AVAILABLE otherwise.
+    await entitlementService.requireFeature(req.workspaceId!, 'lowStockAlerts');
+
     const result = await query(`
       SELECT
         id,
@@ -257,6 +263,9 @@ reportRoutes.get('/low-stock-materials', async (req, res) => {
       }))
     );
   } catch (error) {
+    if (error instanceof ApiError) {
+      return next(error);
+    }
     console.error(error);
     return res.status(500).json({ message: 'Failed to load low stock materials report' });
   }

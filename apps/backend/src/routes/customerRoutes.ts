@@ -1,6 +1,8 @@
 import { Router } from 'express';
-import { query } from '../config/db';
-import { recordSyncChange } from '../services/syncChangeLog';
+import { query, pool } from '../config/db';
+import { recordSyncChange, recordSyncChangeTx } from '../services/syncChangeLog';
+import { entitlementService } from '../services/entitlementService';
+import { ApiError } from '../utils/apiError';
 
 type CustomerRow = {
   id: string;
@@ -105,7 +107,11 @@ customerRoutes.get('/:id/orders', async (req, res) => {
   }
 });
 
-customerRoutes.post('/', async (req, res) => {
+customerRoutes.post('/', async (req, res, next) => {
+  // Phase 5: creation is transactional with a per-workspace lock so the
+  // plan's customer limit cannot be bypassed by simultaneous requests
+  // (Step 13 concurrency-safe enforcement).
+  const client = await pool.connect();
   try {
     const { fullName, phone, email, address, notes } = normalizeCustomerInput(req.body);
 
@@ -123,7 +129,13 @@ customerRoutes.post('/', async (req, res) => {
 
     const id = Date.now().toString();
 
-    const result = await query<CustomerRow>(
+    await client.query('BEGIN');
+
+    // Locks the workspace row, resolves server-authoritative entitlements
+    // and throws CUSTOMER_LIMIT_REACHED when the plan limit is exhausted.
+    await entitlementService.enforceCustomerLimit(client, req.workspaceId!);
+
+    const result = await client.query<CustomerRow>(
       `
         INSERT INTO customers (id, workspace_id, full_name, phone, email, address, notes)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -134,7 +146,7 @@ customerRoutes.post('/', async (req, res) => {
 
     const row = result.rows[0];
 
-    await recordSyncChange({
+    await recordSyncChangeTx(client, {
       workspaceId: req.workspaceId!,
       userId: req.user!.sub,
       entity: 'customers',
@@ -142,6 +154,8 @@ customerRoutes.post('/', async (req, res) => {
       operation: 'insert',
       payload: { id: row.id, fullName, phone, email, address, notes },
     });
+
+    await client.query('COMMIT');
 
     return res.status(201).json({
       id: row.id,
@@ -153,8 +167,14 @@ customerRoutes.post('/', async (req, res) => {
       createdAt: row.created_at,
     });
   } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+    if (error instanceof ApiError) {
+      return next(error);
+    }
     console.error('Failed to create customer:', error);
     return res.status(500).json({ message: 'Failed to create customer' });
+  } finally {
+    client.release();
   }
 });
 

@@ -8,6 +8,7 @@ import { comparePassword, hashPassword } from '../utils/password';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { generateLicenseKey } from '../utils/license';
 import { auditLogService } from './auditLogService';
+import { subscriptionService } from './subscriptionService';
 import { env } from '../config/env';
 
 function getMaxDevices(tier: 'free' | 'pro' | 'enterprise') {
@@ -52,6 +53,11 @@ export const authService = {
       ownerUserId: user.id
     });
     await workspaceRepository.addMember(workspace.id, user.id, 'owner');
+
+    // Phase 5: server-authoritative trial — every new workspace starts a
+    // trialing subscription (duration/plan from TRIAL_DAYS/TRIAL_PLAN_CODE).
+    // The client can display trial state; it cannot define it.
+    await subscriptionService.createTrialForWorkspace(workspace.id, user.id);
 
     const payload = {
       sub: user.id,

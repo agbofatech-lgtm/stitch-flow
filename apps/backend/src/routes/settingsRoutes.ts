@@ -1,6 +1,8 @@
 import { Router } from 'express';
-import { query } from '../config/db';
+import { query, pool } from '../config/db';
 import { requireWorkspaceRole } from '../middleware/requireWorkspaceRole';
+import { entitlementService } from '../services/entitlementService';
+import { ApiError } from '../utils/apiError';
 
 const manageWorkspace = requireWorkspaceRole('owner', 'admin');
 
@@ -110,7 +112,10 @@ settingsRoutes.get('/workspace-members', async (req, res) => {
   }
 });
 
-settingsRoutes.post('/workspace-members', manageWorkspace, async (req, res) => {
+settingsRoutes.post('/workspace-members', manageWorkspace, async (req, res, next) => {
+  // Phase 5: staff creation is transactional with a per-workspace lock so
+  // the plan's staff limit cannot be bypassed by simultaneous requests.
+  const client = await pool.connect();
   try {
     const {
       fullName,
@@ -133,8 +138,14 @@ settingsRoutes.post('/workspace-members', manageWorkspace, async (req, res) => {
       return res.status(400).json({ message: 'Provide email or phone number' });
     }
 
+    await client.query('BEGIN');
+
+    // Locks the workspace row, resolves server-authoritative entitlements
+    // and throws MEMBER_LIMIT_REACHED when the plan limit is exhausted.
+    await entitlementService.enforceStaffLimit(client, workspaceId);
+
     if (String(email).trim()) {
-      const existing = await query<WorkspaceMemberRow>(
+      const existing = await client.query<WorkspaceMemberRow>(
         `
         SELECT *
         FROM workspace_members
@@ -146,13 +157,14 @@ settingsRoutes.post('/workspace-members', manageWorkspace, async (req, res) => {
       );
 
       if (existing.rows.length > 0) {
+        await client.query('ROLLBACK');
         return res.status(409).json({ message: 'Member with this email already exists' });
       }
     }
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-    const result = await query<WorkspaceMemberRow>(
+    const result = await client.query<WorkspaceMemberRow>(
       `
       INSERT INTO workspace_members (
         id,
@@ -181,10 +193,18 @@ settingsRoutes.post('/workspace-members', manageWorkspace, async (req, res) => {
       ]
     );
 
+    await client.query('COMMIT');
+
     res.status(201).json(mapWorkspaceMember(result.rows[0]));
   } catch (err) {
+    await client.query('ROLLBACK').catch(() => undefined);
+    if (err instanceof ApiError) {
+      return next(err);
+    }
     console.error(err);
     res.status(500).json({ message: 'Failed to add workspace member' });
+  } finally {
+    client.release();
   }
 });
 

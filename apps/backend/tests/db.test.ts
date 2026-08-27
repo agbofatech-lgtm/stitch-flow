@@ -24,6 +24,7 @@ describe('Database foundation', () => {
       '008_create_workspaces.sql',
       '009_add_workspace_tenancy.sql',
       '010_sync_v2.sql',
+      '011_commercial_foundation.sql',
     ]);
   });
 

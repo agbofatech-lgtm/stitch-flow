@@ -16,6 +16,8 @@ declare global {
       workspaceId?: string;
       /** Workspace-level role of the authenticated user. */
       workspaceRole?: 'owner' | 'admin' | 'assistant';
+      /** Raw request body captured for webhook signature verification (Phase 5). */
+      rawBody?: Buffer;
     }
   }
 }
