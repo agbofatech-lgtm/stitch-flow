@@ -17,6 +17,8 @@ module.exports = [
   'incidents',
   'integration_outbox',
   'api_keys',
+  'webhook_endpoints',
+  'webhook_deliveries',
   'subscriptions',
   'billing_events',
   'customers',

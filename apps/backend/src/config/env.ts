@@ -52,4 +52,12 @@ export const env = {
   PAYSTACK_SECRET_KEY: getOptionalEnv('PAYSTACK_SECRET_KEY'),
   /** Deterministic signing secret for the test billing provider (test fixture, not a credential). */
   TEST_BILLING_SECRET: getOptionalEnv('TEST_BILLING_SECRET', 'stitchflow-test-billing-secret'),
+
+  // --- Phase 8: webhook delivery configuration (SERVER-ONLY) -------------
+  /** AES key material for webhook-signing-secret envelopes; falls back to JWT_SECRET. */
+  WEBHOOK_ENCRYPTION_KEY: getOptionalEnv('WEBHOOK_ENCRYPTION_KEY'),
+  /** Per-request delivery timeout (ms). Read at call time so tests can override. */
+  WEBHOOK_DELIVERY_TIMEOUT_MS: Number(getEnv('WEBHOOK_DELIVERY_TIMEOUT_MS', '10000')),
+  /** Allow private/loopback destinations (local receivers); never enable in production. */
+  WEBHOOK_ALLOW_PRIVATE_DESTINATIONS: getOptionalEnv('WEBHOOK_ALLOW_PRIVATE_DESTINATIONS', 'false'),
 };

@@ -5,6 +5,7 @@ import { usageService } from '../services/usageService';
 import { errorService } from '../services/errorService';
 import { featureFlagService, controlPlaneService } from '../services/platformServices';
 import { auditLogService } from '../services/auditLogService';
+import { webhookService } from '../services/webhookService';
 
 /**
  * Phase 7 — Developer Control Plane (Step 27–29, 39, 58).
@@ -53,6 +54,18 @@ platformRoutes.patch('/incidents/:fingerprint', requirePlatformRole('operate'), 
     .log({ action: 'platform.incident_status_changed', entityType: 'incident', entityId: req.params.fingerprint, metadata: { status } })
     .catch(() => undefined);
   res.json(result);
+});
+
+// ---------- Webhook dispatch (manual ops trigger until a worker exists) ----------
+platformRoutes.post('/webhooks/dispatch', requirePlatformRole('operate'), async (_req, res) => {
+  try {
+    const dispatch = await webhookService.dispatchOutbox();
+    const drain = await webhookService.drainOnce();
+    res.json({ dispatch, drain });
+  } catch (err) {
+    console.error('platform: webhook dispatch failed:', err);
+    res.status(500).json({ message: 'Webhook dispatch failed' });
+  }
 });
 
 // ---------- Feature flags (server-authoritative) ----------

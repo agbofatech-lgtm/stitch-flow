@@ -25,6 +25,8 @@ const TABLES = [
   'error_records',
   'usage_events',
   'api_keys',
+  'webhook_deliveries',
+  'webhook_endpoints',
   'invoices',
   'orders',
   'customers',

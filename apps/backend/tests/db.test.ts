@@ -29,6 +29,7 @@ describe('Database foundation', () => {
       '013_phase7_customer_growth.sql',
       '014_phase7_intelligence.sql',
       '015_phase8_developer_api.sql',
+      '016_phase8_webhooks.sql',
     ]);
   });
 

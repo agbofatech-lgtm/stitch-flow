@@ -1,5 +1,6 @@
 import { query } from '../config/db';
 import { ApiError } from '../utils/apiError';
+import { scheduleWebhookDrain } from './webhookService';
 
 /** Phase 7 — feature flags (server-authoritative, Step 58). */
 export const featureFlagService = {
@@ -44,7 +45,13 @@ export const outboxService = {
        RETURNING outbox_id`,
       [event.workspaceId, event.eventType, event.entityType ?? null, event.entityId ?? null, JSON.stringify(event.payload ?? {})]
     );
-    return { recorded: result.rows.length > 0 };
+    const recorded = result.rows.length > 0;
+    if (recorded) {
+      // Webhook drain is scheduled OFF the response path: business flow is
+      // never blocked by webhook delivery (single-flight, unref'd timer).
+      scheduleWebhookDrain();
+    }
+    return { recorded };
   },
 
   async list(workspaceId: string, status?: string) {

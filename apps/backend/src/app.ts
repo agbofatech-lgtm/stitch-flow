@@ -29,6 +29,7 @@ import { platformRoutes } from './routes/platformRoutes';
 import { portalLoginRoutes, portalRoutes } from './routes/portalRoutes';
 import { developerRoutes } from './routes/developerRoutes';
 import { apiV1Routes } from './routes/apiV1Routes';
+import { webhookRoutes } from './routes/webhookRoutes';
 
 /**
  * Canonical StitchFlow Express application.
@@ -124,6 +125,9 @@ app.use('/portal', portalLoginRoutes, portalRoutes);
 // while the DEVELOPER_API feature flag is OFF.
 app.use('/developers', authMiddleware, requireWorkspace, developerRoutes);
 app.use('/api/v1', apiV1Routes);
+
+// Phase 8 — webhook management (workspace staff; WEBHOOK_MANAGEMENT flag).
+app.use('/webhooks', authMiddleware, requireWorkspace, webhookRoutes);
 
 // Commercial routes (Phase 5): per-route middleware — the webhook is
 // signature-verified rather than JWT-authenticated; everything else is

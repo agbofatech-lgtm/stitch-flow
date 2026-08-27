@@ -119,6 +119,14 @@ const QUERIES = {
     SELECT k.id, k.workspace_id FROM api_keys k
     LEFT JOIN workspaces w ON w.id = k.workspace_id
     WHERE w.id IS NULL`,
+  'referential/orphan_webhook_endpoint_workspace': `
+    SELECT e.id, e.workspace_id FROM webhook_endpoints e
+    LEFT JOIN workspaces w ON w.id = e.workspace_id
+    WHERE w.id IS NULL`,
+  'referential/orphan_webhook_delivery_workspace': `
+    SELECT d.id, d.workspace_id FROM webhook_deliveries d
+    LEFT JOIN workspaces w ON w.id = d.workspace_id
+    WHERE w.id IS NULL`,
   // ---- Informational (never counts as a violation) -----------------------
   'info/sync_cursor_stats': `
     SELECT COALESCE(MAX(seq), 0) AS max_seq, COUNT(*) AS rows
