@@ -1,3 +1,5 @@
+import { getAuthHeaders } from '../utils/api';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export type ReportSummary = {
@@ -84,27 +86,27 @@ async function parseJson<T>(response: Response): Promise<T> {
 }
 
 export async function fetchReportSummary(): Promise<ReportSummary> {
-  const res = await fetch(`${API_BASE_URL}/reports/summary`);
+  const res = await fetch(`${API_BASE_URL}/reports/summary`, { headers: getAuthHeaders() });
   return parseJson<ReportSummary>(res);
 }
 
 export async function fetchOrderStatusReport(): Promise<OrderStatusReportItem[]> {
-  const res = await fetch(`${API_BASE_URL}/reports/order-status`);
+  const res = await fetch(`${API_BASE_URL}/reports/order-status`, { headers: getAuthHeaders() });
   return parseJson<OrderStatusReportItem[]>(res);
 }
 
 export async function fetchMonthlyRevenueReport(): Promise<MonthlyRevenueReportItem[]> {
-  const res = await fetch(`${API_BASE_URL}/reports/monthly-revenue`);
+  const res = await fetch(`${API_BASE_URL}/reports/monthly-revenue`, { headers: getAuthHeaders() });
   return parseJson<MonthlyRevenueReportItem[]>(res);
 }
 
 export async function fetchOverdueOrdersReport(): Promise<OverdueOrderReportItem[]> {
-  const res = await fetch(`${API_BASE_URL}/reports/overdue-orders`);
+  const res = await fetch(`${API_BASE_URL}/reports/overdue-orders`, { headers: getAuthHeaders() });
   return parseJson<OverdueOrderReportItem[]>(res);
 }
 
 export async function fetchLowStockMaterialsReport(): Promise<LowStockMaterialReportItem[]> {
-  const res = await fetch(`${API_BASE_URL}/reports/low-stock-materials`);
+  const res = await fetch(`${API_BASE_URL}/reports/low-stock-materials`, { headers: getAuthHeaders() });
   return parseJson<LowStockMaterialReportItem[]>(res);
 }
 

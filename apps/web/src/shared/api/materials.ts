@@ -1,3 +1,5 @@
+import { getAuthHeaders } from '../utils/api';
+
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export type ApiFabricRecord = {
@@ -31,7 +33,7 @@ export type ApiMaterialUsage = {
 };
 
 export async function fetchFabricRecords(): Promise<ApiFabricRecord[]> {
-  const response = await fetch(`${API_BASE}/materials/fabrics`);
+  const response = await fetch(`${API_BASE}/materials/fabrics`, { headers: getAuthHeaders() });
 
   if (!response.ok) {
     throw new Error('Failed to fetch fabric records');
@@ -60,6 +62,7 @@ export async function createFabricRecord(payload: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...getAuthHeaders(),
     },
     body: JSON.stringify(payload),
   });
@@ -95,6 +98,7 @@ export async function updateFabricRecordApi(
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
+      ...getAuthHeaders(),
     },
     body: JSON.stringify(payload),
   });
@@ -110,6 +114,7 @@ export async function updateFabricRecordApi(
 export async function deleteFabricRecordApi(id: string): Promise<{ success: true }> {
   const response = await fetch(`${API_BASE}/materials/fabrics/${encodeURIComponent(id)}`, {
     method: 'DELETE',
+    headers: getAuthHeaders(),
   });
 
   if (!response.ok) {
@@ -122,7 +127,8 @@ export async function deleteFabricRecordApi(id: string): Promise<{ success: true
 
 export async function fetchMaterialUsagesByOrder(orderId: string): Promise<ApiMaterialUsage[]> {
   const response = await fetch(
-    `${API_BASE}/materials/usages/order/${encodeURIComponent(orderId)}`
+    `${API_BASE}/materials/usages/order/${encodeURIComponent(orderId)}`,
+    { headers: getAuthHeaders() }
   );
 
   if (!response.ok) {
@@ -143,6 +149,7 @@ export async function createMaterialUsage(payload: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...getAuthHeaders(),
     },
     body: JSON.stringify(payload),
   });
@@ -158,6 +165,7 @@ export async function createMaterialUsage(payload: {
 export async function deleteMaterialUsageApi(id: string): Promise<{ success: true }> {
   const response = await fetch(`${API_BASE}/materials/usages/${encodeURIComponent(id)}`, {
     method: 'DELETE',
+    headers: getAuthHeaders(),
   });
 
   if (!response.ok) {
@@ -169,7 +177,7 @@ export async function deleteMaterialUsageApi(id: string): Promise<{ success: tru
 }
 
 export async function fetchLowStockFabrics(): Promise<ApiFabricRecord[]> {
-  const response = await fetch(`${API_BASE}/materials/fabrics/low-stock`);
+  const response = await fetch(`${API_BASE}/materials/fabrics/low-stock`, { headers: getAuthHeaders() });
 
   if (!response.ok) {
     throw new Error('Failed to fetch low stock fabrics');

@@ -27,7 +27,7 @@ import {
 } from '@shared/utils/productionAlerts';
 import { fetchOrders, type ApiOrder } from '@shared/api/orders';
 import { getCustomers, type ApiCustomer } from '@shared/utils/customerApi';
-import { API_BASE } from '@shared/utils/api';
+import { API_BASE, getAuthHeaders } from '@shared/utils/api';
 import type {
   Order,
   OrderAlert,
@@ -156,6 +156,7 @@ async function transitionProductionStage(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeaders(),
       },
       body: JSON.stringify({ action, note }),
     }
@@ -180,6 +181,7 @@ async function saveProductionStageNote(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeaders(),
       },
       body: JSON.stringify({ note }),
     }
