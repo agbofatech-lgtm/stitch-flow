@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
-import { LogIn, LogOut, UserPlus, CloudOff, RefreshCw } from 'lucide-react';
+import { LogIn, LogOut, UserPlus, CloudOff, RefreshCw, BadgeCheck } from 'lucide-react';
 import { login, register, logout } from '@shared/api/auth';
 import { getAccessToken, getAuthWorkspaceId } from '@shared/utils/api';
 import { syncNow, getSyncDiagnostics } from '@modules/services/syncEngine';
+import {
+  refreshEntitlementsCache,
+  getCachedEntitlements,
+  clearEntitlementsCache,
+  type ServerEntitlements,
+} from '@shared/api/billing';
 import { resolveActiveWorkspaceId } from '../offline/bootstrap';
 
 const AUTH_EMAIL_KEY = 'stitchflow.auth.email';
@@ -23,6 +29,8 @@ export function AccountPanel() {
   const [status, setStatus] = useState<string | null>(null);
   const [signedInAs, setSignedInAs] = useState<string | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
+  const [entitlements, setEntitlements] = useState<ServerEntitlements | null>(null);
+  const [entitlementsStale, setEntitlementsStale] = useState(false);
 
   const refreshState = async () => {
     const token = getAccessToken();
@@ -34,6 +42,18 @@ export function AccountPanel() {
     } catch {
       setPendingCount(0);
     }
+    // Server-authoritative commercial state; cached copy is display-only.
+    if (token) {
+      const fresh = await refreshEntitlementsCache();
+      if (fresh) {
+        setEntitlements(fresh);
+        setEntitlementsStale(false);
+        return;
+      }
+    }
+    const cached = getCachedEntitlements();
+    setEntitlements(cached?.entitlements ?? null);
+    setEntitlementsStale(Boolean(cached));
   };
 
   useEffect(() => {
@@ -74,6 +94,9 @@ export function AccountPanel() {
     try {
       await logout(); // clears tokens ONLY; local data + queue are preserved
       window.localStorage.removeItem(AUTH_EMAIL_KEY);
+      clearEntitlementsCache(); // display cache only — server state is untouched
+      setEntitlements(null);
+      setEntitlementsStale(false);
       setStatus(
         pendingCount > 0
           ? `Signed out. ${pendingCount} unsynced change(s) are kept locally and will sync after your next sign-in.`
@@ -106,12 +129,30 @@ export function AccountPanel() {
     <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-5">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-900">Account & Sync</h2>
-        {pendingCount > 0 && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
-            <CloudOff className="h-3.5 w-3.5" />
-            {pendingCount} pending sync
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {entitlements && (
+            <span
+              className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-3 py-1 text-xs font-medium text-sky-800"
+              title={
+                entitlementsStale
+                  ? 'Cached plan info (offline) — the server remains authoritative.'
+                  : 'Plan resolved by the server.'
+              }
+            >
+              <BadgeCheck className="h-3.5 w-3.5" />
+              {entitlements.effectivePlan}
+              {' · '}
+              {entitlements.effectiveStatus.toUpperCase()}
+              {entitlementsStale ? ' (cached)' : ''}
+            </span>
+          )}
+          {pendingCount > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
+              <CloudOff className="h-3.5 w-3.5" />
+              {pendingCount} pending sync
+            </span>
+          )}
+        </div>
       </div>
 
       {error && (
