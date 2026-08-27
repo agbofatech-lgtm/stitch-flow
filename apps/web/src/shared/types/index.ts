@@ -197,6 +197,7 @@ export interface Tier {
 export interface Workspace {
   id: string;
   name: string;
+  ownerName?: string;
   tierId: string;
   tier: Tier;
   billingStatus: BillingStatus;
@@ -298,6 +299,7 @@ export interface CustomerMeasurementProfile {
   notes?: string;
   measurements: GarmentMeasurements;
   isDefault?: boolean;
+  createdBy?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -328,7 +330,7 @@ export interface OrderMeasurementSnapshot extends GarmentMeasurements {
   profileId?: string | null;
   profileLabel?: string | null;
   profileType?: MeasurementProfileType | null;
-  capturedAt?: Date;
+  capturedAt?: Date | string | null;
 }
 
 export interface ProductionStage {
@@ -720,6 +722,15 @@ export interface FeatureAccess {
   canManageMaterialInventory: FeatureGate;
   canViewLowStockAlerts?: FeatureGate;
   canUseMultiCurrencyReporting?: FeatureGate;
+
+  /**
+   * Design Studio gates. Optional: when a tier evaluation does not produce
+   * them, consumers treat the feature as allowed (`gate?.allowed ?? true`).
+   */
+  measurementProfiles?: FeatureGate;
+  savePattern?: FeatureGate;
+  productionAssistant?: FeatureGate;
+  fitWarnings?: FeatureGate;
 }
 
 export interface TierFeatureRow {
@@ -814,6 +825,7 @@ export interface AppContextShape {
   }) => void;
 
   updateWorkspaceProfile: (updates: {
+    ownerName?: string;
     name?: string;
     defaultCurrency?: CurrencyCode;
     phone?: string;
@@ -913,3 +925,14 @@ export interface AppContextShape {
   getLowStockMaterials: () => FabricRecord[];
 }
 
+
+/**
+ * Backend settings payload: GET /settings returns the `app_settings` table as
+ * a key -> JSON value map. Known keys used by the app are typed explicitly;
+ * the index signature covers additional workspace-defined keys.
+ */
+export interface AppSettings {
+  workspace_profile?: Record<string, unknown>;
+  branding?: Record<string, unknown>;
+  [key: string]: unknown;
+}

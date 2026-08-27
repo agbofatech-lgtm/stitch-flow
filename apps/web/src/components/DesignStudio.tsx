@@ -51,12 +51,14 @@ import {
   inferGarmentTypeFromInspiration,
 } from '@modules/services/productionAssistant';
 import type {
+  BodicePatternResult,
   BodyMeasurements,
   DesignCategory,
   DesignStatus,
   FabricType,
   FitType,
   GarmentMeasurements,
+  MeasurementProfileType,
   PatternLibraryItem,
   ProductionStage,
 } from '../types';
@@ -457,12 +459,51 @@ function normalizeMeasurementSource(
   };
 }
 
-function isBodicePattern(value: unknown): value is {
-  controlPoints: Record<string, { x: number; y: number }>;
-  points: Array<{ x: number; y: number }>;
-  measurements: Record<string, number>;
-} {
+function isBodicePattern(value: unknown): value is BodicePatternResult {
   return !!value && typeof value === 'object' && 'controlPoints' in value;
+}
+
+const MEASUREMENT_PROFILE_TYPES: readonly MeasurementProfileType[] = [
+  'shirt',
+  'dress_kaba',
+  'skirt',
+  'trouser',
+  'blouse',
+  'custom',
+];
+
+/**
+ * Narrows loose/legacy profile-type strings to the canonical
+ * MeasurementProfileType union; unknown values collapse to 'custom'.
+ */
+function toMeasurementProfileType(
+  value: string | null | undefined
+): MeasurementProfileType | null {
+  if (!value) return null;
+  return (MEASUREMENT_PROFILE_TYPES as readonly string[]).includes(value)
+    ? (value as MeasurementProfileType)
+    : 'custom';
+}
+
+/** Maps a studio garment type onto the measurement-profile taxonomy. */
+function garmentTypeToProfileType(
+  garmentType: SupportedGarmentType
+): MeasurementProfileType {
+  switch (garmentType) {
+    case 'shirt':
+      return 'shirt';
+    case 'trouser':
+      return 'trouser';
+    case 'skirt':
+      return 'skirt';
+    case 'blouse':
+      return 'blouse';
+    case 'dress':
+    case 'gown':
+      return 'dress_kaba';
+    default:
+      return 'custom';
+  }
 }
 
 function normalizeGarmentLabel(garmentType: SupportedGarmentType) {
@@ -693,7 +734,7 @@ function buildMeasurementSnapshot(params: {
     wrist: nextMeasurements.aroundWrist,
     profileId,
     profileLabel,
-    profileType,
+    profileType: toMeasurementProfileType(profileType),
     capturedAt,
     metadata: {
       ...existingMetadata,
@@ -736,7 +777,8 @@ function normalizeMeasurementProfile(profile: unknown): MeasurementProfileOption
     profileType:
       asString(record.profileType) ||
       asString(record.garmentType) ||
-      asString(record.type),
+      asString(record.type) ||
+      undefined,
     isDefault: Boolean(record.isDefault),
     measurements,
     raw: record,
@@ -853,7 +895,7 @@ function getOrderStageStatus(order?: unknown): {
   const hasProductionPlan = Boolean(orderRecord.productionPlan);
 
   const hasOverdueStage = productionStages.some((stage) => {
-    const expectedDate = asString((stage as LooseRecord).expectedCompletionDate);
+    const expectedDate = asString(asRecord(stage)?.expectedCompletionDate);
     if (!expectedDate) return false;
     if (stage.status === 'completed') return false;
 
@@ -1964,7 +2006,7 @@ export function DesignStudio() {
           }),
           selectedMeasurementProfileId: profile.id,
           selectedMeasurementProfileLabel: profile.label,
-          selectedMeasurementProfileType: profile.profileType || null,
+          selectedMeasurementProfileType: toMeasurementProfileType(profile.profileType),
         });
       }
 
@@ -1991,7 +2033,7 @@ export function DesignStudio() {
       workspaceId: currentWorkspace.id,
       customerId: selectedOrder.customerId,
       label: profileName.trim(),
-      profileType: garmentType,
+      profileType: garmentTypeToProfileType(garmentType),
       measurements: buildGarmentMeasurements(measurements),
       fitType: selectedOrder.fitType || 'custom',
       isDefault: false,
@@ -2129,8 +2171,9 @@ export function DesignStudio() {
       selectedMeasurementProfileId: selectedMeasurementProfile?.id || profileLinkage.profileId || null,
       selectedMeasurementProfileLabel:
         selectedMeasurementProfile?.label || profileLinkage.profileLabel || null,
-      selectedMeasurementProfileType:
-        selectedMeasurementProfile?.profileType || profileLinkage.profileType || null,
+      selectedMeasurementProfileType: toMeasurementProfileType(
+        selectedMeasurementProfile?.profileType || profileLinkage.profileType
+      ),
     });
 
     if (

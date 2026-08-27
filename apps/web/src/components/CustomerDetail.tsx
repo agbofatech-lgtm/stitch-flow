@@ -13,7 +13,12 @@ import {
   X,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import type { BodyMeasurements, CustomerMeasurementProfile, GarmentMeasurements } from '../types';
+import type {
+  BodyMeasurements,
+  CustomerMeasurementProfile,
+  GarmentMeasurements,
+  MeasurementProfileType,
+} from '../types';
 
 type CustomerDetailProps = {
   customerId: string;
@@ -108,31 +113,33 @@ function createEmptyDraft(): ProfileDraft {
 }
 
 function toDraft(profile: CustomerMeasurementProfile): ProfileDraft {
+  const m = profile.measurements || {};
+
   return {
     label: profile.label || '',
-    bust: profile.bust?.toString() || '',
-    chest: profile.chest?.toString() || '',
-    waist: profile.waist?.toString() || '',
-    hip: profile.hip?.toString() || '',
-    neck: profile.neck?.toString() || '',
-    shoulder: profile.shoulder?.toString() || '',
-    sleeve: profile.sleeve?.toString() || '',
-    backLength: profile.backLength?.toString() || '',
-    bustSpan: profile.bustSpan?.toString() || '',
-    armholeDepth: profile.armholeDepth?.toString() || '',
-    thigh: profile.thigh?.toString() || '',
-    knee: profile.knee?.toString() || '',
-    ankle: profile.ankle?.toString() || '',
-    trouserLength: profile.trouserLength?.toString() || '',
-    skirtLength: profile.skirtLength?.toString() || '',
-    fullLength: profile.fullLength?.toString() || '',
-    inseam: profile.inseam?.toString() || '',
-    crotchDepth: profile.crotchDepth?.toString() || '',
-    shoulderToWaist: profile.shoulderToWaist?.toString() || '',
-    shoulderToHip: profile.shoulderToHip?.toString() || '',
-    sleeveOpening: profile.sleeveOpening?.toString() || '',
-    bicep: profile.bicep?.toString() || '',
-    wrist: profile.wrist?.toString() || '',
+    bust: m.bust?.toString() || '',
+    chest: m.chest?.toString() || '',
+    waist: m.waist?.toString() || '',
+    hip: m.hip?.toString() || '',
+    neck: m.neck?.toString() || '',
+    shoulder: m.shoulder?.toString() || '',
+    sleeve: m.sleeve?.toString() || '',
+    backLength: m.backLength?.toString() || '',
+    bustSpan: m.bustSpan?.toString() || '',
+    armholeDepth: m.armholeDepth?.toString() || '',
+    thigh: m.thigh?.toString() || '',
+    knee: m.knee?.toString() || '',
+    ankle: m.ankle?.toString() || '',
+    trouserLength: m.trouserLength?.toString() || '',
+    skirtLength: m.skirtLength?.toString() || '',
+    fullLength: m.fullLength?.toString() || '',
+    inseam: m.inseam?.toString() || '',
+    crotchDepth: m.crotchDepth?.toString() || '',
+    shoulderToWaist: m.shoulderToWaist?.toString() || '',
+    shoulderToHip: m.shoulderToHip?.toString() || '',
+    sleeveOpening: m.sleeveOpening?.toString() || '',
+    bicep: m.bicep?.toString() || '',
+    wrist: m.aroundWrist?.toString() || '',
     notes: profile.notes || '',
   };
 }
@@ -143,13 +150,8 @@ function parseNumber(value: string): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-function draftToProfileInput(
-  customerId: string,
-  draft: ProfileDraft
-): Omit<CustomerMeasurementProfile, 'id' | 'createdAt'> {
+function draftToMeasurements(draft: ProfileDraft): GarmentMeasurements {
   return {
-    customerId,
-    label: draft.label.trim(),
     bust: parseNumber(draft.bust),
     chest: parseNumber(draft.chest),
     waist: parseNumber(draft.waist),
@@ -172,8 +174,23 @@ function draftToProfileInput(
     shoulderToHip: parseNumber(draft.shoulderToHip),
     sleeveOpening: parseNumber(draft.sleeveOpening),
     bicep: parseNumber(draft.bicep),
-    wrist: parseNumber(draft.wrist),
+    aroundWrist: parseNumber(draft.wrist),
+  };
+}
+
+function draftToProfileInput(
+  workspaceId: string,
+  customerId: string,
+  draft: ProfileDraft,
+  profileType: MeasurementProfileType = 'custom'
+): Omit<CustomerMeasurementProfile, 'id' | 'createdAt' | 'updatedAt'> {
+  return {
+    workspaceId,
+    customerId,
+    label: draft.label.trim(),
+    profileType,
     notes: draft.notes.trim() || undefined,
+    measurements: draftToMeasurements(draft),
   };
 }
 
@@ -198,16 +215,17 @@ function toBodyMeasurementUpdates(
 
 function getProfileHighlights(profile: CustomerMeasurementProfile) {
   const highlights: Array<{ label: string; value: number }> = [];
+  const m = profile.measurements || {};
 
-  if (typeof profile.bust === 'number') highlights.push({ label: 'Bust', value: profile.bust });
-  if (typeof profile.chest === 'number') highlights.push({ label: 'Chest', value: profile.chest });
-  if (typeof profile.waist === 'number') highlights.push({ label: 'Waist', value: profile.waist });
-  if (typeof profile.hip === 'number') highlights.push({ label: 'Hip', value: profile.hip });
-  if (typeof profile.shoulder === 'number') {
-    highlights.push({ label: 'Shoulder', value: profile.shoulder });
+  if (typeof m.bust === 'number') highlights.push({ label: 'Bust', value: m.bust });
+  if (typeof m.chest === 'number') highlights.push({ label: 'Chest', value: m.chest });
+  if (typeof m.waist === 'number') highlights.push({ label: 'Waist', value: m.waist });
+  if (typeof m.hip === 'number') highlights.push({ label: 'Hip', value: m.hip });
+  if (typeof m.shoulder === 'number') {
+    highlights.push({ label: 'Shoulder', value: m.shoulder });
   }
-  if (typeof profile.sleeve === 'number') {
-    highlights.push({ label: 'Sleeve', value: profile.sleeve });
+  if (typeof m.sleeve === 'number') {
+    highlights.push({ label: 'Sleeve', value: m.sleeve });
   }
 
   return highlights.slice(0, 6);
@@ -221,6 +239,7 @@ export function CustomerDetail({
     customers,
     orders,
     selectedOrderId,
+    currentWorkspace,
     getCustomerMeasurementProfiles,
     addCustomerMeasurementProfile,
     updateCustomerMeasurementProfile,
@@ -272,45 +291,23 @@ export function CustomerDetail({
   const handleSave = () => {
     if (!draft.label.trim()) return;
 
-    const payload = draftToProfileInput(customerId, draft);
-
     if (editingProfileId) {
       updateCustomerMeasurementProfile(editingProfileId, {
-        label: payload.label,
-        bust: payload.bust,
-        chest: payload.chest,
-        waist: payload.waist,
-        hip: payload.hip,
-        neck: payload.neck,
-        shoulder: payload.shoulder,
-        sleeve: payload.sleeve,
-        backLength: payload.backLength,
-        bustSpan: payload.bustSpan,
-        armholeDepth: payload.armholeDepth,
-        thigh: payload.thigh,
-        knee: payload.knee,
-        ankle: payload.ankle,
-        trouserLength: payload.trouserLength,
-        skirtLength: payload.skirtLength,
-        fullLength: payload.fullLength,
-        inseam: payload.inseam,
-        crotchDepth: payload.crotchDepth,
-        shoulderToWaist: payload.shoulderToWaist,
-        shoulderToHip: payload.shoulderToHip,
-        sleeveOpening: payload.sleeveOpening,
-        bicep: payload.bicep,
-        wrist: payload.wrist,
-        notes: payload.notes,
+        label: draft.label.trim(),
+        notes: draft.notes.trim() || undefined,
+        measurements: draftToMeasurements(draft),
       });
     } else {
-      addCustomerMeasurementProfile(payload);
+      addCustomerMeasurementProfile(
+        draftToProfileInput(currentWorkspace.id, customerId, draft)
+      );
     }
 
     closeForm();
   };
 
   const handleLoadIntoStudio = (profile: CustomerMeasurementProfile) => {
-    const garmentMeasurements = draftToProfileInput(customerId, toDraft(profile));
+    const garmentMeasurements = profile.measurements || {};
     setGarmentMeasurements(garmentMeasurements);
     setDesignMeasurements(toBodyMeasurementUpdates(garmentMeasurements));
     setView('design-studio');

@@ -49,7 +49,7 @@ export function SplashScreen({
 
     updatePreference();
 
-    if ('addEventListener' in mediaQuery) {
+    if (typeof mediaQuery.addEventListener === 'function') {
       mediaQuery.addEventListener('change', updatePreference);
       return () => mediaQuery.removeEventListener('change', updatePreference);
     }

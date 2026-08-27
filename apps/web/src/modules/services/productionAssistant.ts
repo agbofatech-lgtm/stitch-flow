@@ -12,7 +12,7 @@ import {
   ProductionPlan,
   SewingOperation,
   FitRiskWarning,
-} from '../types';
+} from '../../types';
 
 export interface GenerateProductionPlanInput {
   garmentType?: GarmentType | null;

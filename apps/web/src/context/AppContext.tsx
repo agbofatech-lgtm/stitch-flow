@@ -190,6 +190,8 @@ function resolveWorkspace(workspaceId: string, tierCode: TierCode): Workspace {
       name: 'My Workspace',
       tier: fallbackTier,
       tierId: fallbackTier.id,
+      billingStatus: 'active' as const,
+      createdAt: new Date(),
       defaultCurrency: 'GHS',
       phone: '',
       email: '',
@@ -219,7 +221,10 @@ function resolveMember(workspaceId: string, memberId: string): WorkspaceMember {
       fullName: 'Klenam Kendra',
       email: 'studio@example.com',
       phone: '+233240000000',
+      isActive: true,
+      createdAt: new Date(),
     },
+    canExportPdf: true,
     canManageCustomers: true,
     canManageOrders: true,
     canManagePayments: true,
@@ -345,7 +350,11 @@ function getPatternTypeFromLegacyItem(
 ): PatternLibraryItem['patternType'] {
   if (item.patternType) return item.patternType;
 
-  switch (item.garmentType || item.patternKind) {
+  // Legacy items may carry pattern-type values (e.g. 'suit', 'sleeve',
+  // 'collar') in garmentType/patternKind, so compare as plain strings.
+  const legacyKind: string | undefined = item.garmentType || item.patternKind;
+
+  switch (legacyKind) {
     case 'bodice':
       return 'bodice';
     case 'shirt':

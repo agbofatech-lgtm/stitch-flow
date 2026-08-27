@@ -635,7 +635,6 @@ const balanceDue = Math.max(0, totalAmountNumber - amountPaidNumber);
         customerId: form.customerId,
         orderId: form.orderId || null,
         invoiceNumber: form.invoiceNumber.trim(),
-        status: 'pending',
         dueDate: form.dueDate || null,
         totalAmount: totalAmountNumber,
         amountPaid: amountPaidNumber,

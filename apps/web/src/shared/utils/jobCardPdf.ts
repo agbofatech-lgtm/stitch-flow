@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import { format } from 'date-fns';
-import type { Order } from '../../components/types';
+import type { Order } from '../../types';
 
 export async function downloadJobCardPdf(order: Order, branding: any) {
   const doc = new jsPDF();

@@ -2,13 +2,14 @@ import { BRAND } from '../../config/brand';
 import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
 import { generateStylePattern, type StylePatternKind } from './patternEngine';
 import type {
+  BodicePatternResult,
   DesignInspiration,
   FabricRecord,
   GarmentMeasurements,
   Order,
   ProductionPlan,
   ProductionStage,
-} from '../types';
+} from '../../types';
 
 type JobSheetExportInput = {
   order: Order;
@@ -16,6 +17,8 @@ type JobSheetExportInput = {
   selectedFabric?: FabricRecord | null;
   workspaceName?: string;
   logoUrl?: string | null;
+  brandColor?: string | null;
+  useLogoAsWatermark?: boolean;
   phone?: string | null;
   email?: string | null;
   address?: string | null;
@@ -109,11 +112,7 @@ function mapGarmentToPatternKind(garmentType?: string | null): StylePatternKind 
   }
 }
 
-function isBodicePattern(value: unknown): value is {
-  controlPoints: Record<string, Point>;
-  points: Point[];
-  measurements: Record<string, number>;
-} {
+function isBodicePattern(value: unknown): value is BodicePatternResult {
   return !!value && typeof value === 'object' && 'controlPoints' in value;
 }
 
@@ -429,6 +428,8 @@ export function exportOrderJobSheetPdf({
   selectedFabric,
   workspaceName,
   logoUrl,
+  brandColor,
+  useLogoAsWatermark,
   phone,
   email,
   address,

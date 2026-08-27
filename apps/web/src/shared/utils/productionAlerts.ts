@@ -312,7 +312,7 @@ export function checkOverdueStages(
 
   return stages
     .filter((stage) => isStageActive(stage) || isStagePending(stage))
-    .map((stage) => {
+    .map((stage): StageOverdueAlert | null => {
       const durationDays = DEFAULT_STAGE_DURATION_DAYS[stage.code] || 1;
       const startedAt = toDate(stage.startedAt);
       const dueDate = toDate(order.dueDate);

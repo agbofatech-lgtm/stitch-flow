@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { FEATURE_COMPARISON } from '@modules/services/tierEnforcement';
 import type { CurrencyCode } from '../types';
+import { safeCurrency } from '@shared/utils/currency';
 import { BRAND } from '../config/brand';
 import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
 import { fetchSettings, updateSetting } from '@shared/api/settings';
@@ -94,8 +95,8 @@ export function Settings() {
         setProfileForm((prev) => ({
           ...prev,
           name: String(workspaceProfile.name ?? prev.name ?? ''),
-          defaultCurrency: String(
-            workspaceProfile.defaultCurrency ?? prev.defaultCurrency ?? 'GHS'
+          defaultCurrency: safeCurrency(
+            String(workspaceProfile.defaultCurrency ?? prev.defaultCurrency ?? 'GHS')
           ),
           phone: String(workspaceProfile.phone ?? prev.phone ?? ''),
           email: String(workspaceProfile.email ?? prev.email ?? ''),
@@ -392,7 +393,7 @@ export function Settings() {
                 onChange={(e) =>
                   setProfileForm((prev) => ({
                     ...prev,
-                    defaultCurrency: e.target.value,
+                    defaultCurrency: safeCurrency(e.target.value),
                   }))
                 }
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"

@@ -4,8 +4,9 @@ declare global {
   namespace Express {
     interface UserJwtPayload {
       sub: string;
-      email?: string;
-      role?: string;
+      role: 'user' | 'admin';
+      email: string;
+      tenantUserId?: string;
     }
 
     interface Request {
@@ -13,5 +14,3 @@ declare global {
     }
   }
 }
-
-export {};

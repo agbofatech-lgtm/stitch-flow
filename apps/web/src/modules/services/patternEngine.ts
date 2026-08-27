@@ -4,7 +4,7 @@ import {
   BodiceControlPoints,
   BodiceCalculatedMeasurements,
   BodyMeasurements,
-} from '../types';
+} from '../../types';
 
 export type StylePatternKind = 'bodice' | 'shirt' | 'trouser' | 'skirt' | 'kaftan';
 
@@ -89,11 +89,15 @@ function round1(value: number): number {
 function asMeasurementMap(
   measurements: Partial<ExtendedMeasurements>
 ): Record<string, number | undefined> {
+  // `notes` is the only non-numeric measurement field; exclude it so the
+  // numeric measurement map stays honest. Pattern math is unchanged.
+  const { notes: _notes, ...numericMeasurements } = measurements;
+
   const chest = measurements.chest ?? measurements.bust;
   const bust = measurements.bust ?? measurements.chest;
 
   return {
-    ...measurements,
+    ...numericMeasurements,
     chest,
     bust,
   };

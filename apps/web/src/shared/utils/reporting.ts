@@ -14,10 +14,10 @@ export type ReportingDateRange = {
 
 type MinimalOrder = {
   id: string;
-  createdAt?: string;
-  updatedAt?: string;
-  dueDate?: string | null;
-  deliveredAt?: string | null;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  dueDate?: string | Date | null;
+  deliveredAt?: string | Date | null;
   status?: string | null;
   orderType?: string | null;
   garmentType?: string | null;
@@ -30,13 +30,13 @@ type MinimalProductionStage = {
   title?: string | null;
   stage?: string | null;
   status?: string | null;
-  startedAt?: string | null;
-  completedAt?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-  expectedCompletionDate?: string | null;
-  deadline?: string | null;
-  dueDate?: string | null;
+  startedAt?: string | Date | null;
+  completedAt?: string | Date | null;
+  updatedAt?: string | Date | null;
+  createdAt?: string | Date | null;
+  expectedCompletionDate?: string | Date | null;
+  deadline?: string | Date | null;
+  dueDate?: string | Date | null;
 };
 
 type MinimalMaterialUsage = {
@@ -46,7 +46,7 @@ type MinimalMaterialUsage = {
   referenceOrderId?: string | null;
   quantityUsed: number;
   unit?: string | null;
-  createdAt?: string | null;
+  createdAt?: string | Date | null;
 };
 
 type MinimalFabricRecord = {
@@ -456,9 +456,9 @@ function getDeliveredAt(order: MinimalOrder) {
   return completedStages[completedStages.length - 1];
 }
 
-function parseDate(value?: string | null) {
+function parseDate(value?: string | Date | null) {
   if (!value) return null;
-  const parsed = new Date(value);
+  const parsed = value instanceof Date ? value : new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 

@@ -105,6 +105,6 @@ export async function fetchOverdueOrdersReport(): Promise<OverdueOrderReportItem
 
 export async function fetchLowStockMaterialsReport(): Promise<LowStockMaterialReportItem[]> {
   const res = await fetch(`${API_BASE_URL}/reports/low-stock-materials`);
-  return parseJson<LowStockMaterialReportItem[]>(res), new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)) ]);
+  return parseJson<LowStockMaterialReportItem[]>(res);
 }
 

@@ -43,6 +43,7 @@ import {
   GarmentMeasurements,
   GarmentType,
   Order,
+  OrderMeasurementSnapshot,
 } from '../types';
 import {
   analyzeDesignInspiration,
@@ -923,7 +924,7 @@ function OrderFormModal({
       taxTotal,
       discountTotal,
       totalAmount,
-      currency: safeCurrency(undefined, form.currency),
+      currency: safeCurrency(form.currency),
     };
 
     if (mode === 'create') {
@@ -1102,7 +1103,7 @@ function OrderFormModal({
                     Total Amount
                   </p>
                   <p className="mt-2 text-2xl font-bold text-slate-900">
-                    {formatCurrency(totalAmount, safeCurrency(undefined, form.currency || workspaceCurrency))}
+                    {formatCurrency(totalAmount, safeCurrency(form.currency || workspaceCurrency))}
                   </p>
                 </div>
 
@@ -1544,7 +1545,9 @@ function OrderStatusBadge({ status }: { status: string }) {
   );
 }
 
-function getMeasurementCount(measurementSnapshot?: Record<string, unknown>): number {
+function getMeasurementCount(
+  measurementSnapshot?: OrderMeasurementSnapshot | Record<string, unknown> | null
+): number {
   if (!measurementSnapshot) return 0;
 
   return Object.entries(measurementSnapshot).filter(([key, value]) => {
@@ -1554,7 +1557,7 @@ function getMeasurementCount(measurementSnapshot?: Record<string, unknown>): num
 }
 
 function renderMeasurementChips(
-  measurementSnapshot?: Record<string, unknown>
+  measurementSnapshot?: OrderMeasurementSnapshot | Record<string, unknown> | null
 ): Array<{ label: string; value: string }> {
   if (!measurementSnapshot) return [];
 
@@ -1669,7 +1672,7 @@ function parseMeasurementValues(
 ): Partial<GarmentMeasurements> {
   return Object.fromEntries(
     Object.entries(values)
-      .map(([key, value]) => [key, Number(value)])
+      .map(([key, value]): [string, number] => [key, Number(value)])
       .filter(([, value]) => Number.isFinite(value) && value > 0)
   ) as Partial<GarmentMeasurements>;
 }

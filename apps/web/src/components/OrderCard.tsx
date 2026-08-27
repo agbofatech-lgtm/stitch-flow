@@ -20,6 +20,7 @@ import type {
   Order,
   OrderAlert,
   OrderMaterialUsage,
+  OrderMeasurementSnapshot,
   ProductionStage,
   ProductionStageCode,
 } from '../types';
@@ -410,7 +411,9 @@ function OrderStatusBadge({ status }: { status: string }) {
   );
 }
 
-function getMeasurementCount(measurementSnapshot?: Record<string, unknown>): number {
+function getMeasurementCount(
+  measurementSnapshot?: OrderMeasurementSnapshot | Record<string, unknown> | null
+): number {
   if (!measurementSnapshot) return 0;
 
   return Object.entries(measurementSnapshot).filter(([key, value]) => {
@@ -420,7 +423,7 @@ function getMeasurementCount(measurementSnapshot?: Record<string, unknown>): num
 }
 
 function renderMeasurementChips(
-  measurementSnapshot?: Record<string, unknown>
+  measurementSnapshot?: OrderMeasurementSnapshot | Record<string, unknown> | null
 ): Array<{ label: string; value: string }> {
   if (!measurementSnapshot) return [];
 

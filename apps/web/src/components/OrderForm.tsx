@@ -147,32 +147,7 @@ function countMeasurements(snapshot?: Partial<GarmentMeasurements> | null) {
 function profileToSnapshot(profile?: CustomerMeasurementProfile | null): Partial<GarmentMeasurements> {
   if (!profile) return {};
 
-  return {
-    bust: profile.bust,
-    chest: profile.chest,
-    waist: profile.waist,
-    hip: profile.hip,
-    neck: profile.neck,
-    shoulder: profile.shoulder,
-    sleeve: profile.sleeve,
-    backLength: profile.backLength,
-    bustSpan: profile.bustSpan,
-    armholeDepth: profile.armholeDepth,
-    thigh: profile.thigh,
-    knee: profile.knee,
-    ankle: profile.ankle,
-    trouserLength: profile.trouserLength,
-    skirtLength: profile.skirtLength,
-    fullLength: profile.fullLength,
-    inseam: profile.inseam,
-    crotchDepth: profile.crotchDepth,
-    shoulderToWaist: profile.shoulderToWaist,
-    shoulderToHip: profile.shoulderToHip,
-    sleeveOpening: profile.sleeveOpening,
-    bicep: profile.bicep,
-    wrist: profile.wrist,
-    notes: profile.notes,
-  };
+  return { ...(profile.measurements || {}) };
 }
 
 function buildInitialStages(existing?: ProductionStage[] | null): ProductionStage[] {

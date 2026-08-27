@@ -37,7 +37,7 @@ export async function fetchFabricRecords(): Promise<ApiFabricRecord[]> {
     throw new Error('Failed to fetch fabric records');
   }
 
-  return response.json().catch(e => { console.warn("API error", e); return []; }), new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)) ]);
+  return response.json();
 }
 
 export async function createFabricRecord(payload: {
@@ -69,7 +69,7 @@ export async function createFabricRecord(payload: {
     throw new Error(message || 'Failed to create fabric record');
   }
 
-  return response.json().catch(e => { console.warn("API error", e); return []; });
+  return response.json();
 }
 
 export async function updateFabricRecordApi(
@@ -91,36 +91,45 @@ export async function updateFabricRecordApi(
     isActive: boolean;
   }>
 ): Promise<ApiFabricRecord> {
-  const response = await fetch(`${API_BASE}/materials/fabrics/${encodeURIComponent(id);
+  const response = await fetch(`${API_BASE}/materials/fabrics/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
 
   if (!response.ok) {
     const message = await response.text();
     throw new Error(message || 'Failed to update fabric record');
   }
 
-  return response.json().catch(e => { console.warn("API error", e); return []; });
+  return response.json();
 }
 
 export async function deleteFabricRecordApi(id: string): Promise<{ success: true }> {
-  const response = await fetch(`${API_BASE}/materials/fabrics/${encodeURIComponent(id);
+  const response = await fetch(`${API_BASE}/materials/fabrics/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
 
   if (!response.ok) {
     const message = await response.text();
     throw new Error(message || 'Failed to delete fabric record');
   }
 
-  return response.json().catch(e => { console.warn("API error", e); return []; });
+  return response.json();
 }
 
 export async function fetchMaterialUsagesByOrder(orderId: string): Promise<ApiMaterialUsage[]> {
   const response = await fetch(
-    `${API_BASE}/materials/usages/order/${encodeURIComponent(orderId);
+    `${API_BASE}/materials/usages/order/${encodeURIComponent(orderId)}`
+  );
 
   if (!response.ok) {
     throw new Error('Failed to fetch material usages');
   }
 
-  return response.json().catch(e => { console.warn("API error", e); return []; });
+  return response.json();
 }
 
 export async function createMaterialUsage(payload: {
@@ -129,7 +138,7 @@ export async function createMaterialUsage(payload: {
   quantityUsed: number;
   unit: string;
   notes?: string | null;
-}), new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)) ]): Promise<ApiMaterialUsage> {
+}): Promise<ApiMaterialUsage> {
   const response = await fetch(`${API_BASE}/materials/usages`, {
     method: 'POST',
     headers: {
@@ -143,18 +152,20 @@ export async function createMaterialUsage(payload: {
     throw new Error(message || 'Failed to create material usage');
   }
 
-  return response.json().catch(e => { console.warn("API error", e); return []; });
+  return response.json();
 }
 
 export async function deleteMaterialUsageApi(id: string): Promise<{ success: true }> {
-  const response = await fetch(`${API_BASE}/materials/usages/${encodeURIComponent(id);
+  const response = await fetch(`${API_BASE}/materials/usages/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
 
   if (!response.ok) {
     const message = await response.text();
     throw new Error(message || 'Failed to delete material usage');
   }
 
-  return response.json().catch(e => { console.warn("API error", e); return []; });
+  return response.json();
 }
 
 export async function fetchLowStockFabrics(): Promise<ApiFabricRecord[]> {
@@ -164,5 +175,5 @@ export async function fetchLowStockFabrics(): Promise<ApiFabricRecord[]> {
     throw new Error('Failed to fetch low stock fabrics');
   }
 
-  return response.json().catch(e => { console.warn("API error", e); return []; }), new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)) ]);
+  return response.json();
 }

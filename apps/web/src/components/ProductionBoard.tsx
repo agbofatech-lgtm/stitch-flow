@@ -136,10 +136,10 @@ function mapApiProductionStages(stages?: unknown): ProductionStage[] {
       code: stage.code,
       label: stage.label,
       status: stage.status,
-      startedAt: stage.startedAt || null,
-      completedAt: stage.completedAt || null,
-      skippedAt: stage.skippedAt || null,
-      reopenedAt: stage.reopenedAt || null,
+      startedAt: stage.startedAt ? new Date(stage.startedAt) : null,
+      completedAt: stage.completedAt ? new Date(stage.completedAt) : null,
+      skippedAt: stage.skippedAt ? new Date(stage.skippedAt) : null,
+      reopenedAt: stage.reopenedAt ? new Date(stage.reopenedAt) : null,
       notes: stage.notes || '',
     }));
 }

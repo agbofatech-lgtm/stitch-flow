@@ -12,7 +12,7 @@ import type {
   TierFeatureComparisonPlan,
   Workspace,
   WorkspaceMember,
-} from '../types';
+} from '../../types';
 import { customers, tiers, workspaceMembers } from '@data/mockData';
 
 export interface TierLimits {

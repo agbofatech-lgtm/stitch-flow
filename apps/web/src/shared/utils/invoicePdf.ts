@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import { format } from 'date-fns';
-import { formatCurrency } from '@shared/utils/currency';
+import { formatCurrency, safeCurrency } from '@shared/utils/currency';
 import type { ApiInvoice } from '@shared/api/invoices';
 import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
 
@@ -126,7 +126,7 @@ export async function downloadInvoicePdf(
   branding?: InvoicePdfBranding
 ) {
   const doc = new jsPDF();
-  const currency = invoice.currency || 'GHS';
+  const currency = safeCurrency(invoice.currency);
   const brandColor = branding?.brandColor || '#0F6E8C';
   const workspaceName = branding?.workspaceName || 'StitchFlow Workspace';
   const logoSource = branding?.logoUrl || stitchflowLogo;
