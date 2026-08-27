@@ -1,0 +1,92 @@
+{
+  "environment": "in-process supertest + embedded PostgreSQL 18.4 (jest, single workspace)",
+  "dataset": {
+    "customers": 300,
+    "orders": 200,
+    "syncChanges": 200
+  },
+  "measuredAt": "2026-08-27T13:19:07.166Z",
+  "health": {
+    "live": {
+      "n": 200,
+      "p50": 1.25,
+      "p95": 1.47,
+      "p99": 2.56,
+      "max": 9.09
+    },
+    "readyWithDbProbe": {
+      "n": 100,
+      "p50": 1.49,
+      "p95": 2.14,
+      "p99": 4.28,
+      "max": 4.52
+    }
+  },
+  "apiCustomerList300Rows": {
+    "n": 50,
+    "p50": 5.76,
+    "p95": 8.84,
+    "p99": 9.53,
+    "max": 9.53
+  },
+  "apiDashboardSummary": {
+    "n": 30,
+    "p50": 3.8,
+    "p95": 6.67,
+    "p99": 22.73,
+    "max": 22.73
+  },
+  "syncDeltaPull200": {
+    "n": 30,
+    "p50": 4.43,
+    "p95": 6.67,
+    "p99": 6.86,
+    "max": 6.86
+  },
+  "syncMutationBatch50": {
+    "totalMs": 73.35,
+    "perMutationMs": 1.47
+  },
+  "explainAnalyze": {
+    "customerListByWorkspace": {
+      "indexesPresent": [
+        "idx_customers_workspace_id"
+      ],
+      "chosenPlan": "Sort -> Bitmap Heap Scan -> Bitmap Index Scan",
+      "executionMs": 0.16
+    },
+    "syncDeltaPull": {
+      "indexesPresent": [
+        "idx_sync_changes_workspace_seq"
+      ],
+      "chosenPlan": "Limit -> Index Scan",
+      "executionMs": 0.071
+    },
+    "auditByWorkspace": {
+      "indexesPresent": [
+        "idx_audit_logs_workspace_id"
+      ],
+      "chosenPlan": "Limit -> Sort -> Index Scan",
+      "executionMs": 0.015
+    }
+  },
+  "frontendBundle": {
+    "totalKb": 2652.8,
+    "jsKb": 1624.7,
+    "cssKb": 48.3,
+    "largestJsFiles": [
+      {
+        "file": "index-DoBDNhdU.js",
+        "kb": 1221.2
+      },
+      {
+        "file": "html2canvas.esm-DXEQVQnt.js",
+        "kb": 196.3
+      },
+      {
+        "file": "index.es-VqP1XskW.js",
+        "kb": 155.1
+      }
+    ]
+  }
+}
