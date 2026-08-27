@@ -16,6 +16,7 @@ module.exports = [
   'error_records',
   'incidents',
   'integration_outbox',
+  'api_keys',
   'subscriptions',
   'billing_events',
   'customers',

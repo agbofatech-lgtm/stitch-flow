@@ -114,6 +114,11 @@ const QUERIES = {
     SELECT s.id, s.workspace_id FROM subscriptions s
     LEFT JOIN workspaces w ON w.id = s.workspace_id
     WHERE w.id IS NULL`,
+  // ---- Phase 8 domains ----------------------------------------------------
+  'referential/orphan_api_key_workspace': `
+    SELECT k.id, k.workspace_id FROM api_keys k
+    LEFT JOIN workspaces w ON w.id = k.workspace_id
+    WHERE w.id IS NULL`,
   // ---- Informational (never counts as a violation) -----------------------
   'info/sync_cursor_stats': `
     SELECT COALESCE(MAX(seq), 0) AS max_seq, COUNT(*) AS rows

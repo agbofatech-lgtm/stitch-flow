@@ -24,6 +24,7 @@ const TABLES = [
   'incidents',
   'error_records',
   'usage_events',
+  'api_keys',
   'invoices',
   'orders',
   'customers',
@@ -56,7 +57,14 @@ beforeEach(async () => {
       ('N8N', false, 'Future n8n automation (interface only)'),
       ('CUSTOMER_PORTAL', false, 'Customer-facing portal (Phase 7: foundation)'),
       ('WHATSAPP', false, 'Future WhatsApp provider (interface only)'),
-      ('ADVANCED_ANALYTICS', false, 'Advanced analytics (future)')
+      ('ADVANCED_ANALYTICS', false, 'Advanced analytics (future)'),
+      ('DEVELOPER_DASHBOARD', false, 'Developer dashboard (Phase 8)'),
+      ('DEVELOPER_API', false, 'Developer API + keys (Phase 8)'),
+      ('USAGE_DASHBOARD', false, 'Usage dashboard (Phase 8)'),
+      ('WEBHOOK_MANAGEMENT', false, 'Webhook management (Phase 8)'),
+      ('PROVIDER_REGISTRY', false, 'Provider registry (Phase 8)'),
+      ('AI_FEATURES', false, 'AI features boundary (Phase 8)'),
+      ('AUTOMATION_FEATURES', false, 'Automation boundary (Phase 8)')
     ON CONFLICT (flag_key) DO UPDATE SET enabled = false, updated_by = NULL
   `);
   // Reseed the legacy anchor workspace created by migration 008.

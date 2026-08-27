@@ -27,6 +27,8 @@ import { usageRoutes } from './routes/usageRoutes';
 import { supportRoutes } from './routes/supportRoutes';
 import { platformRoutes } from './routes/platformRoutes';
 import { portalLoginRoutes, portalRoutes } from './routes/portalRoutes';
+import { developerRoutes } from './routes/developerRoutes';
+import { apiV1Routes } from './routes/apiV1Routes';
 
 /**
  * Canonical StitchFlow Express application.
@@ -116,6 +118,12 @@ app.use('/platform', platformRoutes);
 
 // Phase 7 — customer portal: SEPARATE auth boundary (portal audience).
 app.use('/portal', portalLoginRoutes, portalRoutes);
+
+// Phase 8 — developer control plane: API-key management (staff JWT only)
+// and the versioned, API-key-authenticated Developer API. Both fail closed
+// while the DEVELOPER_API feature flag is OFF.
+app.use('/developers', authMiddleware, requireWorkspace, developerRoutes);
+app.use('/api/v1', apiV1Routes);
 
 // Commercial routes (Phase 5): per-route middleware — the webhook is
 // signature-verified rather than JWT-authenticated; everything else is

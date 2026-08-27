@@ -5,47 +5,47 @@
     "orders": 200,
     "syncChanges": 200
   },
-  "measuredAt": "2026-08-27T21:13:03.972Z",
+  "measuredAt": "2026-08-27T21:59:11.539Z",
   "health": {
     "live": {
       "n": 200,
-      "p50": 1.28,
-      "p95": 1.5,
-      "p99": 2.35,
-      "max": 6.99
+      "p50": 1.39,
+      "p95": 1.59,
+      "p99": 3.57,
+      "max": 7.54
     },
     "readyWithDbProbe": {
       "n": 100,
-      "p50": 1.54,
-      "p95": 1.76,
-      "p99": 2.34,
-      "max": 4.01
+      "p50": 1.71,
+      "p95": 1.89,
+      "p99": 2.94,
+      "max": 3.43
     }
   },
   "apiCustomerList300Rows": {
     "n": 50,
-    "p50": 4.98,
-    "p95": 7.41,
-    "p99": 9.42,
-    "max": 9.42
+    "p50": 5.01,
+    "p95": 6.76,
+    "p99": 8.33,
+    "max": 8.33
   },
   "apiDashboardSummary": {
     "n": 30,
-    "p50": 3.41,
-    "p95": 4.67,
-    "p99": 20.97,
-    "max": 20.97
+    "p50": 3.81,
+    "p95": 5.08,
+    "p99": 30.35,
+    "max": 30.35
   },
   "syncDeltaPull200": {
     "n": 30,
-    "p50": 4.39,
-    "p95": 5.84,
-    "p99": 8.11,
-    "max": 8.11
+    "p50": 4.47,
+    "p95": 6.02,
+    "p99": 6.06,
+    "max": 6.06
   },
   "syncMutationBatch50": {
-    "totalMs": 58.96,
-    "perMutationMs": 1.18
+    "totalMs": 64.86,
+    "perMutationMs": 1.3
   },
   "explainAnalyze": {
     "customerListByWorkspace": {
@@ -53,22 +53,40 @@
         "idx_customers_workspace_id"
       ],
       "chosenPlan": "Sort -> Bitmap Heap Scan -> Bitmap Index Scan",
-      "executionMs": 0.204
+      "executionMs": 0.174
     },
     "syncDeltaPull": {
       "indexesPresent": [
         "idx_sync_changes_workspace_seq"
       ],
       "chosenPlan": "Limit -> Index Scan",
-      "executionMs": 0.086
+      "executionMs": 0.08
     },
     "auditByWorkspace": {
       "indexesPresent": [
         "idx_audit_logs_workspace_id"
       ],
       "chosenPlan": "Limit -> Sort -> Index Scan",
-      "executionMs": 0.015
+      "executionMs": 0.016
     }
   },
-  "frontendBundle": "dist not present in this run"
+  "frontendBundle": {
+    "totalKb": 2652.8,
+    "jsKb": 1624.7,
+    "cssKb": 48.3,
+    "largestJsFiles": [
+      {
+        "file": "index-DoBDNhdU.js",
+        "kb": 1221.2
+      },
+      {
+        "file": "html2canvas.esm-DXEQVQnt.js",
+        "kb": 196.3
+      },
+      {
+        "file": "index.es-VqP1XskW.js",
+        "kb": 155.1
+      }
+    ]
+  }
 }

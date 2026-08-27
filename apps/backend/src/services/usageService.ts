@@ -10,6 +10,7 @@ const ALLOWED_EVENT_NAMES = new Set([
   'workflow_abandoned', 'error_occurred', 'sync_failed', 'sync_completed',
   'export_generated', 'appointment_created', 'customer_created',
   'order_created', 'measurement_created', 'fitting_completed',
+  'api_request', // Phase 8 developer-API metering (method/path/status only)
 ]);
 const SENSITIVE_KEY = /password|token|secret|apikey|authorization|databaseurl/i;
 
@@ -24,6 +25,32 @@ function sanitizeMetadata(meta: unknown): Record<string, unknown> {
 }
 
 export const usageService = {
+  /**
+   * Phase 8 — bounded developer-API metering. Records ONE row per API call
+   * with only {method, path, status}; never the key, headers, query or body.
+   */
+  async recordApiCall(input: {
+    workspaceId: string;
+    keyPrefix: string;
+    method: string;
+    path: string;
+    status: number;
+  }) {
+    await query(
+      `INSERT INTO usage_events (workspace_id, session_id, event_name, feature, module, metadata)
+       VALUES ($1, $2, 'api_request', 'developer_api', 'api', $3)`,
+      [
+        input.workspaceId,
+        input.keyPrefix.slice(0, 64),
+        JSON.stringify(sanitizeMetadata({
+          method: input.method,
+          path: input.path.slice(0, 128),
+          status: input.status,
+        })),
+      ]
+    );
+  },
+
   async ingest(workspaceId: string, userId: string, events: Array<Record<string, unknown>>) {
     if (!Array.isArray(events) || events.length === 0) {
       return { accepted: 0, rejected: 1, reason: 'events array required' };

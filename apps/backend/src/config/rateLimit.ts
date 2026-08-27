@@ -45,6 +45,19 @@ export const eventsRateLimit = rateLimit({
 });
 
 /**
+ * Phase 8: developer control-plane limiter — covers API-key creation and
+ * webhook/provider management (identity-aware via IP + token, same shared
+ * express-rate-limit infrastructure as every other limiter; not a second
+ * independent rate-limit system).
+ */
+export const developerRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: testing ? 1000 : 60,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+/**
  * Phase 5: commercial API limiter — protects plan/entitlement/checkout
  * endpoints from abuse without hampering normal client refreshes.
  */
