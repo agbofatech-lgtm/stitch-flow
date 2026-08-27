@@ -2,6 +2,7 @@ import { pool, query } from '../src/config/db';
 
 /** Tables reset between tests (schema_migrations is preserved). */
 const TABLES = [
+  'processed_mutations',
   'order_material_usages',
   'order_production_stage_events',
   'order_production_stages',
@@ -21,11 +22,18 @@ const TABLES = [
   'feature_requests',
   'license_devices',
   'licenses',
+  'workspace_users',
+  'workspaces',
   'users',
 ];
 
 beforeEach(async () => {
   await query(`TRUNCATE TABLE ${TABLES.join(', ')} CASCADE`);
+  // Reseed the legacy anchor workspace created by migration 008.
+  await query(
+    `INSERT INTO workspaces (id, name) VALUES ('default-workspace', 'Default Workspace')
+     ON CONFLICT (id) DO NOTHING`
+  );
 });
 
 afterAll(async () => {

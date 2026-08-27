@@ -20,7 +20,8 @@ type PaymentAnalyticsRow = {
 
 export const dashboardRoutes = Router();
 
-dashboardRoutes.get('/summary', async (_req, res) => {
+dashboardRoutes.get('/summary', async (req, res) => {
+  const ws = req.workspaceId;
   try {
     const [
       customersResult,
@@ -30,28 +31,40 @@ dashboardRoutes.get('/summary', async (_req, res) => {
       balancesResult,
       dueAlertsResult,
     ] = await Promise.all([
-      query<CountRow>(`SELECT COUNT(*)::text AS count FROM customers`),
-      query<CountRow>(`SELECT COUNT(*)::text AS count FROM orders`),
+      query<CountRow>(
+        `SELECT COUNT(*)::text AS count FROM customers WHERE workspace_id = $1 AND deleted_at IS NULL`,
+        [ws]
+      ),
+      query<CountRow>(
+        `SELECT COUNT(*)::text AS count FROM orders WHERE workspace_id = $1 AND deleted_at IS NULL`,
+        [ws]
+      ),
       query<CountRow>(
         `
         SELECT COUNT(*)::text AS count
         FROM orders
-        WHERE status IN ('draft', 'in_progress', 'ready')
-        `
+        WHERE workspace_id = $1 AND deleted_at IS NULL
+          AND status IN ('draft', 'in_progress', 'ready')
+        `,
+        [ws]
       ),
       query<RevenueRow>(
         `
         SELECT COALESCE(SUM(total_amount), 0)::text AS total_revenue
         FROM orders
-        WHERE status != 'cancelled'
-        `
+        WHERE workspace_id = $1 AND deleted_at IS NULL
+          AND status != 'cancelled'
+        `,
+        [ws]
       ),
       query<BalanceRow>(
         `
         SELECT COALESCE(SUM(balance_due), 0)::text AS pending_balances
         FROM invoices
-        WHERE status IN ('pending', 'partial', 'overdue')
-        `
+        WHERE workspace_id = $1 AND deleted_at IS NULL
+          AND status IN ('pending', 'partial', 'overdue')
+        `,
+        [ws]
       ),
       query<CountRow>(
         `
@@ -59,7 +72,8 @@ dashboardRoutes.get('/summary', async (_req, res) => {
         FROM (
           SELECT id
           FROM orders
-          WHERE due_date IS NOT NULL
+          WHERE workspace_id = $1 AND deleted_at IS NULL
+            AND due_date IS NOT NULL
             AND due_date <= NOW()
             AND status NOT IN ('delivered', 'cancelled')
 
@@ -67,11 +81,13 @@ dashboardRoutes.get('/summary', async (_req, res) => {
 
           SELECT id
           FROM invoices
-          WHERE due_date IS NOT NULL
+          WHERE workspace_id = $1 AND deleted_at IS NULL
+            AND due_date IS NOT NULL
             AND due_date <= NOW()
             AND status IN ('pending', 'partial', 'overdue')
         ) AS due_items
-        `
+        `,
+        [ws]
       ),
     ]);
 
@@ -90,7 +106,8 @@ dashboardRoutes.get('/summary', async (_req, res) => {
   }
 });
 
-dashboardRoutes.get('/payments-analytics', async (_req, res) => {
+dashboardRoutes.get('/payments-analytics', async (req, res) => {
+  const ws = req.workspaceId;
   try {
     const thisWeekResult = await query<PaymentAnalyticsRow>(
       `
@@ -98,21 +115,25 @@ dashboardRoutes.get('/payments-analytics', async (_req, res) => {
         TO_CHAR(DATE_TRUNC('day', paid_at), 'YYYY-MM-DD') AS day,
         COALESCE(SUM(amount), 0)::text AS total
       FROM payments
-      WHERE payment_status = 'captured'
+      WHERE workspace_id = $1
+        AND payment_status = 'captured'
         AND paid_at >= DATE_TRUNC('day', NOW()) - INTERVAL '6 days'
       GROUP BY DATE_TRUNC('day', paid_at)
       ORDER BY DATE_TRUNC('day', paid_at) ASC
-      `
+      `,
+      [ws]
     );
 
     const previousWeekResult = await query<RevenueRow>(
       `
       SELECT COALESCE(SUM(amount), 0)::text AS total_revenue
       FROM payments
-      WHERE payment_status = 'captured'
+      WHERE workspace_id = $1
+        AND payment_status = 'captured'
         AND paid_at >= DATE_TRUNC('day', NOW()) - INTERVAL '13 days'
         AND paid_at < DATE_TRUNC('day', NOW()) - INTERVAL '6 days'
-      `
+      `,
+      [ws]
     );
 
     const today = new Date();

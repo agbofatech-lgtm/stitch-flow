@@ -21,6 +21,9 @@ describe('Database foundation', () => {
       '005_seed_admin.sql',
       '006_create_business_tables.sql',
       '007_create_order_production_stages.sql',
+      '008_create_workspaces.sql',
+      '009_add_workspace_tenancy.sql',
+      '010_sync_v2.sql',
     ]);
   });
 
@@ -46,17 +49,19 @@ describe('Database foundation', () => {
   it('enforces the invoices -> customers foreign key', async () => {
     await expect(
       query(
-        `INSERT INTO invoices (id, customer_id, invoice_number, total_amount)
-         VALUES ('inv-x', 'no-such-customer', 'INV-1', 100)`
+        `INSERT INTO invoices (id, workspace_id, customer_id, invoice_number, total_amount)
+         VALUES ('inv-x', 'default-workspace', 'no-such-customer', 'INV-1', 100)`
       )
     ).rejects.toThrow(/foreign key/);
   });
 
   it('enforces the production stage status CHECK constraint', async () => {
-    await query(`INSERT INTO customers (id, full_name) VALUES ('cust-1', 'Check Customer')`);
     await query(
-      `INSERT INTO orders (id, customer_id, order_number, total_amount)
-       VALUES ('ord-1', 'cust-1', 'ORD-1', 0)`
+      `INSERT INTO customers (id, workspace_id, full_name) VALUES ('cust-1', 'default-workspace', 'Check Customer')`
+    );
+    await query(
+      `INSERT INTO orders (id, workspace_id, customer_id, order_number, total_amount)
+       VALUES ('ord-1', 'default-workspace', 'cust-1', 'ORD-1', 0)`
     );
 
     await expect(
@@ -67,12 +72,36 @@ describe('Database foundation', () => {
     ).rejects.toThrow(/check constraint/);
   });
 
+  it('enforces non-negative stock (CHECK constraint)', async () => {
+    await expect(
+      query(
+        `INSERT INTO fabric_records (id, workspace_id, name, fabric_type, unit, quantity_in_stock)
+         VALUES ('fab-neg', 'default-workspace', 'Bad', 'cotton', 'yards', -1)`
+      )
+    ).rejects.toThrow(/check constraint/);
+  });
+
+  it('enforces processed_mutations idempotency uniqueness', async () => {
+    await query(
+      `INSERT INTO processed_mutations (workspace_id, client_mutation_id, entity, operation)
+       VALUES ('default-workspace', 'cmid-1', 'customers', 'insert')`
+    );
+    await expect(
+      query(
+        `INSERT INTO processed_mutations (workspace_id, client_mutation_id, entity, operation)
+         VALUES ('default-workspace', 'cmid-1', 'customers', 'insert')`
+      )
+    ).rejects.toThrow(/duplicate key/);
+  });
+
   it('supports transactions (rollback leaves no rows)', async () => {
     const { pool } = await import('../src/config/db');
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      await client.query(`INSERT INTO customers (id, full_name) VALUES ('tx-1', 'Rollback Me')`);
+      await client.query(
+        `INSERT INTO customers (id, workspace_id, full_name) VALUES ('tx-1', 'default-workspace', 'Rollback Me')`
+      );
       await client.query('ROLLBACK');
     } finally {
       client.release();

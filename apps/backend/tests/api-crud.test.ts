@@ -1,7 +1,23 @@
 import request from 'supertest';
 import { app } from '../src/app';
+import { registerUser, asUser, type AuthSession } from './helpers';
 
 describe('API smoke + representative CRUD', () => {
+  let session: AuthSession;
+  let api: ReturnType<typeof asUser>;
+
+  beforeEach(async () => {
+    session = await registerUser('crud-owner@example.com');
+    api = asUser(session);
+  });
+
+  it('rejects unauthenticated access to business routes with 401', async () => {
+    for (const path of ['/customers', '/orders', '/invoices', '/payments', '/materials/fabrics', '/dashboard/summary']) {
+      const res = await request(app).get(path);
+      expect(res.status).toBe(401);
+    }
+  });
+
   it('GET /health responds ok (frontend health check contract)', async () => {
     const res = await request(app).get('/health');
     expect(res.status).toBe(200);
@@ -16,7 +32,7 @@ describe('API smoke + representative CRUD', () => {
 
   describe('customers CRUD', () => {
     it('creates, lists, fetches and updates a customer', async () => {
-      const created = await request(app).post('/customers').send({
+      const created = await api.post('/customers').send({
         fullName: 'Akosua Boateng',
         phone: '+233201234567',
         email: 'akosua@example.com',
@@ -27,16 +43,16 @@ describe('API smoke + representative CRUD', () => {
       const id = created.body.id;
       expect(created.body.fullName).toBe('Akosua Boateng');
 
-      const list = await request(app).get('/customers');
+      const list = await api.get('/customers');
       expect(list.status).toBe(200);
       expect(list.body).toHaveLength(1);
 
       // The customer surface exposes /:id/orders (no bare /:id route).
-      const orders = await request(app).get(`/customers/${id}/orders`);
+      const orders = await api.get(`/customers/${id}/orders`);
       expect(orders.status).toBe(200);
       expect(Array.isArray(orders.body)).toBe(true);
 
-      const updated = await request(app).put(`/customers/${id}`).send({
+      const updated = await api.put(`/customers/${id}`).send({
         fullName: 'Akosua B. Mensah',
         phone: '+233201234567',
         email: 'akosua@example.com',
@@ -48,20 +64,20 @@ describe('API smoke + representative CRUD', () => {
     });
 
     it('rejects a customer without a name', async () => {
-      const res = await request(app).post('/customers').send({ fullName: '' });
+      const res = await api.post('/customers').send({ fullName: '' });
       expect(res.status).toBe(400);
     });
   });
 
   describe('invoice + payment flow', () => {
     it('creates an invoice with items and settles it with a payment', async () => {
-      const customer = await request(app)
+      const customer = await api
         .post('/customers')
         .send({ fullName: 'Invoice Customer', phone: '+233200000001' });
       expect(customer.status).toBe(201);
       const customerId = customer.body.id;
 
-      const invoice = await request(app).post('/invoices').send({
+      const invoice = await api.post('/invoices').send({
         customerId,
         invoiceNumber: 'INV-100',
         totalAmount: 500,
@@ -75,7 +91,7 @@ describe('API smoke + representative CRUD', () => {
       expect(invoice.body.status).toBe('pending');
       expect(invoice.body.items).toHaveLength(1);
 
-      const payment = await request(app).post('/payments').send({
+      const payment = await api.post('/payments').send({
         invoiceId: invoice.body.id,
         customerId,
         amount: 500,
@@ -87,7 +103,7 @@ describe('API smoke + representative CRUD', () => {
       expect(payment.status).toBe(201);
 
       // No GET /invoices/:id route exists (pre-existing surface); verify via list.
-      const list = await request(app).get('/invoices');
+      const list = await api.get('/invoices');
       const settled = list.body.find((row: { id: string }) => row.id === invoice.body.id);
       expect(settled.amountPaid).toBe(500);
       expect(settled.balanceDue).toBe(0);
@@ -97,7 +113,7 @@ describe('API smoke + representative CRUD', () => {
 
   describe('dashboard', () => {
     it('aggregates summary numbers from real tables', async () => {
-      const res = await request(app).get('/dashboard/summary');
+      const res = await api.get('/dashboard/summary');
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('totalRevenue');
       expect(res.body).toHaveProperty('totalOrders');

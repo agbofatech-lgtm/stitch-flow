@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import request from 'supertest';
 import { app } from '../src/app';
-import { registerUser } from './helpers';
+import { registerUser, asUser } from './helpers';
 
 function change(table: string, id: string, payload: Record<string, unknown> = {}) {
   return {
@@ -73,20 +73,26 @@ describe('Sync + tenant/user isolation', () => {
     expect(pull.status).toBe(401);
   });
 
-  it('scopes workspace members to their workspace', async () => {
-    const create = await request(app).post('/settings/workspace-members').send({
-      workspaceId: 'workspace-a',
+  it('scopes workspace members to the AUTHENTICATED workspace (client hint ignored)', async () => {
+    const userA = await registerUser('members-a@example.com');
+    const userB = await registerUser('members-b@example.com');
+
+    const create = await asUser(userA).post('/settings/workspace-members').send({
       fullName: 'Assistant A',
       email: 'assistant-a@example.com',
       role: 'assistant',
     });
     expect(create.status).toBe(201);
+    expect(create.body.workspaceId).toBe(userA.workspaceId);
 
-    const inA = await request(app).get('/settings/workspace-members?workspaceId=workspace-a');
+    const inA = await asUser(userA).get('/settings/workspace-members');
     expect(inA.status).toBe(200);
     expect(inA.body).toHaveLength(1);
 
-    const inB = await request(app).get('/settings/workspace-members?workspaceId=workspace-b');
+    // B cannot see A's members — even when explicitly requesting A's id.
+    const inB = await asUser(userB).get(
+      `/settings/workspace-members?workspaceId=${userA.workspaceId}`
+    );
     expect(inB.status).toBe(200);
     expect(inB.body).toHaveLength(0);
   });

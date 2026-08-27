@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { query } from '../config/db';
+import { recordSyncChange } from '../services/syncChangeLog';
 
 type InvoiceRow = {
   id: string;
@@ -135,29 +136,33 @@ async function replaceInvoiceItems(
   }
 }
 
-async function refreshOverdueInvoices() {
+async function refreshOverdueInvoices(workspaceId: string) {
   await query(
     `
     UPDATE invoices
     SET status = 'overdue'
-    WHERE balance_due > 0
+    WHERE workspace_id = $1
+      AND balance_due > 0
       AND due_date IS NOT NULL
       AND due_date < NOW()
       AND status IN ('pending', 'partial')
-    `
+    `,
+    [workspaceId]
   );
 }
 
-invoiceRoutes.get('/', async (_req, res) => {
+invoiceRoutes.get('/', async (req, res) => {
   try {
-    await refreshOverdueInvoices();
+    await refreshOverdueInvoices(req.workspaceId!);
 
     const result = await query<InvoiceRow>(
       `
       SELECT *
       FROM invoices
+      WHERE workspace_id = $1 AND deleted_at IS NULL
       ORDER BY created_at DESC
-      `
+      `,
+      [req.workspaceId]
     );
 
     const invoices = await Promise.all(
@@ -194,6 +199,14 @@ invoiceRoutes.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
+    const customerCheck = await query(
+      `SELECT id FROM customers WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NULL`,
+      [customerId, req.workspaceId]
+    );
+    if (customerCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
+
     const numericTotal = Number(totalAmount);
     const numericPaid = Number(amountPaid);
     const computedBalance = Math.max(
@@ -212,14 +225,15 @@ invoiceRoutes.post('/', async (req, res) => {
     const result = await query<InvoiceRow>(
       `
       INSERT INTO invoices (
-        id, customer_id, order_id, invoice_number, status, due_date,
+        id, workspace_id, customer_id, order_id, invoice_number, status, due_date,
         total_amount, amount_paid, balance_due, currency, notes
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
       RETURNING *
       `,
       [
         id,
+        req.workspaceId,
         customerId,
         orderId,
         invoiceNumber,
@@ -237,6 +251,15 @@ invoiceRoutes.post('/', async (req, res) => {
 
     const created = mapInvoiceRow(result.rows[0]);
     const createdItems = await getInvoiceItems(id);
+
+    await recordSyncChange({
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'invoices',
+      entityId: id,
+      operation: 'insert',
+      payload: { ...created, items: createdItems } as unknown as Record<string, unknown>,
+    });
 
     res.status(201).json({ ...created, items: createdItems });
   } catch (error) {
@@ -292,7 +315,7 @@ invoiceRoutes.put('/:id', async (req, res) => {
         balance_due = $9,
         currency = $10,
         notes = $11
-      WHERE id = $1
+      WHERE id = $1 AND workspace_id = $12 AND deleted_at IS NULL
       RETURNING *
       `,
       [
@@ -307,6 +330,7 @@ invoiceRoutes.put('/:id', async (req, res) => {
         computedBalance,
         currency,
         notes,
+        req.workspaceId,
       ]
     );
 
@@ -318,6 +342,15 @@ invoiceRoutes.put('/:id', async (req, res) => {
 
     const updated = mapInvoiceRow(result.rows[0]);
     const updatedItems = await getInvoiceItems(id);
+
+    await recordSyncChange({
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'invoices',
+      entityId: id,
+      operation: 'update',
+      payload: { ...updated, items: updatedItems } as unknown as Record<string, unknown>,
+    });
 
     res.json({ ...updated, items: updatedItems });
   } catch (error) {

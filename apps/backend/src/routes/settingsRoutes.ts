@@ -34,12 +34,16 @@ function mapWorkspaceMember(row: WorkspaceMemberRow) {
   };
 }
 
-settingsRoutes.get('/', async (_req, res) => {
+settingsRoutes.get('/', async (req, res) => {
   try {
-    const result = await query(`
+    const result = await query(
+      `
       SELECT key, value
       FROM app_settings
-    `);
+      WHERE workspace_id = $1
+    `,
+      [req.workspaceId]
+    );
 
     const settings: Record<string, unknown> = {};
 
@@ -65,12 +69,12 @@ settingsRoutes.put('/:key', async (req, res) => {
 
     await query(
       `
-      INSERT INTO app_settings (key, value)
-      VALUES ($1, $2)
-      ON CONFLICT (key)
+      INSERT INTO app_settings (workspace_id, key, value)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (workspace_id, key)
       DO UPDATE SET value = EXCLUDED.value
       `,
-      [key, JSON.stringify(value)]
+      [req.workspaceId, key, JSON.stringify(value)]
     );
 
     res.json({ key, value });
@@ -82,8 +86,9 @@ settingsRoutes.put('/:key', async (req, res) => {
 
 settingsRoutes.get('/workspace-members', async (req, res) => {
   try {
-    const workspaceId =
-      String(req.query.workspaceId || '').trim() || 'default-workspace';
+    // The authenticated workspace is authoritative; the legacy query
+    // parameter is no longer trusted for authorization.
+    const workspaceId = req.workspaceId!;
 
     const result = await query<WorkspaceMemberRow>(
       `
@@ -105,7 +110,6 @@ settingsRoutes.get('/workspace-members', async (req, res) => {
 settingsRoutes.post('/workspace-members', async (req, res) => {
   try {
     const {
-      workspaceId,
       fullName,
       email = '',
       phone = '',
@@ -114,6 +118,9 @@ settingsRoutes.post('/workspace-members', async (req, res) => {
       canManageOrders = false,
       canManagePayments = false,
     } = req.body ?? {};
+
+    // Server-authoritative tenant: the body's workspaceId is ignored.
+    const workspaceId = req.workspaceId!;
 
     if (!workspaceId || !fullName) {
       return res.status(400).json({ message: 'Missing required fields' });
@@ -202,7 +209,7 @@ settingsRoutes.put('/workspace-members/:id', async (req, res) => {
         can_manage_customers = $6,
         can_manage_orders = $7,
         can_manage_payments = $8
-      WHERE id = $1
+      WHERE id = $1 AND workspace_id = $9
       RETURNING *
       `,
       [
@@ -214,6 +221,7 @@ settingsRoutes.put('/workspace-members/:id', async (req, res) => {
         Boolean(canManageCustomers),
         Boolean(canManageOrders),
         Boolean(canManagePayments),
+        req.workspaceId,
       ]
     );
 
@@ -235,10 +243,10 @@ settingsRoutes.delete('/workspace-members/:id', async (req, res) => {
     const result = await query<WorkspaceMemberRow>(
       `
       DELETE FROM workspace_members
-      WHERE id = $1
+      WHERE id = $1 AND workspace_id = $2
       RETURNING *
       `,
-      [id]
+      [id, req.workspaceId]
     );
 
     if (result.rows.length === 0) {

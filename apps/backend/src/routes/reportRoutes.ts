@@ -43,7 +43,8 @@ function toNumber(value: string | number | null | undefined): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-reportRoutes.get('/summary', async (_req, res) => {
+reportRoutes.get('/summary', async (req, res) => {
+  const ws = req.workspaceId;
   try {
     const revenueResult = await query<RevenueRow>(`
       SELECT
@@ -53,7 +54,8 @@ reportRoutes.get('/summary', async (_req, res) => {
         '0'::text AS total_pending,
         '0'::text AS invoice_count
       FROM payments
-    `);
+      WHERE workspace_id = $1
+    `, [ws]);
 
     const invoiceResult = await query<RevenueRow>(`
       SELECT
@@ -63,8 +65,9 @@ reportRoutes.get('/summary', async (_req, res) => {
         '0'::text AS total_paid,
         '0'::text AS payment_count
       FROM invoices
-      WHERE status IN ('sent', 'partial', 'overdue')
-    `);
+      WHERE workspace_id = $1 AND deleted_at IS NULL
+        AND status IN ('sent', 'partial', 'overdue')
+    `, [ws]);
 
     const orderResult = await query<OrderRevenueRow>(`
       SELECT
@@ -78,20 +81,23 @@ reportRoutes.get('/summary', async (_req, res) => {
             AND status NOT IN ('delivered', 'cancelled')
         )::text AS overdue_orders
       FROM orders
-    `);
+      WHERE workspace_id = $1 AND deleted_at IS NULL
+    `, [ws]);
 
     const customerResult = await query<CustomerRow>(`
       SELECT COUNT(*)::text AS total_customers
       FROM customers
-    `);
+      WHERE workspace_id = $1 AND deleted_at IS NULL
+    `, [ws]);
 
     const lowStockResult = await query<LowStockRow>(`
       SELECT COUNT(*)::text AS total_low_stock
       FROM fabric_records
-      WHERE is_active IS DISTINCT FROM FALSE
+      WHERE workspace_id = $1 AND deleted_at IS NULL
+        AND is_active IS DISTINCT FROM FALSE
         AND reorder_level IS NOT NULL
         AND quantity_in_stock <= reorder_level
-    `);
+    `, [ws]);
 
     const payments = revenueResult.rows[0];
     const invoices = invoiceResult.rows[0];
@@ -119,16 +125,17 @@ reportRoutes.get('/summary', async (_req, res) => {
   }
 });
 
-reportRoutes.get('/order-status', async (_req, res) => {
+reportRoutes.get('/order-status', async (req, res) => {
   try {
     const result = await query<OrderStatusRow>(`
       SELECT
         status,
         COUNT(*)::text AS count
       FROM orders
+      WHERE workspace_id = $1 AND deleted_at IS NULL
       GROUP BY status
       ORDER BY status ASC
-    `);
+    `, [req.workspaceId]);
 
     return res.json(
       result.rows.map((row) => ({
@@ -142,17 +149,18 @@ reportRoutes.get('/order-status', async (_req, res) => {
   }
 });
 
-reportRoutes.get('/monthly-revenue', async (_req, res) => {
+reportRoutes.get('/monthly-revenue', async (req, res) => {
   try {
     const result = await query<MonthlyRevenueRow>(`
       SELECT
         TO_CHAR(DATE_TRUNC('month', created_at), 'YYYY-MM') AS month,
         COALESCE(SUM(amount), 0) AS revenue
       FROM payments
-      WHERE payment_status = 'captured'
+      WHERE workspace_id = $1
+        AND payment_status = 'captured'
       GROUP BY DATE_TRUNC('month', created_at)
       ORDER BY DATE_TRUNC('month', created_at) ASC
-    `);
+    `, [req.workspaceId]);
 
     return res.json(
       result.rows.map((row) => ({
@@ -166,7 +174,7 @@ reportRoutes.get('/monthly-revenue', async (_req, res) => {
   }
 });
 
-reportRoutes.get('/overdue-orders', async (_req, res) => {
+reportRoutes.get('/overdue-orders', async (req, res) => {
   try {
     const result = await query(`
       SELECT
@@ -181,11 +189,12 @@ reportRoutes.get('/overdue-orders', async (_req, res) => {
         currency,
         created_at AS "createdAt"
       FROM orders
-      WHERE due_date IS NOT NULL
+      WHERE workspace_id = $1 AND deleted_at IS NULL
+        AND due_date IS NOT NULL
         AND due_date < NOW()
         AND status NOT IN ('delivered', 'cancelled')
       ORDER BY due_date ASC
-    `);
+    `, [req.workspaceId]);
 
     return res.json(
       result.rows.map((row: any) => ({
@@ -207,7 +216,7 @@ reportRoutes.get('/overdue-orders', async (_req, res) => {
   }
 });
 
-reportRoutes.get('/low-stock-materials', async (_req, res) => {
+reportRoutes.get('/low-stock-materials', async (req, res) => {
   try {
     const result = await query(`
       SELECT
@@ -229,11 +238,12 @@ reportRoutes.get('/low-stock-materials', async (_req, res) => {
         created_at AS "createdAt",
         updated_at AS "updatedAt"
       FROM fabric_records
-      WHERE is_active IS DISTINCT FROM FALSE
+      WHERE workspace_id = $1 AND deleted_at IS NULL
+        AND is_active IS DISTINCT FROM FALSE
         AND reorder_level IS NOT NULL
         AND quantity_in_stock <= reorder_level
       ORDER BY quantity_in_stock ASC, name ASC
-    `);
+    `, [req.workspaceId]);
 
     return res.json(
       result.rows.map((row: any) => ({

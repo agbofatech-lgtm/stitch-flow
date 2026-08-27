@@ -1,6 +1,8 @@
+import crypto from 'crypto';
 import { userRepository } from '../repositories/userRepository';
 import { licenseRepository } from '../repositories/licenseRepository';
 import { refreshTokenRepository } from '../repositories/refreshTokenRepository';
+import { workspaceRepository } from '../repositories/workspaceRepository';
 import { ApiError } from '../utils/apiError';
 import { comparePassword, hashPassword } from '../utils/password';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt';
@@ -42,7 +44,21 @@ export const authService = {
       maxDevices: getMaxDevices(data.tier)
     });
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    // Every account gets a workspace; the creator is its owner. This is the
+    // tenancy anchor for all business data.
+    const workspace = await workspaceRepository.create({
+      id: `ws-${crypto.randomUUID()}`,
+      name: `${data.fullName}'s Workspace`,
+      ownerUserId: user.id
+    });
+    await workspaceRepository.addMember(workspace.id, user.id, 'owner');
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      workspaceId: workspace.id as string | null
+    };
     const accessToken = signAccessToken(payload);
     const refreshToken = signRefreshToken(payload);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -55,7 +71,7 @@ export const authService = {
       entityId: user.id
     });
 
-    return { user, license, accessToken, refreshToken };
+    return { user, license, workspace, accessToken, refreshToken };
   },
 
   async login(data: { email: string; password: string }) {
@@ -73,7 +89,13 @@ export const authService = {
       throw new ApiError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const membership = await workspaceRepository.firstMembershipForUser(user.id);
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      workspaceId: (membership?.workspace_id as string | undefined) ?? null
+    };
     const accessToken = signAccessToken(payload);
     const refreshToken = signRefreshToken(payload);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -106,7 +128,13 @@ export const authService = {
     // cannot be replayed after its first legitimate use.
     await refreshTokenRepository.revoke(refreshToken);
 
-    const newPayload = { sub: user.id, email: user.email, role: user.role };
+    const membership = await workspaceRepository.firstMembershipForUser(user.id);
+    const newPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      workspaceId: (membership?.workspace_id as string | undefined) ?? null
+    };
     const accessToken = signAccessToken(newPayload);
     const newRefreshToken = signRefreshToken(newPayload);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);

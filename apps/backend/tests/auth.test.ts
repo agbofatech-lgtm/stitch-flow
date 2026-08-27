@@ -96,10 +96,11 @@ describe('Authentication', () => {
 
     it('rejects an expired token with 401', async () => {
       const user = await registerUser('expired@example.com');
+      const { JWT_ISSUER, JWT_AUDIENCE } = await import('../src/utils/jwt');
       const expired = jwt.sign(
-        { sub: user.userId, email: user.email, role: 'user' },
+        { sub: user.userId, email: user.email, role: 'user', workspaceId: user.workspaceId },
         process.env.JWT_SECRET as string,
-        { expiresIn: -10 }
+        { expiresIn: -10, issuer: JWT_ISSUER, audience: JWT_AUDIENCE }
       );
 
       const res = await request(app)
@@ -109,6 +110,47 @@ describe('Authentication', () => {
 
       expect(res.status).toBe(401);
       expect(res.body.error.code).toBe('INVALID_TOKEN');
+    });
+
+    it('rejects a token with the wrong ISSUER with 401', async () => {
+      const user = await registerUser('issuer@example.com');
+      const { JWT_AUDIENCE } = await import('../src/utils/jwt');
+      const bad = jwt.sign(
+        { sub: user.userId, email: user.email, role: 'user', workspaceId: user.workspaceId },
+        process.env.JWT_SECRET as string,
+        { expiresIn: '15m', issuer: 'evil-issuer', audience: JWT_AUDIENCE }
+      );
+      const res = await request(app)
+        .post('/sync/push')
+        .set('Authorization', `Bearer ${bad}`)
+        .send({ changes: [] });
+      expect(res.status).toBe(401);
+    });
+
+    it('rejects a token with the wrong AUDIENCE with 401', async () => {
+      const user = await registerUser('audience@example.com');
+      const { JWT_ISSUER } = await import('../src/utils/jwt');
+      const bad = jwt.sign(
+        { sub: user.userId, email: user.email, role: 'user', workspaceId: user.workspaceId },
+        process.env.JWT_SECRET as string,
+        { expiresIn: '15m', issuer: JWT_ISSUER, audience: 'evil-audience' }
+      );
+      const res = await request(app)
+        .post('/sync/push')
+        .set('Authorization', `Bearer ${bad}`)
+        .send({ changes: [] });
+      expect(res.status).toBe(401);
+    });
+
+    it('stores refresh tokens hashed (no replayable credentials at rest)', async () => {
+      const user = await registerUser('hashed@example.com');
+      const { query } = await import('../src/config/db');
+      const rows = await query(`SELECT token FROM refresh_tokens`);
+      expect(rows.rows.length).toBeGreaterThan(0);
+      for (const row of rows.rows) {
+        expect(row.token).not.toBe(user.refreshToken);
+        expect(row.token).toMatch(/^[a-f0-9]{64}$/); // sha256 hex
+      }
     });
 
     it('rejects a token signed with the wrong secret with 401', async () => {

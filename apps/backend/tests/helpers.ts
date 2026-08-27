@@ -8,6 +8,7 @@ export type AuthSession = {
   accessToken: string;
   refreshToken: string;
   license: { id: string; license_key: string };
+  workspaceId: string;
 };
 
 export async function registerUser(
@@ -29,6 +30,23 @@ export async function registerUser(
     accessToken: res.body.accessToken,
     refreshToken: res.body.refreshToken,
     license: res.body.license,
+    workspaceId: res.body.workspace.id,
+  };
+}
+
+/** Convenience: supertest request pre-authorized as the given session. */
+export function asUser(session: AuthSession) {
+  return {
+    get: (url: string) =>
+      request(app).get(url).set('Authorization', `Bearer ${session.accessToken}`),
+    post: (url: string) =>
+      request(app).post(url).set('Authorization', `Bearer ${session.accessToken}`),
+    put: (url: string) =>
+      request(app).put(url).set('Authorization', `Bearer ${session.accessToken}`),
+    patch: (url: string) =>
+      request(app).patch(url).set('Authorization', `Bearer ${session.accessToken}`),
+    delete: (url: string) =>
+      request(app).delete(url).set('Authorization', `Bearer ${session.accessToken}`),
   };
 }
 

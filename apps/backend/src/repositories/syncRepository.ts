@@ -3,6 +3,7 @@ import { query } from '../config/db';
 export const syncRepository = {
   async createSyncChange(change: {
     userId: string;
+    workspaceId: string;
     tableName: string;
     operation: string;
     recordId: string;
@@ -11,10 +12,11 @@ export const syncRepository = {
     occurredAt: string;
   }) {
     await query(
-      `INSERT INTO sync_changes (user_id, table_name, operation, record_id, client_id, payload, occurred_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      `INSERT INTO sync_changes (user_id, workspace_id, table_name, operation, record_id, client_id, payload, occurred_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
         change.userId,
+        change.workspaceId,
         change.tableName,
         change.operation,
         change.recordId,

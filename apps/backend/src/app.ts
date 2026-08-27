@@ -6,6 +6,8 @@ import { requestLogger } from './middleware/requestLogger';
 import { notFound } from './middleware/notFound';
 import { errorHandler } from './middleware/errorHandler';
 import apiRoutes from './routes/index';
+import { authMiddleware } from './middleware/auth';
+import { requireWorkspace } from './middleware/workspace';
 import { dashboardRoutes } from './routes/dashboardRoutes';
 import { customerRoutes } from './routes/customerRoutes';
 import { orderRoutes } from './routes/orderRoutes';
@@ -46,15 +48,16 @@ app.get('/', (_req, res) => {
 // Platform routes: auth, licenses, events, feature-requests, sync, admin, health
 app.use('/', apiRoutes);
 
-// Business routes (existing StitchFlow modules, preserved as-is)
-app.use('/dashboard', dashboardRoutes);
-app.use('/customers', customerRoutes);
-app.use('/orders', orderRoutes);
-app.use('/invoices', invoiceRoutes);
-app.use('/payments', paymentRoutes);
-app.use('/materials', materialRoutes);
-app.use('/reports', reportRoutes);
-app.use('/settings', settingsRoutes);
+// Business routes: authenticated + tenant-scoped (Phase 3).
+// JWT -> user -> workspace membership -> req.workspaceId -> scoped SQL.
+app.use('/dashboard', authMiddleware, requireWorkspace, dashboardRoutes);
+app.use('/customers', authMiddleware, requireWorkspace, customerRoutes);
+app.use('/orders', authMiddleware, requireWorkspace, orderRoutes);
+app.use('/invoices', authMiddleware, requireWorkspace, invoiceRoutes);
+app.use('/payments', authMiddleware, requireWorkspace, paymentRoutes);
+app.use('/materials', authMiddleware, requireWorkspace, materialRoutes);
+app.use('/reports', authMiddleware, requireWorkspace, reportRoutes);
+app.use('/settings', authMiddleware, requireWorkspace, settingsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

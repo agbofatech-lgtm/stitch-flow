@@ -26,6 +26,9 @@ const REQUIRED_TABLES = [
   'app_settings',
   'workspace_members',
   'order_production_stages',
+  'workspaces',
+  'workspace_users',
+  'processed_mutations',
 ];
 
 export async function verifySchema() {

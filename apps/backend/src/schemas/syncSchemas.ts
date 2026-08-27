@@ -24,3 +24,29 @@ export const pullSyncSchema = z.object({
   }),
   params: z.object({}).optional()
 });
+
+export const changesQuerySchema = z.object({
+  body: z.object({}).optional(),
+  query: z.object({
+    cursor: z.string().regex(/^\d+$/).optional(),
+    limit: z.string().regex(/^\d+$/).optional()
+  }),
+  params: z.object({}).optional()
+});
+
+export const mutationsSchema = z.object({
+  body: z.object({
+    mutations: z.array(
+      z.object({
+        clientMutationId: z.string().uuid(),
+        entity: z.string().min(1),
+        entityId: z.string().min(1),
+        operation: z.enum(['insert', 'update', 'delete']),
+        payload: z.record(z.any()).default({}),
+        occurredAt: z.string().datetime()
+      })
+    ).min(1).max(200)
+  }),
+  query: z.object({}).optional(),
+  params: z.object({}).optional()
+});

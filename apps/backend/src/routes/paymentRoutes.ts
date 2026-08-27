@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { query, pool } from '../config/db';
+import { recordSyncChangeTx } from '../services/syncChangeLog';
 
 type PaymentRow = {
   id: string;
@@ -25,13 +26,17 @@ type InvoiceRow = {
 
 const paymentRoutes = Router();
 
-paymentRoutes.get('/', async (_req, res) => {
+paymentRoutes.get('/', async (req, res) => {
   try {
-    const result = await query<PaymentRow>(`
+    const result = await query<PaymentRow>(
+      `
       SELECT *
       FROM payments
+      WHERE workspace_id = $1
       ORDER BY paid_at DESC, created_at DESC
-    `);
+    `,
+      [req.workspaceId]
+    );
 
     res.json(
       result.rows.map((row) => ({
@@ -62,10 +67,10 @@ paymentRoutes.get('/invoice/:invoiceId', async (req, res) => {
       `
       SELECT *
       FROM payments
-      WHERE invoice_id = $1
+      WHERE invoice_id = $1 AND workspace_id = $2
       ORDER BY paid_at DESC, created_at DESC
       `,
-      [invoiceId]
+      [invoiceId, req.workspaceId]
     );
 
     res.json(
@@ -103,6 +108,7 @@ paymentRoutes.post('/', async (req, res) => {
       paymentStatus = 'captured',
       paidAt = new Date().toISOString(),
       notes = '',
+      clientMutationId = null,
     } = req.body ?? {};
 
     if (!invoiceId || !customerId || amount === undefined || !method || !referenceCode) {
@@ -117,14 +123,41 @@ paymentRoutes.post('/', async (req, res) => {
 
     await client.query('BEGIN');
 
+    // Idempotency: a replayed clientMutationId acknowledges the original
+    // payment instead of creating a second financial event.
+    if (clientMutationId) {
+      const existing = await client.query<PaymentRow>(
+        `SELECT * FROM payments WHERE workspace_id = $1 AND client_mutation_id = $2`,
+        [req.workspaceId, clientMutationId]
+      );
+      if (existing.rows.length > 0) {
+        await client.query('ROLLBACK');
+        const row = existing.rows[0];
+        return res.status(200).json({
+          id: row.id,
+          invoiceId: row.invoice_id,
+          customerId: row.customer_id,
+          orderId: row.order_id,
+          amount: Number(row.amount),
+          method: row.method,
+          referenceCode: row.reference_code,
+          paymentStatus: row.payment_status,
+          paidAt: row.paid_at,
+          notes: row.notes,
+          createdAt: row.created_at,
+          duplicate: true,
+        });
+      }
+    }
+
     const invoiceResult = await client.query<InvoiceRow>(
       `
       SELECT id, total_amount, amount_paid, balance_due, status
       FROM invoices
-      WHERE id = $1
+      WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NULL
       FOR UPDATE
       `,
-      [invoiceId]
+      [invoiceId, req.workspaceId]
     );
 
     if (invoiceResult.rows.length === 0) {
@@ -154,14 +187,15 @@ paymentRoutes.post('/', async (req, res) => {
     const paymentResult = await client.query<PaymentRow>(
       `
       INSERT INTO payments (
-        id, invoice_id, customer_id, order_id, amount, method,
-        reference_code, payment_status, paid_at, notes
+        id, workspace_id, invoice_id, customer_id, order_id, amount, method,
+        reference_code, payment_status, paid_at, notes, client_mutation_id
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
       RETURNING *
       `,
       [
         id,
+        req.workspaceId,
         invoiceId,
         customerId,
         orderId,
@@ -171,6 +205,7 @@ paymentRoutes.post('/', async (req, res) => {
         paymentStatus,
         paidAt,
         notes,
+        clientMutationId,
       ]
     );
 
@@ -181,10 +216,46 @@ paymentRoutes.post('/', async (req, res) => {
         amount_paid = $2,
         balance_due = $3,
         status = $4
-      WHERE id = $1
+      WHERE id = $1 AND workspace_id = $5
       `,
-      [invoiceId, nextPaid, nextBalance, nextStatus]
+      [invoiceId, nextPaid, nextBalance, nextStatus, req.workspaceId]
     );
+
+    // The payment event, the invoice reconciliation and BOTH sync-change
+    // records commit atomically — or none of them do.
+    await recordSyncChangeTx(client, {
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'payments',
+      entityId: id,
+      operation: 'insert',
+      payload: {
+        id,
+        invoiceId,
+        customerId,
+        orderId,
+        amount: paymentAmount,
+        method,
+        referenceCode,
+        paymentStatus,
+        paidAt,
+        notes,
+      },
+      clientMutationId,
+    });
+    await recordSyncChangeTx(client, {
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'invoices',
+      entityId: invoiceId,
+      operation: 'update',
+      payload: {
+        id: invoiceId,
+        amountPaid: nextPaid,
+        balanceDue: nextBalance,
+        status: nextStatus,
+      },
+    });
 
     await client.query('COMMIT');
 

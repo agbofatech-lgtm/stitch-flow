@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { query } from '../config/db';
+import { recordSyncChange } from '../services/syncChangeLog';
 import {
   getOrderProductionStages,
   saveOrderProductionStageNote,
@@ -118,13 +119,17 @@ function toNullableJson(value: unknown): JsonValue {
   return null;
 }
 
-orderRoutes.get('/', async (_req, res) => {
+orderRoutes.get('/', async (req, res) => {
   try {
-    const result = await query<OrderRow>(`
+    const result = await query<OrderRow>(
+      `
       SELECT *
       FROM orders
+      WHERE workspace_id = $1 AND deleted_at IS NULL
       ORDER BY created_at DESC
-    `);
+    `,
+      [req.workspaceId]
+    );
 
     res.json(result.rows.map(mapOrderRow));
   } catch (err) {
@@ -141,10 +146,10 @@ orderRoutes.get('/:id', async (req, res) => {
       `
       SELECT *
       FROM orders
-      WHERE id = $1
+      WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NULL
       LIMIT 1
       `,
-      [id]
+      [id, req.workspaceId]
     );
 
     if (result.rows.length === 0) {
@@ -158,9 +163,20 @@ orderRoutes.get('/:id', async (req, res) => {
   }
 });
 
+async function orderBelongsToWorkspace(orderId: string, workspaceId: string) {
+  const result = await query(
+    `SELECT id FROM orders WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NULL`,
+    [orderId, workspaceId]
+  );
+  return result.rows.length > 0;
+}
+
 orderRoutes.get('/:orderId/production-stages', async (req, res) => {
   try {
     const { orderId } = req.params;
+    if (!(await orderBelongsToWorkspace(orderId, req.workspaceId!))) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
     const stages = await getOrderProductionStages(orderId);
     return res.json(stages);
   } catch (err) {
@@ -182,6 +198,10 @@ orderRoutes.post('/:orderId/production-stages/:stageCode/transition', async (req
 
     if (!isStageAction(String(action || ''))) {
       return res.status(400).json({ message: 'Invalid production stage action' });
+    }
+
+    if (!(await orderBelongsToWorkspace(orderId, req.workspaceId!))) {
+      return res.status(404).json({ message: 'Order not found' });
     }
 
     const result = await transitionOrderProductionStage(
@@ -208,6 +228,10 @@ orderRoutes.post('/:orderId/production-stages/:stageCode/note', async (req, res)
 
     if (!isProductionStageCode(stageCode)) {
       return res.status(400).json({ message: 'Invalid production stage code' });
+    }
+
+    if (!(await orderBelongsToWorkspace(orderId, req.workspaceId!))) {
+      return res.status(404).json({ message: 'Order not found' });
     }
 
     const productionStages = await saveOrderProductionStageNote(
@@ -261,12 +285,21 @@ orderRoutes.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
+    const customerCheck = await query(
+      `SELECT id FROM customers WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NULL`,
+      [customerId, req.workspaceId]
+    );
+    if (customerCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
+
     const id = Date.now().toString();
 
     const result = await query<OrderRow>(
       `
       INSERT INTO orders (
         id,
+        workspace_id,
         customer_id,
         assigned_to,
         order_number,
@@ -295,12 +328,13 @@ orderRoutes.post('/', async (req, res) => {
         selected_measurement_profile_type
       )
       VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28
       )
       RETURNING *
       `,
       [
         id,
+        req.workspaceId,
         customerId,
         assignedTo,
         orderNumber,
@@ -329,6 +363,15 @@ orderRoutes.post('/', async (req, res) => {
         selectedMeasurementProfileType,
       ]
     );
+
+    await recordSyncChange({
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'orders',
+      entityId: id,
+      operation: 'insert',
+      payload: mapOrderRow(result.rows[0]) as unknown as Record<string, unknown>,
+    });
 
     res.status(201).json(mapOrderRow(result.rows[0]));
   } catch (err) {
@@ -403,7 +446,7 @@ orderRoutes.put('/:id', async (req, res) => {
         selected_measurement_profile_id = $25,
         selected_measurement_profile_label = $26,
         selected_measurement_profile_type = $27
-      WHERE id = $1
+      WHERE id = $1 AND workspace_id = $28 AND deleted_at IS NULL
       RETURNING *
       `,
       [
@@ -434,12 +477,22 @@ orderRoutes.put('/:id', async (req, res) => {
         selectedMeasurementProfileId,
         selectedMeasurementProfileLabel,
         selectedMeasurementProfileType,
+        req.workspaceId,
       ]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'Order not found' });
     }
+
+    await recordSyncChange({
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'orders',
+      entityId: id,
+      operation: 'update',
+      payload: mapOrderRow(result.rows[0]) as unknown as Record<string, unknown>,
+    });
 
     res.json(mapOrderRow(result.rows[0]));
   } catch (err) {
@@ -457,10 +510,10 @@ orderRoutes.patch('/:id/studio-session', async (req, res) => {
       `
       SELECT *
       FROM orders
-      WHERE id = $1
+      WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NULL
       LIMIT 1
       `,
-      [id]
+      [id, req.workspaceId]
     );
 
     if (existingResult.rows.length === 0) {

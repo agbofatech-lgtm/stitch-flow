@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { query } from '../config/db';
+import { recordSyncChange } from '../services/syncChangeLog';
 
 type CustomerRow = {
   id: string;
@@ -41,14 +42,16 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-customerRoutes.get('/', async (_req, res) => {
+customerRoutes.get('/', async (req, res) => {
   try {
     const result = await query<CustomerRow>(
       `
         SELECT id, full_name, phone, email, address, notes, created_at
         FROM customers
+        WHERE workspace_id = $1 AND deleted_at IS NULL
         ORDER BY created_at DESC
-      `
+      `,
+      [req.workspaceId]
     );
 
     const customers = result.rows.map((row: CustomerRow) => ({
@@ -76,10 +79,10 @@ customerRoutes.get('/:id/orders', async (req, res) => {
       `
         SELECT id, customer_id, order_number, status, order_type, due_date, notes, total_amount, currency, created_at
         FROM orders
-        WHERE customer_id = $1
+        WHERE customer_id = $1 AND workspace_id = $2 AND deleted_at IS NULL
         ORDER BY created_at DESC
       `,
-      [id]
+      [id, req.workspaceId]
     );
 
     const orders = result.rows.map((row: OrderRow) => ({
@@ -122,14 +125,23 @@ customerRoutes.post('/', async (req, res) => {
 
     const result = await query<CustomerRow>(
       `
-        INSERT INTO customers (id, full_name, phone, email, address, notes)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO customers (id, workspace_id, full_name, phone, email, address, notes)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING id, full_name, phone, email, address, notes, created_at
       `,
-      [id, fullName, phone, email, address, notes]
+      [id, req.workspaceId, fullName, phone, email, address, notes]
     );
 
     const row = result.rows[0];
+
+    await recordSyncChange({
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'customers',
+      entityId: row.id,
+      operation: 'insert',
+      payload: { id: row.id, fullName, phone, email, address, notes },
+    });
 
     return res.status(201).json({
       id: row.id,
@@ -172,10 +184,10 @@ customerRoutes.put('/:id', async (req, res) => {
           email = $4,
           address = $5,
           notes = $6
-        WHERE id = $1
+        WHERE id = $1 AND workspace_id = $7 AND deleted_at IS NULL
         RETURNING id, full_name, phone, email, address, notes, created_at
       `,
-      [id, fullName, phone, email, address, notes]
+      [id, fullName, phone, email, address, notes, req.workspaceId]
     );
 
     if (result.rows.length === 0) {
@@ -183,6 +195,15 @@ customerRoutes.put('/:id', async (req, res) => {
     }
 
     const row = result.rows[0];
+
+    await recordSyncChange({
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'customers',
+      entityId: row.id,
+      operation: 'update',
+      payload: { id: row.id, fullName, phone, email, address, notes },
+    });
 
     return res.json({
       id: row.id,

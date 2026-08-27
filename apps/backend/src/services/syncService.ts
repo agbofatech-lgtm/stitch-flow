@@ -3,7 +3,7 @@ import { syncRepository } from '../repositories/syncRepository';
 import { auditLogService } from './auditLogService';
 
 export const syncService = {
-  async push(userId: string, changes: any[]) {
+  async push(userId: string, workspaceId: string, changes: any[]) {
     const serialized = JSON.stringify({ changes });
     if (Buffer.byteLength(serialized, 'utf8') > 1024 * 1024) {
       throw new ApiError(413, 'PAYLOAD_TOO_LARGE', 'Sync payload exceeds 1MB');
@@ -14,6 +14,7 @@ export const syncService = {
 
       await syncRepository.createSyncChange({
         userId,
+        workspaceId,
         tableName: change.table,
         operation: change.operation,
         recordId,

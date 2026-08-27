@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { query } from '../config/db';
+import { query, pool } from '../config/db';
+import { recordSyncChange, recordSyncChangeTx } from '../services/syncChangeLog';
 
 type FabricRow = {
   id: string;
@@ -73,7 +74,7 @@ function mapMaterialUsageRow(row: MaterialUsageRow) {
   };
 }
 
-materialRoutes.get('/fabrics', async (_req, res) => {
+materialRoutes.get('/fabrics', async (req, res) => {
   try {
     const result = await query<FabricRow>(
       `
@@ -96,8 +97,10 @@ materialRoutes.get('/fabrics', async (_req, res) => {
         created_at,
         updated_at
       FROM fabric_records
+      WHERE workspace_id = $1 AND deleted_at IS NULL
       ORDER BY created_at DESC
-      `
+      `,
+      [req.workspaceId]
     );
 
     return res.json(result.rows.map(mapFabricRow));
@@ -109,7 +112,7 @@ materialRoutes.get('/fabrics', async (_req, res) => {
   }
 });
 
-materialRoutes.get('/fabrics/low-stock', async (_req, res) => {
+materialRoutes.get('/fabrics/low-stock', async (req, res) => {
   try {
     const result = await query<FabricRow>(
       `
@@ -132,11 +135,14 @@ materialRoutes.get('/fabrics/low-stock', async (_req, res) => {
         created_at,
         updated_at
       FROM fabric_records
-      WHERE is_active = TRUE
+      WHERE workspace_id = $1
+        AND deleted_at IS NULL
+        AND is_active = TRUE
         AND reorder_level IS NOT NULL
         AND quantity_in_stock <= reorder_level
       ORDER BY updated_at DESC
-      `
+      `,
+      [req.workspaceId]
     );
 
     return res.json(result.rows.map(mapFabricRow));
@@ -218,7 +224,7 @@ materialRoutes.post('/fabrics', async (req, res) => {
       `,
       [
         id,
-        workspaceId,
+        req.workspaceId, // server-authoritative tenant, never trusted from the body
         name,
         fabricType,
         color,
@@ -234,6 +240,15 @@ materialRoutes.post('/fabrics', async (req, res) => {
         isActive,
       ]
     );
+
+    await recordSyncChange({
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'fabric_records',
+      entityId: id,
+      operation: 'insert',
+      payload: mapFabricRow(result.rows[0]) as unknown as Record<string, unknown>,
+    });
 
     return res.status(201).json(mapFabricRow(result.rows[0]));
   } catch (error) {
@@ -275,6 +290,7 @@ materialRoutes.put('/fabrics/:id', async (req, res) => {
       UPDATE fabric_records
       SET
         workspace_id = $2,
+        -- (workspace stays the authenticated tenant; see params below)
         name = $3,
         fabric_type = $4,
         color = $5,
@@ -289,7 +305,7 @@ materialRoutes.put('/fabrics/:id', async (req, res) => {
         metadata = $14,
         is_active = $15,
         updated_at = NOW()
-      WHERE id = $1
+      WHERE id = $1 AND workspace_id = $16 AND deleted_at IS NULL
       RETURNING
         id,
         workspace_id,
@@ -311,7 +327,7 @@ materialRoutes.put('/fabrics/:id', async (req, res) => {
       `,
       [
         id,
-        workspaceId,
+        req.workspaceId,
         name,
         fabricType,
         color,
@@ -325,6 +341,7 @@ materialRoutes.put('/fabrics/:id', async (req, res) => {
         imageUrl,
         metadata,
         isActive,
+        req.workspaceId,
       ]
     );
 
@@ -333,6 +350,15 @@ materialRoutes.put('/fabrics/:id', async (req, res) => {
         message: 'Fabric record not found',
       });
     }
+
+    await recordSyncChange({
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'fabric_records',
+      entityId: id,
+      operation: 'update',
+      payload: mapFabricRow(result.rows[0]) as unknown as Record<string, unknown>,
+    });
 
     return res.json(mapFabricRow(result.rows[0]));
   } catch (error) {
@@ -347,13 +373,15 @@ materialRoutes.delete('/fabrics/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Soft delete: other devices need the tombstone to converge.
     const result = await query(
       `
-      DELETE FROM fabric_records
-      WHERE id = $1
+      UPDATE fabric_records
+      SET deleted_at = NOW(), is_active = FALSE, updated_at = NOW()
+      WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NULL
       RETURNING id
       `,
-      [id]
+      [id, req.workspaceId]
     );
 
     if (result.rows.length === 0) {
@@ -361,6 +389,15 @@ materialRoutes.delete('/fabrics/:id', async (req, res) => {
         message: 'Fabric record not found',
       });
     }
+
+    await recordSyncChange({
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'fabric_records',
+      entityId: id,
+      operation: 'delete',
+      payload: { id, deletedAt: new Date().toISOString() },
+    });
 
     return res.json({
       success: true,
@@ -374,6 +411,7 @@ materialRoutes.delete('/fabrics/:id', async (req, res) => {
 });
 
 materialRoutes.post('/usages', async (req, res) => {
+  const client = await pool.connect();
   try {
     const {
       orderId,
@@ -381,15 +419,46 @@ materialRoutes.post('/usages', async (req, res) => {
       quantityUsed,
       unit,
       notes = null,
+      clientMutationId = null,
     } = req.body ?? {};
 
     if (!orderId || !fabricRecordId || !quantityUsed || !unit) {
+      client.release();
       return res.status(400).json({
         message: 'orderId, fabricRecordId, quantityUsed, and unit are required',
       });
     }
 
-    const fabricResult = await query<FabricRow>(
+    await client.query('BEGIN');
+
+    // Idempotency: replayed usage mutations do not deduct stock twice.
+    if (clientMutationId) {
+      const existing = await client.query<MaterialUsageRow>(
+        `SELECT id, order_id, fabric_record_id, quantity_used, unit, notes, created_at
+         FROM order_material_usages WHERE client_mutation_id = $1`,
+        [clientMutationId]
+      );
+      if (existing.rows.length > 0) {
+        await client.query('ROLLBACK');
+        client.release();
+        return res
+          .status(200)
+          .json({ ...mapMaterialUsageRow(existing.rows[0]), duplicate: true });
+      }
+    }
+
+    // The order anchors the usage to a workspace.
+    const orderCheck = await client.query(
+      `SELECT id FROM orders WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NULL`,
+      [orderId, req.workspaceId]
+    );
+    if (orderCheck.rows.length === 0) {
+      await client.query('ROLLBACK');
+      client.release();
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const fabricResult = await client.query<FabricRow>(
       `
       SELECT
         id,
@@ -410,13 +479,15 @@ materialRoutes.post('/usages', async (req, res) => {
         created_at,
         updated_at
       FROM fabric_records
-      WHERE id = $1
-      LIMIT 1
+      WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NULL
+      FOR UPDATE
       `,
-      [fabricRecordId]
+      [fabricRecordId, req.workspaceId]
     );
 
     if (fabricResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      client.release();
       return res.status(404).json({
         message: 'Fabric record not found',
       });
@@ -427,26 +498,32 @@ materialRoutes.post('/usages', async (req, res) => {
     const nextUsageQty = Number(quantityUsed);
 
     if (fabric.unit !== unit) {
+      await client.query('ROLLBACK');
+      client.release();
       return res.status(400).json({
         message: `Unit mismatch. Material uses ${fabric.unit}`,
       });
     }
 
     if (Number.isNaN(nextUsageQty) || nextUsageQty <= 0) {
+      await client.query('ROLLBACK');
+      client.release();
       return res.status(400).json({
         message: 'quantityUsed must be greater than 0',
       });
     }
 
     if (currentStock < nextUsageQty) {
-      return res.status(400).json({
+      await client.query('ROLLBACK');
+      client.release();
+      return res.status(409).json({
         message: 'Not enough stock available',
       });
     }
 
     const id = Date.now().toString();
 
-    const usageResult = await query<MaterialUsageRow>(
+    const usageResult = await client.query<MaterialUsageRow>(
       `
       INSERT INTO order_material_usages (
         id,
@@ -454,9 +531,10 @@ materialRoutes.post('/usages', async (req, res) => {
         fabric_record_id,
         quantity_used,
         unit,
-        notes
+        notes,
+        client_mutation_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING
         id,
         order_id,
@@ -466,10 +544,12 @@ materialRoutes.post('/usages', async (req, res) => {
         notes,
         created_at
       `,
-      [id, orderId, fabricRecordId, nextUsageQty, unit, notes]
+      [id, orderId, fabricRecordId, nextUsageQty, unit, notes, clientMutationId]
     );
 
-    await query(
+    // Deduction is guarded twice: the FOR UPDATE row lock above and the
+    // fabric_records_stock_nonnegative CHECK constraint in the schema.
+    await client.query(
       `
       UPDATE fabric_records
       SET
@@ -480,8 +560,31 @@ materialRoutes.post('/usages', async (req, res) => {
       [fabricRecordId, nextUsageQty]
     );
 
+    await recordSyncChangeTx(client, {
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'order_material_usages',
+      entityId: id,
+      operation: 'insert',
+      payload: mapMaterialUsageRow(usageResult.rows[0]) as unknown as Record<string, unknown>,
+      clientMutationId,
+    });
+    await recordSyncChangeTx(client, {
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'fabric_records',
+      entityId: fabricRecordId,
+      operation: 'update',
+      payload: { id: fabricRecordId, quantityInStock: currentStock - nextUsageQty },
+    });
+
+    await client.query('COMMIT');
+    client.release();
+
     return res.status(201).json(mapMaterialUsageRow(usageResult.rows[0]));
   } catch (error) {
+    await client.query('ROLLBACK');
+    client.release();
     console.error('Failed to create material usage:', error);
     return res.status(500).json({
       message: 'Failed to create material usage',
@@ -496,18 +599,21 @@ materialRoutes.get('/usages/order/:orderId', async (req, res) => {
     const result = await query<MaterialUsageRow>(
       `
       SELECT
-        id,
-        order_id,
-        fabric_record_id,
-        quantity_used,
-        unit,
-        notes,
-        created_at
-      FROM order_material_usages
-      WHERE order_id = $1
-      ORDER BY created_at DESC
+        u.id,
+        u.order_id,
+        u.fabric_record_id,
+        u.quantity_used,
+        u.unit,
+        u.notes,
+        u.created_at
+      FROM order_material_usages u
+      JOIN orders o ON o.id = u.order_id
+      WHERE u.order_id = $1
+        AND o.workspace_id = $2
+        AND u.deleted_at IS NULL
+      ORDER BY u.created_at DESC
       `,
-      [orderId]
+      [orderId, req.workspaceId]
     );
 
     return res.json(result.rows.map(mapMaterialUsageRow));
@@ -520,26 +626,36 @@ materialRoutes.get('/usages/order/:orderId', async (req, res) => {
 });
 
 materialRoutes.delete('/usages/:id', async (req, res) => {
+  const client = await pool.connect();
   try {
     const { id } = req.params;
 
-    const usageResult = await query<MaterialUsageRow>(
+    await client.query('BEGIN');
+
+    const usageResult = await client.query<MaterialUsageRow>(
       `
-      DELETE FROM order_material_usages
-      WHERE id = $1
+      UPDATE order_material_usages u
+      SET deleted_at = NOW()
+      FROM orders o
+      WHERE u.id = $1
+        AND o.id = u.order_id
+        AND o.workspace_id = $2
+        AND u.deleted_at IS NULL
       RETURNING
-        id,
-        order_id,
-        fabric_record_id,
-        quantity_used,
-        unit,
-        notes,
-        created_at
+        u.id,
+        u.order_id,
+        u.fabric_record_id,
+        u.quantity_used,
+        u.unit,
+        u.notes,
+        u.created_at
       `,
-      [id]
+      [id, req.workspaceId]
     );
 
     if (usageResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      client.release();
       return res.status(404).json({
         message: 'Material usage not found',
       });
@@ -547,7 +663,7 @@ materialRoutes.delete('/usages/:id', async (req, res) => {
 
     const usage = usageResult.rows[0];
 
-    await query(
+    await client.query(
       `
       UPDATE fabric_records
       SET
@@ -558,11 +674,25 @@ materialRoutes.delete('/usages/:id', async (req, res) => {
       [usage.fabric_record_id, Number(usage.quantity_used || 0)]
     );
 
+    await recordSyncChangeTx(client, {
+      workspaceId: req.workspaceId!,
+      userId: req.user!.sub,
+      entity: 'order_material_usages',
+      entityId: id,
+      operation: 'delete',
+      payload: { id, deletedAt: new Date().toISOString() },
+    });
+
+    await client.query('COMMIT');
+    client.release();
+
     return res.json({
       success: true,
       deleted: mapMaterialUsageRow(usage),
     });
   } catch (error) {
+    await client.query('ROLLBACK');
+    client.release();
     console.error('Failed to delete material usage:', error);
     return res.status(500).json({
       message: 'Failed to delete material usage',

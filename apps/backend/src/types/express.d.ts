@@ -4,13 +4,20 @@ declare global {
   namespace Express {
     interface UserJwtPayload {
       sub: string;
-      role: 'user' | 'admin';
       email: string;
+      role: 'user' | 'admin';
+      workspaceId?: string | null;
       tenantUserId?: string;
     }
 
     interface Request {
       user?: UserJwtPayload;
+      /** Set by requireWorkspace after membership verification. */
+      workspaceId?: string;
+      /** Workspace-level role of the authenticated user. */
+      workspaceRole?: 'owner' | 'admin' | 'assistant';
     }
   }
 }
+
+export {};
