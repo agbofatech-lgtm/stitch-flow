@@ -112,21 +112,26 @@ export const authService = {
   },
 
   async refresh(refreshToken: string) {
-    const stored = await refreshTokenRepository.find(refreshToken);
+    // Signature/expiry/issuer/audience checked BEFORE touching storage.
+    let payload;
+    try {
+      payload = verifyRefreshToken(refreshToken);
+    } catch {
+      throw new ApiError(401, 'INVALID_REFRESH_TOKEN', 'Refresh token is invalid');
+    }
+
+    // Rotation with SINGLE-USE guarantee: consume() atomically revokes the
+    // presented token; under concurrent refresh exactly one request wins and
+    // every other receives 401 (replay-safe).
+    const stored = await refreshTokenRepository.consume(refreshToken);
     if (!stored) {
       throw new ApiError(401, 'INVALID_REFRESH_TOKEN', 'Refresh token is invalid');
     }
 
-    const payload = verifyRefreshToken(refreshToken);
     const user = await userRepository.findById(payload.sub);
     if (!user || user.status !== 'active') {
       throw new ApiError(401, 'INVALID_REFRESH_TOKEN', 'Refresh token is invalid');
     }
-
-    // Refresh-token rotation: the presented token is revoked and a new one
-    // is issued alongside the new access token, so a stolen refresh token
-    // cannot be replayed after its first legitimate use.
-    await refreshTokenRepository.revoke(refreshToken);
 
     const membership = await workspaceRepository.firstMembershipForUser(user.id);
     const newPayload = {

@@ -1,5 +1,8 @@
 import { Router } from 'express';
 import { query } from '../config/db';
+import { requireWorkspaceRole } from '../middleware/requireWorkspaceRole';
+
+const manageWorkspace = requireWorkspaceRole('owner', 'admin');
 
 const settingsRoutes = Router();
 
@@ -58,7 +61,7 @@ settingsRoutes.get('/', async (req, res) => {
   }
 });
 
-settingsRoutes.put('/:key', async (req, res) => {
+settingsRoutes.put('/:key', manageWorkspace, async (req, res) => {
   try {
     const { key } = req.params;
     const { value } = req.body ?? {};
@@ -107,7 +110,7 @@ settingsRoutes.get('/workspace-members', async (req, res) => {
   }
 });
 
-settingsRoutes.post('/workspace-members', async (req, res) => {
+settingsRoutes.post('/workspace-members', manageWorkspace, async (req, res) => {
   try {
     const {
       fullName,
@@ -185,7 +188,7 @@ settingsRoutes.post('/workspace-members', async (req, res) => {
   }
 });
 
-settingsRoutes.put('/workspace-members/:id', async (req, res) => {
+settingsRoutes.put('/workspace-members/:id', manageWorkspace, async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -236,7 +239,7 @@ settingsRoutes.put('/workspace-members/:id', async (req, res) => {
   }
 });
 
-settingsRoutes.delete('/workspace-members/:id', async (req, res) => {
+settingsRoutes.delete('/workspace-members/:id', manageWorkspace, async (req, res) => {
   try {
     const { id } = req.params;
 

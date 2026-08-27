@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './config/env';
 import { requestLogger } from './middleware/requestLogger';
+import { apiRateLimit } from './config/rateLimit';
 import { notFound } from './middleware/notFound';
 import { errorHandler } from './middleware/errorHandler';
 import apiRoutes from './routes/index';
@@ -25,9 +26,20 @@ import { settingsRoutes } from './routes/settingsRoutes';
  */
 export const app = express();
 
+/**
+ * CORS is environment-driven (Phase 4):
+ * - production: explicit comma-separated allowlist from CORS_ORIGIN — no
+ *   wildcard/reflected origins;
+ * - development/test: permissive to support local dev + sandbox previews.
+ */
+const corsOrigin =
+  env.NODE_ENV === 'production'
+    ? env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean)
+    : true;
+
 app.use(
   cors({
-    origin: true,
+    origin: corsOrigin,
     credentials: true,
   })
 );
@@ -44,6 +56,9 @@ app.get('/', (_req, res) => {
     message: 'StitchFlow backend is running',
   });
 });
+
+// General request-storm protection (auth/sync/etc. keep their own stricter limits)
+app.use(apiRateLimit);
 
 // Platform routes: auth, licenses, events, feature-requests, sync, admin, health
 app.use('/', apiRoutes);

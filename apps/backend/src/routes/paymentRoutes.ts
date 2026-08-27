@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query, pool } from '../config/db';
 import { recordSyncChangeTx } from '../services/syncChangeLog';
+import { auditLogService } from '../services/auditLogService';
 
 type PaymentRow = {
   id: string;
@@ -172,6 +173,12 @@ paymentRoutes.post('/', async (req, res) => {
 
     if (nextPaid > totalAmount) {
       await client.query('ROLLBACK');
+      await auditLogService.log({
+        userId: req.user?.sub,
+        action: 'payment_failed',
+        entityType: 'payment',
+        metadata: { invoiceId, amount: paymentAmount, reason: 'exceeds_invoice_total', workspaceId: req.workspaceId },
+      });
       return res.status(400).json({ message: 'Payment exceeds invoice total' });
     }
 
@@ -258,6 +265,19 @@ paymentRoutes.post('/', async (req, res) => {
     });
 
     await client.query('COMMIT');
+
+    await auditLogService.log({
+      userId: req.user?.sub,
+      action: 'payment_created',
+      entityType: 'payment',
+      metadata: {
+        paymentId: id,
+        invoiceId,
+        amount: paymentAmount,
+        method,
+        workspaceId: req.workspaceId,
+      },
+    });
 
     const row = paymentResult.rows[0];
 

@@ -209,6 +209,14 @@ invoiceRoutes.post('/', async (req, res) => {
 
     const numericTotal = Number(totalAmount);
     const numericPaid = Number(amountPaid);
+
+    if (!Number.isFinite(numericTotal) || numericTotal < 0) {
+      return res.status(400).json({ message: 'totalAmount must be a non-negative finite number' });
+    }
+    if (!Number.isFinite(numericPaid) || numericPaid < 0) {
+      return res.status(400).json({ message: 'amountPaid must be a non-negative finite number' });
+    }
+
     const computedBalance = Math.max(
       0,
       balanceDue !== undefined ? Number(balanceDue) : numericTotal - numericPaid
@@ -290,6 +298,14 @@ invoiceRoutes.put('/:id', async (req, res) => {
 
     const numericTotal = Number(totalAmount);
     const numericPaid = Number(amountPaid);
+
+    if (!Number.isFinite(numericTotal) || numericTotal < 0) {
+      return res.status(400).json({ message: 'totalAmount must be a non-negative finite number' });
+    }
+    if (!Number.isFinite(numericPaid) || numericPaid < 0) {
+      return res.status(400).json({ message: 'amountPaid must be a non-negative finite number' });
+    }
+
     const computedBalance = Math.max(
       0,
       balanceDue !== undefined ? Number(balanceDue) : numericTotal - numericPaid
