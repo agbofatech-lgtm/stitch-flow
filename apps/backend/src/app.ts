@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './config/env';
 import { requestLogger } from './middleware/requestLogger';
+import { requestCorrelation } from './middleware/requestCorrelation';
+import { httpMetrics } from './middleware/httpMetrics';
 import { apiRateLimit } from './config/rateLimit';
 import { notFound } from './middleware/notFound';
 import { errorHandler } from './middleware/errorHandler';
@@ -46,6 +48,13 @@ app.use(
 );
 
 app.use(helmet());
+
+// Observability first so every request (including failures) is counted.
+app.use(httpMetrics);
+
+// Correlation id for every request (works with pino-http + error handler).
+app.use(requestCorrelation);
+
 // Raw body is captured for billing webhook signature verification
 // (Phase 5). Behavior of JSON parsing is otherwise unchanged.
 app.use(

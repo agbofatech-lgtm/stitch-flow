@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query, pool } from '../config/db';
 import { recordSyncChange, recordSyncChangeTx } from '../services/syncChangeLog';
+import { auditLogService } from '../services/auditLogService';
 
 type FabricRow = {
   id: string;
@@ -578,6 +579,16 @@ materialRoutes.post('/usages', async (req, res) => {
       payload: { id: fabricRecordId, quantityInStock: currentStock - nextUsageQty },
     });
 
+    // Phase 6: transactional audit trail (atomic with the deduction).
+    await auditLogService.logTx(client, {
+      userId: req.user!.sub,
+      workspaceId: req.workspaceId,
+      action: 'MATERIAL_USED',
+      entityType: 'material_usage',
+      entityId: id,
+      metadata: { orderId, fabricRecordId, quantityUsed: nextUsageQty, unit },
+    });
+
     await client.query('COMMIT');
     client.release();
 
@@ -681,6 +692,16 @@ materialRoutes.delete('/usages/:id', async (req, res) => {
       entityId: id,
       operation: 'delete',
       payload: { id, deletedAt: new Date().toISOString() },
+    });
+
+    // Phase 6: transactional audit trail — stock restoration is audited.
+    await auditLogService.logTx(client, {
+      userId: req.user!.sub,
+      workspaceId: req.workspaceId,
+      action: 'MATERIAL_RESTORED',
+      entityType: 'material_usage',
+      entityId: id,
+      metadata: { orderId: usage.order_id, fabricRecordId: usage.fabric_record_id, quantityRestored: Number(usage.quantity_used || 0) },
     });
 
     await client.query('COMMIT');

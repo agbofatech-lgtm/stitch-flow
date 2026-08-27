@@ -3,15 +3,25 @@ import { query } from '../config/db';
 export const auditLogRepository = {
   async create(data: {
     userId?: string | null;
+    workspaceId?: string | null;
+    requestId?: string | null;
     action: string;
     entityType: string;
     entityId?: string | null;
-    metadata?: any;
+    metadata?: unknown;
   }) {
     await query(
-      `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, metadata)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [data.userId || null, data.action, data.entityType, data.entityId || null, JSON.stringify(data.metadata || {})]
+      `INSERT INTO audit_logs (user_id, workspace_id, request_id, action, entity_type, entity_id, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        data.userId || null,
+        data.workspaceId || null,
+        data.requestId || null,
+        data.action,
+        data.entityType,
+        data.entityId || null,
+        JSON.stringify(data.metadata ?? {}),
+      ]
     );
   },
 

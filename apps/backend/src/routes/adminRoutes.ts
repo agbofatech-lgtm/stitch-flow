@@ -8,6 +8,9 @@ const router = Router();
 
 router.use(authMiddleware, requireRole('admin'));
 
+// Phase 6: operational metrics — authenticated admins only.
+router.get('/metrics', asyncHandler(adminController.metrics));
+
 router.get('/users', asyncHandler(adminController.users));
 router.get('/analytics', asyncHandler(adminController.analytics));
 router.get('/licenses', asyncHandler(adminController.licenses));

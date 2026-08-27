@@ -5,6 +5,7 @@ import { refreshTokenRepository } from '../repositories/refreshTokenRepository';
 import { workspaceRepository } from '../repositories/workspaceRepository';
 import { ApiError } from '../utils/apiError';
 import { comparePassword, hashPassword } from '../utils/password';
+import { metrics } from '../config/observability/metrics';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { generateLicenseKey } from '../utils/license';
 import { auditLogService } from './auditLogService';
@@ -83,15 +84,18 @@ export const authService = {
   async login(data: { email: string; password: string }) {
     const user = await userRepository.findByEmail(data.email);
     if (!user) {
+      metrics.authFailures.inc();
       throw new ApiError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
     }
 
     if (user.status !== 'active') {
+      metrics.authFailures.inc();
       throw new ApiError(403, 'ACCOUNT_INACTIVE', 'Account is not active');
     }
 
     const match = await comparePassword(data.password, user.password_hash);
     if (!match) {
+      metrics.authFailures.inc();
       throw new ApiError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
     }
 

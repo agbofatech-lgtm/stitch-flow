@@ -29,6 +29,12 @@ export const env = {
   ACCESS_TOKEN_EXPIRES_IN: getEnv('ACCESS_TOKEN_EXPIRES_IN', '15m'),
   REFRESH_TOKEN_EXPIRES_IN: getEnv('REFRESH_TOKEN_EXPIRES_IN', '7d'),
 
+  // --- Phase 6: database pool reliability (DEPLOYMENT-ONLY, safe defaults) --
+  DB_POOL_MAX: Number(getEnv('DB_POOL_MAX', '10')),
+  DB_IDLE_TIMEOUT_MS: Number(getEnv('DB_IDLE_TIMEOUT_MS', '30000')),
+  DB_CONNECTION_TIMEOUT_MS: Number(getEnv('DB_CONNECTION_TIMEOUT_MS', '5000')),
+  DB_STATEMENT_TIMEOUT_MS: Number(getEnv('DB_STATEMENT_TIMEOUT_MS', '15000')),
+
   BCRYPT_ROUNDS: Number(getEnv('BCRYPT_ROUNDS', '12')),
 
   FREE_DEVICE_LIMIT: Number(getEnv('FREE_DEVICE_LIMIT', '1')),

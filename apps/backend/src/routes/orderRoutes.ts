@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query } from '../config/db';
 import { recordSyncChange } from '../services/syncChangeLog';
+import { auditLogService } from '../services/auditLogService';
 import {
   getOrderProductionStages,
   saveOrderProductionStageNote,
@@ -373,6 +374,16 @@ orderRoutes.post('/', async (req, res) => {
       payload: mapOrderRow(result.rows[0]) as unknown as Record<string, unknown>,
     });
 
+    // Phase 6: audit trail.
+    await auditLogService.log({
+      userId: req.user!.sub,
+      workspaceId: req.workspaceId,
+      action: 'ORDER_CREATED',
+      entityType: 'order',
+      entityId: id,
+      metadata: { orderNumber, orderType, totalAmount, currency },
+    });
+
     res.status(201).json(mapOrderRow(result.rows[0]));
   } catch (err) {
     console.error(err);
@@ -415,6 +426,13 @@ orderRoutes.put('/:id', async (req, res) => {
     if (!customerId || !orderNumber || !orderType) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
+
+    // Phase 6: previous status captured so status transitions are audited
+    // distinctly from ordinary updates (ORDER_STATUS_CHANGED).
+    const previous = await query<{ status: string }>(
+      `SELECT status FROM orders WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NULL`,
+      [id, req.workspaceId]
+    );
 
     const result = await query<OrderRow>(
       `
@@ -492,6 +510,20 @@ orderRoutes.put('/:id', async (req, res) => {
       entityId: id,
       operation: 'update',
       payload: mapOrderRow(result.rows[0]) as unknown as Record<string, unknown>,
+    });
+
+    // Phase 6: audit trail — status transitions are first-class events.
+    const statusChanged =
+      previous.rows.length > 0 && previous.rows[0].status !== result.rows[0].status;
+    await auditLogService.log({
+      userId: req.user!.sub,
+      workspaceId: req.workspaceId,
+      action: statusChanged ? 'ORDER_STATUS_CHANGED' : 'ORDER_UPDATED',
+      entityType: 'order',
+      entityId: id,
+      metadata: statusChanged
+        ? { from: previous.rows[0].status, to: result.rows[0].status }
+        : { orderNumber },
     });
 
     res.json(mapOrderRow(result.rows[0]));

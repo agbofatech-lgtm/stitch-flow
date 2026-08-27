@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query } from '../config/db';
 import { recordSyncChange } from '../services/syncChangeLog';
+import { auditLogService } from '../services/auditLogService';
 
 type InvoiceRow = {
   id: string;
@@ -267,6 +268,16 @@ invoiceRoutes.post('/', async (req, res) => {
       entityId: id,
       operation: 'insert',
       payload: { ...created, items: createdItems } as unknown as Record<string, unknown>,
+    });
+
+    // Phase 6: audit trail.
+    await auditLogService.log({
+      userId: req.user!.sub,
+      workspaceId: req.workspaceId,
+      action: 'INVOICE_CREATED',
+      entityType: 'invoice',
+      entityId: id,
+      metadata: { invoiceNumber, totalAmount: numericTotal, currency },
     });
 
     res.status(201).json({ ...created, items: createdItems });

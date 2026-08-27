@@ -1,8 +1,13 @@
 import { Request, Response } from 'express';
 import { adminService } from '../services/adminService';
 import { getPagination } from '../utils/pagination';
+import { metricsSnapshot } from '../config/observability/metrics';
 
 export const adminController = {
+  /** Phase 6: in-process operational metrics snapshot (admin-only). */
+  metrics: async (_req: Request, res: Response) => {
+    res.json(metricsSnapshot());
+  },
   users: async (req: Request, res: Response) => {
     const { limit, offset } = getPagination(req.query);
     const items = await adminService.listUsers(

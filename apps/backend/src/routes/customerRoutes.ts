@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { query, pool } from '../config/db';
 import { recordSyncChange, recordSyncChangeTx } from '../services/syncChangeLog';
 import { entitlementService } from '../services/entitlementService';
+import { auditLogService } from '../services/auditLogService';
 import { ApiError } from '../utils/apiError';
 
 type CustomerRow = {
@@ -155,6 +156,16 @@ customerRoutes.post('/', async (req, res, next) => {
       payload: { id: row.id, fullName, phone, email, address, notes },
     });
 
+    // Phase 6: transactional audit trail (atomic with the insert).
+    await auditLogService.logTx(client, {
+      userId: req.user!.sub,
+      workspaceId: req.workspaceId,
+      action: 'CUSTOMER_CREATED',
+      entityType: 'customer',
+      entityId: row.id,
+      metadata: { source: 'api' },
+    });
+
     await client.query('COMMIT');
 
     return res.status(201).json({
@@ -223,6 +234,16 @@ customerRoutes.put('/:id', async (req, res) => {
       entityId: row.id,
       operation: 'update',
       payload: { id: row.id, fullName, phone, email, address, notes },
+    });
+
+    // Phase 6: audit trail.
+    await auditLogService.log({
+      userId: req.user!.sub,
+      workspaceId: req.workspaceId,
+      action: 'CUSTOMER_UPDATED',
+      entityType: 'customer',
+      entityId: row.id,
+      metadata: { source: 'api' },
     });
 
     return res.json({

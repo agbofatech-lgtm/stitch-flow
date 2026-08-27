@@ -18,6 +18,8 @@ declare global {
       workspaceRole?: 'owner' | 'admin' | 'assistant';
       /** Raw request body captured for webhook signature verification (Phase 5). */
       rawBody?: Buffer;
+      /** Correlation id (Phase 6) — set by requestCorrelation middleware. */
+      id?: string;
     }
   }
 }

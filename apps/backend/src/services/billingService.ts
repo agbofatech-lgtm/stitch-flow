@@ -35,6 +35,7 @@ import {
 import { isLegalTransition } from '../billing/subscriptionStateMachine';
 import { subscriptionService, writeCommercialAudit } from './subscriptionService';
 import { auditLogService } from './auditLogService';
+import { metrics } from '../config/observability/metrics';
 
 const CHECKOUT_EVENT_TYPE = 'checkout.initialized';
 
@@ -170,6 +171,7 @@ export const billingService = {
     }
 
     if (!provider.verifyWebhookSignature(rawBody, signature)) {
+      metrics.webhookFailures.inc();
       await auditLogService.log({
         action: 'BILLING_WEBHOOK_REJECTED',
         entityType: 'billing_event',

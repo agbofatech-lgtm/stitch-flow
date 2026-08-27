@@ -1,4 +1,5 @@
 import { pool, query } from '../config/db';
+import { metrics } from '../config/observability/metrics';
 import { recordSyncChangeTx } from './syncChangeLog';
 
 const MAX_LIMIT = 500;
@@ -152,6 +153,7 @@ export const syncV2Service = {
         });
       } catch (err) {
         await client.query('ROLLBACK');
+        metrics.syncFailures.inc();
         throw err;
       } finally {
         client.release();

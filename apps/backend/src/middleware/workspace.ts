@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApiError } from '../utils/apiError';
 import { workspaceRepository } from '../repositories/workspaceRepository';
+import { setRequestContext } from '../config/observability/requestContext';
 
 /**
  * Tenant boundary enforcement.
@@ -33,6 +34,8 @@ export async function requireWorkspace(req: Request, _res: Response, next: NextF
 
     req.workspaceId = workspaceId;
     req.workspaceRole = membership.role;
+    // Phase 6: propagate correlation context for audit logging.
+    setRequestContext({ workspaceId });
     next();
   } catch (err) {
     next(err);

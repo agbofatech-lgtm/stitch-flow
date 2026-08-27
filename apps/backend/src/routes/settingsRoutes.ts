@@ -3,6 +3,7 @@ import { query, pool } from '../config/db';
 import { requireWorkspaceRole } from '../middleware/requireWorkspaceRole';
 import { entitlementService } from '../services/entitlementService';
 import { ApiError } from '../utils/apiError';
+import { auditLogService } from '../services/auditLogService';
 
 const manageWorkspace = requireWorkspaceRole('owner', 'admin');
 
@@ -193,6 +194,15 @@ settingsRoutes.post('/workspace-members', manageWorkspace, async (req, res, next
       ]
     );
 
+    await auditLogService.logTx(client, {
+      userId: req.user!.sub,
+      workspaceId,
+      action: 'WORKSPACE_MEMBER_ADDED',
+      entityType: 'workspace_member',
+      entityId: id,
+      metadata: { role },
+    });
+
     await client.query('COMMIT');
 
     res.status(201).json(mapWorkspaceMember(result.rows[0]));
@@ -275,6 +285,16 @@ settingsRoutes.delete('/workspace-members/:id', manageWorkspace, async (req, res
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'Workspace member not found' });
     }
+
+    // Phase 6: audit trail for member removal.
+    await auditLogService.log({
+      userId: req.user!.sub,
+      workspaceId: req.workspaceId,
+      action: 'WORKSPACE_MEMBER_REMOVED',
+      entityType: 'workspace_member',
+      entityId: id,
+      metadata: { role: result.rows[0].role },
+    });
 
     res.json({ success: true });
   } catch (err) {
