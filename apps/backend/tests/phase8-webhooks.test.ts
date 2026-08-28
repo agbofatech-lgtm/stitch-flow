@@ -16,6 +16,11 @@ import { checkWebhookUrl } from '../src/security/webhookUrlPolicy';
 
 type ReceivedCall = { headers: http.IncomingHttpHeaders; body: string; at: number };
 
+type ReceiverHandle = { server: http.Server; url: string; calls: ReceivedCall[] };
+
+/** Every receiver server created by the suite, for lifecycle cleanup. */
+const receivers: ReceiverHandle[] = [];
+
 function startReceiver(responder: (req: http.IncomingMessage, res: http.ServerResponse, body: string) => void) {
   const calls: ReceivedCall[] = [];
   const server = http.createServer((req, res) => {
@@ -26,11 +31,25 @@ function startReceiver(responder: (req: http.IncomingMessage, res: http.ServerRe
       responder(req, res, body);
     });
   });
-  return new Promise<{ server: http.Server; url: string; calls: ReceivedCall[] }>((resolve) => {
+  return new Promise<ReceiverHandle>((resolve) => {
     server.listen(0, '127.0.0.1', () => {
       const { port } = server.address() as AddressInfo;
-      resolve({ server, url: `http://127.0.0.1:${port}/hook`, calls });
+      const handle = { server, url: `http://127.0.0.1:${port}/hook`, calls };
+      receivers.push(handle); // track so afterAll can close EVERY server
+      resolve(handle);
     });
+  });
+}
+
+/** Close one receiver server, force-dropping keep-alive connections and
+ * guarded so a stuck close() can never re-introduce a hang. */
+function closeReceiver(handle: ReceiverHandle): Promise<void> {
+  return new Promise<void>((resolve) => {
+    const server = handle.server;
+    server.close(() => resolve());
+    if (typeof server.closeAllConnections === 'function') server.closeAllConnections();
+    const guard = setTimeout(resolve, 2000);
+    if (typeof guard.unref === 'function') guard.unref();
   });
 }
 
@@ -50,10 +69,14 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-  // Deterministic drain settle; then close the receiver (no hanging handles).
+  // Deterministic drain settle, then close EVERY receiver server created by
+  // the delivery-pipeline tests. Closing only the last one leaked the earlier
+  // http.Server handles (TCPSERVERWRAP) and kept the event loop alive, so the
+  // Jest worker never exited after all assertions passed.
   try { await webhookService.drainOnce(); } catch { /* best-effort */ }
   await new Promise((resolve) => setTimeout(resolve, 400));
-  if (receiver) await new Promise((resolve) => receiver.server.close(resolve));
+  await Promise.all(receivers.map(closeReceiver));
+  receivers.length = 0;
 });
 
 async function createEndpoint(session: AuthSession, url: string, events: string[] = ['@all'], extra: Record<string, unknown> = {}) {
