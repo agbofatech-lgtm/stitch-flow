@@ -1,4 +1,4 @@
--- Phase 8 — Webhook delivery infrastructure (Subsystem 2).
+-- Phase 8 - Webhook delivery infrastructure (Subsystem 2).
 -- Additive + idempotent. Builds ON integration_outbox (the durable event
 -- queue from Phase 7); this migration adds endpoint registration + delivery
 -- tracking only. No competing event system.
@@ -33,9 +33,9 @@ CREATE INDEX IF NOT EXISTS idx_webhook_endpoints_ws
 
 -- ============ webhook_deliveries (TENANT-SCOPED, one row per attempt) ============
 -- Purpose: full delivery history + retry state machine.
--- PENDING → DELIVERING → DELIVERED
---                 ↘ FAILED-transient → RETRYING (new PENDING attempt row)
---                 ↘ DEAD_LETTER (permanent 4xx, or attempts exhausted)
+-- PENDING -> DELIVERING -> DELIVERED
+--                  FAILED-transient -> RETRYING (new PENDING attempt row)
+--                  DEAD_LETTER (permanent 4xx, or attempts exhausted)
 -- delivery_key UNIQUE = idempotent delivery identifier (outbox:endpoint:attempt)
 -- endpoint_id ON DELETE SET NULL: delivery history outlives endpoint deletion.
 CREATE TABLE IF NOT EXISTS webhook_deliveries (

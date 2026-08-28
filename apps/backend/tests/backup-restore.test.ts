@@ -134,10 +134,21 @@ describe('Phase 6 — backup / restore verification', () => {
 
   it('restores into a freshly migrated second database and verifies counts', async () => {
     // Simulated disaster target: brand new database, schema via migrations only.
-    const pg = (global as unknown as { __EMBEDDED_PG__: { createDatabase(n: string): Promise<void>; dropDatabase?(n: string): Promise<void> } }).__EMBEDDED_PG__;
-    await pg.createDatabase(RESTORE_DB_NAME).catch(() => undefined); // idempotent across reruns
-    run('run-migrations.js', [], RESTORE_DB);
+    const embeddedPg = (global as unknown as { __EMBEDDED_PG__?: { createDatabase(n: string): Promise<void>; dropDatabase?(n: string): Promise<void> } }).__EMBEDDED_PG__;
 
+    if (embeddedPg) {
+      await embeddedPg.createDatabase(RESTORE_DB_NAME).catch(() => undefined);
+    } else {
+      // External PostgreSQL: connect to the default 'postgres' database and create the restore DB.
+      const { Pool } = require('pg');
+      const masterUrl = (process.env.DATABASE_URL || '').replace(/\/[^/]+$/, '/postgres');
+      const masterPool = new Pool({ connectionString: masterUrl });
+      await masterPool.query(`CREATE DATABASE ${RESTORE_DB_NAME}`).catch(() => undefined);
+      await masterPool.end();
+    }
+
+    // Run migrations on the restore database.
+    run('run-migrations.js', [], RESTORE_DB);
     const out = run('db-restore.js', [backupDir], RESTORE_DB);
     expect(out).toContain('checksum verification: OK');
     expect(out).toContain('RESTORE RESULT: OK');

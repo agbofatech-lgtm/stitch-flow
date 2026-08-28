@@ -1,3 +1,7 @@
+// Increase timeouts for Windows/Docker environment.
+process.env.PG_IDLE_TIMEOUT = '30000';   // 30s idle timeout (default 10s)
+process.env.PG_STATEMENT_TIMEOUT = '120000'; // 120s statement timeout (default 60s)
+
 /* eslint-disable no-console */
 const fs = require('fs');
 const path = require('path');
