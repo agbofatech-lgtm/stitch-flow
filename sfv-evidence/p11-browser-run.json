@@ -1,0 +1,185 @@
+{
+  "results": [
+    {
+      "id": "D29",
+      "ok": true,
+      "detail": "register renders"
+    },
+    {
+      "id": "D29b",
+      "ok": true,
+      "detail": "duplicate email rejected with message"
+    },
+    {
+      "id": "D28",
+      "ok": true,
+      "detail": "login works"
+    },
+    {
+      "id": "D1",
+      "ok": true,
+      "detail": "body rgb(247, 245, 240) aside rgb(255, 253, 249)"
+    },
+    {
+      "id": "D2",
+      "ok": true,
+      "detail": "Geist body / Hanken display"
+    },
+    {
+      "id": "D3",
+      "ok": true,
+      "detail": "gold strip rgb(201, 169, 110)"
+    },
+    {
+      "id": "D4",
+      "ok": true,
+      "detail": "card padding 16px"
+    },
+    {
+      "id": "D5",
+      "ok": true,
+      "detail": "radius 16px bg rgb(255, 253, 249)"
+    },
+    {
+      "id": "D7",
+      "ok": true,
+      "detail": "input radius 4px (min-h 40px)"
+    },
+    {
+      "id": "D6",
+      "ok": true,
+      "detail": "buttons use rounded-btn 8px via shared Button (verified in CSSOM below)"
+    },
+    {
+      "id": "D16",
+      "ok": true,
+      "detail": "sf-btn-motion hover rule present"
+    },
+    {
+      "id": "D8",
+      "ok": true,
+      "detail": "gold focus-visible policy present"
+    },
+    {
+      "id": "D9",
+      "ok": true,
+      "detail": "sf-table treatment present"
+    },
+    {
+      "id": "D15",
+      "ok": true,
+      "detail": "sf-page-enter wrapper active"
+    },
+    {
+      "id": "D17",
+      "ok": true,
+      "detail": "outline rgb(201, 169, 110)"
+    },
+    {
+      "id": "D20",
+      "ok": true,
+      "detail": "keyboard activates navigation"
+    },
+    {
+      "id": "D25",
+      "ok": true,
+      "detail": "design studio UI present"
+    },
+    {
+      "id": "D27",
+      "ok": true,
+      "detail": "production board renders"
+    },
+    {
+      "id": "D26",
+      "ok": true,
+      "detail": "pattern engine UI present"
+    },
+    {
+      "id": "D32",
+      "ok": true,
+      "detail": "invoices + orders workflows render"
+    },
+    {
+      "id": "D30",
+      "ok": true,
+      "detail": "developer dashboard renders"
+    },
+    {
+      "id": "D10",
+      "ok": true,
+      "detail": "modal open, focus trapped=true"
+    },
+    {
+      "id": "D10b",
+      "ok": true,
+      "detail": "Escape closes modal"
+    },
+    {
+      "id": "D22",
+      "ok": true,
+      "detail": "longtasks>200ms: 0"
+    },
+    {
+      "id": "D23",
+      "ok": true,
+      "detail": "CLS 0.002"
+    },
+    {
+      "id": "D24",
+      "ok": true,
+      "detail": "heap 18MB after nav sequence"
+    },
+    {
+      "id": "D14",
+      "ok": true,
+      "detail": "empty state explains missing data"
+    },
+    {
+      "id": "D31",
+      "ok": true,
+      "detail": "control center renders for operator"
+    },
+    {
+      "id": "D13",
+      "ok": true,
+      "detail": "loading status region during section load"
+    },
+    {
+      "id": "D12",
+      "ok": true,
+      "detail": "toast: Customer reactivated — sign-in restored."
+    },
+    {
+      "id": "D11",
+      "ok": true,
+      "detail": "drawer opens at 390px"
+    },
+    {
+      "id": "D19",
+      "ok": true,
+      "detail": "no horizontal overflow"
+    },
+    {
+      "id": "D21",
+      "ok": true,
+      "detail": "aria landmarks + live regions + alts"
+    },
+    {
+      "id": "D18",
+      "ok": true,
+      "detail": "reduced-motion duration 1e-05s"
+    },
+    {
+      "id": "D33",
+      "ok": true,
+      "detail": "sw=true, offline shell rendered"
+    },
+    {
+      "id": "D46x",
+      "ok": true,
+      "detail": "no pageerrors"
+    }
+  ],
+  "failed": 0
+}

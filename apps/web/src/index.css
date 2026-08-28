@@ -304,3 +304,24 @@
     border-bottom: 0;
   }
 }
+
+/* ── Legacy form-control normalization (P2 views migrate to ui/Field next) ──
+   Element+class specificity intentionally outranks the legacy utility
+   combos so every existing input/select/textarea inherits the token look
+   until its file is migrated. */
+input.rounded-xl,
+input.rounded-2xl,
+textarea.rounded-xl,
+select.rounded-xl {
+  @apply rounded-input border-line bg-surface text-ink;
+  min-height: 40px;
+}
+input.rounded-xl:focus,
+input.rounded-2xl:focus,
+textarea.rounded-xl:focus,
+select.rounded-xl:focus {
+  @apply border-line;
+  box-shadow: none;
+  outline: 2px solid var(--sf-gold);
+  outline-offset: 1px;
+}

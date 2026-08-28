@@ -13,10 +13,10 @@ interface ToastItem {
 
 const ToastCtx = createContext<{ push: (tone: ToastTone, message: string) => void } | null>(null);
 
+/** No-op fallback so consumers render safely outside <ToastProvider>
+ *  (e.g. isolated tests); feedback simply stays inline there. */
 export function useToast() {
-  const ctx = useContext(ToastCtx);
-  if (!ctx) throw new Error('useToast must be used inside <ToastProvider>');
-  return ctx;
+  return useContext(ToastCtx) ?? { push: (_tone: ToastTone, _message: string) => undefined };
 }
 
 const toneIcon: Record<ToastTone, ReactNode> = {

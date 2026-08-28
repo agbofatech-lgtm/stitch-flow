@@ -13,6 +13,7 @@ import { Settings } from './components/Settings';
 import { DeveloperDashboard } from './components/DeveloperDashboard';
 import { ControlCenter } from './components/platform/ControlCenter';
 import { PageTransition } from './components/ui/motion';
+import { ToastProvider } from './components/ui/Toast';
 import { SplashScreen } from './components/SplashScreen';
 import { Login } from './components/Login';
 import { Register } from './components/Register';
@@ -180,7 +181,9 @@ function AppContent() {
 export default function App() {
   return (
     <AppProvider>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </AppProvider>
   );
 }

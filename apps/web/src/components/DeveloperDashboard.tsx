@@ -14,6 +14,7 @@
  * by the backend; this view adds no cross-workspace capability.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Modal } from './ui/Modal';
 import {
   Code2,
   Copy,
@@ -23,7 +24,6 @@ import {
   Activity,
   RefreshCw,
   Plus,
-  ShieldAlert,
   Send,
   RotateCcw,
   Trash2,
@@ -158,15 +158,12 @@ function SecretModal({
     }
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4" role="dialog" aria-modal="true">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
-        <div className="mb-3 flex items-center gap-2">
-          <ShieldAlert className="h-5 w-5 text-amber-500" />
-          <h3 className="text-lg font-semibold text-slate-800">
-            {kind === 'api-key' ? 'API key created — copy the secret now' : 'Webhook endpoint created — copy the signing secret now'}
-          </h3>
-        </div>
-        <p className="mb-3 text-sm text-slate-600">
+    <Modal
+      open
+      onClose={onClose}
+      title={kind === 'api-key' ? 'API key created — copy the secret now' : 'Webhook endpoint created — copy the signing secret now'}
+    >
+        <p className="mb-3 text-sm text-ink-soft">
           This secret is displayed <strong>only once</strong>. It is stored as a hash / sealed
           envelope server-side and can never be shown again. Leaving or reloading this page
           will not reveal it again.
@@ -199,12 +196,11 @@ function SecretModal({
           type="button"
           data-testid="secret-dismiss"
           onClick={onClose}
-          className="w-full rounded-xl bg-[#0F6E8C] py-2 text-sm font-semibold text-white hover:bg-[#0C5C74]"
+          className="sf-btn-motion w-full rounded-btn bg-charcoal py-2 text-sm font-semibold text-ivory hover:bg-ink-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
         >
           I have stored it securely — close (secret will be discarded)
         </button>
-      </div>
-    </div>
+    </Modal>
   );
 }
 

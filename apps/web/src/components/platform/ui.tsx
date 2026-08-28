@@ -5,6 +5,7 @@
  * Every action component still calls a real backend endpoint — no inert buttons.
  */
 import { useState } from 'react';
+import { useToast } from '../ui/Toast';
 import { Button } from '../ui/Button';
 import { Card as UiCard, MetricCard as UiMetricCard } from '../ui/Card';
 import { StatusBadge as UiStatusBadge } from '../ui/Badge';
@@ -57,17 +58,21 @@ export function ConfirmAction({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  const { push } = useToast();
 
   const run = async () => {
     setBusy(true);
     setError(null);
     try {
       const message = await onConfirm();
+      push('success', message);
       setDone(message);
       setArmed(false);
       window.setTimeout(() => setDone(null), 5000);
     } catch (e) {
-      setError(describeApiError(e).message);
+      const msg = describeApiError(e).message;
+      push('error', msg);
+      setError(msg);
       setArmed(false);
     } finally {
       setBusy(false);
