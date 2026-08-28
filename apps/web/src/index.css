@@ -1,3 +1,282 @@
-﻿@tailwind base;
+/* ── Phase 11 — StitchFlow design foundation ───────────────────────────
+   Local bundled fonts (no runtime fetching; precached by the PWA):
+   display  → Hanken Grotesk Variable  (open-licensed Satoshi-adjacent grotesk)
+   body     → Geist Variable
+   technical→ JetBrains Mono Variable                                          */
+@import '@fontsource-variable/hanken-grotesk';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/jetbrains-mono';
+
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Design tokens ─────────────────────────────────────────────────────── */
+:root {
+  /* colour — luxury tailoring × precision engineering */
+  --sf-ivory: #f7f5f0;
+  --sf-charcoal: #18181b;
+  --sf-gold: #c9a96e;
+  --sf-gold-light: #d4b87a;
+  --sf-gold-dark: #a88950;
+  --sf-burgundy: #6a2e35;
+  --sf-grey: #c9c6bf;
+  --sf-grey-light: #e8e5df;
+  /* derived neutrals (charcoal tints — never #000000) */
+  --sf-ink: #18181b;
+  --sf-ink-soft: #3f3f46;
+  --sf-ink-mute: #6b6b70;
+  --sf-line: #e4e1da;
+  --sf-surface: #fffdf9;
+  /* spacing — 8px-oriented system (4/8/12/16/24/32/40/48/64/80/96);
+     Tailwind's default scale maps 1→4px … 24→96px and is the single source
+     for spacing utilities; do not scatter arbitrary values. */
+  /* shape */
+  --sf-radius-input: 4px;
+  --sf-radius-btn: 8px;
+  --sf-radius-card: 16px;
+  --sf-radius-modal: 16px;
+  /* elevation — restrained, communicates page→section→card→control→overlay */
+  --sf-e1: 0 1px 2px rgb(24 24 27 / 0.05);
+  --sf-e2: 0 2px 8px rgb(24 24 27 / 0.07);
+  --sf-e3: 0 8px 24px rgb(24 24 27 / 0.1);
+  --sf-e4: 0 16px 48px rgb(24 24 27 / 0.14);
+  /* z-index */
+  --sf-z-nav: 100;
+  --sf-z-dropdown: 200;
+  --sf-z-sticky: 300;
+  --sf-z-overlay: 400;
+  --sf-z-modal: 500;
+  --sf-z-toast: 600;
+  /* motion */
+  --sf-t-instant: 0ms;
+  --sf-t-micro: 150ms;
+  --sf-t-fast: 250ms;
+  --sf-t-medium: 400ms;
+  --sf-t-slow: 600ms;
+  --sf-t-cinematic: 800ms;
+  --sf-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --sf-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --sf-ease-dramatic: cubic-bezier(0.65, 0, 0.35, 1);
+  --sf-ease-sharp: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    background: var(--sf-ivory);
+  }
+  body {
+    @apply bg-ivory text-ink antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-ink;
+    letter-spacing: -0.02em;
+  }
+  ::selection {
+    background: var(--sf-gold-light);
+    color: var(--sf-charcoal);
+  }
+  /* visible, consistent focus — gold ring everywhere */
+  :focus-visible {
+    outline: 2px solid var(--sf-gold);
+    outline-offset: 2px;
+  }
+  /* restrained scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sf-grey) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--sf-grey);
+    border-radius: 8px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* ── Motion keyframes (transform/opacity only — GPU friendly) ─────────── */
+@keyframes sf-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes sf-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sf-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes sf-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes sf-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes sf-toast-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+}
+@keyframes sf-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes sf-logo-light {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── Motion utility classes ────────────────────────────────────────────── */
+.sf-page-enter {
+  animation: sf-page-in var(--sf-t-medium) var(--sf-ease-standard) both;
+}
+.sf-fade-enter {
+  animation: sf-fade-in var(--sf-t-fast) var(--sf-ease-standard) both;
+}
+.sf-rise-enter {
+  animation: sf-rise-in var(--sf-t-fast) var(--sf-ease-standard) both;
+}
+.sf-modal-enter {
+  animation: sf-scale-in 300ms var(--sf-ease-standard) both;
+}
+.sf-backdrop-enter {
+  animation: sf-fade-in 200ms var(--sf-ease-sharp) both;
+}
+.sf-toast-enter {
+  animation: sf-toast-in var(--sf-t-fast) var(--sf-ease-standard) both;
+}
+.sf-toast-exit {
+  animation: sf-toast-out var(--sf-t-fast) var(--sf-ease-sharp) both;
+}
+.sf-logo-reveal {
+  animation: sf-logo-light var(--sf-t-slow) var(--sf-ease-standard) both;
+}
+/* 80ms stagger for card grids (dashboard, metrics) */
+.sf-stagger > * {
+  animation: sf-rise-in var(--sf-t-fast) var(--sf-ease-standard) both;
+}
+.sf-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.sf-stagger > *:nth-child(2) { animation-delay: 80ms; }
+.sf-stagger > *:nth-child(3) { animation-delay: 160ms; }
+.sf-stagger > *:nth-child(4) { animation-delay: 240ms; }
+.sf-stagger > *:nth-child(5) { animation-delay: 320ms; }
+.sf-stagger > *:nth-child(6) { animation-delay: 400ms; }
+.sf-stagger > *:nth-child(7) { animation-delay: 480ms; }
+.sf-stagger > *:nth-child(8) { animation-delay: 560ms; }
+.sf-stagger > *:nth-child(n + 9) { animation-delay: 640ms; }
+
+/* skeleton shimmer — 1500ms; static under reduced motion */
+.sf-skeleton {
+  border-radius: var(--sf-radius-input);
+  background: linear-gradient(
+    100deg,
+    var(--sf-grey-light) 40%,
+    #f3f0ea 50%,
+    var(--sf-grey-light) 60%
+  );
+  background-size: 200% 100%;
+  animation: sf-shimmer 1500ms linear infinite;
+}
+
+/* button micro-interaction (scale limits per §25) */
+.sf-btn-motion {
+  transition: transform var(--sf-t-micro) var(--sf-ease-standard),
+    box-shadow var(--sf-t-micro) var(--sf-ease-standard),
+    background-color var(--sf-t-micro) var(--sf-ease-standard),
+    border-color var(--sf-t-micro) var(--sf-ease-standard),
+    color var(--sf-t-micro) var(--sf-ease-standard);
+}
+.sf-btn-motion:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+.sf-btn-motion:active:not(:disabled) {
+  transform: scale(0.96);
+  transition-duration: 100ms;
+}
+
+/* card hover lift — restrained */
+.sf-card-hover {
+  transition: transform var(--sf-t-fast) var(--sf-ease-standard),
+    box-shadow var(--sf-t-fast) var(--sf-ease-standard);
+}
+.sf-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sf-e2);
+}
+
+/* ── Reduced motion: decorative motion off, functional feedback instant ─ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .sf-skeleton {
+    animation: none;
+  }
+  .sf-btn-motion:hover:not(:disabled),
+  .sf-btn-motion:active:not(:disabled),
+  .sf-card-hover:hover {
+    transform: none;
+  }
+}

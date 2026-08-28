@@ -22,7 +22,8 @@ export default defineConfig({
       includeAssets: ['icons/*.png', 'manifest.json'],
       manifest: false, // keep the existing public/manifest.json
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+        // Phase 11: bundled variable fonts must be available offline.
+        globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2,woff}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [
           /^\/(auth|sync|customers|orders|invoices|payments|materials|reports|settings|dashboard|admin|licenses|events|feature-requests|health)/,
