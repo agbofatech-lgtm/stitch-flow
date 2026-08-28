@@ -11,6 +11,7 @@ import { Materials } from './components/Materials';
 import { Reports } from './components/Reports';
 import { Settings } from './components/Settings';
 import { DeveloperDashboard } from './components/DeveloperDashboard';
+import { ControlCenter } from './components/platform/ControlCenter';
 import { SplashScreen } from './components/SplashScreen';
 import { Login } from './components/Login';
 import { Register } from './components/Register';
@@ -29,6 +30,7 @@ import {
   isResetPasswordPath,
   isPublicAuthPath,
   isDeveloperPath,
+  isPlatformPath,
   setNextPath,
 } from '@shared/router';
 
@@ -100,6 +102,7 @@ function AppContent() {
     if (deepLinkedRoute.current !== route) {
       deepLinkedRoute.current = route;
       if (isDeveloperPath(route)) setView('developer');
+      else if (isPlatformPath(route)) setView('platform');
     }
   }, [route, authed, setView]);
 
@@ -115,7 +118,13 @@ function AppContent() {
     if (!viewChanged) return;
     const p = currentPath();
     if (currentView === 'developer' && !isDeveloperPath(p)) navigate('/developer');
-    else if (currentView !== 'developer' && isDeveloperPath(p)) navigate('/');
+    else if (currentView === 'platform' && !isPlatformPath(p)) navigate('/platform');
+    else if (
+      currentView !== 'developer' &&
+      currentView !== 'platform' &&
+      (isDeveloperPath(p) || isPlatformPath(p))
+    )
+      navigate('/');
   }, [currentView, authed]);
 
   if (!authed) {
@@ -153,6 +162,8 @@ function AppContent() {
         return <Settings />;
       case 'developer':
         return <DeveloperDashboard />;
+      case 'platform':
+        return <ControlCenter />;
       default:
         return <Dashboard />;
     }

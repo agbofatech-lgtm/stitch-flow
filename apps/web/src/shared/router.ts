@@ -54,6 +54,15 @@ export function isDeveloperPath(p: string): boolean {
   return p === '/developer' || p.startsWith('/developer/');
 }
 
+/**
+ * Phase 10 — Developer Control Center path family. The route gate treats it
+ * like every other protected route; the platform ROLE check is enforced
+ * server-side on every API call (the UI hint is cosmetic only).
+ */
+export function isPlatformPath(p: string): boolean {
+  return p === '/platform' || p.startsWith('/platform/');
+}
+
 /* Intended-route memory so post-login lands where the user was headed. */
 const NEXT_KEY = 'stitchflow.auth.next';
 

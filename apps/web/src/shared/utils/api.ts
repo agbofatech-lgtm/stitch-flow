@@ -68,6 +68,35 @@ export function clearAuthTokens() {
 }
 
 /**
+ * Phase 10: reads the role claim from the stored access token. This is a UX
+ * hint ONLY (nav visibility, section gating) — every /platform API call is
+ * authorized server-side against the database role, never this claim.
+ */
+export function getAuthRole(): string | null {
+  const token = getAccessToken();
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return typeof payload.role === 'string' ? payload.role : null;
+  } catch {
+    return null;
+  }
+}
+
+export const PLATFORM_ROLES = [
+  'platform_owner',
+  'platform_admin',
+  'platform_support',
+  'platform_analyst',
+  // Legacy bootstrap operator (documented: treated as platform owner server-side).
+  'admin',
+] as const;
+
+export function isPlatformRole(role: string | null | undefined): boolean {
+  return role != null && (PLATFORM_ROLES as readonly string[]).includes(role);
+}
+
+/**
  * Reads the workspaceId claim from the stored access token (base64 decode,
  * client-side only; the server never trusts this and re-verifies membership
  * on every request). Used to scope local sync state after login.

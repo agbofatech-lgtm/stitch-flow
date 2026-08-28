@@ -25,11 +25,31 @@ export const auditLogRepository = {
     );
   },
 
-  async list(limit: number, offset: number) {
+  /**
+   * Phase 10: optional filters (action / entity type / entity id) for the
+   * Control Center audit view; existing positional callers keep working.
+   */
+  async list(limit: number, offset: number, filters?: { action?: string; entityType?: string; entityId?: string }) {
+    const clauses: string[] = ['deleted_at IS NULL'];
+    const args: unknown[] = [];
+    if (filters?.action) {
+      args.push(filters.action);
+      clauses.push(`action = $${args.length}`);
+    }
+    if (filters?.entityType) {
+      args.push(filters.entityType);
+      clauses.push(`entity_type = $${args.length}`);
+    }
+    if (filters?.entityId) {
+      args.push(filters.entityId);
+      clauses.push(`entity_id = $${args.length}`);
+    }
+    args.push(limit, offset);
     const result = await query(
-      `SELECT * FROM audit_logs WHERE deleted_at IS NULL
-       ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
-      [limit, offset]
+      `SELECT * FROM audit_logs WHERE ${clauses.join(' AND ')}
+       ORDER BY created_at DESC
+       LIMIT $${args.length - 1} OFFSET $${args.length}`,
+      args
     );
     return result.rows;
   }

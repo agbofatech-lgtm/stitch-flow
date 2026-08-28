@@ -14,11 +14,13 @@ import {
   Package,
   BarChart3,
   Code2,
+  ShieldCheck,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { BRAND } from '../config/brand';
 import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
+import { getAuthRole, isPlatformRole } from '@shared/utils/api';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -46,6 +48,18 @@ export function Layout({ children }: { children: ReactNode }) {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // Phase 10: the Control Center nav entry is a UX hint from the signed role
+  // claim — the server independently authorizes every /platform API call, so
+  // hiding/showing this item can never grant or leak access.
+  const showPlatformNav = isPlatformRole(getAuthRole());
+  const visibleNavItems = showPlatformNav
+    ? [
+        ...navItems.slice(0, 9), // …through 'developer'
+        { id: 'platform', label: 'Control Center', icon: ShieldCheck },
+        ...navItems.slice(9), // 'settings'
+      ]
+    : navItems;
 
   const tierBadgeClass =
     tierSimulation === 'STUDIO'
@@ -125,7 +139,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
         <nav className="overflow-y-auto px-3 py-3">
           <div className="space-y-1.5">
-            {(navItems ?? []).map((item) => {
+            {(visibleNavItems ?? []).map((item) => {
               const isActive = currentView === item.id;
               const Icon = item.icon;
 

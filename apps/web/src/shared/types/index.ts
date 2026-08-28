@@ -12,7 +12,8 @@ export type AppView =
   | 'materials'
   | 'reports'
   | 'settings'
-  | 'developer';
+  | 'developer'
+  | 'platform';
 
 export type OrderStatus =
   | 'draft'

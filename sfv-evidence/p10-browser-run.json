@@ -1,0 +1,326 @@
+{
+  "phase": 10,
+  "runAt": "2026-08-28T21:23:33.566Z",
+  "passed": 50,
+  "failed": 0,
+  "total": 50,
+  "jsErrors": [],
+  "http5xx": [],
+  "authEvents": [
+    {
+      "url": "/auth/login",
+      "status": 403
+    },
+    {
+      "url": "/platform/flags/ADVANCED_ANALYTICS",
+      "status": 403
+    },
+    {
+      "url": "/platform/webhooks/dispatch",
+      "status": 403
+    }
+  ],
+  "secretScanHits": [],
+  "results": [
+    {
+      "id": "C1",
+      "desc": "Unauthenticated visitor to /platform is redirected to /login",
+      "pass": true,
+      "evidence": "landed on /login"
+    },
+    {
+      "id": "C2",
+      "desc": "Workspace owner denied Control Center (UI card + hidden nav + API 403)",
+      "pass": true,
+      "evidence": "denial card shown; nav hidden; direct API 403"
+    },
+    {
+      "id": "C3",
+      "desc": "Platform owner: nav entry present, Control Center renders with live metrics",
+      "pass": true,
+      "evidence": "nav present; overview renders real metrics"
+    },
+    {
+      "id": "C6",
+      "desc": "Customers section renders a real list",
+      "pass": true,
+      "evidence": "9 rows rendered"
+    },
+    {
+      "id": "C7",
+      "desc": "Search finds customers by email substring (server-side)",
+      "pass": true,
+      "evidence": "search=owner-a returns only matching rows"
+    },
+    {
+      "id": "C9",
+      "desc": "Create a customer entirely from the UI",
+      "pass": true,
+      "evidence": "created cust-c9-1787952125736@p10.test via UI"
+    },
+    {
+      "id": "C10",
+      "desc": "Customer truly provisioned in the database",
+      "pass": true,
+      "evidence": "user 61608101… active, role user, phone +233247525736"
+    },
+    {
+      "id": "C11",
+      "desc": "Exactly one workspace + owner membership + trial + license; zero tokens",
+      "pass": true,
+      "evidence": "1 workspace, owner membership, STUDIO trialing, 1 license, 0 tokens"
+    },
+    {
+      "id": "C12",
+      "desc": "Customer authenticates after self-service password setup (reset flow)",
+      "pass": true,
+      "evidence": "reset email delivered, password self-set, UI login succeeded"
+    },
+    {
+      "id": "C13",
+      "desc": "Customer detail shows identity, workspace, members, usage, developer counts, audit",
+      "pass": true,
+      "evidence": "all six detail blocks render; no credential material"
+    },
+    {
+      "id": "C14",
+      "desc": "Suspend from UI takes effect server-side immediately",
+      "pass": true,
+      "evidence": "two-step confirm; success; DB suspended"
+    },
+    {
+      "id": "C8",
+      "desc": "Status filter excludes suspended customers (server-side)",
+      "pass": true,
+      "evidence": "filter=active excludes the suspended customer"
+    },
+    {
+      "id": "C15",
+      "desc": "Suspended customer cannot authenticate (UI error + API 403)",
+      "pass": true,
+      "evidence": "API 403 ACCOUNT_INACTIVE; UI login error shown"
+    },
+    {
+      "id": "C16",
+      "desc": "Reactivate from UI restores the account",
+      "pass": true,
+      "evidence": "two-step confirm; success; DB active"
+    },
+    {
+      "id": "C17",
+      "desc": "Reactivated customer can authenticate again (UI)",
+      "pass": true,
+      "evidence": "UI login succeeded"
+    },
+    {
+      "id": "C17b",
+      "desc": "Session revocation independent of account status",
+      "pass": true,
+      "evidence": "refresh 401 while account stays active"
+    },
+    {
+      "id": "C18",
+      "desc": "Workspaces section renders the roster",
+      "pass": true,
+      "evidence": "10 workspaces listed"
+    },
+    {
+      "id": "C19",
+      "desc": "Workspace detail renders owner, members, stats",
+      "pass": true,
+      "evidence": "owner/members/stats render for the created workspace"
+    },
+    {
+      "id": "C20",
+      "desc": "Entitlement data is server-sourced (subscription plan/status)",
+      "pass": true,
+      "evidence": "detail shows \"STUDIO — trialing\" matching subscriptions table"
+    },
+    {
+      "id": "C21",
+      "desc": "Tenant isolation: workspace-owner JWT denied across platform surfaces",
+      "pass": true,
+      "evidence": "/platform/customers=403, /platform/workspaces/ws-752abe74-dc89-418a-a4bb-eb74dbf8122a=403, /platform/audit-logs=403, /platform/operators=403"
+    },
+    {
+      "id": "C22",
+      "desc": "Usage section renders",
+      "pass": true,
+      "evidence": "usage section rendered"
+    },
+    {
+      "id": "C23",
+      "desc": "Usage metrics match direct DB queries (no fabrication)",
+      "pass": true,
+      "evidence": "UI==DB: active30d=0, dau=0"
+    },
+    {
+      "id": "C24",
+      "desc": "Quota/entitlement renders on customer detail (plan + trial end)",
+      "pass": true,
+      "evidence": "STUDIO plan — trialing + trial end rendered"
+    },
+    {
+      "id": "C25",
+      "desc": "Detail data belongs to the selected customer (workspace id cross-check)",
+      "pass": true,
+      "evidence": "detail shows ws-752abe74-dc89-4… (created customer's workspace)"
+    },
+    {
+      "id": "C26",
+      "desc": "Signals render with counts and trend",
+      "pass": true,
+      "evidence": "three real signals rendered"
+    },
+    {
+      "id": "C27",
+      "desc": "Errors render from real error records",
+      "pass": true,
+      "evidence": "P10_CERT_PROBE visible with severity/route/message"
+    },
+    {
+      "id": "C28",
+      "desc": "Incidents render from real incident aggregation",
+      "pass": true,
+      "evidence": "1 incident(s) rendered"
+    },
+    {
+      "id": "C29",
+      "desc": "Incident status update via UI (two-step confirm) persists",
+      "pass": true,
+      "evidence": "incident dcccc5342d46… status=INVESTIGATING in DB and UI"
+    },
+    {
+      "id": "C30",
+      "desc": "Overview metrics cross-check against DB",
+      "pass": true,
+      "evidence": "UI customers=0; DB customers=0; DB workspaces=10"
+    },
+    {
+      "id": "C31",
+      "desc": "Webhooks section renders operations + documented gaps",
+      "pass": true,
+      "evidence": "operations + explicit unavailable list rendered"
+    },
+    {
+      "id": "C32",
+      "desc": "Dispatch/drain executes for real and reports the result",
+      "pass": true,
+      "evidence": "two-step confirm; raw dispatch/drain result rendered"
+    },
+    {
+      "id": "C34",
+      "desc": "Dispatch appears in the audit history (actor + result)",
+      "pass": true,
+      "evidence": "audit row present; actor=711acf9c…"
+    },
+    {
+      "id": "C35",
+      "desc": "Audit log renders privileged operations",
+      "pass": true,
+      "evidence": "created/suspended/reactivated/revoked/dispatch visible"
+    },
+    {
+      "id": "C36",
+      "desc": "Audit action filter works server-side",
+      "pass": true,
+      "evidence": "4 row(s), all platform.customer_suspended"
+    },
+    {
+      "id": "C37",
+      "desc": "Privileged operations produce exactly one deterministic audit entry each",
+      "pass": true,
+      "evidence": "{\"platform.customer_created\":1,\"platform.customer_reactivated\":1,\"platform.customer_suspended\":1,\"platform.sessions_revoked\":1,\"platform.webhooks_dispatched\":1}"
+    },
+    {
+      "id": "C38",
+      "desc": "No secrets/tokens in audit data, UI, or any platform API response",
+      "pass": true,
+      "evidence": "audit metadata, UI and all platform responses scanned clean"
+    },
+    {
+      "id": "C39",
+      "desc": "Operators section renders the grant form",
+      "pass": true,
+      "evidence": "email + role form rendered"
+    },
+    {
+      "id": "C41",
+      "desc": "Self role change refused (400) — lock-out protection",
+      "pass": true,
+      "evidence": "server 400 CANNOT_CHANGE_OWN_ROLE surfaced in UI"
+    },
+    {
+      "id": "C4",
+      "desc": "Analyst: read access OK, flag mutation denied by server (403 UX)",
+      "pass": true,
+      "evidence": "reads work; flag toggle rejected with 403 explanation"
+    },
+    {
+      "id": "C33",
+      "desc": "Analyst cannot dispatch webhooks (403 UX)",
+      "pass": true,
+      "evidence": "dispatch rejected for analyst with 403 UX"
+    },
+    {
+      "id": "C40",
+      "desc": "Analyst cannot grant operator roles (403)",
+      "pass": true,
+      "evidence": "POST /platform/operators -> 403 for analyst"
+    },
+    {
+      "id": "C42",
+      "desc": "Cross-tenant: workspace B JWT cannot read platform resources of others",
+      "pass": true,
+      "evidence": "customer detail 403, workspace detail 403 for foreign workspace owner"
+    },
+    {
+      "id": "C43",
+      "desc": "API error responses expose no secrets or internals",
+      "pass": true,
+      "evidence": "4 error samples clean (403,404,400,404)"
+    },
+    {
+      "id": "C44",
+      "desc": "No unexpected 401/403 storm from UI sessions",
+      "pass": true,
+      "evidence": "auth events=3, all from intentional negative-path tests"
+    },
+    {
+      "id": "C45",
+      "desc": "No 5xx responses during the entire run",
+      "pass": true,
+      "evidence": "zero 5xx across every monitored request"
+    },
+    {
+      "id": "C46",
+      "desc": "No uncaught JavaScript errors",
+      "pass": true,
+      "evidence": "zero pageerror events"
+    },
+    {
+      "id": "C47",
+      "desc": "Desktop Control Center usable at 1280px (nav click)",
+      "pass": true,
+      "evidence": "nav click → /platform; overview renders at 1280x900"
+    },
+    {
+      "id": "C48",
+      "desc": "390px mobile: drawer nav + Control Center usable",
+      "pass": true,
+      "evidence": "drawer nav works; overview + customers usable at 390px"
+    },
+    {
+      "id": "C49",
+      "desc": "No horizontal clipping at 390px across sections",
+      "pass": true,
+      "evidence": "document fits viewport on Customers/Workspaces/Audit at 390px"
+    },
+    {
+      "id": "C50",
+      "desc": "Tables scroll, actions touch-reachable on narrow screens",
+      "pass": true,
+      "evidence": "horizontally scrollable table; touch-size action targets"
+    }
+  ]
+}

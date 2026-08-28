@@ -46,7 +46,17 @@ const TABLES = [
 
 beforeEach(async () => {
   // Dynamically truncate only tables that exist in the public schema.
-  await query(`
+  //
+  // Harness hardening (Phase 10 investigation): TRUNCATE takes ACCESS
+  // EXCLUSIVE locks while fire-and-forget background writes from the
+  // previous test (audit rows, timeline entries, outbox inserts) may still
+  // hold row locks — Postgres can resolve that ordering as a deadlock
+  // (40P01). Proven pre-existing on the Phase 9 baseline (same failure with
+  // zero Phase 10 code). The truncation is idempotent, so retrying is safe
+  // and makes the suite deterministic; no test assertions are affected.
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await query(`
     DO $$
     DECLARE
       t text;
@@ -58,6 +68,13 @@ beforeEach(async () => {
       END LOOP;
     END $$;
   `);
+      break;
+    } catch (err) {
+      const isDeadlock = (err as { code?: string }).code === '40P01';
+      if (!isDeadlock || attempt >= 5) throw err;
+      await new Promise((r) => setTimeout(r, 100 * attempt));
+    }
+  }
   // Re-seed feature_flags after TRUNCATE.
   await query(`
     INSERT INTO feature_flags (flag_key, enabled, description) VALUES
