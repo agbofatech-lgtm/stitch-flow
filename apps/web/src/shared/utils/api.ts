@@ -14,6 +14,23 @@ export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5
 const ACCESS_TOKEN_KEY = 'stitchflow.auth.accessToken';
 const REFRESH_TOKEN_KEY = 'stitchflow.auth.refreshToken';
 
+/** Dispatched whenever tokens are stored/cleared — the route gate listens. */
+export const AUTH_CHANGED_EVENT = 'stitchflow:auth-changed';
+/**
+ * Dispatched when the server explicitly rejects a refresh-token rotation
+ * (401/403): authentication is unrecoverable and the gate returns the user
+ * to /login. Network failures do NOT dispatch this (offline-first).
+ */
+export const AUTH_FAILURE_EVENT = 'stitchflow:auth-unrecoverable';
+
+function dispatchAuthEvent(name: string): void {
+  try {
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event(name));
+  } catch {
+    // non-browser context (tests) — ignore
+  }
+}
+
 export function getAccessToken(): string | null {
   try {
     return window.localStorage.getItem(ACCESS_TOKEN_KEY);
@@ -34,6 +51,7 @@ export function storeAuthTokens(accessToken: string, refreshToken: string) {
   try {
     window.localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     window.localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    dispatchAuthEvent(AUTH_CHANGED_EVENT);
   } catch {
     // storage unavailable (private mode etc.) — session-only auth
   }
@@ -43,6 +61,7 @@ export function clearAuthTokens() {
   try {
     window.localStorage.removeItem(ACCESS_TOKEN_KEY);
     window.localStorage.removeItem(REFRESH_TOKEN_KEY);
+    dispatchAuthEvent(AUTH_CHANGED_EVENT);
   } catch {
     // ignore
   }
@@ -83,15 +102,31 @@ export async function refreshAuthTokens(fetchImpl: typeof fetch = fetch): Promis
 export async function tryRefreshTokens(fetchImpl: typeof fetch = fetch): Promise<boolean> {
   if (!refreshInFlight) {
     refreshInFlight = (async () => {
-      const refreshToken = getRefreshToken();
-      if (!refreshToken) return false;
+      const sentRefresh = getRefreshToken();
+      if (!sentRefresh) return false;
       try {
         const res = await fetchImpl(`${API_BASE}/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken }),
+          body: JSON.stringify({ refreshToken: sentRefresh }),
         });
-        if (!res.ok) return false;
+        if (!res.ok) {
+          // Refresh rotation race: another refresher (e.g. the developer
+          // client's rotate-once-on-401) may have already swapped the tokens,
+          // leaving this call with a stale refresh token. If storage now holds
+          // a different refresh token, treat the race as won elsewhere and let
+          // callers retry with the fresh tokens instead of signing out.
+          const currentRefresh = getRefreshToken();
+          if (currentRefresh && currentRefresh !== sentRefresh) return true;
+          // Explicit server rejection of the refresh token means the session
+          // is unrecoverable: clear credentials and let the route gate return
+          // the user to /login. Offline/network failures keep tokens instead.
+          if (res.status === 401 || res.status === 403) {
+            clearAuthTokens();
+            dispatchAuthEvent(AUTH_FAILURE_EVENT);
+          }
+          return false;
+        }
         const data = await res.json();
         if (data.accessToken && data.refreshToken) {
           storeAuthTokens(data.accessToken, data.refreshToken);

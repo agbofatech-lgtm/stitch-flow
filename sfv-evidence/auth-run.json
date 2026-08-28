@@ -1,0 +1,94 @@
+{
+ "results": [
+  {
+   "n": "1 / no tokens -> /login",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/login"
+  },
+  {
+   "n": "4 /login public, form present",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "n": "5 no pre-auth dashboard calls, no 401 storm",
+   "ok": true,
+   "d": "[]"
+  },
+  {
+   "n": "2 /developer no tokens -> /login",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/login"
+  },
+  {
+   "n": "3 deep /developer/* -> /login",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/login"
+  },
+  {
+   "n": "6a bad credentials -> visible error, stays on /login",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "n": "6 login 200 + tokens stored + lands on /",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/"
+  },
+  {
+   "n": "7 dashboard loads after login",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "n": "8a developer view at /developer",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/developer"
+  },
+  {
+   "n": "8b key create + one-time secret still works post-gate",
+   "ok": true,
+   "d": "len=51"
+  },
+  {
+   "n": "8c key listed, secret not in DOM",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "n": "8d revoke works post-gate",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "n": "10 expired/tampered access + valid refresh recovers (no login redirect)",
+   "ok": true,
+   "d": "refreshCalls=2"
+  },
+  {
+   "n": "9 sign out -> /login",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/login"
+  },
+  {
+   "n": "9b cleared tokens + / -> /login",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/login"
+  },
+  {
+   "n": "11 invalid refresh -> /login, bounded retries",
+   "ok": true,
+   "d": "url=http://127.0.0.1:4173/login refreshCalls=2"
+  },
+  {
+   "n": "12 /login @390px usable, no clipping",
+   "ok": true,
+   "d": "{\"scrollW\":390,\"clientW\":390,\"email\":true,\"btn\":true}"
+  },
+  {
+   "n": "13 authed mobile nav to Developer",
+   "ok": true,
+   "d": "{\"h1\":\"Developer\",\"scrollW\":390}"
+  }
+ ]
+}

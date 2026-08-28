@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { LogIn, LogOut, UserPlus, CloudOff, RefreshCw, BadgeCheck } from 'lucide-react';
 import { login, register, logout } from '@shared/api/auth';
 import { getAccessToken, getAuthWorkspaceId } from '@shared/utils/api';
+import { navigate } from '@shared/router';
 import { syncNow, getSyncDiagnostics } from '@modules/services/syncEngine';
 import {
   refreshEntitlementsCache,
@@ -94,6 +95,7 @@ export function AccountPanel() {
     try {
       await logout(); // clears tokens ONLY; local data + queue are preserved
       window.localStorage.removeItem(AUTH_EMAIL_KEY);
+      navigate('/login', { replace: true }); // auth gate: signed-out users return to /login
       clearEntitlementsCache(); // display cache only — server state is untouched
       setEntitlements(null);
       setEntitlementsStale(false);
