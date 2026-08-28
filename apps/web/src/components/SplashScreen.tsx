@@ -288,7 +288,7 @@ export function SplashScreen({
         aria-label={`${BRAND.productName} is loading`}
         className={[
           'relative flex min-h-screen items-center justify-center overflow-hidden px-6',
-          'bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.12),transparent_32%),linear-gradient(135deg,#f8fafc_0%,#ffffff_48%,#ecfeff_100%)]',
+          'bg-[radial-gradient(circle_at_top,rgba(201,169,110,0.16),transparent_32%),linear-gradient(135deg,#F7F5F0_0%,#FFFDF9_48%,#E8E5DF_100%)]',
           motionClass,
           isExiting ? 'opacity-0 scale-[1.015]' : 'opacity-100 scale-100',
         ].join(' ')}
@@ -296,33 +296,33 @@ export function SplashScreen({
         <div className="absolute inset-0">
           <div
             className={[
-              'absolute -left-16 top-10 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl',
+              'absolute -left-16 top-10 h-64 w-64 rounded-full bg-gold/10 blur-3xl',
               reduceMotion ? '' : 'animate-[pulse_8s_ease-in-out_infinite]',
             ].join(' ')}
           />
           <div
             className={[
-              'absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-sky-500/10 blur-3xl',
+              'absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-gold-dark/10 blur-3xl',
               reduceMotion ? '' : 'animate-[pulse_10s_ease-in-out_infinite]',
             ].join(' ')}
           />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(15,110,140,0.09),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(15,110,140,0.08),transparent_28%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(201,169,110,0.10),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(24,24,27,0.05),transparent_28%)]" />
         </div>
 
         <div
           className={[
-            'relative w-full max-w-md overflow-hidden rounded-[32px] border border-white/70 bg-white/78 px-8 py-10 text-center shadow-[0_24px_90px_rgba(15,23,42,0.14)] backdrop-blur-2xl',
+            'relative w-full max-w-md overflow-hidden rounded-[32px] border border-line bg-surface/80 px-8 py-10 text-center shadow-e4 backdrop-blur-2xl',
             motionClass,
             mounted && !isExiting
               ? 'translate-y-0 opacity-100 scale-100'
               : 'translate-y-3 opacity-0 scale-[0.985]',
           ].join(' ')}
         >
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/80 to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/80 to-transparent" />
 
           <div className="mb-7 flex justify-center">
             <div className="relative">
-              <div className="absolute inset-[-20px] rounded-[32px] bg-[#0F6E8C]/10 blur-2xl" />
+              <div className="absolute inset-[-20px] rounded-[32px] bg-gold/20 blur-2xl" />
               <div
                 className={[
                   'relative flex items-center justify-center rounded-3xl border border-white/70 bg-white/70 px-5 py-4 shadow-lg',
@@ -345,7 +345,7 @@ export function SplashScreen({
 
           <h1
             className={[
-              'text-3xl font-semibold tracking-tight text-slate-800 sm:text-4xl',
+              'text-3xl font-semibold tracking-tight text-ink sm:text-4xl font-display',
               motionClass,
               nameIntroClass,
               mounted ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0',
@@ -371,7 +371,7 @@ export function SplashScreen({
               >
                 <path
                   d="M58 24 C85 24, 102 24, 122 24 S160 24, 184 24 S220 24, 244 24"
-                  stroke="#0F6E8C"
+                  stroke="#A88950"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeDasharray="8 8"
@@ -400,9 +400,9 @@ export function SplashScreen({
                   xmlns="http://www.w3.org/2000/svg"
                   className="drop-shadow-sm"
                 >
-                  <rect x="10" y="20" width="24" height="7" rx="2.5" fill="#0F6E8C" />
-                  <path d="M18 11C18 8.8 19.8 7 22 7H31C34.3 7 37 9.7 37 13V20H18V11Z" fill="#0F6E8C" />
-                  <rect x="31" y="10" width="8" height="4" rx="1.5" fill="#38BDF8" />
+                  <rect x="10" y="20" width="24" height="7" rx="2.5" fill="#18181B" />
+                  <path d="M18 11C18 8.8 19.8 7 22 7H31C34.3 7 37 9.7 37 13V20H18V11Z" fill="#18181B" />
+                  <rect x="31" y="10" width="8" height="4" rx="1.5" fill="#C9A96E" />
                   <rect x="12" y="27" width="30" height="3" rx="1.5" fill="#1E293B" opacity="0.85" />
                   <rect x="40" y="18" width="2.5" height="10" rx="1.25" fill="#1E293B" />
                   <rect
@@ -426,7 +426,7 @@ export function SplashScreen({
 
           <p
             className={[
-              'mt-3 text-sm font-medium text-[#0F6E8C] sm:text-base',
+              'mt-3 text-sm font-medium text-gold-dark sm:text-base',
               motionClass,
               mounted ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0',
             ].join(' ')}
@@ -457,7 +457,7 @@ export function SplashScreen({
             <div className="mb-3 flex items-center justify-center gap-2 text-xs text-slate-500">
               <span
                 className={[
-                  'h-2 w-2 rounded-full bg-[#0F6E8C]',
+                  'h-2 w-2 rounded-full bg-gold',
                   reduceMotion ? '' : 'animate-pulse',
                 ].join(' ')}
               />
@@ -469,7 +469,7 @@ export function SplashScreen({
               aria-hidden="true"
             >
               <div
-                className="h-full rounded-full bg-gradient-to-r from-cyan-600 via-sky-600 to-[#0F6E8C] transition-[width] duration-500 ease-out"
+                className="h-full rounded-full bg-gradient-to-r from-gold-light via-gold to-gold-dark transition-[width] duration-500 ease-out"
                 style={{ width: `${targetProgress}%` }}
               />
               {!reduceMotion && targetProgress < 100 && (

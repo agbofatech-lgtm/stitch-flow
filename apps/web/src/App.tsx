@@ -12,6 +12,7 @@ import { Reports } from './components/Reports';
 import { Settings } from './components/Settings';
 import { DeveloperDashboard } from './components/DeveloperDashboard';
 import { ControlCenter } from './components/platform/ControlCenter';
+import { PageTransition } from './components/ui/motion';
 import { SplashScreen } from './components/SplashScreen';
 import { Login } from './components/Login';
 import { Register } from './components/Register';
@@ -169,7 +170,11 @@ function AppContent() {
     }
   };
 
-  return <Layout>{renderView()}</Layout>;
+  return (
+    <Layout>
+      <PageTransition viewKey={currentView}>{renderView()}</PageTransition>
+    </Layout>
+  );
 }
 
 export default function App() {
