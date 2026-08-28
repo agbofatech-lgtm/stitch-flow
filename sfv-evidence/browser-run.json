@@ -1,0 +1,313 @@
+{
+ "nav": [
+  "Dashboard",
+  "Customers",
+  "Orders",
+  "Production Board",
+  "Invoices",
+  "Design Studio",
+  "Materials",
+  "Reports",
+  "Settings",
+  "KK\n\nKlenam Kendra\n\nOwner"
+ ],
+ "viewResults": [
+  {
+   "view": "Dashboard",
+   "clicked": true,
+   "matches": []
+  },
+  {
+   "view": "Customers",
+   "clicked": true,
+   "matches": []
+  },
+  {
+   "view": "Orders",
+   "clicked": true,
+   "matches": []
+  },
+  {
+   "view": "Production Board",
+   "clicked": true,
+   "matches": [
+    [
+     "delivery",
+     2
+    ]
+   ]
+  },
+  {
+   "view": "Invoices",
+   "clicked": true,
+   "matches": []
+  },
+  {
+   "view": "Design Studio",
+   "clicked": true,
+   "matches": []
+  },
+  {
+   "view": "Materials",
+   "clicked": true,
+   "matches": []
+  },
+  {
+   "view": "Reports",
+   "clicked": true,
+   "matches": [
+    [
+     "delivery",
+     12
+    ]
+   ]
+  },
+  {
+   "view": "Settings",
+   "clicked": true,
+   "matches": []
+  },
+  {
+   "view": "KK\n\nKlenam Kendra\n\nOwner",
+   "clicked": true,
+   "matches": []
+  }
+ ],
+ "hits": {
+  "developer": {
+   "body": 0,
+   "html": 0
+  },
+  "api key": {
+   "body": 0,
+   "html": 0
+  },
+  "apikey": {
+   "body": 0,
+   "html": 0
+  },
+  "api-key": {
+   "body": 0,
+   "html": 0
+  },
+  "webhook": {
+   "body": 0,
+   "html": 0
+  },
+  "signing secret": {
+   "body": 0,
+   "html": 0
+  },
+  "scope": {
+   "body": 0,
+   "html": 0
+  },
+  "dead letter": {
+   "body": 0,
+   "html": 0
+  },
+  "dead-letter": {
+   "body": 0,
+   "html": 0
+  },
+  "delivery": {
+   "body": 0,
+   "html": 0
+  },
+  "replay": {
+   "body": 0,
+   "html": 0
+  },
+  "x-api-key": {
+   "body": 0,
+   "html": 0
+  },
+  "sf_live": {
+   "body": 0,
+   "html": 0
+  },
+  "whsec": {
+   "body": 0,
+   "html": 0
+  },
+  "integration": {
+   "body": 0,
+   "html": 0
+  },
+  "control plane": {
+   "body": 0,
+   "html": 0
+  },
+  "usage dashboard": {
+   "body": 0,
+   "html": 0
+  },
+  "api activity": {
+   "body": 0,
+   "html": 0
+  }
+ },
+ "probes": {
+  "scopes": {
+   "status": 200,
+   "len": 238,
+   "head": "{\"enforceable\":[\"customers:read\",\"customers:write\",\"orders:read\",\"measurements:read\",\"inve"
+  },
+  "keys": {
+   "status": 200,
+   "len": 474,
+   "head": "[{\"id\":\"63a91c48-040d-4505-9e15-783b377a558a\",\"workspace_id\":\"ws-7818fb80-142f-4497-b0ec-8"
+  },
+  "endpoints": {
+   "status": 200,
+   "len": 1509,
+   "head": "[{\"id\":\"8ade5fe7-4e85-4d6f-9452-99393b8905a3\",\"workspace_id\":\"ws-7818fb80-142f-4497-b0ec-8"
+  },
+  "deliveries": {
+   "status": 200,
+   "len": 2648,
+   "head": "[{\"id\":\"c9acfbaf-961a-4446-bbdb-9b2d5a97e97b\",\"delivery_key\":\"95cee387-a48b-4389-97dd-5531"
+  },
+  "deadletters": {
+   "status": 200,
+   "len": 1071,
+   "head": "[{\"id\":\"c9acfbaf-961a-4446-bbdb-9b2d5a97e97b\",\"delivery_key\":\"95cee387-a48b-4389-97dd-5531"
+  },
+  "usage": {
+   "status": 200,
+   "len": 202,
+   "head": "{\"windowDays\":30,\"activity\":{\"active_users\":0,\"total_events\":5},\"featureAdoption\":[{\"featu"
+  }
+ },
+ "consoleMsgs": [
+  {
+   "type": "error",
+   "text": "Failed to load resource: net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "type": "error",
+   "text": "Failed to load resource: net::ERR_CONNECTION_CLOSED"
+  }
+ ],
+ "errors": [],
+ "network": [
+  {
+   "kind": "FAILED",
+   "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+   "err": "net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "kind": "FAILED",
+   "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+   "err": "net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "kind": "FAILED",
+   "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+   "err": "net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "kind": "FAILED",
+   "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+   "err": "net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "kind": "HTTP401",
+   "url": "http://127.0.0.1:4173/settings/developers",
+   "status": 401
+  },
+  {
+   "kind": "FAILED",
+   "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+   "err": "net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "kind": "FAILED",
+   "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+   "err": "net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "kind": "FAILED",
+   "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+   "err": "net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "kind": "FAILED",
+   "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+   "err": "net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "kind": "HTTP401",
+   "url": "http://127.0.0.1:4173/dashboard/developers",
+   "status": 401
+  },
+  {
+   "kind": "FAILED",
+   "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+   "err": "net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "kind": "FAILED",
+   "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+   "err": "net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "kind": "FAILED",
+   "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+   "err": "net::ERR_CONNECTION_CLOSED"
+  },
+  {
+   "kind": "FAILED",
+   "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+   "err": "net::ERR_CONNECTION_CLOSED"
+  }
+ ]
+}
