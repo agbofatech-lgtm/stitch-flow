@@ -37,6 +37,14 @@ export const env = {
 
   BCRYPT_ROUNDS: Number(getEnv('BCRYPT_ROUNDS', '12')),
 
+  // --- Phase 9: commercial identity & account recovery (SERVER-ONLY) ------
+  /** Email delivery transport: 'console' (dev/test) | 'smtp' (later phase). */
+  EMAIL_TRANSPORT: getOptionalEnv('EMAIL_TRANSPORT', 'console'),
+  /** Public web origin used to build password-reset links. */
+  AUTH_PUBLIC_BASE_URL: getEnv('AUTH_PUBLIC_BASE_URL', 'http://localhost:5173'),
+  /** Password-reset token lifetime in minutes (single-use regardless). */
+  PASSWORD_RESET_TTL_MINUTES: Number(getEnv('PASSWORD_RESET_TTL_MINUTES', '15')),
+
   FREE_DEVICE_LIMIT: Number(getEnv('FREE_DEVICE_LIMIT', '1')),
   PRO_DEVICE_LIMIT: Number(getEnv('PRO_DEVICE_LIMIT', '2')),
   ENTERPRISE_DEVICE_LIMIT: Number(getEnv('ENTERPRISE_DEVICE_LIMIT', '5')),

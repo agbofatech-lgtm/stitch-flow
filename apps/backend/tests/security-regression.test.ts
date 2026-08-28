@@ -195,7 +195,7 @@ describe('Phase 6 — production configuration (live server)', () => {
       const res = await fetch(`${BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'rate-limit-probe@test.local', password: 'wrong-password-123' }),
+        body: JSON.stringify({ identifier: 'rate-limit-probe@test.local', password: 'wrong-password-123' }),
       });
       lastHeaders = res.headers;
       if (res.status === 429) {
@@ -210,7 +210,7 @@ describe('Phase 6 — production configuration (live server)', () => {
   });
 
   it('oversized payload is rejected with 413 PAYLOAD_TOO_LARGE (limit 32kb in this configuration)', async () => {
-    const big = JSON.stringify({ email: 'x@y.test', password: 'p'.repeat(64 * 1024) });
+    const big = JSON.stringify({ identifier: 'x@y.test', password: 'p'.repeat(64 * 1024) });
     const res = await fetch(`${BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

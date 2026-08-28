@@ -51,7 +51,7 @@ describe('Authentication', () => {
       await registerUser('login@example.com', 'password123');
       const res = await request(app)
         .post('/auth/login')
-        .send({ email: 'login@example.com', password: 'password123' });
+        .send({ identifier: 'login@example.com', password: 'password123' });
 
       expect(res.status).toBe(200);
       expect(typeof res.body.accessToken).toBe('string');
@@ -62,7 +62,7 @@ describe('Authentication', () => {
       await registerUser('wrongpw@example.com', 'password123');
       const res = await request(app)
         .post('/auth/login')
-        .send({ email: 'wrongpw@example.com', password: 'password456' });
+        .send({ identifier: 'wrongpw@example.com', password: 'password456' });
 
       expect(res.status).toBe(401);
       expect(res.body.error.code).toBe('INVALID_CREDENTIALS');
@@ -71,7 +71,7 @@ describe('Authentication', () => {
     it('rejects an unknown email with 401', async () => {
       const res = await request(app)
         .post('/auth/login')
-        .send({ email: 'ghost@example.com', password: 'password123' });
+        .send({ identifier: 'ghost@example.com', password: 'password123' });
 
       expect(res.status).toBe(401);
     });

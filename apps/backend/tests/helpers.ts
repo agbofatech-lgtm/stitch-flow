@@ -55,7 +55,7 @@ export async function registerAdmin(email: string, password = 'password123'): Pr
   const session = await registerUser(email, password, 'Test Admin');
   await query(`UPDATE users SET role = 'admin' WHERE id = $1`, [session.userId]);
 
-  const login = await request(app).post('/auth/login').send({ email, password });
+  const login = await request(app).post('/auth/login').send({ identifier: email, password });
   if (login.status !== 200) {
     throw new Error(`admin login failed: ${login.status}`);
   }

@@ -5,47 +5,47 @@
     "orders": 200,
     "syncChanges": 200
   },
-  "measuredAt": "2026-08-27T22:53:12.093Z",
+  "measuredAt": "2026-08-28T18:46:35.891Z",
   "health": {
     "live": {
       "n": 200,
-      "p50": 1.37,
-      "p95": 1.53,
-      "p99": 2.82,
-      "max": 5.28
+      "p50": 1.47,
+      "p95": 1.98,
+      "p99": 3.46,
+      "max": 7.28
     },
     "readyWithDbProbe": {
       "n": 100,
-      "p50": 1.7,
-      "p95": 1.91,
-      "p99": 2.78,
-      "max": 2.84
+      "p50": 1.94,
+      "p95": 2.81,
+      "p99": 4.17,
+      "max": 4.38
     }
   },
   "apiCustomerList300Rows": {
     "n": 50,
-    "p50": 5.05,
-    "p95": 6.67,
-    "p99": 8.42,
-    "max": 8.42
+    "p50": 5.17,
+    "p95": 6.94,
+    "p99": 10.63,
+    "max": 10.63
   },
   "apiDashboardSummary": {
     "n": 30,
-    "p50": 3.67,
-    "p95": 9.66,
-    "p99": 21.17,
-    "max": 21.17
+    "p50": 3.94,
+    "p95": 6.87,
+    "p99": 18.32,
+    "max": 18.32
   },
   "syncDeltaPull200": {
     "n": 30,
-    "p50": 4.51,
-    "p95": 5.65,
-    "p99": 6.26,
-    "max": 6.26
+    "p50": 4.16,
+    "p95": 5.51,
+    "p99": 7.34,
+    "max": 7.34
   },
   "syncMutationBatch50": {
-    "totalMs": 64.61,
-    "perMutationMs": 1.29
+    "totalMs": 72.4,
+    "perMutationMs": 1.45
   },
   "explainAnalyze": {
     "customerListByWorkspace": {
@@ -53,38 +53,38 @@
         "idx_customers_workspace_id"
       ],
       "chosenPlan": "Sort -> Bitmap Heap Scan -> Bitmap Index Scan",
-      "executionMs": 0.19
+      "executionMs": 0.147
     },
     "syncDeltaPull": {
       "indexesPresent": [
         "idx_sync_changes_workspace_seq"
       ],
       "chosenPlan": "Limit -> Index Scan",
-      "executionMs": 0.079
+      "executionMs": 0.064
     },
     "auditByWorkspace": {
       "indexesPresent": [
         "idx_audit_logs_workspace_id"
       ],
       "chosenPlan": "Limit -> Sort -> Index Scan",
-      "executionMs": 0.019
+      "executionMs": 0.015
     }
   },
   "frontendBundle": {
-    "totalKb": 2652.8,
-    "jsKb": 1624.7,
-    "cssKb": 48.3,
+    "totalKb": 2695,
+    "jsKb": 1664.6,
+    "cssKb": 50.6,
     "largestJsFiles": [
       {
-        "file": "index-DoBDNhdU.js",
-        "kb": 1221.2
+        "file": "index-DOZr9T4T.js",
+        "kb": 1261.1
       },
       {
         "file": "html2canvas.esm-DXEQVQnt.js",
         "kb": 196.3
       },
       {
-        "file": "index.es-VqP1XskW.js",
+        "file": "index.es-oUbjidg2.js",
         "kb": 155.1
       }
     ]

@@ -13,6 +13,9 @@ import { Settings } from './components/Settings';
 import { DeveloperDashboard } from './components/DeveloperDashboard';
 import { SplashScreen } from './components/SplashScreen';
 import { Login } from './components/Login';
+import { Register } from './components/Register';
+import { ForgotPassword } from './components/ForgotPassword';
+import { ResetPassword } from './components/ResetPassword';
 import {
   getAccessToken,
   AUTH_CHANGED_EVENT,
@@ -21,7 +24,10 @@ import {
 import {
   currentPath,
   navigate,
-  isLoginPath,
+  isRegisterPath,
+  isForgotPasswordPath,
+  isResetPasswordPath,
+  isPublicAuthPath,
   isDeveloperPath,
   setNextPath,
 } from '@shared/router';
@@ -70,13 +76,21 @@ function AppContent() {
     };
   }, []);
 
-  // Route gate: public /login; everything else requires a session.
+  // Route gate: public auth pages (/login, /register, /forgot-password,
+  // /reset-password); everything else requires a session.
+  //
+  // IMPORTANT: the `authed` state can lag one render behind a just-completed
+  // sign-in/sign-out (event → setState → render ordering). Token storage is
+  // the source of truth, so both redirect branches re-check it before acting;
+  // the AUTH_CHANGED re-render then re-runs this gate with fresh state.
   useEffect(() => {
-    if (isLoginPath(route)) {
-      if (authed) navigate('/', { replace: true });
+    if (isPublicAuthPath(route)) {
+      // Signed-in users never stay on the auth pages.
+      if (authed && getAccessToken()) navigate('/', { replace: true });
       return;
     }
     if (!authed) {
+      if (getAccessToken()) return; // sign-in in flight; AUTH_CHANGED re-runs the gate
       if (route !== '/') setNextPath(route);
       navigate('/login', { replace: true });
       return;
@@ -90,14 +104,26 @@ function AppContent() {
   }, [route, authed, setView]);
 
   // Keep the URL meaningful for the gated routes while views are state-driven.
+  // React ONLY to genuine view transitions (user navigation). Reacting to
+  // authed/route flips as well races the post-login intended-route navigate
+  // (path '/developer' + view still 'dashboard' would bounce back to '/').
+  const prevView = useRef(currentView);
   useEffect(() => {
     if (!authed) return;
+    const viewChanged = prevView.current !== currentView;
+    prevView.current = currentView;
+    if (!viewChanged) return;
     const p = currentPath();
     if (currentView === 'developer' && !isDeveloperPath(p)) navigate('/developer');
     else if (currentView !== 'developer' && isDeveloperPath(p)) navigate('/');
   }, [currentView, authed]);
 
   if (!authed) {
+    // Public authentication pages only — no application shell, no dashboard,
+    // no authenticated API calls mount in this state (Phase 8 gate preserved).
+    if (isRegisterPath(route)) return <Register />;
+    if (isForgotPasswordPath(route)) return <ForgotPassword />;
+    if (isResetPasswordPath(route)) return <ResetPassword />;
     return <Login />;
   }
 

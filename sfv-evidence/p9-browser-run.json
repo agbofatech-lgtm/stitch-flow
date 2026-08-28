@@ -1,0 +1,129 @@
+{
+ "results": [
+  {
+   "n": "A1 / without auth -> /login",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/login"
+  },
+  {
+   "n": "A2 /developer without auth -> /login",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/login"
+  },
+  {
+   "n": "A3 developer deep link without auth -> /login",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/login"
+  },
+  {
+   "n": "A4 zero pre-auth API calls / 401s",
+   "ok": true,
+   "d": "{\"preAuthApi\":0,\"c401\":0,\"refreshCalls\":0}"
+  },
+  {
+   "n": "A5 login UI welcoming + simple + functional",
+   "ok": true,
+   "d": "{\"identLabel\":true,\"pwLabel\":true,\"identPlaceholder\":\"customer@example.com or 0241234567\",\"autocomplete\":\"username\",\"pwType\":\"password\",\"signIn\":true,\"forgot\":true,\"create\":true}"
+  },
+  {
+   "n": "A6 invalid credentials -> visible error, stays on /login",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "n": "A9a /register is public",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/register"
+  },
+  {
+   "n": "A9 registration -> workspace -> dashboard (tokens stored)",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/ reg={\"status\":201,\"body\":\"{\\\"user\\\":{\\\"id\\\":\\\"7ed8c437-7b8c-4352-9f70-a96cd1da1371\\\",\\\"email\\\":\\\"browser-owner-434827@p9.test\\\",\\\"password_hash\\\":\\\"$2b$04$uEchnIdDYMtlOPqKckrkXeF50gV978oEGqWehImcjCqIyq7h45KQO\\\",\\\"full_name\\\":\\\"Browser Owner\\\",\\\"\"} pageErr=null"
+  },
+  {
+   "n": "A10 no 401 storm after registration-login (only the intentional A6 /auth/login 401)",
+   "ok": true,
+   "d": "[\"/auth/login=401\"]"
+  },
+  {
+   "n": "A11a developer view at /developer",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/developer"
+  },
+  {
+   "n": "A11b API key create + one-time secret (Phase 8 intact)",
+   "ok": true,
+   "d": "len=51"
+  },
+  {
+   "n": "A11c key revoke + Overview/Usage sections present",
+   "ok": true,
+   "d": ""
+  },
+  {
+   "n": "A14 tampered access + valid refresh -> silent recovery, stays logged in",
+   "ok": true,
+   "d": "refreshCalls=2"
+  },
+  {
+   "n": "A12 sign out -> /login",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/login"
+  },
+  {
+   "n": "A13 /developer after logout -> /login",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/login"
+  },
+  {
+   "n": "A7 email login -> dashboard",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/"
+  },
+  {
+   "n": "A21 deep link -> login -> intended route restored",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/developer"
+  },
+  {
+   "n": "A8a phone login (local 024…) -> dashboard",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/"
+  },
+  {
+   "n": "A8b phone login (intl +233 spaced) -> dashboard",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/"
+  },
+  {
+   "n": "A15 invalid refresh -> /login with bounded retries",
+   "ok": true,
+   "d": "url=http://127.0.0.1:4173/login refreshCalls=2"
+  },
+  {
+   "n": "A17 keyboard-only login (focus order + implicit submit)",
+   "ok": true,
+   "d": "{\"f0\":\"identifier\",\"f1\":\"Forgot password?\",\"f2\":{\"id\":\"password\",\"t\":\"\"},\"f2b\":\"Show\",\"url\":\"http://127.0.0.1:4173/\"}"
+  },
+  {
+   "n": "A16a /login @390px no clipping, usable",
+   "ok": true,
+   "d": "{\"sw\":390,\"cw\":390,\"email\":true,\"btn\":true}"
+  },
+  {
+   "n": "A16b authed mobile -> Developer, no clipping",
+   "ok": true,
+   "d": "{\"h1\":\"Developer\",\"sw\":390}"
+  },
+  {
+   "n": "A18a /forgot-password reachable from login",
+   "ok": true,
+   "d": "http://127.0.0.1:4173/forgot-password"
+  },
+  {
+   "n": "A18b forgot request (by PHONE) -> neutral confirmation",
+   "ok": true,
+   "d": ""
+  }
+ ]
+}

@@ -32,6 +32,24 @@ export function isLoginPath(p: string): boolean {
   return p === '/login' || p.startsWith('/login/');
 }
 
+/* Phase 9: public authentication family (no session required). */
+export function isRegisterPath(p: string): boolean {
+  return p === '/register' || p.startsWith('/register/');
+}
+
+export function isForgotPasswordPath(p: string): boolean {
+  return p === '/forgot-password' || p.startsWith('/forgot-password/');
+}
+
+export function isResetPasswordPath(p: string): boolean {
+  return p === '/reset-password' || p.startsWith('/reset-password/');
+}
+
+/** Any of the public auth pages — reachable without a session. */
+export function isPublicAuthPath(p: string): boolean {
+  return isLoginPath(p) || isRegisterPath(p) || isForgotPasswordPath(p) || isResetPasswordPath(p);
+}
+
 export function isDeveloperPath(p: string): boolean {
   return p === '/developer' || p.startsWith('/developer/');
 }

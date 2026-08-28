@@ -5,6 +5,7 @@ import { refreshTokenRepository } from '../repositories/refreshTokenRepository';
 import { workspaceRepository } from '../repositories/workspaceRepository';
 import { ApiError } from '../utils/apiError';
 import { comparePassword, hashPassword } from '../utils/password';
+import { isEmailIdentifier, normalizePhone } from '../utils/phone';
 import { metrics } from '../config/observability/metrics';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { generateLicenseKey } from '../utils/license';
@@ -24,19 +25,40 @@ export const authService = {
     password: string;
     fullName: string;
     tier: 'free' | 'pro' | 'enterprise';
+    phone?: string;
   }) {
-    const existing = await userRepository.findByEmail(data.email);
+    // Phase 9: email identity is case-insensitive — normalize before both the
+    // duplicate check and persistence so "EMAIL@X.COM" can never register
+    // twice or split from "email@x.com".
+    const email = data.email.trim().toLowerCase();
+    const existing = await userRepository.findByEmailLower(email);
     if (existing) {
       throw new ApiError(409, 'EMAIL_IN_USE', 'Email already exists');
     }
 
+    // Phase 9: optional phone identity, stored canonical (E.164) and unique.
+    let phone: string | null = null;
+    const rawPhone = (data.phone ?? '').trim();
+    if (rawPhone) {
+      const normalized = normalizePhone(rawPhone);
+      if (!normalized.ok) {
+        throw new ApiError(400, 'INVALID_PHONE_NUMBER', 'Enter a valid phone number (e.g. 0241234567 or +233241234567)');
+      }
+      const phoneOwner = await userRepository.findByPhone(normalized.e164);
+      if (phoneOwner) {
+        throw new ApiError(409, 'PHONE_IN_USE', 'Phone number already exists');
+      }
+      phone = normalized.e164;
+    }
+
     const passwordHash = await hashPassword(data.password);
     const user = await userRepository.create({
-      email: data.email,
+      email,
       passwordHash,
       fullName: data.fullName,
       role: 'user',
-      status: 'active'
+      status: 'active',
+      phone
     });
 
     const license = await licenseRepository.create({
@@ -81,21 +103,39 @@ export const authService = {
     return { user, license, workspace, accessToken, refreshToken };
   },
 
-  async login(data: { email: string; password: string }) {
-    const user = await userRepository.findByEmail(data.email);
+  /**
+   * Phase 9: identifier-based login — one field accepts an email OR a phone
+   * number (Ghana-aware normalization). Failures are uniform: an invalid
+   * phone format is indistinguishable from a wrong password (no account or
+   * format oracle). Audit records which identifier TYPE was used, never the
+   * credential itself.
+   */
+  async login(data: { identifier: string; password: string }) {
+    const identifier = data.identifier.trim();
+    const method: 'email' | 'phone' = isEmailIdentifier(identifier) ? 'email' : 'phone';
+    const user = await userRepository.findByIdentifier(identifier);
     if (!user) {
       metrics.authFailures.inc();
+      void auditLogService
+        .log({ action: 'user_login_failed', entityType: 'user', metadata: { method, reason: 'unknown_identifier' } })
+        .catch(() => undefined);
       throw new ApiError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
     }
 
     if (user.status !== 'active') {
       metrics.authFailures.inc();
+      void auditLogService
+        .log({ userId: user.id, action: 'user_login_blocked', entityType: 'user', entityId: user.id, metadata: { method, reason: 'suspended' } })
+        .catch(() => undefined);
       throw new ApiError(403, 'ACCOUNT_INACTIVE', 'Account is not active');
     }
 
     const match = await comparePassword(data.password, user.password_hash);
     if (!match) {
       metrics.authFailures.inc();
+      void auditLogService
+        .log({ userId: user.id, action: 'user_login_failed', entityType: 'user', entityId: user.id, metadata: { method, reason: 'bad_password' } })
+        .catch(() => undefined);
       throw new ApiError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
     }
 
@@ -115,10 +155,24 @@ export const authService = {
       userId: user.id,
       action: 'user_logged_in',
       entityType: 'user',
-      entityId: user.id
+      entityId: user.id,
+      metadata: { method }
     });
 
     return { user, accessToken, refreshToken };
+  },
+
+  /** Phase 9: account recovery — enumeration-proof by design (see service). */
+  async forgotPassword(identifier: string) {
+    // Lazy require avoids a module cycle (passwordResetService -> repositories only).
+    const { passwordResetService } = await import('./passwordResetService');
+    return passwordResetService.request(identifier);
+  },
+
+  /** Phase 9: complete recovery with a single-use token. */
+  async resetPassword(token: string, password: string) {
+    const { passwordResetService } = await import('./passwordResetService');
+    return passwordResetService.reset(token, password);
   },
 
   async refresh(refreshToken: string) {

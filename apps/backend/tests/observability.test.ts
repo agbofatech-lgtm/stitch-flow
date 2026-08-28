@@ -67,7 +67,7 @@ describe('Phase 6 — in-process metrics', () => {
     resetMetrics();
     await request(app)
       .post('/auth/login')
-      .send({ email: 'ghost@nowhere.test', password: 'wrong-password' });
+      .send({ identifier: 'ghost@nowhere.test', password: 'wrong-password' });
     expect(metricsSnapshot().counters['auth.failures']).toBeGreaterThanOrEqual(1);
   });
 
@@ -81,7 +81,7 @@ describe('Phase 6 — in-process metrics', () => {
     await query(`UPDATE users SET role = 'admin' WHERE id = $1`, [session.userId]);
     const login = await request(app)
       .post('/auth/login')
-      .send({ email: session.email, password: 'password123' });
+      .send({ identifier: session.email, password: 'password123' });
     const token = login.body.accessToken;
 
     const res = await request(app)
@@ -186,7 +186,7 @@ describe('Phase 6 — audit correlation', () => {
     const res = await request(app)
       .post('/auth/login')
       .set('X-Request-Id', 'login-corr-0002')
-      .send({ email: session.email, password: 'password123' });
+      .send({ identifier: session.email, password: 'password123' });
     expect(res.status).toBe(200);
 
     const audit = await query(

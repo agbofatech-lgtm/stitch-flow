@@ -47,5 +47,17 @@ export const refreshTokenRepository = {
        WHERE token = $1`,
       [hashToken(token)]
     );
+  },
+
+  /**
+   * Phase 9: revoke every live session for a user (used after a completed
+   * password reset so existing sessions cannot survive the credential change).
+   */
+  async revokeAllForUser(userId: string) {
+    await query(
+      `UPDATE refresh_tokens SET revoked_at = NOW(), updated_at = NOW()
+       WHERE user_id = $1 AND revoked_at IS NULL`,
+      [userId]
+    );
   }
 };

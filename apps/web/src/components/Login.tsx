@@ -1,93 +1,129 @@
 /**
- * Public sign-in page for the authentication gate (Phase 8 fix).
+ * Public sign-in page (Phase 9 — commercial identity).
  *
- * Reuses the existing Phase 3 auth client (`login()` → POST /auth/login →
- * storeAuthTokens), so token storage and refresh-token behavior are
- * unchanged. On success the user returns to the intended protected route
- * (sessionStorage "next"), otherwise '/'.
+ * Single identifier field: an email address OR a phone number — customers
+ * never choose between separate login screens. Reuses the existing Phase 3
+ * auth client (`login()` → POST /auth/login → storeAuthTokens), so token
+ * storage and refresh behavior are unchanged. On success the user returns to
+ * the intended protected route (sessionStorage "next"), otherwise '/'.
+ *
+ * Intentionally simple and welcoming — this is not the cinematic landing
+ * page (later phase); it is the trust-building front door to the workspace.
  */
 import { useState, type FormEvent } from 'react';
 import { LogIn } from 'lucide-react';
-import { login } from '@shared/api/auth';
+import { login, authErrorText } from '@shared/api/auth';
 import { navigate, takeNextPath, isLoginPath } from '@shared/router';
-import { BRAND } from '../config/brand';
-import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
+import { AuthPage, FieldError, FormLabel, inputClass, primaryButtonClass, linkClass } from './auth/AuthPage';
 
 export function Login() {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (busy) return; // guard against duplicate submissions
     setBusy(true);
     setError(null);
     try {
-      await login(email.trim(), password);
+      await login(identifier.trim(), password);
       const next = takeNextPath();
       navigate(next && !isLoginPath(next) ? next : '/', { replace: true });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Sign-in failed';
-      setError(/HTTP 401/.test(msg) ? 'Invalid email or password.' : msg);
+      setError(authErrorText(err));
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-sky-50 p-4">
-      <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 shadow-xl">
-        <div className="mb-6 flex flex-col items-center gap-2 text-center">
-          <img src={stitchflowLogo} alt={`${BRAND.productName} logo`} className="h-12 w-auto" />
-          <h1 className="text-xl font-bold text-slate-900">Sign in to {BRAND.productName}</h1>
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">by {BRAND.parentName}</p>
+    <AuthPage
+      title="Welcome to StitchFlow"
+      subtitle="Sign in to continue to your workspace."
+      footer={
+        <>
+          Don&apos;t have an account?{' '}
+          <button type="button" className={linkClass} onClick={() => navigate('/register')}>
+            Create account
+          </button>
+        </>
+      }
+    >
+      <form onSubmit={submit} noValidate>
+        {error && <FieldError id="login-error" message={error} />}
+
+        <div className="mb-4">
+          <FormLabel htmlFor="identifier">Email or phone number</FormLabel>
+          <input
+            id="identifier"
+            name="identifier"
+            type="text"
+            inputMode="email"
+            autoComplete="username"
+            autoFocus
+            required
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? 'login-error' : undefined}
+            placeholder="customer@example.com or 0241234567"
+            className={inputClass}
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+          />
         </div>
 
-        {error && (
-          <div role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {error}
+        <div className="mb-5">
+          <div className="flex items-baseline justify-between">
+            <FormLabel htmlFor="password">Password</FormLabel>
+            <button
+              type="button"
+              className="mb-1.5 text-xs text-slate-500 underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-sky-300 rounded"
+              onClick={() => navigate('/forgot-password')}
+            >
+              Forgot password?
+            </button>
           </div>
-        )}
-
-        <form onSubmit={(e) => void submit(e)} className="space-y-4">
-          <label className="block text-sm font-medium text-slate-700">
-            Email
+          <div className="relative">
             <input
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@business.com"
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-[#0F6E8C] focus:outline-none"
-            />
-          </label>
-          <label className="block text-sm font-medium text-slate-700">
-            Password
-            <input
-              type="password"
-              required
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
+              required
+              minLength={8}
+              aria-invalid={error ? true : undefined}
+              className={`${inputClass} pr-16`}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-[#0F6E8C] focus:outline-none"
             />
-          </label>
-          <button
-            type="submit"
-            disabled={busy}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F6E8C] py-2.5 text-sm font-semibold text-white transition hover:bg-[#0C5C74] disabled:opacity-50"
-          >
-            <LogIn className="h-4 w-4" /> {busy ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-pressed={showPassword}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute inset-y-0 right-0 rounded-r-xl px-3 text-xs font-medium text-slate-500 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-300"
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
+        </div>
 
-        <p className="mt-4 text-center text-xs text-slate-400">
-          Your session is required to access the workspace, developer console and sync.
-        </p>
-      </div>
-    </div>
+        <button type="submit" className={primaryButtonClass} disabled={busy || !identifier.trim() || !password}>
+          {busy ? (
+            <>
+              <span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              Signing in…
+            </>
+          ) : (
+            <>
+              <LogIn className="h-4 w-4" aria-hidden="true" />
+              Sign in
+            </>
+          )}
+        </button>
+      </form>
+    </AuthPage>
   );
 }

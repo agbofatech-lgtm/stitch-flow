@@ -12,7 +12,7 @@ afterAll(async () => {
 async function promoteToPlatform(email: string, role: string): Promise<AuthSession> {
   const s = await registerUser(email, 'password123');
   await query(`UPDATE users SET role = $1 WHERE email = $2`, [role, email]);
-  const login = await request(app).post('/auth/login').send({ email, password: 'password123' });
+  const login = await request(app).post('/auth/login').send({ identifier: email, password: 'password123' });
   if (login.status !== 200) throw new Error(`platform login failed: ${login.status}`);
   return { ...s, accessToken: login.body.accessToken, refreshToken: login.body.refreshToken };
 }
