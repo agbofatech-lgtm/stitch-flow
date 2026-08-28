@@ -16,6 +16,8 @@ import { checkWebhookUrl } from '../src/security/webhookUrlPolicy';
 
 type ReceivedCall = { headers: http.IncomingHttpHeaders; body: string; at: number };
 
+const receivers: Array<Awaited<ReturnType<typeof startReceiver>>> = [];
+
 function startReceiver(responder: (req: http.IncomingMessage, res: http.ServerResponse, body: string) => void) {
   const calls: ReceivedCall[] = [];
   const server = http.createServer((req, res) => {
@@ -29,7 +31,12 @@ function startReceiver(responder: (req: http.IncomingMessage, res: http.ServerRe
   return new Promise<{ server: http.Server; url: string; calls: ReceivedCall[] }>((resolve) => {
     server.listen(0, '127.0.0.1', () => {
       const { port } = server.address() as AddressInfo;
-      resolve({ server, url: `http://127.0.0.1:${port}/hook`, calls });
+      const receiver = { server, url: `http://127.0.0.1:${port}/hook`, calls };
+      // Track EVERY receiver so afterAll can close them all — previously only the
+      // last one was closed, leaking N-1 HTTP listeners and keeping Jest's event
+      // loop alive forever (the run "hung" after all tests had already passed).
+      receivers.push(receiver);
+      resolve(receiver);
     });
   });
 }
@@ -50,10 +57,21 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-  // Deterministic drain settle; then close the receiver (no hanging handles).
+  // Deterministic drain settle; then close EVERY receiver created across the
+  // suite (previously only `receiver` was closed, leaking the other N-1 HTTP
+  // listeners and hanging Jest via open handles).
   try { await webhookService.drainOnce(); } catch { /* best-effort */ }
   await new Promise((resolve) => setTimeout(resolve, 400));
-  if (receiver) await new Promise((resolve) => receiver.server.close(resolve));
+  await Promise.all(
+    receivers.map(
+      (r) =>
+        new Promise<void>((resolve) => {
+          if (r.server.listening) r.server.close(() => resolve());
+          else resolve();
+        })
+    )
+  );
+  receivers.length = 0;
 });
 
 async function createEndpoint(session: AuthSession, url: string, events: string[] = ['@all'], extra: Record<string, unknown> = {}) {
