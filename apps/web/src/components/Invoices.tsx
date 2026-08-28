@@ -209,7 +209,7 @@ const [_items, _setItems] = useState([
         <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
           <div className="h-1.5 w-full bg-[#0F6E8C]" />
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="sf-table">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-left text-sm text-slate-500">
                   <th className="px-5 py-3 font-medium">Invoice</th>

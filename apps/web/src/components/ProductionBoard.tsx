@@ -519,7 +519,7 @@ export function ProductionBoard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
+    <div className="min-h-screen ">
       <div className="flex flex-col gap-6 p-4 lg:p-8">
         <div className="overflow-hidden rounded-[28px] border border-white/50 bg-gradient-to-r from-[#0F6E8C] via-[#117793] to-[#0C5C74] p-6 text-white shadow-2xl">
           <div className="grid gap-6 lg:grid-cols-[1.35fr_0.85fr]">

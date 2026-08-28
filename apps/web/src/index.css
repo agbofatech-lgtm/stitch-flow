@@ -75,7 +75,7 @@
   h2,
   h3,
   h4 {
-    @apply font-display text-ink;
+    @apply font-display;
     letter-spacing: -0.02em;
   }
   ::selection {
@@ -278,5 +278,29 @@
   .sf-btn-motion:active:not(:disabled),
   .sf-card-hover:hover {
     transform: none;
+  }
+}
+
+/* ── Data tables — one consistent treatment ───────────────────────────── */
+@layer components {
+  .sf-table {
+    @apply w-full text-left text-sm;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  .sf-table thead th {
+    @apply border-b border-line bg-ivory px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-ink-mute;
+  }
+  .sf-table tbody td {
+    @apply border-b border-line px-4 py-3 text-ink-soft;
+  }
+  .sf-table tbody tr {
+    transition: background-color var(--sf-t-micro) var(--sf-ease-standard);
+  }
+  .sf-table tbody tr:hover {
+    @apply bg-ivory;
+  }
+  .sf-table tbody tr:last-child td {
+    border-bottom: 0;
   }
 }

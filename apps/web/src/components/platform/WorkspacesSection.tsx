@@ -53,7 +53,7 @@ export function WorkspacesSection() {
           <EmptyState>No workspaces yet.</EmptyState>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
+            <table className="sf-table min-w-[720px] ">
               <thead>
                 <tr className="border-b border-slate-200 text-[11px] uppercase tracking-wide text-slate-500">
                   <th scope="col" className="py-2 pr-3 font-medium">Workspace</th>

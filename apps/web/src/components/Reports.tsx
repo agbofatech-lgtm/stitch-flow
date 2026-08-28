@@ -575,7 +575,7 @@ export function Reports() {
   }, [orders, materialUsages, fabricRecords, selectedProductionRange, now]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 p-4 lg:p-8">
+    <div className="p-4 lg:p-8">
       <div className="mx-auto max-w-7xl space-y-8">
         <section className="relative overflow-hidden rounded-[28px] border border-white/50 bg-gradient-to-r from-[#0F6E8C] via-[#117793] to-[#0C5C74] p-6 text-white shadow-2xl">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.10),transparent_24%)]" />
@@ -920,7 +920,7 @@ export function Reports() {
                     />
                   ) : (
                     <div className="overflow-hidden rounded-2xl border border-slate-200">
-                      <table className="min-w-full divide-y divide-slate-200">
+                      <table className="sf-table">
                         <thead className="bg-slate-50">
                           <tr>
                             <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">

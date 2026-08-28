@@ -286,7 +286,7 @@ export function Settings() {
         : 'bg-slate-100 text-slate-700';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
+    <div className="min-h-screen ">
       <div className="mx-auto max-w-6xl p-4 lg:p-8">
         <AccountPanel />
         <div className="mb-8 overflow-hidden rounded-[28px] border border-white/60 bg-white/80 p-6 shadow-xl backdrop-blur-sm">

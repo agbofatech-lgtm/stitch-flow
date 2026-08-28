@@ -31,7 +31,7 @@ import { DashboardSummaryCard } from './DashboardSummaryCard';
 const ACTIVE_ORDER_STATUSES = new Set(['draft', 'in_progress', 'ready']);
 
 const cardShellClass =
-  'rounded-[24px] border border-white/60 bg-white/90 p-6 shadow-lg';
+  'rounded-card border border-line bg-surface p-6 shadow-e1';
 
 const interactiveFocusClass =
   'focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2';
@@ -181,50 +181,50 @@ export function Dashboard() {
   const displayDueAlerts = realSummary?.dueAlerts ?? 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 p-4 lg:p-8">
+    <div className="p-4 lg:p-8">
       <div className="mx-auto max-w-7xl">
-        <div className="relative mb-8 overflow-hidden rounded-[32px] border border-white/50 bg-gradient-to-r from-[#0F6E8C] via-[#117793] to-[#0C5C74] p-6 text-white shadow-2xl">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.12),transparent_24%)]" />
+        <div className="relative mb-8 overflow-hidden rounded-card border border-charcoal/60 bg-gradient-to-r from-charcoal via-[#26262b] to-charcoal p-6 text-ivory shadow-e3">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(201,169,110,0.20),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(201,169,110,0.12),transparent_24%)]" />
 
           <img
             src={tailoringSoft}
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute right-0 top-1/2 hidden h-[220px] w-auto -translate-y-1/2 translate-x-8 opacity-50 lg:block"
+            className="pointer-events-none absolute right-0 top-1/2 hidden h-[220px] w-auto -translate-y-1/2 translate-x-8 opacity-25 saturate-50 hue-rotate-[-160deg] lg:block"
           />
 
           <img
             src={scissorsSoft}
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute right-8 top-5 hidden h-16 w-16 rotate-6 opacity-50 md:block"
+            className="pointer-events-none absolute right-8 top-5 hidden h-16 w-16 rotate-6 opacity-25 saturate-50 hue-rotate-[-160deg] md:block"
           />
 
           <img
             src={measuringTapeSoft}
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute left-[43%] top-20 hidden h-14 w-14 -rotate-12 opacity-50 xl:block"
+            className="pointer-events-none absolute left-[43%] top-20 hidden h-14 w-14 -rotate-12 opacity-25 saturate-50 hue-rotate-[-160deg] xl:block"
           />
 
           <img
             src={sewingMachineSoft}
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute bottom-6 right-24 hidden h-16 w-16 opacity-50 lg:block"
+            className="pointer-events-none absolute bottom-6 right-24 hidden h-16 w-16 opacity-25 saturate-50 hue-rotate-[-160deg] lg:block"
           />
 
           <img
             src={symbolSoft}
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute bottom-5 left-[34%] hidden h-12 w-12 opacity-50 xl:block"
+            className="pointer-events-none absolute bottom-5 left-[34%] hidden h-12 w-12 opacity-25 saturate-50 hue-rotate-[-160deg] xl:block"
           />
 
           <div className="relative grid gap-6 lg:grid-cols-[1.3fr_0.9fr]">
             <div>
               <div className="mb-4 flex flex-wrap items-center gap-3">
-                <div className="rounded-2xl bg-white px-3 py-2 shadow-sm">
+                <div className="rounded-btn bg-surface px-3 py-2 shadow-e1">
                   <img
                     src={stitchflowLogo}
                     alt={`${BRAND.productName} logo`}
@@ -501,7 +501,7 @@ export function Dashboard() {
             <p className="text-sm text-slate-500">No recent orders yet.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-[720px] w-full">
+              <table className="sf-table min-w-[720px]">
                 <thead>
                   <tr className="border-b border-slate-200 text-left text-sm text-slate-500">
                     <th scope="col" className="pb-3 font-medium">

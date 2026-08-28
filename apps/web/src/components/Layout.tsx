@@ -17,7 +17,6 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { BRAND } from '../config/brand';
 import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
 import { getAuthRole, isPlatformRole } from '@shared/utils/api';
@@ -63,17 +62,17 @@ export function Layout({ children }: { children: ReactNode }) {
 
   const tierBadgeClass =
     tierSimulation === 'STUDIO'
-      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
+      ? 'bg-gradient-to-r from-gold to-gold-dark text-charcoal'
       : tierSimulation === 'PRO'
-      ? 'bg-[#0F6E8C] text-white'
-      : 'bg-slate-100 text-slate-700';
+        ? 'bg-charcoal text-ivory'
+        : 'bg-grey-light text-ink-soft';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 shadow-sm backdrop-blur lg:hidden">
+    <div className="min-h-screen bg-ivory">
+      <header className="sticky top-0 z-sticky flex items-center justify-between border-b border-line bg-surface/95 px-4 py-3 shadow-e1 backdrop-blur lg:hidden">
         <button
           onClick={() => setSidebarOpen(true)}
-          className="rounded-xl p-2 text-slate-700 transition hover:bg-slate-100"
+          className="sf-btn-motion rounded-btn p-2 text-ink-soft transition-colors hover:bg-grey-light/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
           aria-label="Open navigation"
         >
           <Menu className="h-5 w-5" />
@@ -90,20 +89,20 @@ export function Layout({ children }: { children: ReactNode }) {
 
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/35 backdrop-blur-sm lg:hidden"
+          className="sf-backdrop-enter fixed inset-0 z-overlay bg-charcoal/40 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside
-        className={`fixed left-0 top-0 z-50 grid h-full w-72 transform grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden border-r border-slate-200 bg-white shadow-2xl transition-transform lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-modal grid h-full w-72 transform grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden border-r border-line bg-surface shadow-e3 transition-transform duration-fast ease-standard lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div>
-          <div className="h-1.5 w-full bg-[#0F6E8C]" />
+          <div className="h-1.5 w-full bg-gold" />
 
-          <div className="border-b border-slate-200 px-5 py-5">
+          <div className="border-b border-line px-5 py-5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <img
@@ -111,25 +110,25 @@ export function Layout({ children }: { children: ReactNode }) {
                   alt={`${BRAND.productName} logo`}
                   className="h-12 w-auto"
                 />
-                <p className="mt-3 truncate text-sm font-semibold text-slate-900">
+                <p className="mt-3 truncate font-display text-sm font-semibold text-ink">
                   {currentWorkspace.name || BRAND.productName}
                 </p>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-slate-500">
+                <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-ink-mute">
                   by {BRAND.parentName}
                 </p>
               </div>
 
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 lg:hidden"
+                className="rounded-btn p-2 text-ink-mute transition-colors hover:bg-grey-light/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold lg:hidden"
                 aria-label="Close navigation"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/80 p-3">
-              <div className={`flex items-center gap-2 rounded-xl px-3 py-2 ${tierBadgeClass}`}>
+            <div className="mt-5 rounded-card border border-line bg-ivory p-3">
+              <div className={`flex items-center gap-2 rounded-btn px-3 py-2 ${tierBadgeClass}`}>
                 {tierSimulation !== 'BASIC' && <Crown className="h-4 w-4" />}
                 <span className="text-sm font-medium">{tierSimulation} Plan</span>
               </div>
@@ -137,7 +136,7 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <nav className="overflow-y-auto px-3 py-3">
+        <nav className="overflow-y-auto px-3 py-3" aria-label="Primary">
           <div className="space-y-1.5">
             {(visibleNavItems ?? []).map((item) => {
               const isActive = currentView === item.id;
@@ -151,18 +150,19 @@ export function Layout({ children }: { children: ReactNode }) {
                     setSidebarOpen(false);
                     setDropdownOpen(false);
                   }}
-                  className={`group w-full rounded-2xl px-4 py-2.5 text-left transition-all ${
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`group w-full rounded-btn px-4 py-2.5 text-left transition-colors duration-micro ease-standard focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
                     isActive
-                      ? 'bg-[#0F6E8C] text-white shadow-sm'
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                      ? 'bg-charcoal text-ivory shadow-e1'
+                      : 'text-ink-soft hover:bg-grey-light/70 hover:text-ink'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+                      className={`flex h-9 w-9 items-center justify-center rounded-btn transition-colors duration-micro ${
                         isActive
-                          ? 'bg-white/15 text-white'
-                          : 'bg-white text-slate-500 ring-1 ring-slate-200 group-hover:bg-slate-50'
+                          ? 'bg-gold/20 text-gold-light'
+                          : 'bg-surface text-ink-mute ring-1 ring-line group-hover:bg-grey-light/50'
                       }`}
                     >
                       <Icon className="h-4.5 w-4.5" />
@@ -175,14 +175,15 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
         </nav>
 
-        <div className="border-t border-slate-200 p-4">
+        <div className="border-t border-line p-4">
           <div className="relative">
             <button
               onClick={() => setDropdownOpen((prev) => !prev)}
-              className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3 transition hover:bg-slate-100"
+              aria-expanded={dropdownOpen}
+              className="flex w-full items-center gap-3 rounded-card border border-line bg-ivory p-3 transition-colors duration-micro hover:bg-grey-light/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0F6E8C] shadow-sm">
-                <span className="text-sm font-medium text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-charcoal shadow-e1">
+                <span className="text-sm font-medium text-gold-light">
                   {currentMember.user.fullName
                     .split(' ')
                     .map((n) => n[0])
@@ -191,23 +192,23 @@ export function Layout({ children }: { children: ReactNode }) {
               </div>
 
               <div className="min-w-0 flex-1 text-left">
-                <p className="truncate text-sm font-medium text-slate-900">
+                <p className="truncate text-sm font-medium text-ink">
                   {currentWorkspace.ownerName || currentMember.user.fullName || 'Owner'}
                 </p>
-                <p className="text-xs capitalize text-slate-500">{currentMember.role}</p>
+                <p className="text-xs capitalize text-ink-mute">{currentMember.role}</p>
               </div>
 
               <ChevronDown
-                className={`h-4 w-4 text-slate-500 transition-transform ${
+                className={`h-4 w-4 text-ink-mute transition-transform duration-micro ${
                   dropdownOpen ? 'rotate-180' : ''
                 }`}
               />
             </button>
 
             {dropdownOpen && (
-              <div className="absolute bottom-full left-0 right-0 mb-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-                <div className="border-b border-slate-200 p-3">
-                  <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wide text-slate-400">
+              <div className="sf-rise-enter absolute bottom-full left-0 right-0 mb-3 overflow-hidden rounded-card border border-line bg-surface shadow-e4">
+                <div className="border-b border-line p-3">
+                  <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wide text-ink-mute">
                     Switch Role
                   </p>
 
@@ -216,10 +217,10 @@ export function Layout({ children }: { children: ReactNode }) {
                       switchRole('owner');
                       setDropdownOpen(false);
                     }}
-                    className={`w-full rounded-xl px-3 py-2 text-left text-sm transition ${
+                    className={`w-full rounded-btn px-3 py-2 text-left text-sm transition-colors duration-micro ${
                       currentMember.role === 'owner'
-                        ? 'bg-[#0F6E8C] text-white'
-                        : 'text-slate-700 hover:bg-slate-100'
+                        ? 'bg-charcoal text-ivory'
+                        : 'text-ink-soft hover:bg-grey-light/70'
                     }`}
                   >
                     Owner
@@ -230,10 +231,10 @@ export function Layout({ children }: { children: ReactNode }) {
                       switchRole('assistant');
                       setDropdownOpen(false);
                     }}
-                    className={`mt-1 w-full rounded-xl px-3 py-2 text-left text-sm transition ${
+                    className={`mt-1 w-full rounded-btn px-3 py-2 text-left text-sm transition-colors duration-micro ${
                       currentMember.role === 'assistant'
-                        ? 'bg-[#0F6E8C] text-white'
-                        : 'text-slate-700 hover:bg-slate-100'
+                        ? 'bg-charcoal text-ivory'
+                        : 'text-ink-soft hover:bg-grey-light/70'
                     }`}
                   >
                     Assistant
@@ -241,7 +242,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 </div>
 
                 <div className="p-3">
-                  <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wide text-slate-400">
+                  <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wide text-ink-mute">
                     Simulate Tier
                   </p>
 
@@ -250,10 +251,10 @@ export function Layout({ children }: { children: ReactNode }) {
                       simulateTier('BASIC');
                       setDropdownOpen(false);
                     }}
-                    className={`w-full rounded-xl px-3 py-2 text-left text-sm transition ${
+                    className={`w-full rounded-btn px-3 py-2 text-left text-sm transition-colors duration-micro ${
                       tierSimulation === 'BASIC'
-                        ? 'bg-[#0F6E8C] text-white'
-                        : 'text-slate-700 hover:bg-slate-100'
+                        ? 'bg-charcoal text-ivory'
+                        : 'text-ink-soft hover:bg-grey-light/70'
                     }`}
                   >
                     Basic Plan
@@ -264,10 +265,10 @@ export function Layout({ children }: { children: ReactNode }) {
                       simulateTier('PRO');
                       setDropdownOpen(false);
                     }}
-                    className={`mt-1 w-full rounded-xl px-3 py-2 text-left text-sm transition ${
+                    className={`mt-1 w-full rounded-btn px-3 py-2 text-left text-sm transition-colors duration-micro ${
                       tierSimulation === 'PRO'
-                        ? 'bg-[#0F6E8C] text-white'
-                        : 'text-slate-700 hover:bg-slate-100'
+                        ? 'bg-charcoal text-ivory'
+                        : 'text-ink-soft hover:bg-grey-light/70'
                     }`}
                   >
                     Pro Plan
@@ -278,10 +279,10 @@ export function Layout({ children }: { children: ReactNode }) {
                       simulateTier('STUDIO');
                       setDropdownOpen(false);
                     }}
-                    className={`mt-1 w-full rounded-xl px-3 py-2 text-left text-sm transition ${
+                    className={`mt-1 w-full rounded-btn px-3 py-2 text-left text-sm transition-colors duration-micro ${
                       tierSimulation === 'STUDIO'
-                        ? 'bg-[#0F6E8C] text-white'
-                        : 'text-slate-700 hover:bg-slate-100'
+                        ? 'bg-charcoal text-ivory'
+                        : 'text-ink-soft hover:bg-grey-light/70'
                     }`}
                   >
                     Studio Plan
@@ -293,25 +294,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="min-h-screen lg:ml-72">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentView}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.22 }}
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
-      </main>
+      <main className="min-h-screen lg:ml-72">{children}</main>
     </div>
   );
 }
-
-
-
-
-
-

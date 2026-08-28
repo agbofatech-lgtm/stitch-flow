@@ -102,7 +102,7 @@ export function ObservabilitySection() {
           <EmptyState>No incidents recorded.</EmptyState>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-left text-sm">
+            <table className="sf-table min-w-[680px] ">
               <thead>
                 <tr className="border-b border-slate-200 text-[11px] uppercase tracking-wide text-slate-500">
                   <th scope="col" className="py-2 pr-3 font-medium">Fingerprint</th>
@@ -127,7 +127,7 @@ export function ObservabilitySection() {
           <EmptyState>No recent errors.</EmptyState>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
+            <table className="sf-table min-w-[760px] ">
               <thead>
                 <tr className="border-b border-slate-200 text-[11px] uppercase tracking-wide text-slate-500">
                   <th scope="col" className="py-2 pr-3 font-medium">Severity</th>
