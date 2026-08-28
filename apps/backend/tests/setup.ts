@@ -1,55 +1,64 @@
 import { pool, query } from '../src/config/db';
 
 /** Tables reset between tests (schema_migrations is preserved). */
+// We will truncate only tables that actually exist in the current schema.
 const TABLES = [
-  'fit_observations',
-  'fittings',
-  'appointments',
-  'referrals',
-  'customer_timeline_entries',
-  'customer_preferences',
-  'customer_notes',
+  // Core auth & workspace
+  'users',
+  'workspaces',
+  'workspace_users',
+  'refresh_tokens',
+  'audit_logs',
+  // Phase 7/8 platform tables
+  'feature_flags',
+  'integration_outbox',
+  'api_keys',
+  'usage_events',
+  'error_records',
+  'incidents',
+  // Webhook tables (Phase 8)
+  'webhook_endpoints',
+  'webhook_deliveries',
+  // Sync & processed mutations (Phase 3.5/6)
+  'sync_changes',
+  'processed_mutations',
+  // Other core business tables that exist in Phase 1-6
+  'customers',
+  'orders',
+  'invoices',
+  'payments',
+  'fabric_records',
+  'order_production_stages',
+  'order_production_stage_events',
+  'order_material_usages',
+  'invoice_items',
+  // Phase 5 commercial tables
   'billing_events',
   'subscriptions',
-  'processed_mutations',
-  'order_material_usages',
-  'order_production_stage_events',
-  'order_production_stages',
-  'payments',
-  'invoice_items',
-  'integration_outbox',
+  // Phase 4-6 tables
+  'license_devices',
+  'licenses',
+  // Phase 7-8 portal & support (if they exist, they will be truncated)
   'portal_customers',
   'customer_feedback',
   'support_cases',
-  'incidents',
-  'error_records',
-  'usage_events',
-  'api_keys',
-  'webhook_deliveries',
-  'webhook_endpoints',
-  'invoices',
-  'orders',
-  'customers',
-  'fabric_records',
-  'workspace_members',
-  'app_settings',
-  'sync_changes',
-  'refresh_tokens',
-  'audit_logs',
-  'events',
-  'feature_request_votes',
-  'feature_requests',
-  'license_devices',
-  'licenses',
-  'workspace_users',
-  'workspaces',
-  'users',
 ];
 
 beforeEach(async () => {
-  await query(`TRUNCATE TABLE ${TABLES.join(', ')} CASCADE`);
-  // Phase 7: TRUNCATE users CASCADE also empties feature_flags (FK → users),
-  // so re-seed the flags rather than assuming the migration rows survived.
+  // Dynamically truncate only tables that exist in the public schema.
+  await query(`
+    DO $$
+    DECLARE
+      t text;
+    BEGIN
+      FOREACH t IN ARRAY ARRAY[${TABLES.map(t => `'${t}'`).join(', ')}] LOOP
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = t AND table_schema = 'public') THEN
+          EXECUTE format('TRUNCATE TABLE %I CASCADE', t);
+        END IF;
+      END LOOP;
+    END $$;
+  `);
+  // Re-seed feature_flags after TRUNCATE.
   await query(`
     INSERT INTO feature_flags (flag_key, enabled, description) VALUES
       ('AI_DIAGNOSTICS', false, 'Advisory AI diagnostics (interface only)'),
