@@ -80,7 +80,7 @@ export async function refreshAuthTokens(fetchImpl: typeof fetch = fetch): Promis
   return tryRefreshTokens(fetchImpl);
 }
 
-async function tryRefreshTokens(fetchImpl: typeof fetch = fetch): Promise<boolean> {
+export async function tryRefreshTokens(fetchImpl: typeof fetch = fetch): Promise<boolean> {
   if (!refreshInFlight) {
     refreshInFlight = (async () => {
       const refreshToken = getRefreshToken();

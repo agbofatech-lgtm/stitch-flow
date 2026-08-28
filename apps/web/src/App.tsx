@@ -10,6 +10,7 @@ import { DesignStudio } from './components/DesignStudio';
 import { Materials } from './components/Materials';
 import { Reports } from './components/Reports';
 import { Settings } from './components/Settings';
+import { DeveloperDashboard } from './components/DeveloperDashboard';
 import { SplashScreen } from './components/SplashScreen';
 
 function AppContent() {
@@ -45,6 +46,8 @@ function AppContent() {
         return <Reports />;
       case 'settings':
         return <Settings />;
+      case 'developer':
+        return <DeveloperDashboard />;
       default:
         return <Dashboard />;
     }

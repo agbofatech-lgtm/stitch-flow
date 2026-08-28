@@ -11,7 +11,8 @@ export type AppView =
   | 'production-board'
   | 'materials'
   | 'reports'
-  | 'settings';
+  | 'settings'
+  | 'developer';
 
 export type OrderStatus =
   | 'draft'

@@ -1,0 +1,180 @@
+{
+ "results": [
+  {
+   "name": "A1 dashboard opens + workspace displayed",
+   "ok": true,
+   "detail": "header shows workspace id chip"
+  },
+  {
+   "name": "A2 nav contains Developer entry",
+   "ok": true,
+   "detail": "clicked from sidebar"
+  },
+  {
+   "name": "A3 usage loads",
+   "ok": true,
+   "detail": "cards render usage pipeline data"
+  },
+  {
+   "name": "B2 existing keys listed",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "B3 no full secret rendered for existing keys",
+   "ok": true,
+   "detail": "prefix-only"
+  },
+  {
+   "name": "B7 invalid/empty scope handling",
+   "ok": true,
+   "detail": "inline validation error"
+  },
+  {
+   "name": "B8/B9 key created, full secret shown once",
+   "ok": true,
+   "detail": "len=51"
+  },
+  {
+   "name": "B10 copy action works",
+   "ok": true,
+   "detail": "clipboard content matches secret"
+  },
+  {
+   "name": "9 live developer API request via UI",
+   "ok": true,
+   "detail": "metered as api_request"
+  },
+  {
+   "name": "B11 secret not shown after close",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "B11b secret not shown after reload",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "B12 only prefix displayed",
+   "ok": true,
+   "detail": "truncated prefix with ellipsis"
+  },
+  {
+   "name": "B13/B14 revoke via UI + visible revoked state",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "C1/C2 webhooks page opens, endpoints load",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "C6 invalid/unsafe URL rejected",
+   "ok": true,
+   "detail": "server 400 surfaced"
+  },
+  {
+   "name": "C7/C8 endpoint saved + signing secret once",
+   "ok": true,
+   "detail": "len=38"
+  },
+  {
+   "name": "C9 signing secret not shown after close",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "C13 test delivery triggered",
+   "ok": true,
+   "detail": "queued via real pipeline"
+  },
+  {
+   "name": "C12 disable works",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "D statuses representable",
+   "ok": true,
+   "detail": "delivered + dead-letter visible"
+  },
+  {
+   "name": "D metadata (attempt/reason/endpoint)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "D filter works",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "Replay creates new attempt, history intact",
+   "ok": true,
+   "detail": "rows before=2 after(all)=14"
+  },
+  {
+   "name": "9b usage reflects developer_api activity",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "11 zero JS page errors (context A)",
+   "ok": true,
+   "detail": "clean"
+  },
+  {
+   "name": "11 no 5xx (context A)",
+   "ok": true,
+   "detail": "clean"
+  },
+  {
+   "name": "12 mobile: developer view usable, no clipping, drawer closes",
+   "ok": true,
+   "detail": "{\"scrollW\":390,\"clientW\":390,\"h1\":\"Developer\",\"tabs\":[\"Overview & Usage\",\"API Keys\",\"Webhooks\",\"Delivery History\"],\"drawerOffscreenX\":-288}"
+  },
+  {
+   "name": "12b mobile: keys table usable (scroll container, no body clipping)",
+   "ok": true,
+   "detail": "{\"scrollW\":390,\"clientW\":390,\"hasTable\":true,\"tableScrollable\":true}"
+  },
+  {
+   "name": "10 workspace B sees none of A data",
+   "ok": true,
+   "detail": "keys=true endpoints=true deliveries=true"
+  },
+  {
+   "name": "11 zero JS page errors (context B)",
+   "ok": true,
+   "detail": "clean"
+  },
+  {
+   "name": "A9 unauthorized rejected with understandable state",
+   "ok": true,
+   "detail": ""
+  }
+ ],
+ "consoleA": [
+  "error: Failed to load resource: net::ERR_CONNECTION_CLOSED",
+  "error: Failed to load resource: net::ERR_CONNECTION_CLOSED",
+  "error: Failed to load resource: the server responded with a status of 400 (Bad Request)"
+ ],
+ "consoleU": [
+  "error: Failed to load resource: net::ERR_CONNECTION_CLOSED",
+  "error: Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "error: Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "error: Failed to load dashboard summary: Error: HTTP 401",
+  "error: Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "error: Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "error: Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "error: Failed to load payments analytics: Error: HTTP 401",
+  "error: Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "error: Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "error: Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "error: Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "error: Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "error: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+ ]
+}

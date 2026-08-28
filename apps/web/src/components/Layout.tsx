@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Package,
   BarChart3,
+  Code2,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -28,6 +29,7 @@ const navItems = [
   { id: 'design-studio', label: 'Design Studio', icon: Palette },
   { id: 'materials', label: 'Materials', icon: Package },
   { id: 'reports', label: 'Reports', icon: BarChart3 },
+  { id: 'developer', label: 'Developer', icon: Code2 },
   { id: 'settings', label: 'Settings', icon: Settings },
 ] as const;
 
