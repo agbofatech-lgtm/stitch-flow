@@ -22,6 +22,7 @@ import {
 } from './routes/designRoutes';
 import { patternModelRoutes, cuttingLayoutRoutes } from './routes/patternRoutes';
 import { productionRoutes } from './routes/productionRoutes';
+import { aiRoutes } from './routes/aiRoutes';
 import { orderRoutes } from './routes/orderRoutes';
 import { invoiceRoutes } from './routes/invoiceRoutes';
 import { paymentRoutes } from './routes/paymentRoutes';
@@ -117,6 +118,8 @@ app.use('/customers/:customerId/pattern-models', authMiddleware, requireWorkspac
 app.use('/customers/:customerId/cutting-layouts', authMiddleware, requireWorkspace, cuttingLayoutRoutes);
 // Phase 16 — Fabric & Production Intelligence
 app.use('/production-plans', authMiddleware, requireWorkspace, productionRoutes);
+// Phase 17 — AI Tailoring Intelligence (advisory only; inherits auth + tenant scope)
+app.use('/ai', authMiddleware, requireWorkspace, aiRoutes);
 app.use('/orders', authMiddleware, requireWorkspace, orderRoutes);
 app.use('/invoices', authMiddleware, requireWorkspace, invoiceRoutes);
 app.use('/payments', authMiddleware, requireWorkspace, paymentRoutes);
