@@ -1,4 +1,3 @@
-import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
 import { BRAND } from '../config/brand';
 import { navigate } from '@shared/router';
 
@@ -8,7 +7,10 @@ export function PublicFooter() {
     <footer className="border-t border-line bg-charcoal text-ivory">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 py-10 sm:flex-row sm:justify-between sm:px-6">
         <div className="flex items-center gap-3">
-          <img src={stitchflowLogo} alt={`${BRAND.productName} logo`} className="h-8 w-auto rounded-btn bg-ivory p-1" width={32} height={32} />
+          <picture>
+            <source srcSet="/images/public/brand/stitchflow-logo-128.webp" type="image/webp" />
+            <img src="/images/public/brand/stitchflow-logo-128.png" alt={`${BRAND.productName} logo`} className="h-8 w-auto rounded-btn bg-ivory p-1" width={32} height={32} loading="lazy" decoding="async" />
+          </picture>
           <div>
             <p className="font-display text-sm font-semibold">{BRAND.productName}</p>
             <p className="text-xs text-ivory/60">by {BRAND.parentName}</p>

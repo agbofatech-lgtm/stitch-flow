@@ -1,4 +1,3 @@
-import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
 import { BRAND } from '../config/brand';
 import { navigate } from '@shared/router';
 import { Button } from '../components/ui/Button';
@@ -20,7 +19,10 @@ export function PublicHeader() {
           className="flex items-center gap-3 rounded-btn focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
           aria-label={`${BRAND.productName} — back to top`}
         >
-          <img src={stitchflowLogo} alt={`${BRAND.productName} logo`} className="h-9 w-auto" width={36} height={36} />
+          <picture>
+            <source srcSet="/images/public/brand/stitchflow-logo-128.webp" type="image/webp" />
+            <img src="/images/public/brand/stitchflow-logo-128.png" alt={`${BRAND.productName} logo`} className="h-9 w-auto" width={36} height={36} />
+          </picture>
           <span className="font-display text-lg font-semibold tracking-tight text-ink">{BRAND.productName}</span>
         </button>
 

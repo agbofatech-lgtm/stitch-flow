@@ -1,36 +1,18 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
-import { Layout } from './components/Layout';
-import { Dashboard } from './components/Dashboard';
-import { Customers } from './components/Customers';
-import { Orders } from './components/Orders';
-import { ProductionBoard } from './components/ProductionBoard';
-import { Invoices } from './components/Invoices';
-import { DesignStudio } from './components/DesignStudio';
-import { Materials } from './components/Materials';
-import { Reports } from './components/Reports';
-import { Settings } from './components/Settings';
-import { DeveloperDashboard } from './components/DeveloperDashboard';
-import { ControlCenter } from './components/platform/ControlCenter';
-import { PageTransition } from './components/ui/motion';
 import { ToastProvider } from './components/ui/Toast';
-import { SplashScreen } from './components/SplashScreen';
-import { Login } from './components/Login';
-import { Register } from './components/Register';
-import { ForgotPassword } from './components/ForgotPassword';
-import { ResetPassword } from './components/ResetPassword';
 import {
-  getAccessToken,
   AUTH_CHANGED_EVENT,
   AUTH_FAILURE_EVENT,
-} from '@shared/utils/api';
+  getAccessToken,
+} from './shared/utils/api';
 import {
   currentPath,
   navigate,
+  isPublicAuthPath,
   isRegisterPath,
   isForgotPasswordPath,
   isResetPasswordPath,
-  isPublicAuthPath,
   isDeveloperPath,
   isPlatformPath,
   isLandingPath,
@@ -39,13 +21,22 @@ import {
 
 /** Phase 12 — public landing experience, code-split from the app bundle. */
 const LandingPage = lazy(() => import('./public/LandingPage'));
+/** Public auth pages — split so the entry chunk stays lean. */
+const Login = lazy(() => import('./components/Login').then((m) => ({ default: m.Login })));
+const Register = lazy(() => import('./components/Register').then((m) => ({ default: m.Register })));
+const ForgotPassword = lazy(() => import('./components/ForgotPassword').then((m) => ({ default: m.ForgotPassword })));
+const ResetPassword = lazy(() => import('./components/ResetPassword').then((m) => ({ default: m.ResetPassword })));
+/** The entire authenticated application (Phase 12 code-split). */
+const AuthenticatedApp = lazy(() => import('./AuthenticatedApp'));
 
 /**
- * Authentication gate (Phase 8 fix):
- *  - `/login` is public.
- *  - `/` and every application route (incl. `/developer…`) require a stored
- *    access token; unauthenticated visits are redirected to `/login`
- *    (intended route preserved for post-login return).
+ * Authentication gate (Phase 8 fix, Phase 12 public entry):
+ *  - `/` renders the public landing when signed out; the application when
+ *    signed in. `/login`, `/register`, `/forgot-password`, `/reset-password`
+ *    are public.
+ *  - Every application route (incl. `/developer…`) requires a stored access
+ *    token; unauthenticated visits are redirected to `/login` (intended route
+ *    preserved for post-login return).
  *  - Unrecoverable auth failures (server-rejected refresh rotation) clear
  *    credentials and return to `/login` via AUTH_FAILURE_EVENT.
  *  - The gate is the FIRST check only; API-level refresh/retry in
@@ -53,7 +44,6 @@ const LandingPage = lazy(() => import('./public/LandingPage'));
  */
 function AppContent() {
   const { currentView, setView } = useApp();
-  const [showSplash, setShowSplash] = useState(true);
   const [route, setRoute] = useState<string>(() => currentPath());
   const [authed, setAuthed] = useState<boolean>(() => Boolean(getAccessToken()));
   // Deep-link handling must run only when the ROUTE changes. Keying it off
@@ -61,11 +51,6 @@ function AppContent() {
   // stale '/developer' route -> forced back to developer view -> navigate
   // back -> loop), leaving the user unable to navigate away from Developer.
   const deepLinkedRoute = useRef<string | null>(null);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setShowSplash(false), 1800);
-    return () => window.clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     const onPop = () => setRoute(currentPath());
@@ -84,8 +69,8 @@ function AppContent() {
     };
   }, []);
 
-  // Route gate: public auth pages (/login, /register, /forgot-password,
-  // /reset-password); everything else requires a session.
+  // Route gate: public pages (landing + auth); everything else requires a
+  // session.
   //
   // IMPORTANT: the `authed` state can lag one render behind a just-completed
   // sign-in/sign-out (event → setState → render ordering). Token storage is
@@ -145,49 +130,38 @@ function AppContent() {
         </Suspense>
       );
     }
-    if (isRegisterPath(route)) return <Register />;
-    if (isForgotPasswordPath(route)) return <ForgotPassword />;
-    if (isResetPasswordPath(route)) return <ResetPassword />;
-    return <Login />;
-  }
-
-  if (showSplash) {
-    return <SplashScreen />;
-  }
-
-  const renderView = () => {
-    switch (currentView) {
-      case 'dashboard':
-        return <Dashboard />;
-      case 'customers':
-        return <Customers />;
-      case 'orders':
-        return <Orders />;
-      case 'production-board':
-        return <ProductionBoard />;
-      case 'invoices':
-        return <Invoices />;
-      case 'design-studio':
-        return <DesignStudio />;
-      case 'materials':
-        return <Materials />;
-      case 'reports':
-        return <Reports />;
-      case 'settings':
-        return <Settings />;
-      case 'developer':
-        return <DeveloperDashboard />;
-      case 'platform':
-        return <ControlCenter />;
-      default:
-        return <Dashboard />;
+    if (isRegisterPath(route)) {
+      return (
+        <Suspense fallback={null}>
+          <Register />
+        </Suspense>
+      );
     }
-  };
+    if (isForgotPasswordPath(route)) {
+      return (
+        <Suspense fallback={null}>
+          <ForgotPassword />
+        </Suspense>
+      );
+    }
+    if (isResetPasswordPath(route)) {
+      return (
+        <Suspense fallback={null}>
+          <ResetPassword />
+        </Suspense>
+      );
+    }
+    return (
+      <Suspense fallback={null}>
+        <Login />
+      </Suspense>
+    );
+  }
 
   return (
-    <Layout>
-      <PageTransition viewKey={currentView}>{renderView()}</PageTransition>
-    </Layout>
+    <Suspense fallback={null}>
+      <AuthenticatedApp />
+    </Suspense>
   );
 }
 

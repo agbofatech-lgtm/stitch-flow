@@ -1,4 +1,3 @@
-import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
 import { BRAND } from '../../config/brand';
 import { navigate } from '@shared/router';
 import { Button } from '../../components/ui/Button';
@@ -22,7 +21,10 @@ export function HeroSection() {
         }}
       />
       <div className={`relative mx-auto flex min-h-[88svh] max-w-4xl flex-col items-center justify-center px-4 py-24 text-center sm:px-6 ${inView ? 'sf-rise-enter' : 'opacity-0'}`}>
-        <img src={stitchflowLogo} alt={`${BRAND.productName} logo`} className="sf-logo-reveal mb-8 h-16 w-auto" width={64} height={64} />
+        <picture className="sf-logo-reveal mb-8 inline-block">
+          <source srcSet="/images/public/brand/stitchflow-logo-256.webp" type="image/webp" />
+          <img src="/images/public/brand/stitchflow-logo-256.png" alt={`${BRAND.productName} logo`} className="h-16 w-auto" width={64} height={64} decoding="async" />
+        </picture>
         <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-gold-dark">
           Measure · Design · Pattern · Produce · Manage
         </p>
