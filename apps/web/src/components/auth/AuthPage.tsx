@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
 import { BRAND } from '../../config/brand';
+import { navigate } from '@shared/router';
+import { ArrowLeft } from 'lucide-react';
 
 /**
  * Phase 9 — shared shell for the public authentication pages.
@@ -21,7 +23,15 @@ export function AuthPage({
   footer?: ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ivory bg-gradient-to-br from-ivory via-surface to-grey-light p-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-ivory bg-gradient-to-br from-ivory via-surface to-grey-light p-4">
+      <button
+        type="button"
+        onClick={() => navigate('/')}
+        className="sf-btn-motion absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-btn px-3 py-2 text-xs font-semibold text-ink-soft hover:bg-grey-light/70 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+        {BRAND.productName} home
+      </button>
       <main className="sf-page-enter w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
           <img src={stitchflowLogo} alt={`${BRAND.productName} logo`} className="sf-logo-reveal h-12 w-auto" />

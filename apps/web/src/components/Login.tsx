@@ -42,7 +42,7 @@ export function Login() {
   return (
     <AuthPage
       title="Welcome to StitchFlow"
-      subtitle="Sign in to continue to your workspace."
+      subtitle="Your craft, digitally refined. Sign in to continue to your workspace."
       footer={
         <>
           Don&apos;t have an account?{' '}
