@@ -83,9 +83,9 @@ describe('Phase 14 — Dexie v4 schema (offline-first)', () => {
     await Promise.all(db.tables.map((t) => t.clear()));
   });
 
-  it('database is at schema version 4', () => {
+  it('database is at current schema version (v5 after Phase 15)', () => {
     expect(db.verno).toBe(CURRENT_SCHEMA_VERSION);
-    expect(CURRENT_SCHEMA_VERSION).toBe(4);
+    expect(CURRENT_SCHEMA_VERSION).toBe(5);
   });
 
   it('Phase 14 tables are present', () => {

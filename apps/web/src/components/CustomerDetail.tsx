@@ -23,6 +23,8 @@ import type {
 import { MeasurementIntelligence } from './measurements/MeasurementIntelligence';
 // Phase 14 — Design Intelligence (additive, external adapter — DesignStudio.tsx untouched)
 import { DesignIntelligence } from './design/DesignIntelligence';
+// Phase 15 — Pattern & Cutting Intelligence (additive, patternEngine.ts untouched)
+import PatternIntelligenceSection from './pattern/PatternIntelligenceSection';
 
 type CustomerDetailProps = {
   customerId: string;
@@ -648,6 +650,14 @@ export function CustomerDetail({
       {/* Phase 14 — Design Intelligence (inspiration + fabric + design spec → Design Studio) */}
       <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
         <DesignIntelligence
+          customerId={customerId}
+          workspaceId={currentWorkspace.id}
+        />
+      </section>
+
+      {/* Phase 15 — Pattern & Cutting Intelligence (patternEngine.ts untouched, ZERO DIFF) */}
+      <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+        <PatternIntelligenceSection
           customerId={customerId}
           workspaceId={currentWorkspace.id}
         />
