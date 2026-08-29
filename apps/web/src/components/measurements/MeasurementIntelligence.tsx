@@ -13,6 +13,7 @@ import { ProfileList } from './ProfileList';
 import { ProfileDetail } from './ProfileDetail';
 import { ProfileHistory } from './ProfileHistory';
 import type { SuggestionItem } from './ValidationPanel';
+import MeasurementAIPanel from '../ai/MeasurementAIPanel';
 import type { DraftUpdate } from './MeasurementTypes';
 import * as svc from '../../modules/services/measurementService';
 import { Loading, ErrorState } from '../ui/Feedback';
@@ -390,6 +391,13 @@ export function MeasurementIntelligence({
                 setSuggestions((prev) => prev.filter((s) => s.definitionCode !== code));
               }}
             />
+          )}
+          {/* Phase 17 — AI advisory surface. Advisory only; the deterministic
+              validation above remains authoritative. */}
+          {profileFull && selectedProfileId && (
+            <div className="mt-4 border-t border-line pt-4">
+              <MeasurementAIPanel profileId={selectedProfileId} />
+            </div>
           )}
         </>
       )}

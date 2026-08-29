@@ -29,6 +29,7 @@ import PurchasingPanel from './PurchasingPanel';
 import ProductionWorkflowPanel from './ProductionWorkflowPanel';
 import QualityControlPanel from './QualityControlPanel';
 import ProductionReadinessPanel from './ProductionReadinessPanel';
+import { ProductionAIPanel, FabricAIPanel } from '../ai/ProductionAIPanel';
 import ProductionTraceabilityPanel from './ProductionTraceabilityPanel';
 
 type WorkflowTab =
@@ -192,15 +193,29 @@ export default function ProductionIntelligence({
 
       {/* Tab content */}
       {tab === 'readiness' && (
-        <ProductionReadinessPanel
-          readiness={plan?.readiness ?? buildPreviewReadiness(designSpec, patternModel, cuttingLayout, !!fabricProfile)}
-          onGenerate={handleGenerate}
-          isLoading={isLoading}
-        />
+        <>
+          <ProductionReadinessPanel
+            readiness={plan?.readiness ?? buildPreviewReadiness(designSpec, patternModel, cuttingLayout, !!fabricProfile)}
+            onGenerate={handleGenerate}
+            isLoading={isLoading}
+          />
+          {/* Phase 17 — advisory only. The readiness panel above is authoritative. */}
+          {plan && (
+            <div className="mt-4 border-t border-line pt-4">
+              <ProductionAIPanel planId={plan.id} />
+            </div>
+          )}
+        </>
       )}
 
       {tab === 'fabric' && plan && (
-        <FabricRequirementPanel consumption={plan.fabricConsumption} />
+        <>
+          <FabricRequirementPanel consumption={plan.fabricConsumption} />
+          {/* Phase 17 — explains the deterministic consumption; never recomputes it. */}
+          <div className="mt-4 border-t border-line pt-4">
+            <FabricAIPanel planId={plan.id} />
+          </div>
+        </>
       )}
 
       {tab === 'purchasing' && plan?.purchasingRecommendation && (
