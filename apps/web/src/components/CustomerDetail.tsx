@@ -19,6 +19,8 @@ import type {
   GarmentMeasurements,
   MeasurementProfileType,
 } from '../types';
+// Phase 13 — Measurement Intelligence (additive, preserves legacy system)
+import { MeasurementIntelligence } from './measurements/MeasurementIntelligence';
 
 type CustomerDetailProps = {
   customerId: string;
@@ -631,6 +633,14 @@ export function CustomerDetail({
             })}
           </div>
         )}
+      </section>
+
+      {/* Phase 13 — Measurement Intelligence (server-authoritative, versioned, validated) */}
+      <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+        <MeasurementIntelligence
+          customerId={customerId}
+          workspaceId={currentWorkspace.id}
+        />
       </section>
     </div>
   );

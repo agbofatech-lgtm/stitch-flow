@@ -87,7 +87,17 @@ export const SCHEMA_V2: Record<string, string> = {
     '++id, clientMutationId, workspaceId, status, nextRetryAt, [workspaceId+status]',
 };
 
-export const CURRENT_SCHEMA_VERSION = 2;
+export const SCHEMA_V3: Record<string, string> = {
+  ...SCHEMA_V2,
+  // Phase 13 — canonical measurement tables (local cache + outbox)
+  measurementProfilesV13: 'id, workspaceId, [workspaceId+id], customerId, status',
+  measurementSetsV13: 'id, workspaceId, profileId, [profileId+category]',
+  measurementValuesV13: 'id, workspaceId, setId, definitionCode',
+  measurementOutbox:
+    '++id, clientMutationId, workspaceId, status, nextRetryAt, [workspaceId+status]',
+};
+
+export const CURRENT_SCHEMA_VERSION = 3;
 
 /** Server entity name -> local table name (delta application map). */
 export const ENTITY_TABLE_MAP: Record<string, string> = {

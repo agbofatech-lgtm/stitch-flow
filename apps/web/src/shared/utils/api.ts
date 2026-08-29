@@ -216,6 +216,16 @@ export async function apiPut<T = unknown>(url: string, data: unknown): Promise<T
   return res.json();
 }
 
+export async function apiPatch<T = unknown>(url: string, data: unknown): Promise<T> {
+  const res = await request(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 export async function apiDelete<T = unknown>(url: string): Promise<T> {
   const res = await request(url, { method: 'DELETE' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);

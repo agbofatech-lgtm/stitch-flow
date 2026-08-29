@@ -3,6 +3,7 @@ import {
   DB_NAME,
   SCHEMA_V1,
   SCHEMA_V2,
+  SCHEMA_V3,
   CURRENT_SCHEMA_VERSION,
   type SyncQueueRecord,
   type SyncMetaRecord,
@@ -28,12 +29,18 @@ export class StitchFlowDatabase extends Dexie {
   settings!: Table<LocalSettingRecord, [string, string]>;
   syncMeta!: Table<SyncMetaRecord, string>;
   syncQueue!: Table<SyncQueueRecord, number>;
+  // Phase 13 — canonical measurement tables (local cache + draft outbox)
+  measurementProfilesV13!: Table<LocalRow, string>;
+  measurementSetsV13!: Table<LocalRow, string>;
+  measurementValuesV13!: Table<LocalRow, string>;
+  measurementOutbox!: Table<SyncQueueRecord, number>;
 
   constructor(name = DB_NAME) {
     super(name);
     // Versioned, additive schema history (§35). Never edit old versions.
     this.version(1).stores(SCHEMA_V1);
     this.version(2).stores(SCHEMA_V2);
+    this.version(3).stores(SCHEMA_V3);
   }
 }
 
