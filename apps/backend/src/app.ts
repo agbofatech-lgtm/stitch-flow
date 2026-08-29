@@ -21,6 +21,7 @@ import {
   designSpecRoutes,
 } from './routes/designRoutes';
 import { patternModelRoutes, cuttingLayoutRoutes } from './routes/patternRoutes';
+import { productionRoutes } from './routes/productionRoutes';
 import { orderRoutes } from './routes/orderRoutes';
 import { invoiceRoutes } from './routes/invoiceRoutes';
 import { paymentRoutes } from './routes/paymentRoutes';
@@ -114,6 +115,8 @@ app.use('/customers/:customerId/design-specifications', authMiddleware, requireW
 // Phase 15 — Pattern & Cutting Intelligence
 app.use('/customers/:customerId/pattern-models', authMiddleware, requireWorkspace, patternModelRoutes);
 app.use('/customers/:customerId/cutting-layouts', authMiddleware, requireWorkspace, cuttingLayoutRoutes);
+// Phase 16 — Fabric & Production Intelligence
+app.use('/production-plans', authMiddleware, requireWorkspace, productionRoutes);
 app.use('/orders', authMiddleware, requireWorkspace, orderRoutes);
 app.use('/invoices', authMiddleware, requireWorkspace, invoiceRoutes);
 app.use('/payments', authMiddleware, requireWorkspace, paymentRoutes);

@@ -118,7 +118,16 @@ export const SCHEMA_V5: Record<string, string> = {
     '++id, clientMutationId, workspaceId, status, nextRetryAt, [workspaceId+status]',
 };
 
-export const CURRENT_SCHEMA_VERSION = 5;
+export const SCHEMA_V6: Record<string, string> = {
+  ...SCHEMA_V5,
+  // Phase 16 — Fabric & Production Intelligence (local cache + outbox)
+  productionPlansV16: 'id, workspaceId, [workspaceId+id], customerId, designSpecificationId, status',
+  fabricConsumptionsV16: 'id, workspaceId, [workspaceId+id], cuttingLayoutId',
+  productionOutbox:
+    '++id, clientMutationId, workspaceId, status, nextRetryAt, [workspaceId+status]',
+};
+
+export const CURRENT_SCHEMA_VERSION = 6;
 
 /** Server entity name -> local table name (delta application map). */
 export const ENTITY_TABLE_MAP: Record<string, string> = {

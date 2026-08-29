@@ -6,6 +6,7 @@ import {
   SCHEMA_V3,
   SCHEMA_V4,
   SCHEMA_V5,
+  SCHEMA_V6,
   CURRENT_SCHEMA_VERSION,
   type SyncQueueRecord,
   type SyncMetaRecord,
@@ -47,6 +48,10 @@ export class StitchFlowDatabase extends Dexie {
   patternModelsV15!: Table<LocalRow, string>;
   cuttingLayoutsV15!: Table<LocalRow, string>;
   patternOutbox!: Table<SyncQueueRecord, number>;
+  // Phase 16 — Fabric & Production Intelligence
+  productionPlansV16!: Table<LocalRow, string>;
+  fabricConsumptionsV16!: Table<LocalRow, string>;
+  productionOutbox!: Table<SyncQueueRecord, number>;
 
   constructor(name = DB_NAME) {
     super(name);
@@ -56,6 +61,7 @@ export class StitchFlowDatabase extends Dexie {
     this.version(3).stores(SCHEMA_V3);
     this.version(4).stores(SCHEMA_V4);
     this.version(5).stores(SCHEMA_V5);
+    this.version(6).stores(SCHEMA_V6);
   }
 }
 
