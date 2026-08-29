@@ -16,9 +16,13 @@ export function validate(schema: ZodSchema<any>) {
       );
     }
 
-    req.body = result.data.body;
-    req.query = result.data.query;
-    req.params = result.data.params;
+    // Only overwrite the request parts the schema declares. Undeclared keys
+    // must survive intact: a body-only schema (e.g. customer-scoped Phase
+    // 14/15/16 routes) must not strip req.params, and a params-only schema
+    // must not strip req.body.
+    if (result.data.body !== undefined) req.body = result.data.body;
+    if (result.data.query !== undefined) req.query = result.data.query;
+    if (result.data.params !== undefined) req.params = result.data.params;
     next();
   };
 }
