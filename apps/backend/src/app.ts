@@ -14,6 +14,12 @@ import { requireWorkspace } from './middleware/workspace';
 import { dashboardRoutes } from './routes/dashboardRoutes';
 import { customerRoutes } from './routes/customerRoutes';
 import measurementRoutes, { definitionRoutes } from './routes/measurementRoutes';
+import {
+  assetRoutes,
+  inspirationRoutes,
+  fabricProfileRoutes,
+  designSpecRoutes,
+} from './routes/designRoutes';
 import { orderRoutes } from './routes/orderRoutes';
 import { invoiceRoutes } from './routes/invoiceRoutes';
 import { paymentRoutes } from './routes/paymentRoutes';
@@ -99,6 +105,11 @@ app.use('/dashboard', authMiddleware, requireWorkspace, dashboardRoutes);
 app.use('/customers', authMiddleware, requireWorkspace, customerRoutes);
 app.use('/customers/:customerId/measurement-profiles', authMiddleware, requireWorkspace, measurementRoutes);
 app.use('/measurement-definitions', authMiddleware, requireWorkspace, definitionRoutes);
+// Phase 14 — Design Intelligence routes
+app.use('/local-assets', authMiddleware, requireWorkspace, assetRoutes);
+app.use('/customers/:customerId/inspirations', authMiddleware, requireWorkspace, inspirationRoutes);
+app.use('/fabric-profiles', authMiddleware, requireWorkspace, fabricProfileRoutes);
+app.use('/customers/:customerId/design-specifications', authMiddleware, requireWorkspace, designSpecRoutes);
 app.use('/orders', authMiddleware, requireWorkspace, orderRoutes);
 app.use('/invoices', authMiddleware, requireWorkspace, invoiceRoutes);
 app.use('/payments', authMiddleware, requireWorkspace, paymentRoutes);
