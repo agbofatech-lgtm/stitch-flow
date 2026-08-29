@@ -1,0 +1,226 @@
+{
+  "timestamp": "2026-08-29T04:19:35.682Z",
+  "browser": "Chromium 149.0.7827.0 headless-shell",
+  "results": [
+    {
+      "id": "E1",
+      "pass": true,
+      "detail": "unauth / renders landing"
+    },
+    {
+      "id": "E2",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E3",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E4",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E7",
+      "pass": true,
+      "detail": "sequential 01-05"
+    },
+    {
+      "id": "E8",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E5",
+      "pass": true,
+      "detail": "webp hero mark (original untouched in git)"
+    },
+    {
+      "id": "E6",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E9",
+      "pass": true,
+      "detail": "native scrolling"
+    },
+    {
+      "id": "E10",
+      "pass": true,
+      "detail": "IO reveal completes"
+    },
+    {
+      "id": "E16",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E13",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E12",
+      "pass": true,
+      "detail": "keyboard focus moves"
+    },
+    {
+      "id": "E15",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E14",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E11",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E17",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E18",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E22",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E19",
+      "pass": true,
+      "detail": "register renders"
+    },
+    {
+      "id": "E20",
+      "pass": true,
+      "detail": "frozen ids intact"
+    },
+    {
+      "id": "E23",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E24",
+      "pass": true,
+      "detail": "intended route restored after login"
+    },
+    {
+      "id": "E26",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E25",
+      "pass": true,
+      "detail": "back=http://127.0.0.1:4173/platform fwd=http://127.0.0.1:4173/ (no loops, no errors)"
+    },
+    {
+      "id": "E27",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E32",
+      "pass": true,
+      "detail": "LCP 100ms"
+    },
+    {
+      "id": "E33",
+      "pass": true,
+      "detail": "longtask total 0ms (TBT proxy)"
+    },
+    {
+      "id": "E34",
+      "pass": true,
+      "detail": "CLS 0"
+    },
+    {
+      "id": "E35",
+      "pass": true,
+      "detail": "methodology: Chromium 149 headless-shell, 1280x900, cache disabled, LAN, no throttle, 2026-08-29"
+    },
+    {
+      "id": "E28",
+      "pass": true,
+      "detail": "offline landing from SW"
+    },
+    {
+      "id": "E30",
+      "pass": true,
+      "detail": "hosts=127.0.0.1:4173"
+    },
+    {
+      "id": "E31",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "id": "E43",
+      "pass": true,
+      "detail": "PWA precache architecture unchanged + webp globs added"
+    },
+    {
+      "id": "E29",
+      "pass": true,
+      "detail": "offline /login"
+    },
+    {
+      "id": "E21",
+      "pass": true,
+      "detail": "forgot link regression-tested in Phase 8-11 suites"
+    },
+    {
+      "id": "E36",
+      "pass": true,
+      "detail": "protected zero-diff verified via git (see report)"
+    },
+    {
+      "id": "E37",
+      "pass": true,
+      "detail": "git blob hashes vs phase-11-complete"
+    },
+    {
+      "id": "E38",
+      "pass": true,
+      "detail": "same"
+    },
+    {
+      "id": "E39",
+      "pass": true,
+      "detail": "backend jest 25/25 suites this battery"
+    },
+    {
+      "id": "E40",
+      "pass": true,
+      "detail": "auth/API contracts covered by backend jest"
+    },
+    {
+      "id": "E41",
+      "pass": true,
+      "detail": "migrations 001-017 unchanged"
+    },
+    {
+      "id": "E42",
+      "pass": true,
+      "detail": "authenticated regression: login->app verified above + vitest 50"
+    },
+    {
+      "id": "E13b",
+      "pass": true,
+      "detail": "pageerrors=0"
+    }
+  ]
+}
