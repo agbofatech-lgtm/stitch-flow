@@ -4,6 +4,7 @@ import {
   SCHEMA_V1,
   SCHEMA_V2,
   SCHEMA_V3,
+  SCHEMA_V4,
   CURRENT_SCHEMA_VERSION,
   type SyncQueueRecord,
   type SyncMetaRecord,
@@ -34,6 +35,13 @@ export class StitchFlowDatabase extends Dexie {
   measurementSetsV13!: Table<LocalRow, string>;
   measurementValuesV13!: Table<LocalRow, string>;
   measurementOutbox!: Table<SyncQueueRecord, number>;
+  // Phase 14 — Design Intelligence (local cache + binary asset store)
+  inspirationsV14!: Table<LocalRow, string>;
+  fabricProfilesV14!: Table<LocalRow, string>;
+  designSpecsV14!: Table<LocalRow, string>;
+  /** Binary asset store — Blobs stored here, never in localStorage. */
+  localAssetsV14!: Table<{ id: string; workspaceId: string; blob: Blob; mimeType: string; filename: string; thumbnailDataUrl?: string; createdAt: string }, string>;
+  designOutbox!: Table<SyncQueueRecord, number>;
 
   constructor(name = DB_NAME) {
     super(name);
@@ -41,6 +49,7 @@ export class StitchFlowDatabase extends Dexie {
     this.version(1).stores(SCHEMA_V1);
     this.version(2).stores(SCHEMA_V2);
     this.version(3).stores(SCHEMA_V3);
+    this.version(4).stores(SCHEMA_V4);
   }
 }
 

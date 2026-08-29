@@ -97,7 +97,19 @@ export const SCHEMA_V3: Record<string, string> = {
     '++id, clientMutationId, workspaceId, status, nextRetryAt, [workspaceId+status]',
 };
 
-export const CURRENT_SCHEMA_VERSION = 3;
+export const SCHEMA_V4: Record<string, string> = {
+  ...SCHEMA_V3,
+  // Phase 14 — Design Intelligence (local cache + local asset store)
+  inspirationsV14: 'id, workspaceId, [workspaceId+id], customerId',
+  fabricProfilesV14: 'id, workspaceId, [workspaceId+id]',
+  designSpecsV14: 'id, workspaceId, [workspaceId+id], customerId, status',
+  // Binary asset store: Blob stored locally, never in localStorage
+  localAssetsV14: 'id, workspaceId, createdAt',
+  designOutbox:
+    '++id, clientMutationId, workspaceId, status, nextRetryAt, [workspaceId+status]',
+};
+
+export const CURRENT_SCHEMA_VERSION = 4;
 
 /** Server entity name -> local table name (delta application map). */
 export const ENTITY_TABLE_MAP: Record<string, string> = {
