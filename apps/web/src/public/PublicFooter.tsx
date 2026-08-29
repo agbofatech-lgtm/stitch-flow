@@ -18,10 +18,10 @@ export function PublicFooter() {
         </div>
         <nav aria-label="Footer">
           <div className="flex items-center gap-6 text-sm">
-            <button type="button" onClick={() => navigate('/login')} className="rounded text-ivory/80 transition-colors duration-micro hover:text-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold">
+            <button type="button" onClick={() => navigate('/login')} className="rounded px-1 py-3 text-ivory/80 transition-colors duration-micro hover:text-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold">
               Sign In
             </button>
-            <button type="button" onClick={() => navigate('/register')} className="rounded text-ivory/80 transition-colors duration-micro hover:text-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold">
+            <button type="button" onClick={() => navigate('/register')} className="rounded px-1 py-3 text-ivory/80 transition-colors duration-micro hover:text-gold-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold">
               Create account
             </button>
           </div>

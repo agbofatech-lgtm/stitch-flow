@@ -8,7 +8,7 @@ export function PublicHeader() {
     <header className="fixed inset-x-0 top-0 z-sticky border-b border-line/70 bg-ivory/90 backdrop-blur">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-toast focus:rounded-btn focus:bg-charcoal focus:px-4 focus:py-2 focus:text-sm focus:text-ivory"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-toast focus:rounded-btn focus:bg-charcoal focus:px-4 focus:py-3 focus:text-sm focus:text-ivory"
       >
         Skip to content
       </a>
@@ -16,7 +16,7 @@ export function PublicHeader() {
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: 'auto' })}
-          className="flex items-center gap-3 rounded-btn focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+          className="flex min-h-11 items-center gap-3 rounded-btn px-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
           aria-label={`${BRAND.productName} — back to top`}
         >
           <picture>
@@ -28,10 +28,10 @@ export function PublicHeader() {
 
         <nav aria-label="Public">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="md" onClick={() => navigate('/login')}>
+            <Button variant="ghost" size="lg" onClick={() => navigate('/login')}>
               Sign In
             </Button>
-            <Button variant="primary" size="md" className="hidden sm:inline-flex" onClick={() => navigate('/register')}>
+            <Button variant="primary" size="lg" className="hidden sm:inline-flex" onClick={() => navigate('/register')}>
               Start with StitchFlow
             </Button>
           </div>
