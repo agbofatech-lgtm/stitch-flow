@@ -21,6 +21,8 @@ import type {
 } from '../types';
 // Phase 13 — Measurement Intelligence (additive, preserves legacy system)
 import { MeasurementIntelligence } from './measurements/MeasurementIntelligence';
+// Phase 14 — Design Intelligence (additive, external adapter — DesignStudio.tsx untouched)
+import { DesignIntelligence } from './design/DesignIntelligence';
 
 type CustomerDetailProps = {
   customerId: string;
@@ -638,6 +640,14 @@ export function CustomerDetail({
       {/* Phase 13 — Measurement Intelligence (server-authoritative, versioned, validated) */}
       <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
         <MeasurementIntelligence
+          customerId={customerId}
+          workspaceId={currentWorkspace.id}
+        />
+      </section>
+
+      {/* Phase 14 — Design Intelligence (inspiration + fabric + design spec → Design Studio) */}
+      <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+        <DesignIntelligence
           customerId={customerId}
           workspaceId={currentWorkspace.id}
         />
