@@ -13,6 +13,7 @@ import { authMiddleware } from './middleware/auth';
 import { requireWorkspace } from './middleware/workspace';
 import { dashboardRoutes } from './routes/dashboardRoutes';
 import { customerRoutes } from './routes/customerRoutes';
+import measurementRoutes, { definitionRoutes } from './routes/measurementRoutes';
 import { orderRoutes } from './routes/orderRoutes';
 import { invoiceRoutes } from './routes/invoiceRoutes';
 import { paymentRoutes } from './routes/paymentRoutes';
@@ -96,6 +97,8 @@ app.use('/', apiRoutes);
 // JWT -> user -> workspace membership -> req.workspaceId -> scoped SQL.
 app.use('/dashboard', authMiddleware, requireWorkspace, dashboardRoutes);
 app.use('/customers', authMiddleware, requireWorkspace, customerRoutes);
+app.use('/customers/:customerId/measurement-profiles', authMiddleware, requireWorkspace, measurementRoutes);
+app.use('/measurement-definitions', authMiddleware, requireWorkspace, definitionRoutes);
 app.use('/orders', authMiddleware, requireWorkspace, orderRoutes);
 app.use('/invoices', authMiddleware, requireWorkspace, invoiceRoutes);
 app.use('/payments', authMiddleware, requireWorkspace, paymentRoutes);

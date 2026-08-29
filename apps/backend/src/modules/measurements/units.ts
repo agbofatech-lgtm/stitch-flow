@@ -27,6 +27,9 @@ export function toCanonicalCm(originalValue: number, originalUnit: MeasurementUn
   if (!Number.isFinite(originalValue)) {
     throw new Error('Measurement value must be a finite number');
   }
+  if (!isSupportedUnit(originalUnit)) {
+    throw new Error(`Unsupported unit: ${String(originalUnit)}`);
+  }
   const raw = originalUnit === 'cm' ? originalValue : originalValue * INCH_CM;
   return toCanonicalScale(raw);
 }
