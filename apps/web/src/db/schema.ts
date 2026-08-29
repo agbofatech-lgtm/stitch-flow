@@ -109,7 +109,16 @@ export const SCHEMA_V4: Record<string, string> = {
     '++id, clientMutationId, workspaceId, status, nextRetryAt, [workspaceId+status]',
 };
 
-export const CURRENT_SCHEMA_VERSION = 4;
+export const SCHEMA_V5: Record<string, string> = {
+  ...SCHEMA_V4,
+  // Phase 15 — Pattern & Cutting Intelligence (local cache + outbox)
+  patternModelsV15: 'id, workspaceId, [workspaceId+id], customerId, designSpecificationId, status',
+  cuttingLayoutsV15: 'id, workspaceId, [workspaceId+id], patternModelId',
+  patternOutbox:
+    '++id, clientMutationId, workspaceId, status, nextRetryAt, [workspaceId+status]',
+};
+
+export const CURRENT_SCHEMA_VERSION = 5;
 
 /** Server entity name -> local table name (delta application map). */
 export const ENTITY_TABLE_MAP: Record<string, string> = {
