@@ -21,7 +21,10 @@ import {
   X,
   ClipboardList,
   Calendar,
+  ArrowLeft,
+  Sparkles,
 } from 'lucide-react';
+import { CustomerDetail } from './CustomerDetail';
 import {
   getCustomers,
   createCustomer,
@@ -64,6 +67,14 @@ export function Customers() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<ApiCustomer | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<ApiCustomer | null>(null);
+  /**
+   * Phase 13–16 exposure repair: CustomerDetail (measurement, design,
+   * pattern and production intelligence) existed since Phase 13 but had no
+   * mount point. This state opens it contextually for an API-backed
+   * customer — the backend id is preserved so the intelligence endpoints
+   * (/customers/:id/…) bind to the right record.
+   */
+  const [intelligenceCustomer, setIntelligenceCustomer] = useState<ApiCustomer | null>(null);
 
   async function loadCustomers() {
     try {
@@ -106,6 +117,22 @@ export function Customers() {
 
   return (
     <div className="p-4 lg:p-8">
+      {intelligenceCustomer ? (
+        <div>
+          <button
+            onClick={() => setIntelligenceCustomer(null)}
+            className="mb-5 flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Customers
+          </button>
+          <CustomerDetail
+            customerId={intelligenceCustomer.id}
+            customer={{ fullName: intelligenceCustomer.fullName }}
+          />
+        </div>
+      ) : (
+        <>
       <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-sm font-medium text-[#0F6E8C]">
@@ -275,13 +302,20 @@ export function Customers() {
                     </div>
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-4 grid grid-cols-2 gap-2">
                     <button
                       onClick={() => setEditingCustomer(customer)}
                       className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
                     >
                       <Pencil className="h-4 w-4" />
                       Edit
+                    </button>
+                    <button
+                      onClick={() => setIntelligenceCustomer(customer)}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2.5 text-sm font-medium text-[#0F6E8C] hover:bg-sky-100"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      Intelligence
                     </button>
                   </div>
                 </div>
@@ -331,6 +365,8 @@ export function Customers() {
           customer={selectedCustomer}
           onClose={() => setSelectedCustomer(null)}
         />
+      )}
+        </>
       )}
     </div>
   );
