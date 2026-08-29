@@ -26,6 +26,24 @@ export default function FabricRequirementPanel({ consumption: c }: FabricRequire
     low: 'text-red-700 bg-red-50 border-red-200',
   };
 
+  // Collect manual overrides with provenance (original → applied, reason).
+  const overrides: Array<{ label: string; original: number; applied: number; reason: string | null }> = [];
+  if (c.shrinkage.source === 'manual_override' && c.shrinkage.originalPercentage != null) {
+    overrides.push({ label: 'Shrinkage', original: c.shrinkage.originalPercentage, applied: c.shrinkage.percentage, reason: c.shrinkage.overrideReason ?? null });
+  }
+  if (c.patternMatching.source === 'manual_override' && c.patternMatching.originalPercentage != null) {
+    overrides.push({ label: 'Pattern matching', original: c.patternMatching.originalPercentage, applied: c.patternMatching.allowancePercentage, reason: c.patternMatching.overrideReason ?? null });
+  }
+  if (c.directional.source === 'manual_override' && c.directional.originalPercentage != null) {
+    overrides.push({ label: 'Directional', original: c.directional.originalPercentage, applied: c.directional.allowancePercentage, reason: c.directional.overrideReason ?? null });
+  }
+  if (c.handlingWaste.source === 'manual_override' && c.handlingWaste.originalPercentage != null) {
+    overrides.push({ label: 'Handling waste', original: c.handlingWaste.originalPercentage, applied: c.handlingWaste.percentage, reason: c.handlingWaste.overrideReason ?? null });
+  }
+  if (c.safetyBuffer.source === 'manual_override' && c.safetyBuffer.originalPercentage != null) {
+    overrides.push({ label: 'Safety buffer', original: c.safetyBuffer.originalPercentage, applied: c.safetyBuffer.percentage, reason: c.safetyBuffer.overrideReason ?? null });
+  }
+
   return (
     <section aria-label="Fabric requirement" className="space-y-4">
       <div className="flex items-center justify-between">
@@ -49,6 +67,19 @@ export default function FabricRequirementPanel({ consumption: c }: FabricRequire
         <strong>Phase distinction:</strong> Cutting Layout Length ({c.layoutEnvelopeCm} cm) is the Phase 15 geometric output.
         Fabric Required ({c.fabricRequiredCm} cm) is the Phase 16 authoritative real-world requirement after all allowances.
       </div>
+
+      {/* §35 Tailor overrides — original → override + reason (audit trail) */}
+      {overrides.length > 0 && (
+        <div className="bg-purple-50 border border-purple-200 rounded-md p-3 space-y-1" role="region" aria-label="Tailor overrides">
+          <p className="text-xs font-semibold text-purple-900">Tailor overrides (original → applied)</p>
+          {overrides.map((o, i) => (
+            <p key={i} className="text-xs text-purple-800">
+              {o.label}: {o.original}% → {o.applied}%
+              {o.reason ? ` — Reason: ${o.reason}` : ''}
+            </p>
+          ))}
+        </div>
+      )}
 
       {/* Key metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

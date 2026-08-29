@@ -200,6 +200,8 @@ export interface GeneratePlanInput {
   shrinkageOverridePercent?: number | null;
   safetyBufferOverridePercent?: number | null;
   nominalWidthCm?: number | null;
+  /** §35 shared override reason (recorded on every overridden allowance). */
+  overrideReason?: string | null;
   notes?: string;
 }
 
@@ -218,6 +220,7 @@ export async function generateProductionPlan(input: GeneratePlanInput): Promise<
     nominalWidthCmOverride: input.nominalWidthCm ?? null,
     shrinkageOverridePercent: input.shrinkageOverridePercent ?? null,
     safetyBufferOverridePercent: input.safetyBufferOverridePercent ?? null,
+    overrideReason: input.overrideReason ?? null,
   });
 
   // 2. Purchasing recommendation

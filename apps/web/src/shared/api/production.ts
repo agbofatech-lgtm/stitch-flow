@@ -41,6 +41,10 @@ export interface ShrinkageAllowance {
   source: AllowanceSource;
   confidence: AllowanceConfidence;
   fabricType?: string | null;
+  /** §35 override provenance — the percentage that would have applied without the override. */
+  originalPercentage?: number;
+  /** Tailor-provided reason for the override (required for audit when source=manual_override). */
+  overrideReason?: string | null;
 }
 
 export type PatternMatchingVerification = 'not_required' | 'manual_required' | 'verified';
@@ -53,6 +57,9 @@ export interface PatternMatchingAssessment {
   repeatSizeCm: number | null;
   source: AllowanceSource;
   notes: string[];
+  /** §35 override provenance. */
+  originalPercentage?: number;
+  overrideReason?: string | null;
 }
 
 export interface DirectionalAllowance {
@@ -61,18 +68,27 @@ export interface DirectionalAllowance {
   allowanceCm: number;
   source: AllowanceSource;
   notes: string[];
+  /** §35 override provenance. */
+  originalPercentage?: number;
+  overrideReason?: string | null;
 }
 
 export interface HandlingWasteAllowance {
   percentage: number;
   valueCm: number;
   source: AllowanceSource;
+  /** §35 override provenance. */
+  originalPercentage?: number;
+  overrideReason?: string | null;
 }
 
 export interface SafetyBuffer {
   percentage: number;
   valueCm: number;
   source: AllowanceSource;
+  /** §35 override provenance. */
+  originalPercentage?: number;
+  overrideReason?: string | null;
 }
 
 export interface FabricConsumptionBreakdown {

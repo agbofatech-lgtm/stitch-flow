@@ -29,6 +29,7 @@ import type {
   FabricConsumptionConfidence,
 } from '../../shared/api/production';
 import type { FabricProfile } from '../../shared/api/design';
+import { widthToCm } from '../../shared/api/design';
 import type { CuttingLayout } from '../../shared/api/pattern';
 import { db } from '../../db/database';
 
@@ -126,27 +127,38 @@ export function buildShrinkageAllowance(
   baseLength: number,
   fabricType: string | null | undefined,
   overridePercent?: number | null,
+  overrideReason?: string | null,
 ): ShrinkageAllowance {
+  // The value that WOULD have applied without an override (preserved for audit — §35).
+  const defaultPercentage = fabricType && SHRINKAGE_BY_FABRIC_TYPE[fabricType] !== undefined
+    ? SHRINKAGE_BY_FABRIC_TYPE[fabricType]
+    : DEFAULT_SHRINKAGE_PERCENT;
+
   let source: AllowanceSource;
   let confidence: ShrinkageAllowance['confidence'];
   let percentage: number;
+  let originalPercentage: number | undefined;
 
   if (overridePercent != null) {
     percentage = overridePercent;
     source = 'manual_override';
     confidence = 'high';
+    originalPercentage = defaultPercentage;
   } else if (fabricType && SHRINKAGE_BY_FABRIC_TYPE[fabricType] !== undefined) {
-    percentage = SHRINKAGE_BY_FABRIC_TYPE[fabricType];
+    percentage = defaultPercentage;
     source = 'material_default';
     confidence = 'medium';
   } else {
-    percentage = DEFAULT_SHRINKAGE_PERCENT;
+    percentage = defaultPercentage;
     source = 'system_default';
     confidence = 'low';
   }
 
   const valueCm = round2(baseLength * (percentage / 100));
-  return { percentage, valueCm, source, confidence, fabricType: fabricType ?? null };
+  return {
+    percentage, valueCm, source, confidence, fabricType: fabricType ?? null,
+    originalPercentage, overrideReason: overrideReason ?? null,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -158,6 +170,7 @@ export function buildPatternMatchingAssessment(
   required: boolean,
   repeatSizeCm: number | null,
   overridePercent?: number | null,
+  overrideReason?: string | null,
 ): PatternMatchingAssessment {
   if (!required) {
     return {
@@ -168,10 +181,12 @@ export function buildPatternMatchingAssessment(
       repeatSizeCm: null,
       source: 'system_default',
       notes: [],
+      overrideReason: null,
     };
   }
 
-  const percentage = overridePercent ?? 15; // conservative: 15% when matching required
+  const DEFAULT_PATTERN_MATCHING_PERCENT = 15; // conservative: 15% when matching required
+  const percentage = overridePercent ?? DEFAULT_PATTERN_MATCHING_PERCENT;
   const allowanceCm = round2(baseLength * (percentage / 100));
 
   return {
@@ -181,6 +196,8 @@ export function buildPatternMatchingAssessment(
     allowanceCm,
     repeatSizeCm,
     source: overridePercent != null ? 'manual_override' : 'system_default',
+    originalPercentage: overridePercent != null ? DEFAULT_PATTERN_MATCHING_PERCENT : undefined,
+    overrideReason: overrideReason ?? null,
     notes: [
       'PATTERN MATCHING REVIEW REQUIRED: Automated repeat alignment is not guaranteed by the current layout engine.',
       'A conservative fabric allowance has been applied.',
@@ -198,6 +215,7 @@ export function buildDirectionalAllowance(
   baseLength: number,
   required: boolean,
   overridePercent?: number | null,
+  overrideReason?: string | null,
 ): DirectionalAllowance {
   if (!required) {
     return {
@@ -206,10 +224,12 @@ export function buildDirectionalAllowance(
       allowanceCm: 0,
       source: 'system_default',
       notes: [],
+      overrideReason: null,
     };
   }
 
-  const percentage = overridePercent ?? 10; // 10% for directional fabrics
+  const DEFAULT_DIRECTIONAL_PERCENT = 10; // 10% for directional fabrics
+  const percentage = overridePercent ?? DEFAULT_DIRECTIONAL_PERCENT;
   const allowanceCm = round2(baseLength * (percentage / 100));
 
   return {
@@ -217,6 +237,8 @@ export function buildDirectionalAllowance(
     allowancePercentage: percentage,
     allowanceCm,
     source: overridePercent != null ? 'manual_override' : 'system_default',
+    originalPercentage: overridePercent != null ? DEFAULT_DIRECTIONAL_PERCENT : undefined,
+    overrideReason: overrideReason ?? null,
     notes: [
       'DIRECTIONAL FABRIC DETECTED: All pattern pieces must preserve the approved grain/direction orientation.',
       `Additional fabric allowance applied: ${percentage}%.`,
@@ -232,24 +254,32 @@ export function buildDirectionalAllowance(
 export function buildHandlingWaste(
   baseLength: number,
   overridePercent?: number | null,
+  overrideReason?: string | null,
 ): HandlingWasteAllowance {
-  const percentage = overridePercent ?? 3;
+  const DEFAULT_HANDLING_WASTE_PERCENT = 3;
+  const percentage = overridePercent ?? DEFAULT_HANDLING_WASTE_PERCENT;
   return {
     percentage,
     valueCm: round2(baseLength * (percentage / 100)),
     source: overridePercent != null ? 'manual_override' : 'system_default',
+    originalPercentage: overridePercent != null ? DEFAULT_HANDLING_WASTE_PERCENT : undefined,
+    overrideReason: overrideReason ?? null,
   };
 }
 
 export function buildSafetyBuffer(
   baseLength: number,
   overridePercent?: number | null,
+  overrideReason?: string | null,
 ): SafetyBuffer {
-  const percentage = overridePercent ?? 5;
+  const DEFAULT_SAFETY_BUFFER_PERCENT = 5;
+  const percentage = overridePercent ?? DEFAULT_SAFETY_BUFFER_PERCENT;
   return {
     percentage,
     valueCm: round2(baseLength * (percentage / 100)),
     source: overridePercent != null ? 'manual_override' : 'system_default',
+    originalPercentage: overridePercent != null ? DEFAULT_SAFETY_BUFFER_PERCENT : undefined,
+    overrideReason: overrideReason ?? null,
   };
 }
 
@@ -276,6 +306,11 @@ export interface FabricConsumptionInput {
   patternMatchingOverridePercent?: number | null;
   /** Tailor override for directional %. */
   directionalOverridePercent?: number | null;
+  /**
+   * §35 Human override policy — shared reason recorded on every overridden
+   * allowance in this calculation (auditable: original + override + reason).
+   */
+  overrideReason?: string | null;
 }
 
 /**
@@ -306,17 +341,26 @@ export function calculateFabricConsumption(
   // Fabric type for shrinkage lookup
   const fabricType = fabricProfile?.fabricType ?? null;
 
-  // Nominal width resolution (priority: fabricProfile > explicit override > layoutWidthCm)
-  const nominalWidthCm = input.nominalWidthCmOverride
-    ?? (fabricProfile?.width?.value != null && fabricProfile?.width?.unit === 'cm'
-      ? fabricProfile.width.value
-      : cuttingLayout.layoutWidthCm + DEFAULT_LEFT_SELVEDGE_CM + DEFAULT_RIGHT_SELVEDGE_CM);
+  // Nominal width resolution (priority: explicit override > fabricProfile > layoutWidthCm).
+  // Profile widths in inches are converted to canonical cm — never silently dropped.
+  const profileWidthCm = fabricProfile?.width?.value != null
+    ? widthToCm(fabricProfile.width.value, fabricProfile.width.unit)
+    : null;
 
-  const widthSource: AllowanceSource = fabricProfile?.width?.value != null
-    ? 'fabric_profile'
-    : input.nominalWidthCmOverride != null
+  const nominalWidthCm = input.nominalWidthCmOverride
+    ?? profileWidthCm
+    ?? (cuttingLayout.layoutWidthCm + DEFAULT_LEFT_SELVEDGE_CM + DEFAULT_RIGHT_SELVEDGE_CM);
+
+  // Source label must reflect the value actually used (an override is not a profile value).
+  const widthSource: AllowanceSource = input.nominalWidthCmOverride != null
     ? 'manual_override'
+    : profileWidthCm != null
+    ? 'fabric_profile'
     : 'system_default';
+
+  const widthAssumptionNote = fabricProfile?.width?.value != null && input.nominalWidthCmOverride == null && profileWidthCm != null
+    ? `Nominal width ${fabricProfile.width.value} ${fabricProfile.width.unit} → ${profileWidthCm} cm (Source: fabric_profile)`
+    : null;
 
   // Width intelligence
   const widthProfile = buildWidthProfile({
@@ -337,6 +381,7 @@ export function calculateFabricConsumption(
     L0,
     fabricType,
     input.shrinkageOverridePercent,
+    input.overrideReason,
   );
   const L1 = round2(L0 + shrinkage.valueCm);
 
@@ -351,6 +396,7 @@ export function calculateFabricConsumption(
     patternMatchingRequired,
     repeatSizeCm,
     input.patternMatchingOverridePercent,
+    input.overrideReason,
   );
   const L3 = round2(L2 + patternMatching.allowanceCm);
 
@@ -360,15 +406,16 @@ export function calculateFabricConsumption(
     L3,
     directionalRequired,
     input.directionalOverridePercent,
+    input.overrideReason,
   );
   const L4 = round2(L3 + directional.allowanceCm);
 
   // Step 5: Handling waste
-  const handlingWaste = buildHandlingWaste(L4, input.handlingWasteOverridePercent);
+  const handlingWaste = buildHandlingWaste(L4, input.handlingWasteOverridePercent, input.overrideReason);
   const L5 = round2(L4 + handlingWaste.valueCm);
 
   // Step 6: Safety buffer
-  const safetyBuffer = buildSafetyBuffer(L5, input.safetyBufferOverridePercent);
+  const safetyBuffer = buildSafetyBuffer(L5, input.safetyBufferOverridePercent, input.overrideReason);
   const L6 = round2(L5 + safetyBuffer.valueCm);
 
   const fabricRequiredCm = L6;
@@ -406,6 +453,9 @@ export function calculateFabricConsumption(
 
   // Build assumptions list
   const assumptions: string[] = [];
+  if (widthAssumptionNote) {
+    assumptions.push(widthAssumptionNote);
+  }
   if (shrinkage.source !== 'manual_override') {
     assumptions.push(`Shrinkage ${shrinkage.percentage}% — Source: ${shrinkage.source}${fabricType ? ` (${fabricType})` : ''} — Confidence: ${shrinkage.confidence}`);
   }
