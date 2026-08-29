@@ -74,6 +74,11 @@ export function setNextPath(p: string): void {
   }
 }
 
+/** Phase 12 — the public landing experience (unauthenticated entry). */
+export function isLandingPath(p: string): boolean {
+  return p === '/' || p === '/index.html';
+}
+
 export function takeNextPath(): string | null {
   try {
     const v = window.sessionStorage.getItem(NEXT_KEY);

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
@@ -33,8 +33,12 @@ import {
   isPublicAuthPath,
   isDeveloperPath,
   isPlatformPath,
+  isLandingPath,
   setNextPath,
 } from '@shared/router';
+
+/** Phase 12 — public landing experience, code-split from the app bundle. */
+const LandingPage = lazy(() => import('./public/LandingPage'));
 
 /**
  * Authentication gate (Phase 8 fix):
@@ -95,6 +99,7 @@ function AppContent() {
     }
     if (!authed) {
       if (getAccessToken()) return; // sign-in in flight; AUTH_CHANGED re-runs the gate
+      if (isLandingPath(route)) return; // Phase 12 — public entry renders the landing
       if (route !== '/') setNextPath(route);
       navigate('/login', { replace: true });
       return;
@@ -130,8 +135,16 @@ function AppContent() {
   }, [currentView, authed]);
 
   if (!authed) {
-    // Public authentication pages only — no application shell, no dashboard,
-    // no authenticated API calls mount in this state (Phase 8 gate preserved).
+    // Public experience: landing + authentication pages only — no application
+    // shell, no dashboard, no authenticated API calls mount in this state
+    // (Phase 8 gate preserved).
+    if (isLandingPath(route)) {
+      return (
+        <Suspense fallback={null}>
+          <LandingPage />
+        </Suspense>
+      );
+    }
     if (isRegisterPath(route)) return <Register />;
     if (isForgotPasswordPath(route)) return <ForgotPassword />;
     if (isResetPasswordPath(route)) return <ResetPassword />;

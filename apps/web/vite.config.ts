@@ -23,7 +23,7 @@ export default defineConfig({
       manifest: false, // keep the existing public/manifest.json
       workbox: {
         // Phase 11: bundled variable fonts must be available offline.
-        globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2,woff}'],
+        globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2,woff,webp}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [
           /^\/(auth|sync|customers|orders|invoices|payments|materials|reports|settings|dashboard|admin|licenses|events|feature-requests|health)/,
