@@ -13,7 +13,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     setupFiles: ['tests/offline/setup.ts'],
-    include: ['tests/offline/**/*.test.ts'],
+    include: ['tests/offline/**/*.test.ts', 'tests/offline/**/*.test.tsx'],
     testTimeout: 20000,
     // IndexedDB state is per-file; run serially for determinism
     fileParallelism: false,

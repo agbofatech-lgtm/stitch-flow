@@ -240,7 +240,7 @@ export default function ProductionIntelligence({
 // Inline sub-components
 // ---------------------------------------------------------------------------
 
-function MaterialsPanel({ materials }: { materials: ProductionPlan['materials'] }) {
+export function MaterialsPanel({ materials }: { materials: ProductionPlan['materials'] }) {
   return (
     <section aria-label="Materials" className="space-y-3">
       <h3 className="text-base font-semibold text-gray-900">Material Requirements</h3>
@@ -275,7 +275,7 @@ function MaterialsPanel({ materials }: { materials: ProductionPlan['materials'] 
   );
 }
 
-function CuttingExecutionPlanDisplay({ steps }: { steps: ProductionPlan['cuttingExecutionPlan'] }) {
+export function CuttingExecutionPlanDisplay({ steps }: { steps: ProductionPlan['cuttingExecutionPlan'] }) {
   return (
     <section aria-label="Cutting execution plan" className="space-y-3">
       <h3 className="text-base font-semibold text-gray-900">Cutting Execution Plan</h3>
