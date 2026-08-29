@@ -139,20 +139,21 @@ describe('Phase 14 — design suggestions (pure unit)', () => {
 // ---------------------------------------------------------------------------
 
 describe('Phase 14 — inspiration API', () => {
-  let session: AuthSession;
-  let customerId: string;
-
-  beforeAll(async () => {
-    session = await registerUser();
-    customerId = await createCustomer(session, 'Inspiration Test Customer');
-  });
+  // tests/setup.ts truncates tenant tables before every test — seed per test.
+  async function seed() {
+    const session = await registerUser('phase14-inspiration@example.com');
+    const customerId = await createCustomer(session, 'Inspiration Test Customer');
+    return { session, customerId };
+  }
 
   it('rejects unauthenticated access (401)', async () => {
+    const { customerId } = await seed();
     const res = await request(app).get(`/customers/${customerId}/inspirations`);
     expect(res.status).toBe(401);
   });
 
   it('creates an inspiration with manual source type', async () => {
+    const { session, customerId } = await seed();
     const res = await request(app)
       .post(`/customers/${customerId}/inspirations`)
       .set('Authorization', `Bearer ${session.accessToken}`)
@@ -173,6 +174,7 @@ describe('Phase 14 — inspiration API', () => {
   });
 
   it('creates a reference_url inspiration (URL is metadata only)', async () => {
+    const { session, customerId } = await seed();
     const res = await request(app)
       .post(`/customers/${customerId}/inspirations`)
       .set('Authorization', `Bearer ${session.accessToken}`)
@@ -187,6 +189,15 @@ describe('Phase 14 — inspiration API', () => {
   });
 
   it('lists inspirations for customer', async () => {
+    const { session, customerId } = await seed();
+    // Seed two inspirations, then verify both are listed.
+    for (const title of ['Listed One', 'Listed Two']) {
+      const c = await request(app)
+        .post(`/customers/${customerId}/inspirations`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
+        .send({ sourceType: 'manual', title, observations: [] });
+      expect(c.status).toBe(201);
+    }
     const res = await request(app)
       .get(`/customers/${customerId}/inspirations`)
       .set('Authorization', `Bearer ${session.accessToken}`);
@@ -196,6 +207,7 @@ describe('Phase 14 — inspiration API', () => {
   });
 
   it('updates inspiration observations', async () => {
+    const { session, customerId } = await seed();
     const createRes = await request(app)
       .post(`/customers/${customerId}/inspirations`)
       .set('Authorization', `Bearer ${session.accessToken}`)
@@ -211,6 +223,7 @@ describe('Phase 14 — inspiration API', () => {
   });
 
   it('deletes an inspiration', async () => {
+    const { session, customerId } = await seed();
     const createRes = await request(app)
       .post(`/customers/${customerId}/inspirations`)
       .set('Authorization', `Bearer ${session.accessToken}`)
@@ -230,13 +243,14 @@ describe('Phase 14 — inspiration API', () => {
 });
 
 describe('Phase 14 — fabric profile API', () => {
-  let session: AuthSession;
-
-  beforeAll(async () => {
-    session = await registerUser();
-  });
+  // tests/setup.ts truncates tenant tables before every test — seed per test.
+  async function seed() {
+    const session = await registerUser('phase14-fabric@example.com');
+    return { session };
+  }
 
   it('creates a fabric profile with width in inches', async () => {
+    const { session } = await seed();
     const res = await request(app)
       .post('/fabric-profiles')
       .set('Authorization', `Bearer ${session.accessToken}`)
@@ -266,6 +280,7 @@ describe('Phase 14 — fabric profile API', () => {
   });
 
   it('creates a fabric profile with width in cm', async () => {
+    const { session } = await seed();
     const res = await request(app)
       .post('/fabric-profiles')
       .set('Authorization', `Bearer ${session.accessToken}`)
@@ -282,6 +297,7 @@ describe('Phase 14 — fabric profile API', () => {
   });
 
   it('updates fabric properties', async () => {
+    const { session } = await seed();
     const createRes = await request(app)
       .post('/fabric-profiles')
       .set('Authorization', `Bearer ${session.accessToken}`)
@@ -299,20 +315,16 @@ describe('Phase 14 — fabric profile API', () => {
 });
 
 describe('Phase 14 — design specification API', () => {
-  let session: AuthSession;
-  let customerId: string;
-  let inspirationId: string;
-  let fabricProfileId: string;
-
-  beforeAll(async () => {
-    session = await registerUser();
-    customerId = await createCustomer(session, 'Design Spec Customer');
+  // tests/setup.ts truncates tenant tables before every test — seed per test.
+  async function seed() {
+    const session = await registerUser('phase14-designspec@example.com');
+    const customerId = await createCustomer(session, 'Design Spec Customer');
 
     const inspRes = await request(app)
       .post(`/customers/${customerId}/inspirations`)
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({ sourceType: 'image_upload', title: 'Style Photo', observations: [] });
-    inspirationId = inspRes.body.inspiration.id;
+    const inspirationId = inspRes.body.inspiration.id;
 
     const fabRes = await request(app)
       .post('/fabric-profiles')
@@ -324,10 +336,13 @@ describe('Phase 14 — design specification API', () => {
         availableLength: { value: 5, unit: 'yard' },
         properties: { directional: false },
       });
-    fabricProfileId = fabRes.body.fabricProfile.id;
-  });
+    const fabricProfileId = fabRes.body.fabricProfile.id;
+
+    return { session, customerId, inspirationId, fabricProfileId };
+  }
 
   it('creates a design specification with garment classification', async () => {
+    const { session, customerId, inspirationId, fabricProfileId } = await seed();
     const res = await request(app)
       .post(`/customers/${customerId}/design-specifications`)
       .set('Authorization', `Bearer ${session.accessToken}`)
@@ -358,6 +373,7 @@ describe('Phase 14 — design specification API', () => {
   });
 
   it('retrieves design spec with readiness report', async () => {
+    const { session, customerId } = await seed();
     const createRes = await request(app)
       .post(`/customers/${customerId}/design-specifications`)
       .set('Authorization', `Bearer ${session.accessToken}`)
@@ -379,6 +395,7 @@ describe('Phase 14 — design specification API', () => {
   });
 
   it('updates design specification status to ready_for_design', async () => {
+    const { session, customerId, inspirationId, fabricProfileId } = await seed();
     const createRes = await request(app)
       .post(`/customers/${customerId}/design-specifications`)
       .set('Authorization', `Bearer ${session.accessToken}`)
@@ -400,6 +417,7 @@ describe('Phase 14 — design specification API', () => {
   });
 
   it('version history records transitions', async () => {
+    const { session, customerId } = await seed();
     const createRes = await request(app)
       .post(`/customers/${customerId}/design-specifications`)
       .set('Authorization', `Bearer ${session.accessToken}`)
@@ -421,7 +439,8 @@ describe('Phase 14 — design specification API', () => {
   });
 
   it('enforces workspace isolation — different workspace cannot access spec', async () => {
-    const otherSession = await registerUser();
+    const { session, customerId } = await seed();
+    const otherSession = await registerUser('phase14-isolation@example.com');
     const otherCustomer = await createCustomer(otherSession, 'Isolation Customer');
 
     const createRes = await request(app)
@@ -439,11 +458,9 @@ describe('Phase 14 — design specification API', () => {
 });
 
 describe('Phase 14 — asset registration API', () => {
-  let session: AuthSession;
-
-  beforeAll(async () => { session = await registerUser(); });
-
   it('registers asset metadata (thumbnail only)', async () => {
+    // tests/setup.ts truncates tenant tables before every test — seed in-test.
+    const session = await registerUser('phase14-assets@example.com');
     const res = await request(app)
       .post('/local-assets')
       .set('Authorization', `Bearer ${session.accessToken}`)

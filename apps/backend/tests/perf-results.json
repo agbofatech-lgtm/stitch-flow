@@ -5,83 +5,83 @@
     "orders": 200,
     "syncChanges": 200
   },
-  "measuredAt": "2026-08-29T05:00:47.767Z",
+  "measuredAt": "2026-08-29T12:37:28.676Z",
   "health": {
     "live": {
       "n": 200,
-      "p50": 1.31,
-      "p95": 1.89,
-      "p99": 3.31,
-      "max": 3.8
+      "p50": 1.4,
+      "p95": 2.48,
+      "p99": 4.27,
+      "max": 5.59
     },
     "readyWithDbProbe": {
       "n": 100,
-      "p50": 1.6,
-      "p95": 2.14,
-      "p99": 3.26,
-      "max": 4.7
+      "p50": 1.9,
+      "p95": 3.1,
+      "p99": 7.67,
+      "max": 13.96
     }
   },
   "apiCustomerList300Rows": {
     "n": 50,
-    "p50": 5.09,
-    "p95": 6.87,
-    "p99": 9.28,
-    "max": 9.28
+    "p50": 7.18,
+    "p95": 12.25,
+    "p99": 18.65,
+    "max": 18.65
   },
   "apiDashboardSummary": {
     "n": 30,
-    "p50": 3.33,
-    "p95": 4.7,
-    "p99": 21.26,
-    "max": 21.26
+    "p50": 4.31,
+    "p95": 6.29,
+    "p99": 24.11,
+    "max": 24.11
   },
   "syncDeltaPull200": {
     "n": 30,
-    "p50": 4.51,
-    "p95": 7.67,
-    "p99": 8.82,
-    "max": 8.82
+    "p50": 7.14,
+    "p95": 11.17,
+    "p99": 15.86,
+    "max": 15.86
   },
   "syncMutationBatch50": {
-    "totalMs": 68.5,
-    "perMutationMs": 1.37
+    "totalMs": 80.9,
+    "perMutationMs": 1.62
   },
   "explainAnalyze": {
     "customerListByWorkspace": {
       "indexesPresent": [
         "idx_customers_workspace_id"
       ],
-      "chosenPlan": "Sort -> Bitmap Heap Scan -> Bitmap Index Scan",
-      "executionMs": 0.199
+      "chosenPlan": "Sort -> Seq Scan",
+      "executionMs": 0.154
     },
     "syncDeltaPull": {
       "indexesPresent": [
         "idx_sync_changes_workspace_seq"
       ],
       "chosenPlan": "Limit -> Index Scan",
-      "executionMs": 0.066
+      "executionMs": 0.086
     },
     "auditByWorkspace": {
       "indexesPresent": [
         "idx_audit_logs_workspace_id"
       ],
-      "chosenPlan": "Limit -> Sort -> Index Scan",
-      "executionMs": 0.013
+      "chosenPlan": "Limit -> Sort -> Seq Scan",
+      "executionMs": 0.029
     }
   },
   "frontendBundle": {
-    "totalKb": 2954.1,
-    "jsKb": 1609.5,
-    "cssKb": 72.8,
+    "totalKb": 2963.6,
+    "jsKb": 1611.1,
+    "cssKb": 80.8,
     "largestJsFiles": [
       {
-        "file": "AuthenticatedApp-CX_tzy-Z.js",
+        "file": "AuthenticatedApp-CMM9iCer.js",
         "kb": 834.4
       },
       {
-        "file": "index-CV-6mLgU.js",
-        "kb": 334.7
+        "file": "index-CMu6l74Q.js",
+        "kb": 336.2
       },
       {
         "file": "html2canvas.esm-DXEQVQnt.js",

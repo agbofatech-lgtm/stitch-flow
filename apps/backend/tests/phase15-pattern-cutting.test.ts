@@ -15,7 +15,6 @@
  * Pure logic tests run in all environments.
  */
 
-import { describe, it, expect } from 'vitest';
 import { computePatternReadiness } from '../src/modules/pattern/patternService';
 import type {
   PatternModel,

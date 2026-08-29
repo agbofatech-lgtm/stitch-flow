@@ -31,6 +31,10 @@ describe('Database foundation', () => {
       '015_phase8_developer_api.sql',
       '016_phase8_webhooks.sql',
       '017_phase9_identity.sql',
+      '018_phase13_measurement_intelligence.sql',
+      '019_phase14_design_intelligence.sql',
+      '020_phase15_pattern_cutting.sql',
+      '021_phase16_fabric_production.sql',
     ]);
   });
 
