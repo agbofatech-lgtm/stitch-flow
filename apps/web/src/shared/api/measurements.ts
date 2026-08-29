@@ -94,6 +94,8 @@ export interface ApiValidationResult {
   completeness: ApiCompletenessResult[];
   canSave: boolean;
   canValidate: boolean;
+  /** Historical suggestions — previous verified values only. Never predictions. Never auto-applied. */
+  suggestions?: ApiSuggestion[];
 }
 
 export interface ApiProfileFull {

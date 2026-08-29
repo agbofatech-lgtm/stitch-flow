@@ -135,8 +135,16 @@ export function MeasurementIntelligence({
       try {
         const full = await svc.getProfileFull(customerId, profileId, workspaceId);
         if (!mounted.current) return;
+        if (!full) { setDetailError('Profile not found.'); return; }
         setProfileFull(full);
-        // No client-side suggestion computation — suggestions come from backend validation
+        // Suggestions come from backend validation response (historical only — never predictions)
+        if (full.validation.suggestions?.length) {
+          setSuggestions(full.validation.suggestions.map((s) => ({
+            definitionCode: s.definitionCode,
+            label: s.label,
+            previousCm: s.previousCm,
+          })));
+        }
       } catch {
         if (mounted.current) setDetailError('Failed to load profile details.');
       } finally {
@@ -184,6 +192,16 @@ export function MeasurementIntelligence({
         setProfiles((prev) =>
           prev.map((p) => (p.id === full.profile.id ? full.profile : p)),
         );
+        // Refresh suggestions from updated validation
+        if (full.validation.suggestions?.length) {
+          setSuggestions(full.validation.suggestions.map((s) => ({
+            definitionCode: s.definitionCode,
+            label: s.label,
+            previousCm: s.previousCm,
+          })));
+        } else {
+          setSuggestions([]);
+        }
       }
     } catch (e) {
       if (mounted.current) {
