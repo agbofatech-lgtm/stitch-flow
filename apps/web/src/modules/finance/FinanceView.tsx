@@ -30,6 +30,7 @@ import { emptyStateSrc } from '../workspace/assets';
 /** Non-colour financial status semantics (§41) — InvoiceStatus is VERIFIED as
  *  draft|sent|partial|paid|overdue|void; presentation groups keep them. */
 const STATUS_META: Record<string, { label: string; icon: string; tone: 'success' | 'warning' | 'danger' | 'neutral' }> = {
+  pending: { label: 'Payment outstanding', icon: '○', tone: 'neutral' }, // backend GET /invoices returns 'pending' (VERIFIED live)
   draft: { label: 'Payment outstanding', icon: '○', tone: 'neutral' },
   sent: { label: 'Payment outstanding', icon: '○', tone: 'neutral' },
   partial: { label: 'Partial payment', icon: '◐', tone: 'warning' },
