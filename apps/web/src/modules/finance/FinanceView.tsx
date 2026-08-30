@@ -88,7 +88,7 @@ export function FinanceView() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return (invoices ?? []).filter((inv) => {
-      if (filter === 'outstanding' && !['draft', 'sent', 'partial', 'overdue'].includes(inv.status)) return false;
+      if (filter === 'outstanding' && !['draft', 'pending', 'sent', 'partial', 'overdue'].includes(inv.status)) return false;
       if (filter === 'paid' && inv.status !== 'paid') return false;
       if (filter === 'overdue' && inv.status !== 'overdue') return false;
       if (!q) return true;

@@ -38,6 +38,12 @@ import {
   inferGarmentTypeFromInspiration,
 } from '@modules/services/productionAssistant';
 import { initializeAppStorage, saveAppStorage } from '@shared/lib/db';
+// Phase 18.5 (AD1) — canonical metric definitions (one truth for Dashboard + Reports).
+import {
+  collectedRevenue,
+  outstandingBalance,
+  isUnpaidInvoice,
+} from '@shared/utils/analyticsProjection';
 
 type AppState = Omit<
   AppContextShape,
@@ -119,13 +125,11 @@ function buildDashboardSummary(params: {
 }): DashboardSummary {
   const { customers, orders, invoices, payments } = params;
 
-  const totalRevenue = payments
-    .filter((payment) => payment.paymentStatus === 'captured')
-    .reduce((sum, payment) => sum + payment.amount, 0);
+  // Canonical (AD1/F-1): "revenue" here is Collected Revenue = captured payments,
+  // never Order Value. Outstanding (F-4) includes the `pending` unpaid class.
+  const totalRevenue = collectedRevenue(payments);
 
-  const pendingBalances = invoices
-    .filter((invoice) => ['sent', 'partial', 'overdue'].includes(invoice.status))
-    .reduce((sum, invoice) => sum + invoice.balanceDue, 0);
+  const pendingBalances = outstandingBalance(invoices);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);

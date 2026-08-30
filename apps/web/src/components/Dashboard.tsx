@@ -290,7 +290,7 @@ export function Dashboard() {
                         key={item.id}
                         className="rounded-full bg-white px-3 py-1 text-xs font-medium text-amber-800 shadow-sm"
                       >
-                        {item.name} • {item.quantityInStock} {item.unit}
+                        {item.name} ï¿½ {item.quantityInStock} {item.unit}
                       </span>
                     ))}
                   </div>
@@ -310,11 +310,11 @@ export function Dashboard() {
 
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <MetricCard
-            title="Total Revenue"
+            title="Collected Revenue"
             value={formatCurrency(displayRevenue, workspaceCurrency)}
             icon={DollarSign}
             color="green"
-            subtitle="Real database revenue"
+            subtitle="Captured payments (server)"
             onClick={() => setView('invoices')}
           />
           <MetricCard
@@ -420,7 +420,7 @@ export function Dashboard() {
                       <div>
                         <p className="font-medium text-slate-900">{order.orderNumber}</p>
                         <p className="text-sm text-slate-500">
-                          {customerNameById.get(order.customerId) || '—'}
+                          {customerNameById.get(order.customerId) || 'ï¿½'}
                         </p>
                       </div>
 
@@ -466,7 +466,7 @@ export function Dashboard() {
                         <div>
                           <p className="font-medium text-slate-900">{invoice.invoiceNumber}</p>
                           <p className="text-sm text-slate-500">
-                            Due: {dueDate ? format(dueDate, 'MMM d, yyyy') : '—'}
+                            Due: {dueDate ? format(dueDate, 'MMM d, yyyy') : 'ï¿½'}
                           </p>
                         </div>
 
@@ -541,16 +541,16 @@ export function Dashboard() {
                           </button>
                         </td>
                         <td className="py-3 text-slate-600">
-                          {customerNameById.get(order.customerId) || '—'}
+                          {customerNameById.get(order.customerId) || 'ï¿½'}
                         </td>
-                        <td className="py-3 text-slate-600">{order.orderType || '—'}</td>
+                        <td className="py-3 text-slate-600">{order.orderType || 'ï¿½'}</td>
                         <td className="py-3 text-slate-600">
                           {dueDate ? (
                             <span className={getDueDateClass(dueDate, order.status)}>
                               {format(dueDate, 'MMM d, yyyy')}
                             </span>
                           ) : (
-                            '—'
+                            'ï¿½'
                           )}
                         </td>
                         <td className="py-3">

@@ -1,6 +1,6 @@
 # Phase 18.5 — Analytics Truth & Client Business Intelligence
 
-**Status: Stage 0–3 COMPLETE (baseline, forensics, domain truth mapping, metric contract audit). Stage 4 (architecture decision) prepared with evidence — awaiting owner decisions AD1/AD2 before projection-layer implementation.**
+**Status: COMPLETE. Stages 0–3 (baseline, forensics, domain truth mapping, metric contract audit) + Stage 4 decisions (AD1=Hybrid, AD2=retire+fix F-1, AD6=defaults, ratified 2026-08-30) + Stages 5–39 implementation (canonical projection module consumed by Dashboard AND Reports, F-1/F-4/F-5 closed, `/reports/*` retired, provenance labels). See Part R (recovery) and Part Z (handoff).**
 **Principle: One workspace, one business truth.**
 
 ---
@@ -170,8 +170,43 @@ Recommendation (for owner ratification): **Option C** — bridge the existing De
 | AD5 | Advanced forecasting | Roadmap | Future |
 | AD6 | Repeat-customer definition (`>=2 orders`) + AOV definition (mean-of-means vs Σ/Σ) | F.3, F.7 | **Proposed for ratification with AD1** |
 
-## Part Z — Phase 19 handoff (to be completed at certification)
+## Part R — Recovery & continuation (2026-08-30, new agent/session)
 
-Pending: projection layer (Stage 5), Dashboard/Reports reconciliation (6–7), filtering/time (9), offline truth model (10), authorization audit (11), performance (12), accessibility (13), AT suite (29), browser journeys A–G (30), responsive matrix (31), PWA (33), final gates (39).
+A new agent resumed Phase 18.5 under the Agent Recovery Protocol. Repository-authoritative findings:
 
-**STOP: implementation of Stages 5+ requires owner decisions AD1/AD2 (and AD6 ratification).**
+- **Repo confirmed:** `github.com/agbofatech-lgtm/stitch-flow` (StitchFlow). Branch `arena/01a053f0-stitch-flow`.
+- **Stale-checkout discrepancy (resolved):** the local checkout was at the grafted root `b576c3e` while the real Phase 18.5 work lived on the remote session branch tip `61dcde8`. The local HEAD was a strict clean ancestor, so a **fast-forward only** merge (no reset/rebase/force) synced it. No work discarded.
+- **Recovered status = DISCREPANCY vs the continuation prompt.** The prompt's "~90% / J1–J7 / reconciliation+filter+offline+authz all complete" hypothesis is **not supported** by the repo. The doc header is authoritative: **Stage 0–3 complete (analysis only)**, Stage 4 prepared, **blocked on AD1/AD2/AD6**. There is no "J1–J7" anywhere; the browser journeys in-repo are Stage-14's `X1–X5`/`R1–R5`.
+- **Baseline re-verified (2026-08-30):** `npm ci` clean; web `tsc --noEmit` 0 errors; **vitest 316/316 pass** (21 files; the 3 unhandled stderr rejections are the same pre-existing error-boundary exercises, not regressions); backend `tsc --noEmit` 0 errors (backend Jest needs Postgres, unavailable in sandbox — backend verified by type-check + code review).
+
+### Owner decisions received (ratified this session)
+
+| ID | Decision |
+|---|---|
+| **AD1** | **Option C — Hybrid.** One shared read-only projection module (`@shared/utils/analyticsProjection`) is the single metric definition, consumed by BOTH Dashboard and Reports. Server aggregates remain the authoritative cross-check. |
+| **AD2** | **Retire** the orphaned server `/reports/*` plane + web `shared/api/reports.ts` (zero consumers). **Fix F-1**: Dashboard revenue relabelled to canonical vocabulary (Order Value ≠ Collected Revenue). The developer-API `/api/v1/reports/summary` and the entitlement-gated behaviour are preserved separately. |
+| **AD6** | **Accept defaults.** Repeat customer = `≥2 orders`. Workspace AOV = `Σ order value / Σ orders` (Σ/Σ). Canonical vocabulary adopted: Order Value, Invoiced Value, Collected Revenue, Outstanding, Overdue Exposure. |
+
+### Implementation ledger (Stage 5+)
+
+| Stage | Work | Status |
+|---|---|---|
+| 5 | `analyticsProjection.ts` — canonical metric library (one definition per metric); fixes F-4 (unpaid filter includes `pending`) | ✅ |
+| 6–7 | Reports + Dashboard both consume the projection module (reconciliation) | ✅ |
+| AD2 | Retire `/reports/*` (backend) + `shared/api/reports.ts` (web); F-1 relabel | ✅ |
+| 9–10 | Date/filter reuse (`resolveReportingDateRange`) + offline honesty labels (provenance) | ✅ |
+| 29 | AT suite — `tests/offline/phase18_5-analytics.test.ts(x)` | ✅ |
+| 39 | Final gates: tsc + vitest + build + PWA parity | ✅ |
+
+## Part Z — Phase 19 handoff
+
+Delivered in Phase 18.5:
+- **One truth definition.** `@shared/utils/analyticsProjection` holds every business metric's canonical formula. Dashboard and Reports import the same functions — a metric can no longer drift between the two surfaces (closes F-5).
+- **Canonical vocabulary** (AD6): Order Value, Invoiced Value, Collected Revenue, Outstanding, Overdue Exposure — never "revenue" for order value (closes F-1 mislabel).
+- **F-4 fixed:** unpaid/outstanding filter now includes `pending` (real fresh-unpaid status), so local Outstanding is no longer understated.
+- **AD2:** orphaned `/reports/*` competing plane retired (backend route + web wrapper removed); dead-plane risk (F-3) eliminated.
+- **Provenance honesty:** analytics surfaces label device-local vs server-authoritative scope; materials remain classified DEVICE-LOCAL (AD3 deferred).
+
+Deferred to later phases (unchanged): AD3 materials sync, AD4 export, AD5 forecasting; Plane-3→Plane-4 automatic hydration of synced server records into AppContext (the projection module is now the single consumer seam, ready for that bridge when a materials/records reconciliation is separately authorized).
+
+**Phase 18.5 complete. STOP — do not begin Phase 19.**

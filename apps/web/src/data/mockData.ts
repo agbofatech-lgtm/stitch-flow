@@ -1012,8 +1012,9 @@ export function calculateDashboardSummary(): DashboardSummary {
     .filter((payment) => payment.paymentStatus === 'captured')
     .reduce((sum, payment) => sum + payment.amount, 0);
 
+  // F-4: unpaid class includes `pending` (canonical, see analyticsProjection).
   const pendingBalances = invoices
-    .filter((invoice) => ['sent', 'partial', 'overdue'].includes(invoice.status))
+    .filter((invoice) => ['pending', 'sent', 'partial', 'overdue'].includes(invoice.status))
     .reduce((sum, invoice) => sum + invoice.balanceDue, 0);
 
   const todayDate = new Date();
