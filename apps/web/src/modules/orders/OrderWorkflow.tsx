@@ -33,10 +33,18 @@ import { useApp } from '../../context/AppContext';
 import type { ApiCustomer } from '@shared/utils/customerApi';
 import type { GarmentType, GarmentMeasurements } from '../../shared/types';
 import {
-  Button, Section, Body, Label, Numeric, Input, Textarea, Surface, ImageFrame, EmptyState, ErrorState,
+  Button, Section, Body, Label, Numeric, Input, Textarea, Surface, ImageFrame, EmptyState, ErrorState, Badge,
 } from '../../design-system';
 import { StepIndicator } from '../../design-system/Navigation';
 import { garmentImageSrc } from './assets';
+import {
+  CANONICAL_SNAPSHOT_FIELDS as SNAPSHOT_FIELDS,
+  CONSUMPTION_CHAIN_STEPS,
+  fabricRequirementStatus,
+  fitRiskAdvisory,
+  measurementReadiness,
+} from '../intelligence/orderIntelligence';
+import { IntelligenceCard, MissingDataNotice } from '../intelligence/IntelligenceCard';
 
 /** VERIFIED order-domain taxonomy (shared/types GarmentType — 11 values).
  *  Stage 4 imagery covers 4; the rest render honest initial tiles. */
@@ -47,19 +55,6 @@ const GARMENTS: Array<{ value: GarmentType; label: string }> = [
   { value: 'skirt', label: 'Skirt' }, { value: 'bodice', label: 'Bodice' },
   { value: 'senator', label: 'Senator' }, { value: 'agbada', label: 'Agbada' },
   { value: 'custom', label: 'Custom' },
-];
-
-// Canonical 16-field measurement set — identical keys and order to
-// OrderForm.SNAPSHOT_FIELDS (src/components/OrderForm.tsx) so a manual capture
-// records the same completeness as the legacy form; per-garment relevance is
-// advisory (help text), never a hidden filter (§20).
-const SNAPSHOT_FIELDS: Array<{ key: keyof GarmentMeasurements; label: string }> = [
-  { key: 'bust', label: 'Bust' }, { key: 'chest', label: 'Chest' }, { key: 'waist', label: 'Waist' },
-  { key: 'hip', label: 'Hip' }, { key: 'neck', label: 'Neck' }, { key: 'shoulder', label: 'Shoulder' },
-  { key: 'sleeve', label: 'Sleeve' }, { key: 'backLength', label: 'Back Length' },
-  { key: 'bustSpan', label: 'Bust Span' }, { key: 'armholeDepth', label: 'Armhole Depth' }, { key: 'thigh', label: 'Thigh' },
-  { key: 'knee', label: 'Knee' }, { key: 'ankle', label: 'Ankle' },
-  { key: 'trouserLength', label: 'Trouser Length' }, { key: 'skirtLength', label: 'Skirt Length' }, { key: 'fullLength', label: 'Full Length' },
 ];
 
 const STEPS = [
@@ -101,6 +96,23 @@ export function OrderWorkflow({ customer, onExit, onCompleted }: {
   const snapshotCount = Object.values(snapshot).filter((v) => v !== undefined).length;
   const measurementsReady = !!profileId || snapshotCount > 0;
   const stepReady = [!!garment, measurementsReady, true, true, true];
+  const [advisoryDismissed, setAdvisoryDismissed] = useState(false);
+
+  /* ── Stage 9 contextual intelligence (deterministic engines + Phase 17
+     advisory, consumed via thin adapters — never recomputed here) ──────── */
+  const attachedProfile = profiles.find((p) => p.id === profileId) ?? null;
+  const effectiveMeasurements = (attachedProfile?.measurements ?? snapshot) as Partial<Record<keyof GarmentMeasurements, number>>;
+  const readiness = useMemo(
+    () => (garment ? measurementReadiness(garment, effectiveMeasurements) : null),
+    [garment, effectiveMeasurements],
+  );
+  const inspiration = inspirations.find((d) => d.id === inspirationId) ?? null;
+  const advisory = useMemo(
+    () => (garment ? fitRiskAdvisory(garment, effectiveMeasurements, inspiration) : { warnings: [] }),
+    [garment, effectiveMeasurements, inspiration],
+  );
+  const selectedFabric = fabrics.find((f) => f.id === fabricId) ?? null;
+  const fabricStatus = fabricRequirementStatus(selectedFabric);
 
   /** Resolve the API customer in the offline store (existing contracts only):
    *  match by id, else by identity. Creation (addCustomer, tier-gated) updates
@@ -175,9 +187,25 @@ export function OrderWorkflow({ customer, onExit, onCompleted }: {
         <span className="grid size-14 place-items-center rounded-full bg-ds-success-surface text-ds-success" aria-hidden="true"><Check className="h-7 w-7" /></span>
         <Section>Order confirmed</Section>
         <Body className="max-w-md text-ink-soft">
-          {customer.fullName} · <span className="capitalize">{garment}</span> order <Numeric>{confirmed.orderNumber}</Numeric> is saved on this device
-          {profileId ? ' with the selected measurement profile snapshotted (later profile edits never change this order).' : snapshotCount ? ` with ${snapshotCount} captured measurements.` : '.'}
+          {customer.fullName} · <span className="capitalize">{garment}</span> order <Numeric>{confirmed.orderNumber}</Numeric> is saved on this device.
         </Body>
+        <Surface data-intelligence="snapshot" className="flex w-full flex-col gap-2 p-5 text-left">
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-ink">Order snapshot</Label>
+            <Badge tone="neutral">Snapshot</Badge>
+          </div>
+          <div className="flex flex-col gap-1 text-sm text-ink-soft">
+            <span>Garment: <span className="capitalize text-ink">{garment}</span></span>
+            <span>Measurements: {profileId
+              ? `${profiles.find((p) => p.id === profileId)?.label ?? 'attached profile'} — profile snapshotted`
+              : snapshotCount ? `${snapshotCount} ${snapshotCount === 1 ? 'value' : 'values'} captured` : 'not set'}</span>
+            <span>Design: {inspirations.find((d) => d.id === inspirationId)?.title ?? 'to be designed in the Studio'}</span>
+            <span>Fabric: {fabrics.find((f) => f.id === fabricId)?.name ?? 'not assigned'}</span>
+          </div>
+          <Body className="text-xs text-ink-mute">
+            Frozen at confirm: later customer-profile edits never rewrite this order — deterministic results for it always read this snapshot, not today&rsquo;s profile.
+          </Body>
+        </Surface>
         <div className="flex flex-wrap justify-center gap-2">
           {/* EXISTING contextual Studio entry: binds to the selected order */}
           <Button variant="primary" data-action="open-studio" onClick={() => { selectOrder(confirmed.id); setView('design-studio'); }}>
@@ -240,6 +268,34 @@ export function OrderWorkflow({ customer, onExit, onCompleted }: {
       {step === 1 && (
         <section aria-label="Measurements" className="flex flex-col gap-4">
           <Body className="text-ink-mute">Attach a saved measurement profile, or capture the key values now.</Body>
+          {readiness && (
+            <IntelligenceCard
+              kind="deterministic"
+              title="Measurement readiness"
+              ready={readiness.complete}
+              basedOn={[
+                attachedProfile ? `Profile: ${attachedProfile.label || 'attached'}` : 'Values captured in this order',
+                `Garment: ${GARMENTS.find((g) => g.value === garment)?.label} → ${readiness.kindLabel} pattern foundation`,
+              ]}
+              disclosure={{
+                summary: 'How this is calculated',
+                body: (
+                  <>The pattern adapter (Phase 14) checks every required and recommended measurement for the {readiness.kindLabel.toLowerCase()} foundation against what is captured. Missing required values mean the engine could only proceed with its documented defaults — your decision, not a silent guess.</>
+                ),
+              }}
+            >
+              <Body className="text-sm text-ink">
+                {readiness.requiredCaptured} of {readiness.requiredTotal} required measurements for a {readiness.kindLabel.toLowerCase()} pattern are captured
+                {readiness.recommendedTotal > 0 ? `, plus ${readiness.recommendedCaptured} of ${readiness.recommendedTotal} recommended` : ''}.
+              </Body>
+              {!readiness.mapped && readiness.mappingNote && (
+                <Body className="text-sm text-ink-soft">Pattern mapping: {readiness.mappingNote}</Body>
+              )}
+              {readiness.requiredMissing.length > 0 && (
+                <MissingDataNotice>Additional measurements required for this garment: {readiness.requiredMissing.map((m) => m.label).join(', ')}.</MissingDataNotice>
+              )}
+            </IntelligenceCard>
+          )}
           {profiles.length > 0 ? (
             <Surface className="divide-y divide-line">
               {profiles.map((p) => (
@@ -326,6 +382,28 @@ export function OrderWorkflow({ customer, onExit, onCompleted }: {
             </Surface>
           )}
           <Body className="text-xs text-ink-mute">Stock shown is your library record — required yardage is a separate calculation, confirmed at cutting preparation.</Body>
+          <IntelligenceCard
+            kind="missing"
+            title="Material requirement"
+            basedOn={[
+              selectedFabric ? `Fabric: ${selectedFabric.name}` : 'No fabric selected',
+              'Deterministic calculation: pattern & cutting preparation (Phase 15→16)',
+            ]}
+            disclosure={{
+              summary: 'What the calculation includes',
+              body: (
+                <ul className="list-disc pl-4">
+                  {CONSUMPTION_CHAIN_STEPS.map((step) => (<li key={step}>{step}</li>))}
+                </ul>
+              ),
+            }}
+          >
+            {fabricStatus.state === 'width_unknown' ? (
+              <MissingDataNotice>Material requirement cannot be finalized until fabric width is known — width is not on this fabric&rsquo;s library record yet. It is settled when the cutting layout is prepared.</MissingDataNotice>
+            ) : (
+              <MissingDataNotice>No fabric is selected, so nothing is being calculated. You can assign fabric after confirmation.</MissingDataNotice>
+            )}
+          </IntelligenceCard>
         </section>
       )}
 
@@ -335,14 +413,49 @@ export function OrderWorkflow({ customer, onExit, onCompleted }: {
           {confirmError && <ErrorState title="Order not confirmed" message={confirmError} />}
           <Surface className="flex flex-col gap-3 p-5">
             <div><Label>Customer</Label><Body className="text-ink">{customer.fullName}{customer.phone ? ` · ${customer.phone}` : ''}</Body></div>
+
             <div><Label>Garment</Label><Body className="text-ink">{garment ? GARMENTS.find((g) => g.value === garment)?.label : '—'}</Body></div>
             <div>
               <Label>Measurements</Label>
-              <Body className="text-ink">{profileId ? `Profile: ${profiles.find((p) => p.id === profileId)?.label ?? 'attached'} (snapshotted on confirm)` : snapshotCount ? `${snapshotCount} values captured` : 'Not set'}</Body>
+              <Body className="text-ink">{profileId ? `Profile: ${profiles.find((p) => p.id === profileId)?.label ?? 'attached'} (snapshotted on confirm)` : snapshotCount ? `${snapshotCount} ${snapshotCount === 1 ? 'value' : 'values'} captured` : 'Not set'}</Body>
             </div>
             <div><Label>Design</Label><Body className="text-ink">{inspirations.find((d) => d.id === inspirationId)?.title ?? 'To be designed in Studio'}</Body></div>
             <div><Label>Fabric</Label><Body className="text-ink">{fabrics.find((f) => f.id === fabricId)?.name ?? 'Not assigned'}</Body></div>
           </Surface>
+          <IntelligenceCard
+            kind="advisory"
+            title="Fit-risk advisory"
+            basedOn={[
+              `Garment: ${GARMENTS.find((g) => g.value === garment)?.label ?? '—'}`,
+              attachedProfile ? `Profile: ${attachedProfile.label || 'attached'}` : (snapshotCount ? `${snapshotCount} values captured` : 'No measurements yet'),
+              inspiration ? `Inspiration: ${inspiration.title}` : 'No design reference yet',
+            ]}
+            disclosure={{
+              summary: 'Where this comes from',
+              body: (<>On-device rule-based assistant (Phase 17). Advisory only — it never changes measurements, fabric, or material requirements, and every captured value above stays exactly as you entered it.</>),
+            }}
+            className="border border-ds-advisory/30"
+          >
+            {advisoryDismissed ? (
+              <Body className="text-sm text-ink-mute">Advisory dismissed for this order.</Body>
+            ) : advisory.warnings.length === 0 ? (
+              <Body className="text-sm text-ink-soft">No fit risks flagged for this combination.</Body>
+            ) : (
+              <ul className="flex flex-col gap-2" data-advisory-list>
+                {advisory.warnings.map((w, i) => (
+                  <li key={i} className="rounded-xl border border-line bg-ds-subtle p-3">
+                    <span className="ds-label">{w.severity === 'high' ? 'High' : w.severity === 'medium' ? 'Medium' : 'Low'} risk</span>
+                    <span className="block text-sm font-medium text-ink">{w.title}</span>
+                    <span className="block text-sm text-ink-soft">{w.description}</span>
+                    {w.recommendation && <span className="mt-1 block text-sm text-ink">Recommendation: {w.recommendation}</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {!advisoryDismissed && (
+              <Button variant="tertiary" className="w-fit px-0" data-action="dismiss-advisory" onClick={() => setAdvisoryDismissed(true)}>Dismiss advisory</Button>
+            )}
+          </IntelligenceCard>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="flex flex-col gap-1"><span className="ds-label">Due date</span>
               <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} /></label>
