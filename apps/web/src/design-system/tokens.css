@@ -1,0 +1,124 @@
+/**
+ * StitchFlow Design System — semantic token layer (Phase 18 · Stage 5).
+ *
+ * Architecture:  primitives (--sf-*, Phase 11 — UNCHANGED)
+ *                 → semantic tokens (--ds-*, this file)
+ *                   → component contracts (src/design-system/*)
+ *
+ * Additive by mandate: no --sf-* value is redefined, no existing screen is
+ * altered. Semantic meaning (§8 of the Stage 5 mandate) lives HERE, never as
+ * hard-coded hex in components.
+ *
+ * Colour is never the sole carrier of state (Stage 3 §16 / Stage 5 §14):
+ * every status token pairs with the label+shape contract in Status.tsx.
+ */
+
+:root {
+  /* ── surfaces ─────────────────────────────────────────────────────── */
+  --ds-bg: var(--sf-ivory);            /* application canvas            */
+  --ds-surface: var(--sf-surface);     /* cards, panels                 */
+  --ds-surface-subtle: var(--sf-grey-light); /* recesses, wells          */
+  --ds-surface-raised: #ffffff;        /* raised: popover/menu/dialog   */
+  --ds-surface-active: #f1ece2;        /* pressed/selected ground       */
+  --ds-overlay: rgb(24 24 27 / 0.42);  /* dialog/drawer scrim           */
+
+  /* ── text hierarchy (3 tiers only) ────────────────────────────────── */
+  --ds-text-primary: var(--sf-ink);
+  --ds-text-secondary: var(--sf-ink-soft);
+  --ds-text-muted: var(--sf-ink-mute);
+  --ds-text-on-accent: var(--sf-surface);
+
+  /* ── borders ──────────────────────────────────────────────────────── */
+  --ds-border: var(--sf-line);         /* hairline                      */
+  --ds-border-strong: var(--sf-grey);  /* emphasis edge                 */
+
+  /* ── interaction ──────────────────────────────────────────────────── */
+  --ds-accent: var(--sf-charcoal);     /* primary identity (Stage 3)    */
+  --ds-accent-hover: #3f3f46;
+  --ds-focus: var(--sf-gold);          /* VERIFIED Phase 11 focus ring  */
+
+  /* ── status semantics ─────────────────────────────────────────────── */
+  --ds-success: #16a34a;  --ds-success-surface: #eff7f0;
+  --ds-warning: #b45309;  --ds-warning-surface: #faf3e6;
+  --ds-danger: #dc2626;   --ds-danger-surface: #fdf1f1;
+  --ds-info: #44607a;     --ds-info-surface: #eff3f7;
+  --ds-neutral: var(--sf-ink-mute); --ds-neutral-surface: var(--sf-grey-light);
+
+  /* ── AI advisory (distinct from success/error — advice is neither) ── */
+  --ds-advisory: var(--sf-gold-dark);
+  --ds-advisory-surface: #faf5ea;
+  --ds-advisory-border: var(--sf-gold-light);
+
+  /* ── production-stage ramp (canonical codes → presentation hues; the
+     canonical DB sequence is untouched — labels map in Status.tsx) ──── */
+  --ds-stage-not-started: var(--sf-ink-mute);
+  --ds-stage-measurement: #44607a;
+  --ds-stage-cutting: #b45309;
+  --ds-stage-sewing: #4c5d8a;
+  --ds-stage-embroidery: #7a4c7d;
+  --ds-stage-fitting: #3f7d76;
+  --ds-stage-final-press: #5d6b7a;
+  --ds-stage-ready: #16a34a;
+  --ds-stage-delivered: #18181b;
+
+  /* ── density defaults (workspace baseline) ────────────────────────── */
+  --ds-control-h: 40px;    /* input/button default height              */
+  --ds-control-h-sm: 32px; /* developer/dense                          */
+  --ds-row-h: 44px;        /* table row baseline                       */
+  --ds-touch-min: 44px;    /* mobile minimum touch target (§13/§14)    */
+  --ds-gap: 16px;
+  --ds-radius-control: var(--sf-radius-btn);
+  --ds-radius-surface: var(--sf-radius-card);
+}
+
+/* Surface personalities (Stage 3 §8): density/temperature differences on
+   one shared system — never a second design system. */
+[data-density='developer'] {
+  --ds-control-h: var(--ds-control-h-sm);
+  --ds-row-h: 32px;
+  --ds-gap: 12px;
+}
+[data-density='platform'] { --ds-gap: 20px; }
+[data-density='public']   { --ds-gap: 24px; }
+
+/* ── typography roles (Stage 3 §2 — six roles, one voice) ────────────── */
+.ds-display { font-family: 'Hanken Grotesk Variable','Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;
+  font-weight: 700; font-size: 2.5rem; line-height: 1.1; letter-spacing: -0.01em; }
+.ds-heading { font-family: 'Hanken Grotesk Variable','Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;
+  font-weight: 600; font-size: 1.5rem; line-height: 1.2; letter-spacing: -0.005em; }
+.ds-section { font-family: 'Hanken Grotesk Variable','Hanken Grotesk',ui-sans-serif,system-ui,sans-serif;
+  font-weight: 600; font-size: 1.0625rem; line-height: 1.3; }
+.ds-body { font-family: 'Geist Variable',Geist,ui-sans-serif,system-ui,sans-serif;
+  font-weight: 400; font-size: 0.9375rem; line-height: 1.5;
+  overflow-wrap: break-word; /* long tokens (ids, verb lists) must never break layout */ }
+.ds-label { font-family: 'Geist Variable',Geist,ui-sans-serif,system-ui,sans-serif;
+  font-weight: 500; font-size: 0.75rem; line-height: 1.2; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--ds-text-muted); }
+.ds-numeric { font-family: 'JetBrains Mono Variable','JetBrains Mono',ui-monospace,monospace;
+  font-weight: 500; font-variant-numeric: tabular-nums; font-size: 0.875rem; line-height: 1.4; }
+@media (max-width: 640px) {
+  .ds-display { font-size: 1.75rem; }
+  .ds-heading { font-size: 1.25rem; }
+  .ds-body { font-size: 1rem; } /* ≥16px mobile body (Stage 3 §16) */
+}
+
+/* ── focus contract (non-negotiable, universal) ──────────────────────── */
+.ds :focus-visible,
+.ds-focusable:focus-visible {
+  outline: 2px solid var(--ds-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── motion tiers (Stage 3 §12 / Stage 5 §15) ──────────────────────────
+   Tier 0 NONE is expressed by NOT applying motion classes; operational
+   tables/financial flows get no animation by contract. Global
+   prefers-reduced-motion (Phase 11, VERIFIED) stays authoritative.     */
+.ds-motion-micro { transition: all var(--sf-t-micro) var(--sf-ease-standard); }
+.ds-motion-fast { transition: all var(--sf-t-fast) var(--sf-ease-standard); }
+.ds-motion-surface { box-shadow: var(--sf-e1); transition: box-shadow var(--sf-t-micro) var(--sf-ease-standard); }
+.ds-motion-surface:hover { box-shadow: var(--sf-e2); }
+[data-motion='none'] *, .ds-motion-none * {
+  animation: none !important;
+  transition: none !important;
+}
