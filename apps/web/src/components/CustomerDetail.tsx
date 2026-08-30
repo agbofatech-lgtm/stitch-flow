@@ -30,6 +30,15 @@ import ProductionIntelligenceSection from './production/ProductionIntelligenceSe
 
 type CustomerDetailProps = {
   customerId: string;
+  /**
+   * Display fallback for customers that live in the backend API store but
+   * not in the local-first AppContext store (e.g. opened from the API-backed
+   * Customers screen). Without this, the store lookup fails and the Phase
+   * 13–16 intelligence sections below never mount — the id MUST stay the
+   * backend customer id because those sections call
+   * /customers/:id/… endpoints with it.
+   */
+  customer?: { fullName: string } | null;
   onCreateOrderFromProfile?: (profile: CustomerMeasurementProfile) => void;
 };
 
@@ -241,6 +250,7 @@ function getProfileHighlights(profile: CustomerMeasurementProfile) {
 
 export function CustomerDetail({
   customerId,
+  customer: customerOverride,
   onCreateOrderFromProfile,
 }: CustomerDetailProps) {
   const {
@@ -258,7 +268,8 @@ export function CustomerDetail({
     setView,
   } = useApp();
 
-  const customer = customers.find((item) => item.id === customerId) || null;
+  const customer =
+    customers.find((item) => item.id === customerId) ?? customerOverride ?? null;
   const profiles = getCustomerMeasurementProfiles(customerId);
 
   const selectedOrder =
