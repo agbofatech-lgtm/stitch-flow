@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from 'react';
 import { useApp } from './context/AppContext';
-import { Layout } from './components/Layout';
+import { WorkspaceShell } from './shell/WorkspaceShell';
 import { Dashboard } from './components/Dashboard';
 import { Customers } from './components/Customers';
 import { Orders } from './components/Orders';
@@ -63,8 +63,8 @@ export default function AuthenticatedApp() {
   };
 
   return (
-    <Layout>
+    <WorkspaceShell>
       <PageTransition viewKey={currentView}>{renderView()}</PageTransition>
-    </Layout>
+    </WorkspaceShell>
   );
 }

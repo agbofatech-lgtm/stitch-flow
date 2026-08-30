@@ -6,7 +6,9 @@ import { clsx } from 'clsx';
 import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { IconButton } from './Button';
 
-function useModalBehaviour(open: boolean, onClose: () => void) {
+/** Reusable modal behaviour (focus-in/restore, trap, Escape, scroll lock) —
+    exported in Stage 6 for the shell account menu (documented DS extension). */
+export function useModalBehaviour(open: boolean, onClose: () => void) {
   const ref = useRef<HTMLDivElement>(null);
   const restoreTo = useRef<HTMLElement | null>(null);
   useEffect(() => {
