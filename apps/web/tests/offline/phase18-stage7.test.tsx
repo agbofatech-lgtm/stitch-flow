@@ -49,6 +49,9 @@ vi.mock('../../src/components/CustomerDetail', () => ({ CustomerDetail: ({ custo
   <div data-testid="customer-detail-stub" data-customer={customerId}>intelligence context</div>
 ) }));
 vi.mock('../../src/modules/workspace/assets', () => ({ emptyStateSrc: (k: string) => `/assets/${k}.webp` }));
+vi.mock('../../src/modules/orders/OrderWorkflow', () => ({ OrderWorkflow: ({ customer }: { customer: { id: string } }) => (
+  <div data-testid="order-workflow-stub" data-customer={customer.id}>order workflow</div>
+) }));
 
 import { HomeView } from '../../src/modules/workspace/HomeView';
 import { CustomersView } from '../../src/modules/customers/CustomersView';
@@ -143,7 +146,7 @@ describe('CW7 · Customer workspace = context + handoff', () => {
     expect(await screen.findByText(/SO-1001/)).toBeTruthy(); // active work
     expect(screen.getByTestId('customer-detail-stub').getAttribute('data-customer')).toBe('c1'); // Phase 13–16 context reused
     fireEvent.click(screen.getByRole('button', { name: /New order/i }));
-    expect(mockApp.setView).toHaveBeenCalledWith('orders'); // Stage 8 handoff, not the wizard
+    expect(screen.getByTestId('order-workflow-stub').getAttribute('data-customer')).toBe('c1'); // Stage 8 workflow launches in customer context
   });
   it('back returns to the list', async () => {
     render(<CustomersView />);
