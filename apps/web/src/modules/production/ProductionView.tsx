@@ -257,7 +257,7 @@ export function ProductionView() {
           <Section>Production</Section>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Input aria-label="Search production by customer or order number" placeholder="Search customer or order…" value={search} onChange={(e) => setSearch(e.target.value)} className="w-56" />
+          <Input aria-label="Search production by customer or order number" placeholder="Search customer or order…" value={search} onChange={(e) => setSearch(e.target.value)} className="w-full sm:w-56" />
           <select aria-label="Filter by stage" value={stageFilter} onChange={(e) => setStageFilter(e.target.value)}
             className="ds-input h-[var(--ds-touch-min)] rounded-xl border border-line bg-ds-surface px-3 text-sm text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ds-focus">
             <option value="all">All stages</option>
@@ -347,7 +347,7 @@ export function ProductionView() {
                     <span className="text-xs text-ink-mute">canonical code: {c.code}</span>
                     {stage?.notes ? <span className="text-xs text-ink-soft">note: {stage.notes}</span> : null}
                     {(stage?.status === 'completed' || stage?.status === 'skipped') && (
-                      <Button variant="tertiary" className="min-h-0 px-2 py-1 text-xs" data-action={`reopen-${c.code}`} disabled={busy} onClick={() => setReopenCode(c.code)}>
+                      <Button variant="tertiary" className="min-h-[var(--ds-touch-min)] px-3 text-xs" data-action={`reopen-${c.code}`} disabled={busy} onClick={() => setReopenCode(c.code)}>
                         <RotateCcw className="h-3 w-3" aria-hidden="true" /> Reopen
                       </Button>
                     )}
