@@ -263,13 +263,24 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
           </p>
         }>
         <div className="flex flex-col gap-4">
+          {/* Stage 10 §49: primary destinations beyond the bottom bar's four
+              slots (currently Finance) must stay reachable on mobile. */}
+          {PRIMARY_NAV.slice(4).length > 0 && (
+            <div>
+              <Label className="mb-2 px-1">Workspace</Label>
+              <nav aria-label="More workspace destinations" className="flex flex-col gap-1">
+                {PRIMARY_NAV.slice(4).map((item) => (
+                  <NavButton key={item.id} item={item} active={currentView === item.id} onNavigate={() => go(item.id)} showHint />
+                ))}
+              </nav>
+            </div>
+          )}
           <div>
-            <Label className="mb-2 px-1">Workspace</Label>
+            <Label className="mb-2 px-1">Tools</Label>
             {secondaryBlock(true)}
           </div>
           <p className="px-1 text-xs text-ink-mute">
-            Finance lives in the bottom bar; materials, reports, the Design Studio legacy entry and console
-            destinations live here.
+            Destinations beyond the bottom bar's four slots live here, with materials, reports, the Design Studio legacy entry and console tools.
           </p>
         </div>
       </Drawer>

@@ -232,6 +232,32 @@ describe('PW15 · Lazy stage initialisation (VERIFIED backend contract)', () => 
   });
 });
 
+describe('PW6b · Terminal order — no fabricated forward actions', () => {
+  it('all stages closed → "No open stage", only Reopen remains; delivered-as-open keeps valid actions', async () => {
+    ordersMock = [
+      // terminal: every stage completed (incl. delivered)
+      order({ id: 'o-done', productionStages: NINE.map((c, i) => stage(c, 'completed', i + 1)) }),
+      // delivered ACTIVE = the legitimate open stage (skip/complete valid)
+      order({ id: 'o-dlv', productionStages: NINE.map((c, i) => stage(c, c === 'delivered' ? 'active' : 'completed', i + 1)) }),
+    ];
+    render(<ProductionView />);
+    await waitFor(() => expect(document.querySelectorAll('[data-order-card]').length).toBe(2));
+    // Terminal order: no open stage
+    fireEvent.click(document.querySelector('[data-order-card="o-done"]')!);
+    await waitFor(() => expect(screen.getByText(/No open stage/)).toBeTruthy());
+    expect(screen.queryByRole('button', { name: /Skip / })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Complete / })).toBeNull();
+    expect(document.querySelector('[data-action="reopen-delivered"]')).toBeTruthy();
+    cleanup();
+    // Open delivered stage: Start? no (active) — Complete + Skip ARE valid backend actions
+    render(<ProductionView />);
+    await waitFor(() => expect(document.querySelectorAll('[data-order-card]').length).toBe(2));
+    fireEvent.click(document.querySelector('[data-order-card="o-dlv"]')!);
+    await waitFor(() => expect(screen.getByRole('button', { name: /Complete Delivered/ })).toBeTruthy());
+    expect(screen.getByRole('button', { name: /Skip Delivered/ })).toBeTruthy();
+  });
+});
+
 describe('PW12–PW14 · Real data, empty ≠ loading, retry', () => {
   it('PW13 loading is distinct from empty', async () => {
     ordersMock = [];

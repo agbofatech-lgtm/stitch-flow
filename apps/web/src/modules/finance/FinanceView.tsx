@@ -251,7 +251,7 @@ export function FinanceView() {
             </Body>
             {payOutcome ? (
               <>
-                <Body className="text-sm text-ink" data-outcome="success">{payOutcome}</Body>
+                <span data-outcome="success" className="block"><Body className="text-sm text-ink">{payOutcome}</Body></span>
                 <Button variant="primary" data-action="close-payment" onClick={() => setPayFor(null)}>Done</Button>
               </>
             ) : (

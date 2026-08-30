@@ -80,13 +80,22 @@ function normalizeStages(raw: unknown): ApiProductionStage[] {
     .sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0));
 }
 
-/** Mirrors the backend's open-stage rule: first stage (by sequence) that is
- *  pending or active; else delivered if completed; else null. */
+/** The ACTIONABLE open stage — first (by sequence) pending or active stage.
+ *  Mirrors the backend rule: only this stage may be started/completed/skipped.
+ *  A terminal order (delivered completed) has NO open stage — no fabricated
+ *  forward actions; reopen remains on completed/skipped timeline stages. */
 function currentOpenStage(stages: ApiProductionStage[]): ApiProductionStage | null {
-  const open = stages.find((s) => s.status === 'pending' || s.status === 'active');
+  return stages.find((s) => s.status === 'pending' || s.status === 'active') ?? null;
+}
+
+/** DISPLAY stage for board grouping: the open stage, else delivered when
+ *  completed (terminal), else the first non-terminal stage. */
+function currentDisplayStage(stages: ApiProductionStage[]): ApiProductionStage | null {
+  const open = currentOpenStage(stages);
   if (open) return open;
   const delivered = stages.find((s) => s.code === 'delivered' && s.status === 'completed');
-  return delivered ?? null;
+  if (delivered) return delivered;
+  return stages.find((s) => s.status !== 'completed' && s.status !== 'skipped') ?? null;
 }
 
 export function ProductionView() {
@@ -144,7 +153,7 @@ export function ProductionView() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return productionOrders.filter((o) => {
-      const open = currentOpenStage(normalizeStages(o.productionStages));
+      const open = currentDisplayStage(normalizeStages(o.productionStages));
       const group = BOARD_GROUPS.find((g) => open && g.codes.includes(open.code));
       if (stageFilter !== 'all' && group?.id !== stageFilter) return false;
       if (!q) return true;
@@ -425,7 +434,7 @@ export function ProductionView() {
           <div className="flex flex-col gap-5" data-board="production">
             {BOARD_GROUPS.map((group) => {
               const items = filtered.filter((o) => {
-                const open = currentOpenStage(normalizeStages(o.productionStages));
+                const open = currentDisplayStage(normalizeStages(o.productionStages));
                 return open && group.codes.includes(open.code);
               });
               return (
@@ -440,7 +449,7 @@ export function ProductionView() {
                   ) : (
                     <Surface className="divide-y divide-line">
                       {items.map((o) => {
-                        const open = currentOpenStage(normalizeStages(o.productionStages))!;
+                        const open = currentDisplayStage(normalizeStages(o.productionStages))!;
                         const inv = invoiceByOrderId.get(o.id);
                         return (
                           <button key={o.id} type="button" data-order-card={o.id} data-stage-code={open.code}
