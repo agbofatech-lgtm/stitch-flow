@@ -17,10 +17,13 @@ import {
   isPlatformPath,
   isLandingPath,
   setNextPath,
+  isDesignSystemPath,
 } from '@shared/router';
 
 /** Phase 12 — public landing experience, code-split from the app bundle. */
 const LandingPage = lazy(() => import('./public/LandingPage'));
+// Phase 18 Stage 5 — design-system showcase (public, static, no data)
+const DesignSystemShowcase = lazy(() => import('./design-system/showcase/DesignSystemShowcase'));
 /** Public auth pages — split so the entry chunk stays lean. */
 const Login = lazy(() => import('./components/Login').then((m) => ({ default: m.Login })));
 const Register = lazy(() => import('./components/Register').then((m) => ({ default: m.Register })));
@@ -85,6 +88,7 @@ function AppContent() {
     if (!authed) {
       if (getAccessToken()) return; // sign-in in flight; AUTH_CHANGED re-runs the gate
       if (isLandingPath(route)) return; // Phase 12 — public entry renders the landing
+      if (isDesignSystemPath(route)) return; // Phase 18 Stage 5 — public component laboratory
       if (route !== '/') setNextPath(route);
       navigate('/login', { replace: true });
       return;
@@ -118,6 +122,17 @@ function AppContent() {
     )
       navigate('/');
   }, [currentView, authed]);
+
+  // Phase 18 Stage 5 — the design-system laboratory renders identically for
+  // signed-in and anonymous visitors: it is static, mounts no workflows,
+  // and connects to no production data.
+  if (isDesignSystemPath(route)) {
+    return (
+      <Suspense fallback={null}>
+        <DesignSystemShowcase />
+      </Suspense>
+    );
+  }
 
   if (!authed) {
     // Public experience: landing + authentication pages only — no application

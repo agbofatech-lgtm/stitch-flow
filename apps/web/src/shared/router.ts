@@ -88,3 +88,10 @@ export function takeNextPath(): string | null {
     return null;
   }
 }
+
+/** Phase 18 Stage 5 — controlled design-system showcase (component
+ *  laboratory). Public + static: renders no production data, mounts no
+ *  authenticated API calls. This is the ONLY screen-level Stage 5 surface. */
+export function isDesignSystemPath(p: string): boolean {
+  return p === '/design-system' || p.startsWith('/design-system/');
+}
