@@ -14,7 +14,8 @@ import { format, isToday, isPast } from 'date-fns';
 import { AlertTriangle, CalendarClock, Package, Users, Wallet, ArrowRight } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useApp } from '../../context/AppContext';
-import { getDashboardSummary, type DashboardSummary } from '@shared/utils/dashboardApi';
+import { useAnalytics } from '@modules/analytics/useAnalytics';
+import { executiveSummary } from '@modules/analytics/projection';
 import { getDashboardDataBundle } from '@shared/utils/dashboardDataApi';
 import type { ApiOrder } from '@shared/api/orders';
 import type { ApiInvoice } from '@shared/api/invoices';
@@ -45,8 +46,17 @@ function AttentionRow({ icon: Icon, label, value, action, onClick, tone }: {
 }
 
 export function HomeView() {
-  const { customers, fabricRecords, getLowStockMaterials, setView, currentMember, currentWorkspace } = useApp();
-  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const { fabricRecords, getLowStockMaterials, setView, currentMember, currentWorkspace } = useApp();
+
+  /* PHASE 18.5 — Dashboard "At a glance" consumes the SAME analytics
+   * projection as Reports (one metric definition, AT2/AT15). The server
+   * data bundle stays for the TODAY operational lists. */
+  const analytics = useAnalytics();
+  const glance = useMemo(
+    () => executiveSummary(analytics.records),
+    [analytics.records]
+  );
+
   const [orders, setOrders] = useState<ApiOrder[] | null>(null);
   const [invoices, setInvoices] = useState<ApiInvoice[] | null>(null);
   const [apiError, setApiError] = useState(false);
@@ -55,15 +65,15 @@ export function HomeView() {
     let alive = true;
     (async () => {
       try {
-        const [s, bundle] = await Promise.all([getDashboardSummary(), getDashboardDataBundle()]);
+        const bundle = await getDashboardDataBundle();
         if (!alive) return;
-        setSummary(s); setOrders(bundle.orders); setInvoices(bundle.invoices);
+        setOrders(bundle.orders); setInvoices(bundle.invoices);
       } catch { if (alive) setApiError(true); }
     })();
     return () => { alive = false; };
   }, []);
 
-  const currency = safeCurrency(currentWorkspace?.defaultCurrency ?? summary?.currency);
+  const currency = safeCurrency(currentWorkspace?.defaultCurrency);
   const firstName = (currentMember?.user?.fullName || 'there').split(' ')[0];
 
   const overdue = useMemo(() => (invoices ?? []).filter((i) => i.balanceDue > 0 && (i.status === 'overdue' || (i.dueDate && isPast(new Date(i.dueDate))))), [invoices]);
@@ -129,7 +139,7 @@ export function HomeView() {
       <section aria-label="Active work" className="flex flex-col gap-2">
         <Label>Active work</Label>
         {orders === null && !apiError ? <Skeleton label="Active work" /> : active.length === 0 ? (
-          <Body className="text-ink-mute">{nothingToDo && customers.length === 0
+          <Body className="text-ink-mute">{nothingToDo && glance.totalCustomers === 0
             ? 'Your workspace is ready — start by adding your first customer.'
             : 'No active orders right now.'}</Body>
         ) : (
@@ -149,14 +159,14 @@ export function HomeView() {
 
       {/* L4 — Informational (real figures only) */}
       <section aria-label="At a glance" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Surface subtle className="p-4"><Label>Customers</Label><Numeric className="mt-1 text-lg font-semibold">{customers.length}</Numeric></Surface>
+        <Surface subtle className="p-4"><Label>Customers</Label><Numeric className="mt-1 text-lg font-semibold">{glance.totalCustomers}</Numeric></Surface>
         <Surface subtle className="p-4"><Label>Materials</Label><Numeric className="mt-1 text-lg font-semibold">{activeMaterials.length}</Numeric></Surface>
-        <Surface subtle className="p-4"><Label>Active orders</Label><Numeric className="mt-1 text-lg font-semibold">{active.length}</Numeric></Surface>
-        <Surface subtle className="p-4"><Label>Pending balances</Label><Numeric className="mt-1 text-lg font-semibold">{summary ? formatCurrency(summary.pendingBalances, currency) : '—'}</Numeric></Surface>
+        <Surface subtle className="p-4"><Label>Open orders</Label><Numeric className="mt-1 text-lg font-semibold">{glance.openOrders}</Numeric></Surface>
+        <Surface subtle className="p-4"><Label>Outstanding (unpaid invoices)</Label><Numeric className="mt-1 text-lg font-semibold">{formatCurrency(glance.outstandingBalance, currency)}</Numeric></Surface>
       </section>
 
       {/* Empty workspace → first-use guidance */}
-      {customers.length === 0 && (
+      {glance.totalCustomers === 0 && (
         <EmptyState illustration={emptyStateSrc('no-customers')}
           title="No customers yet" message="Everything in StitchFlow starts with a customer — add your first one and orders, measurements and designs flow from there."
           primaryAction={<Button variant="primary" onClick={() => setView('customers')}>Add customer</Button>}
@@ -165,7 +175,11 @@ export function HomeView() {
 
       <p className="flex items-center gap-1.5 text-xs text-ink-mute">
         <Wallet className="h-3.5 w-3.5" aria-hidden="true" />
-        Figures combine live workspace data with this device's saved records. <Users className="ml-1 h-3.5 w-3.5" aria-hidden="true" /> Offline notes are saved locally.
+        Figures are calculated from your workspace records on this device{' '}
+        {analytics.lastSyncedAt
+          ? `(workspace data last synced ${format(new Date(analytics.lastSyncedAt), 'd MMM, HH:mm')})`
+          : '(workspace data updated from this device, not yet synced)'}
+        . Materials are recorded on this device only. <Users className="ml-1 h-3.5 w-3.5" aria-hidden="true" /> Payment truth is server-authoritative in Finance.
       </p>
     </div>
   );
