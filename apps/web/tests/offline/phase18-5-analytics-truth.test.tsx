@@ -120,6 +120,40 @@ describe('AT7/AT8 · Bottleneck and turnaround only with timestamp evidence', ()
     });
     expect(noTiming.averageTurnaroundDays).toBeNull();
   });
+
+  it('a completed NON-delivery stage is production progress, never delivery evidence', () => {
+    // Phase 18.5 §8.4 regression (browser Journey D): an order whose sewing
+    // stage completed seconds after creation must NOT count as delivered with
+    // "0.0 days" turnaround — that fabricated a measured value.
+    const sewingOnly = executiveSummary({
+      customers: [customer('c1')],
+      orders: [order('o1', 'c1', {
+        status: 'in_progress',
+        productionStages: [
+          { code: 'sewing', label: 'Sewing', status: 'completed', completedAt: '2026-08-30T18:00:05.000Z' },
+          { code: 'delivered', label: 'Delivered', status: 'pending' },
+        ] as never,
+      })],
+      invoices: [], payments: [],
+    });
+    expect(sewingOnly.averageTurnaroundDays).toBeNull(); // AT8: N/A, not 0
+  });
+
+  it('a completed canonical delivered stage IS delivery evidence', () => {
+    const delivered = executiveSummary({
+      customers: [customer('c1')],
+      orders: [order('o1', 'c1', {
+        status: 'delivered',
+        createdAt: '2026-08-01T09:00:00.000Z',
+        productionStages: [
+          { code: 'sewing', label: 'Sewing', status: 'completed', completedAt: '2026-08-02T09:00:00.000Z' },
+          { code: 'delivered', label: 'Delivered', status: 'completed', completedAt: '2026-08-05T09:00:00.000Z' },
+        ] as never,
+      })],
+      invoices: [], payments: [],
+    });
+    expect(delivered.averageTurnaroundDays).toBe(4); // created Aug 1 → delivered stage completed Aug 5
+  });
 });
 
 /* ── AT9 — material provenance ────────────────────────────────────────────── */

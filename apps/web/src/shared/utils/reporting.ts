@@ -25,6 +25,7 @@ type MinimalOrder = {
 };
 
 export type MinimalProductionStage = {
+  code?: string | null;
   name?: string | null;
   label?: string | null;
   title?: string | null;
@@ -455,18 +456,34 @@ function getStageDeadline(stage: MinimalProductionStage) {
   );
 }
 
+function isDeliveryStage(stage: MinimalProductionStage) {
+  const code = String(stage.code || '').trim().toLowerCase();
+  if (code) return code === 'delivered';
+  const label = String(stage.label || stage.name || stage.title || stage.stage || '')
+    .trim()
+    .toLowerCase();
+  return label === 'delivered';
+}
+
 function getDeliveredAt(order: MinimalOrder) {
   const direct = parseDate(order.deliveredAt);
   if (direct) return direct;
 
-  const completedStages = getProductionStages(order)
+  // Phase 18.5 turnaround honesty (§8.4 / AT8): only completion of the
+  // canonical `delivered` stage is delivery evidence. Treating ANY completed
+  // stage (e.g. sewing) as delivery fabricated "0.0 days average turnaround"
+  // for orders that were never delivered.
+  const deliveredCompletions = getProductionStages(order)
+    .filter((stage) => isDeliveryStage(stage) && isStageComplete(stage))
     .map((stage) => parseDate(stage.completedAt) || parseDate(stage.updatedAt))
     .filter(Boolean) as Date[];
 
-  if (!completedStages.length) return null;
+  if (!deliveredCompletions.length) return null;
 
-  completedStages.sort((a, b) => a.getTime() - b.getTime());
-  return completedStages[completedStages.length - 1];
+  deliveredCompletions.sort((a, b) => a.getTime() - b.getTime());
+  // Final delivery moment: if a delivery was reopened and completed again,
+  // the last completion is when the order ended up delivered.
+  return deliveredCompletions[deliveredCompletions.length - 1];
 }
 
 function parseDate(value?: string | Date | null) {
