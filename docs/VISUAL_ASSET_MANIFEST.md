@@ -52,8 +52,8 @@ Technical validation = automated (format/dimensions/size/integrity). **Automated
 **Garment Visual Taxonomy — evidence-locked (mandate §4):** repository VERIFIED canonical garment types (`measurements/definitions.ts` `applicableGarmentTypes`): **shirt · trouser · kaftan · dress · jacket**. Classification: one style card per canonical type = **REQUIRED** (Flow B category selection, Stage 8) · second/third variants per type = OPTIONAL (deferred until Stage 8 UX proves choice language) · suits/runway/editorial variants = DEFERRED · **children's wear = DEFERRED — no canonical domain category exists** (not invented). Presentation grammar for ALL garment cards: flat-lay, top-down, neutral warm-grey surface, soft even studio light, garment-only (no model, no face, no props), clear silhouette + visible construction (seams/collar/cuff/hem), palette-consistent fabrics.
 | VA-FAB-01..08 (macro cotton/linen/silk/wool/ankara/kente/lace/denim) | `fabrics/fabric-*-macro-01-{card-800,thumb-480}.webp` | Fabric reference | material recognition (Stage 8/9) — texture character | 1024×1024 | see exception | CACHE ON DEMAND | PASS | LIMITED | PENDING | VISUALLY_PROVISIONAL |
 | VA-FAB-D01..04 (drape silk/denim/kente/lace — one per behavioral group) | `fabrics/fabric-*-drape-01-card-800.webp` | Fabric reference | drape *behavior* (Stage 8/9 material context) | ~1024px | 11–37K | CACHE ON DEMAND | PASS | LIMITED | PENDING | VISUALLY_PROVISIONAL |
-| VA-GAR-01..04 (shirt/trouser/kaftan/dress; jacket pending batch 4 completion) | `garments/garment-*-01-{card-800,thumb-480}.webp` | Garment selection | Flow B category selection (Stage 8) — flat-lay grammar, evidence-locked taxonomy | 1408×768 | 4–5K ⚠ | CACHE ON DEMAND | PASS | LIMITED | PENDING | VISUALLY_PROVISIONAL |
-| VA-ILL | — | illustrations | batch 5 pending (grammar specified above) | — | — | — | — | — | — | — |
+| VA-GAR-01..05 (shirt/trouser/kaftan/dress/jacket) | `garments/garment-*-01-{card-800,thumb-480}.webp` | Garment selection | Flow B category selection (Stage 8) — flat-lay grammar, evidence-locked taxonomy: **coverage complete; visual acceptance provisional** | 1408×768 | 4.3–7.2K ⚠ | CACHE ON DEMAND | PASS | LIMITED | PENDING | VISUALLY_PROVISIONAL |
+| VA-ILL-01..07 (no-customers/orders/production/materials/reports/results/activity) | `illustrations/empty-states/empty-state-*-01-card-800.webp` | Empty-state system | Stage 5 primitives + all screens; hierarchy message→action→illustration | 1408×768 | 4.7–9.3K | PRECACHE REQUIRED | PASS | LIMITED | PENDING | VISUALLY_PROVISIONAL |
 
 **⚠ Garment-card size flag (honest review signal, §9):** 4–5 KB at 800 px is atypically small for photographic content — may indicate overly plain/low-detail imagery. TECHNICALLY VALIDATED only; **HUMAN REVIEW REQUIRED — REPLACEMENT candidate if detail proves insufficient.** Drape references (11–37 KB) plausible. Fabric-texture exception extended: lace 102K · denim 115K @card-800 (same §10 rationale as other macros).
 
@@ -76,5 +76,59 @@ Technical validation = automated (format/dimensions/size/integrity). **Automated
 ## 6. Usage map (§21 original mandate)
 Landing hero + craftsmanship → **Stage 11 Public Landing** · Production imagery → **Stage 10 Production Workflow** · Fabric macro/drape → **Stage 8/9 material workflow** · Garment cards → **Stage 8 Customer/Order workflow** · Empty states → **Stage 5 primitives** + implementation stages · Brand (existing, untouched) → all surfaces, PRECACHE REQUIRED · `_originals/` → NON-RUNTIME.
 
-## 7. Integrity register (§18 checklist — updated at completion gate)
-Pending: fabric/garment/illustration coverage · final coherence review · completion checklist.
+## 7. Garment Card Quality Review Register (mandate §1)
+
+Diagnosis (§5 classification, evidence-based): garment **source** JPEGs are 62–147 KB @1408×768 vs 156–240 KB for craft scenes; a near-lossless q95 re-encode of `garment-shirt-01` reaches only 28 KB → small derivatives are explained by **(A) source image complexity** (flat-lay grammar on matte ground compresses well), **not (B) aggressive optimization**. Whether that equals **(D) genuine lack of visual information** is **(E) UNKNOWN WITHOUT HUMAN INSPECTION.** No replacements generated (§5 constraint honored).
+
+| Garment | Source | Purpose | Tech | Card size | Expected visual info | Auto-insp | Human | Status | Replacement risk | Stage 5 action |
+|---|---|---|---|---|---|---|---|---|---|---|
+| shirt | `garment-shirt-01.jpg` (69K) | category selection | VALID | 5.4K | silhouette, collar/cuff/construction, ivory cotton form, ground separation | LIMITED | REQUIRED | VISUALLY_PROVISIONAL | MEDIUM | EVALUATE IN CONTEXT |
+| trouser | `garment-trouser-01.jpg` (108K) | category selection | VALID | 5.5K | silhouette, creases/waistband/pockets, charcoal wool, separation | LIMITED | REQUIRED | VISUALLY_PROVISIONAL | MEDIUM | EVALUATE IN CONTEXT |
+| kaftan | `garment-kaftan-01.jpg` (77K) | category selection | VALID | 5.0K | silhouette, neckline/cuff embroidery, wide sleeve drape | LIMITED | REQUIRED | VISUALLY_PROVISIONAL | MEDIUM | EVALUATE IN CONTEXT |
+| dress | `garment-dress-01.jpg` (63K) | category selection | VALID | 4.3K | silhouette, waist seams, neckline, burgundy form | LIMITED | REQUIRED | VISUALLY_PROVISIONAL | MEDIUM | EVALUATE IN CONTEXT |
+| jacket | `garment-jacket-01.jpg` (147K) | category selection | VALID | 7.2K | silhouette, notch lapels, buttons, navy suiting | LIMITED | REQUIRED | VISUALLY_PROVISIONAL | LOW-MED | EVALUATE IN CONTEXT |
+
+Jacket discrepancy note (§2): jacket source is materially richer (147 KB → 7.2 KB card) than the other four; proportionate behavior, no anomalous normalization — **documented, not reconciled silently**.
+
+## 8. Empty-State Family Coherence Register (§4)
+
+All 7 from one grammar spec; per-field verification is auto-limited (no machine vision) — **structural** conformity verified at generation time (single prompt family, fixed constraints), visual conformity pending human review.
+
+| Check | Status |
+|---|---|
+| Line weight consistency (2px-equivalent ink) | SPEC-CONFORMANT / visual: LIMITED, PENDING |
+| Single gold accent per illustration | SPEC-CONFORMANT / visual: LIMITED, PENDING |
+| Stitch-dash family signature present | SPEC-CONFORMANT / visual: LIMITED, PENDING |
+| ≥60% whitespace | SPEC-CONFORMANT / visual: LIMITED, PENDING |
+| ≤2 principal elements | SPEC-CONFORMANT / visual: LIMITED, PENDING |
+| Object scale consistency | LIMITED, PENDING |
+| Emotional tone (calm/craft) | LIMITED, PENDING |
+| Background: opaque warm-ivory (NOT transparent — webp derivatives are flattened; alpha-channel variant is a Stage 5 decision if needed) | VERIFIED (opaque) |
+
+Family status: TECHNICALLY_VALIDATED · AUTO-INSPECTION: LIMITED · HUMAN REVIEW: PENDING · VISUALLY_PROVISIONAL. Concept mapping validated to Stage 3 taxonomy: NO CUSTOMERS/ORDERS/PRODUCTION/MATERIALS (Workspace entities) · NO REPORT DATA (`no-reports`) · NO RESULTS (search) · NO ACTIVITY (feed/dashboard).
+
+## 9. Coverage audit (§6)
+
+**A Public/landing:** 3 heroes + 6 story moments → hero storytelling ✓, craftsmanship ✓, MEASURE→FINISH narrative ✓.
+**B Tailor Workspace:** garment category selection ✓ (5 canonical cards, provisional) · fabric reference ✓ (8 macro + 4 drape) · production context ✓ (5 distinct moments) · empty states ✓ (7-family).
+**C Fabric system:** surface characteristics ✓ (8 macros) · flowing ✓ silk · structured ✓ denim · sheer/delicate ✓ lace · traditional identity ✓ kente (macro + drape) & ankara (macro).
+**D Production system:** measurement / cutting (layout) / sewing (assembly) / fitting (pinning on form) / finishing (press) — 5 distinct operational moments vs workflow spine ✓; embroidery stage imagery intentionally folded into "sewing/assembly" (not separately acquired — canonical stage *model* untouched; imagery is human-concept, §10 original mandate).
+**E Empty states:** coherent 7-member family ✓ (provisional).
+**F Reuse classification:** heroes/story = PUBLIC-surface-specific · production = cross-surface (Workspace Stage 10 + Public MAKE section reuse) · fabrics = cross-surface (Stage 8/9 + Public MATERIALS) · garments = Workspace Stage 8 (+ future Public marketing OPTIONAL) · illustrations = cross-surface PRECACHE · `_originals/` = NON-RUNTIME. No remaining product moment lacks required visual support within the accepted provisional-quality caveat.
+
+## 10. Deferred assets (controlled omissions — architecture, not gaps)
+
+1. Garment variants 2–3 per type — OPTIONAL until Stage 8 proves choice language. 2. Category-hero/detail garment shots — DEFERRED (style cards serve Stage 8). 3. Children's/specialty garments — **unsupported by repository taxonomy**. 4. Cotton/linen/wool/ankara drapes — redundant (behavior covered). 5. Embroidery-specific process image — folded into sewing/assembly. 6. Authentic documentary photography (all categories) — requires licensed/commissioned acquisition; gap register open. 7. Dark-mode asset variants — V1 deferred. 8. Phase 19/20/21 assets — out of scope by standing boundary. 9. Transparent-alpha illustration variants — Stage 5 decision.
+
+## 11. Human review queue
+
+**P0 — before UI implementation:** all 5 garment cards (detail sufficiency; replacement risk MEDIUM) · 3 heroes (art-direction fit). **P1 — during Stage 5:** 7 empty-state illustrations (family coherence on real surfaces) · 4 drapes · fabric macro quality-vs-byte tuning in UI context (exception review: YES). **P2 — before public release:** 6 craftsmanship story images · production set as used in Stage 10 · PWA/manifest visual coherence. **P3 — future acquisition:** authentic photography per gap register; optional garment variants; dark-mode variants.
+
+## 12. Stage 5 handoff
+
+**May use immediately (technically validated):** token-gap work (no assets involved); asset paths in *design specs only*. **Must evaluate in real UI context:** fabric macro byte/quality tuning (documented mitigations); garment cards 800/480 in card layouts; illustration scale/whitespace on real surfaces; hero AVIF/WebP loading strategy (runtime = `assets/**` derivatives only). **Must not use until human review:** any P0 asset in shipped UI (garment cards, heroes). **Intentionally deferred:** §10 list. **Open gaps:** authentic photography (register §2). Runtime/original separation: `_originals/` = SOURCE ARCHIVE, NON-RUNTIME, never bundled/precached.
+
+## 13. Completion checklist (§10)
+
+Visual system 7/7 ✓ · Governance 6/6 ✓ (manifest, provenance, AI disclosure, rejected sources, photography gap, deferred list) · Technical integrity 5/5 ✓ (68 derivatives readable 0 corrupt; runtime/original separation; optimization documented; exceptions explicit; no unexplained duplicates) · Quality governance 5/5 ✓ (technical validation complete; no false approval claims; review queue P0–P3; replacement candidates flagged; Stage 5 evaluation documented) · Scope integrity 5/5 ✓ (zero UI/CSS/component/route changes; Stage 5 not begun).
+
