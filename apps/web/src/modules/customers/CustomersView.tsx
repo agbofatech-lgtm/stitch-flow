@@ -32,8 +32,39 @@ import {
 } from '../../design-system';
 import { emptyStateSrc } from '../workspace/assets';
 import { OrderWorkflow } from '../orders/OrderWorkflow';
+import { IntelligenceCard, MissingDataNotice } from '../intelligence/IntelligenceCard';
+import { CANONICAL_SNAPSHOT_FIELDS } from '../intelligence/orderIntelligence';
+import type { GarmentMeasurements } from '../../shared/types';
 
 /* ── Customer context (single selected customer) ────────────────────────── */
+/** Stage 9 §9.1 — deterministic measurement context, one card only.
+ *  The full intelligence surface stays in CustomerDetail (no duplication). */
+function MeasurementContextStrip({ customerId }: { customerId: string }) {
+  const { getCustomerMeasurementProfiles } = useApp();
+  const profiles = useMemo(() => getCustomerMeasurementProfiles(customerId), [customerId, getCustomerMeasurementProfiles]);
+  const latest = useMemo(
+    () => [...profiles].sort((a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime())[0] ?? null,
+    [profiles],
+  );
+  if (!latest) {
+    return (
+      <IntelligenceCard kind="missing" title="Measurement readiness"
+        disclosure={{ summary: 'What this means', body: <>No measurement profile exists for this customer on this device. Values can be captured during order creation, or a full profile can be added in the customer detail below.</> }}>
+        <MissingDataNotice>Measurement profile required — none exists on this device yet.</MissingDataNotice>
+      </IntelligenceCard>
+    );
+  }
+  const numeric = latest.measurements as Partial<Record<keyof GarmentMeasurements, number>>;
+  const captured = CANONICAL_SNAPSHOT_FIELDS.filter(({ key }) => typeof numeric?.[key] === 'number').length;
+  return (
+    <IntelligenceCard kind="deterministic" title="Measurement readiness"
+      basedOn={[`Profile: ${latest.label || 'latest'}`, latest.updatedAt ? `updated ${format(new Date(latest.updatedAt), 'd MMM yyyy')}` : 'no update date recorded']}
+      disclosure={{ summary: 'What this means', body: <>Readiness for a specific garment is checked during order creation — each garment type has its own required measurement set (pattern adapter, Phase 14). Profiles carry no version number; the update date above is the honest chronology.</> }}>
+      <Body className="text-sm text-ink">{captured} of {CANONICAL_SNAPSHOT_FIELDS.length} canonical measurement fields captured on “{latest.label || 'latest profile'}”.</Body>
+    </IntelligenceCard>
+  );
+}
+
 function CustomerWorkspace({ customer, onBack }: { customer: ApiCustomer; onBack: () => void }) {
   const { setView } = useApp();
   const [ordering, setOrdering] = useState(false);
@@ -78,6 +109,9 @@ function CustomerWorkspace({ customer, onBack }: { customer: ApiCustomer; onBack
           </Button>
         </div>
       </div>
+
+      {/* Stage 9 — deterministic measurement context (full surface stays in CustomerDetail) */}
+      <MeasurementContextStrip customerId={customer.id} />
 
       {/* Active work */}
       <section aria-label="Active work" className="flex flex-col gap-2">

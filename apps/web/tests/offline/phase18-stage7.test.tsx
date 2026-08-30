@@ -12,6 +12,7 @@ const mockApp = {
   customers: [{ id: 'c1', fullName: 'Abena Ofori' }],
   fabricRecords: [{ id: 'm1', name: 'Ankara print', isActive: true }],
   getLowStockMaterials: () => [{ id: 'm1', name: 'Ankara print' }],
+  getCustomerMeasurementProfiles: () => [],
   setView: vi.fn(),
   currentMember: { role: 'owner', user: { fullName: 'Ama Ofori' } },
   currentWorkspace: { id: 'ws1', name: 'Accra Atelier', defaultCurrency: 'GHS' },
