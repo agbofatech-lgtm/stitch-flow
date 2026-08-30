@@ -66,12 +66,17 @@ describe('CH1 · Operational initialization seeds EMPTY collections', () => {
 
 /* ══ CH4–CH6 · Reports honest classification + accessible charts ════════ */
 describe('CH4 · Reports data-source classification (§6.3)', () => {
-  it('carries the "Locally calculated" scope notice and never claims live/synced', () => {
+  it('carries the "Locally calculated" scope notice and never claims live/real-time', () => {
+    // PHASE 18.5: Reports now consumes the workspace sync mirror, so evidenced
+    // disclosures — "Last synced …" / "(not yet synced)" — are honest and
+    // allowed. The claim ban keeps its original intent: no "live"/"real-time",
+    // and "synced" only as a qualified disclosure, never a bare status claim.
     render(<Reports />);
     const notice = document.querySelector('[data-reports-scope="local"]');
     expect(notice).toBeTruthy();
     expect(notice!.textContent).toMatch(/Locally calculated/);
-    expect(document.body.textContent).not.toMatch(/\blive\b|\breal-time\b|\bsynced\b/i);
+    expect(document.body.textContent).not.toMatch(/\blive\b|\breal-time\b/i);
+    expect(document.body.textContent).not.toMatch(/(?<!Last )(?<!yet )synced/i);
   });
 });
 
