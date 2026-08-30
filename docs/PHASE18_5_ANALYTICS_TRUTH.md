@@ -188,7 +188,18 @@ Baseline gates re-verified at `61dcde8` before validation: tsc 0 errors · 316/3
 
 ## Part H2 — Browser re-validation of the implemented truth layer (post-merge, 2026-08-30)
 
-Re-execution of J1–J7 against the merged Stage 5+ implementation (real PostgreSQL + Redis + headless Chromium) — see `PHASE18_5_FINAL_CERTIFICATION_REPORT.md` §10.
+After integrating the parallel implementation commit (`fdaef0b`, Part R) via merge `dd1a461`, the full J1–J7 suite was re-executed against the **implemented** app on the same real stack (fresh workspace, one UI login, REST-only seeding). Evidence: `sfv-evidence/p185-postmerge/`. Gates pre-run: web tsc 0 · **vitest 343/343 (23 files)** · backend tsc 0.
+
+| Check | Result on implemented app |
+|---|---|
+| J1–J7 (full suite) | **7/7 PASS** — honest empty, server propagation, offline honesty, chart integrity/a11y all unchanged and green |
+| **F-1 closure (verified live)** | `/dashboard/summary` now returns `totalRevenue: 300` (= captured payments) **and** `totalOrderValue: 3300` separately — the mislabel is dead at the contract; live Home still renders no revenue figure (canonical semantics correct) |
+| **F-3/AD2 closure (verified live)** | `/reports/summary` → **404** (retired); entitlement-gated `/reports/low-stock-materials` → **200** (retained, as designed) |
+| **Provenance label (verified live)** | Reports carries `data-reports-scope="local"` + the "Locally calculated — from the records stored on this device…" notice |
+| **F-9 / F-6 (still open, honestly recorded)** | The Home "At a glance" chip row still mixes planes (`CUSTOMERS 0` device-local beside server `ACTIVE ORDERS 1` / `PENDING BALANCES GHS 200.00`, with server `totalCustomers: 2` and a "No customers yet" empty state) — `HomeView` was not part of the implementation commit; the projection module is the ready seam for this remaining reconciliation |
+| S8 / F-2 | Re-confirmed unchanged (UI materials device-local, invisible to server; Reports honest-empty beside a server-rich session) |
+
+**Verdict: the implemented analytics truth layer holds in the real browser + real backend. One known cosmetic-but-real residual (F-9 chip-row provenance) is inherited by Phase 19 as the first candidate for the projection seam.**
 
 ## Part R — Recovery & continuation (2026-08-30, new agent/session)
 

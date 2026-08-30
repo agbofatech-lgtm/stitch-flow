@@ -1,0 +1,211 @@
+{
+  "runId": "p185v3-postmerge-2026-08-30T19:10:01.307Z",
+  "probeVersion": 3,
+  "startedAt": "2026-08-30T19:10:01.308Z",
+  "stack": {
+    "web": "http://localhost:5173",
+    "api": "http://127.0.0.1:3000"
+  },
+  "journeys": {
+    "J1-fresh-truth": {
+      "id": "J1-fresh-truth",
+      "startedAt": "2026-08-30T19:10:01.433Z",
+      "result": {
+        "pass": true,
+        "chipsZero": true,
+        "pendingChip": "PENDING BALANCESGHS 0.00\n\nNo c",
+        "pendingDash": true,
+        "emptyState": true,
+        "footnote": true,
+        "reportsEmptyCharts": 5,
+        "reportsScopeLabel": true,
+        "materialsHonestEmpty": true
+      },
+      "pass": true,
+      "consoleErrors": [],
+      "failedRequests": [],
+      "finishedAt": "2026-08-30T19:10:12.370Z"
+    },
+    "J2-server-truth": {
+      "id": "J2-server-truth",
+      "startedAt": "2026-08-30T19:10:12.370Z",
+      "result": {
+        "pass": true,
+        "seeded": {
+          "orders": 2,
+          "invoices": 1,
+          "payments": 1
+        },
+        "homeShowsActiveOrder": true,
+        "homeActiveOrdersChip": "ACTIVE ORDERS1",
+        "homePendingChip": "PENDING BALANCESGHS 200.00\n\nNo custo",
+        "financeShowsInvoice": true,
+        "productionShowsDelivered": true,
+        "invoiceRecalculated": {
+          "id": "1788117012427",
+          "customerId": "1788117012377",
+          "orderId": "1788117012405",
+          "invoiceNumber": "INV-P185-1",
+          "status": "partial",
+          "dueDate": "2026-09-06T00:00:00.000Z",
+          "totalAmount": 800,
+          "amountPaid": 600,
+          "balanceDue": 200,
+          "currency": "GHS",
+          "notes": "",
+          "createdAt": "2026-08-30T19:10:12.427Z",
+          "items": []
+        }
+      },
+      "pass": true,
+      "consoleErrors": [],
+      "failedRequests": [],
+      "finishedAt": "2026-08-30T19:10:21.709Z"
+    },
+    "J3-F1-revenue-mislabel": {
+      "id": "J3-F1-revenue-mislabel",
+      "startedAt": "2026-08-30T19:10:21.709Z",
+      "result": {
+        "pass": true,
+        "api_totalRevenue": 300,
+        "api_totalOrderValue": 3300,
+        "api_totalOrders": 2,
+        "api_pendingBalances": 200,
+        "capturedPaymentsSum": 300,
+        "F1_fixed_postmerge": true,
+        "retiredPlane": {
+          "reportsSummary": 404,
+          "lowStock": 200
+        },
+        "liveHomeShowsRevenueCard": false,
+        "liveHomeRevenueVerdict": "no revenue figure in live Home (canonical semantics now correct at contract: totalRevenue=captured payments, totalOrderValue separate)",
+        "sourceFacts": {
+          "note": "pre-merge findings F-8/F-9 recorded in sfv-evidence/p185 (61dcde8 state); this run validates the merged implementation"
+        }
+      },
+      "pass": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "failedRequests": [
+        "HTTP 404 http://localhost:5173/reports/summary"
+      ],
+      "finishedAt": "2026-08-30T19:10:25.519Z"
+    },
+    "J4-F2-reports-local-blind": {
+      "id": "J4-F2-reports-local-blind",
+      "startedAt": "2026-08-30T19:10:25.519Z",
+      "result": {
+        "pass": true,
+        "reportsEmptyCharts": 5,
+        "reportsSrOnlyCount": 1,
+        "reportsScopeAttr": "local",
+        "scopeLabel": "Locally calculated — from the records stored on this device. Server workspace totals are shown in Home; payment truth is server-authoritative in Finance.",
+        "serverContext": "same session: 2 orders/1 invoice/1 payment on server (J2), 0 device-local records",
+        "F2_confirmed": true
+      },
+      "pass": true,
+      "consoleErrors": [],
+      "failedRequests": [],
+      "finishedAt": "2026-08-30T19:10:28.326Z"
+    },
+    "J5-materials-device-local": {
+      "id": "J5-materials-device-local",
+      "startedAt": "2026-08-30T19:10:28.326Z",
+      "result": {
+        "pass": true,
+        "materialVisibleLocally": true,
+        "homeMaterialsChipAfterAdd": "MATERIALS1",
+        "homeCustomersChip": "CUSTOMERS0",
+        "serverTotalCustomers": 2,
+        "F6_live_confirmed": true,
+        "serverSeesUiMaterial": false,
+        "S8_reconfirmed": true,
+        "note": "Home chips provenance (HomeView.tsx:148-153): Customers/Materials=LOCAL, Active orders/Pending balances=SERVER"
+      },
+      "pass": true,
+      "consoleErrors": [],
+      "failedRequests": [],
+      "finishedAt": "2026-08-30T19:10:34.642Z"
+    },
+    "J6-offline-honesty": {
+      "id": "J6-offline-honesty",
+      "startedAt": "2026-08-30T19:10:34.642Z",
+      "result": {
+        "pass": true,
+        "offlineHomeHonestySignal": "ErrorState \"Live figures unavailable\"",
+        "offlineHomePendingChip": "PENDING BALANCES—\n\nNo customer",
+        "offlineReportsStillHonest": true,
+        "onlineAgainRestoresServerTruth": true
+      },
+      "pass": true,
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+        "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+      ],
+      "failedRequests": [
+        "http://localhost:5173/dashboard/summary :: net::ERR_INTERNET_DISCONNECTED",
+        "http://localhost:5173/orders :: net::ERR_INTERNET_DISCONNECTED",
+        "http://localhost:5173/invoices :: net::ERR_INTERNET_DISCONNECTED",
+        "http://localhost:5173/dashboard/summary :: net::ERR_INTERNET_DISCONNECTED",
+        "http://localhost:5173/orders :: net::ERR_INTERNET_DISCONNECTED",
+        "http://localhost:5173/invoices :: net::ERR_INTERNET_DISCONNECTED",
+        "http://localhost:5173/assets/illustrations/empty-states/empty-state-no-customers-01-card-800.webp :: net::ERR_INTERNET_DISCONNECTED"
+      ],
+      "finishedAt": "2026-08-30T19:10:46.167Z"
+    },
+    "J7-chart-integrity-a11y": {
+      "id": "J7-chart-integrity-a11y",
+      "startedAt": "2026-08-30T19:10:46.167Z",
+      "result": {
+        "pass": true,
+        "reports": {
+          "charts": 5,
+          "emptyCharts": 5,
+          "srOnly": 1,
+          "srSamples": [
+            "Skip to content"
+          ],
+          "headings": [
+            "Reports",
+            "Reports",
+            "Production KPI Dashboard",
+            "Orders by Stage",
+            "No production stage data",
+            "Turnaround Snapshot",
+            "Advanced Production Reports",
+            "No material consumption yet",
+            "No bottleneck data yet",
+            "Revenue by Month",
+            "Revenue by Week",
+            "Paid vs Unpaid",
+            "Overdue Invoice Trend",
+            "Customer Intelligence"
+          ]
+        },
+        "verdict": "honest-empty charts WITH text alternatives (chart-integrity + a11y rules hold on real data-free device)"
+      },
+      "pass": true,
+      "consoleErrors": [],
+      "failedRequests": [],
+      "finishedAt": "2026-08-30T19:10:49.081Z"
+    }
+  },
+  "serverTruth": {
+    "orderValue": 3300,
+    "collected": 300,
+    "orderCount": 2,
+    "paymentCount": 1
+  },
+  "account": {
+    "email": "p185probe+9b717f@phase185.test",
+    "workspaceId": "ws-318af5bd-7537-462c-b93c-6457901c2503",
+    "userId": "48bf3510-bc42-4ad8-aca5-f81314e27ebf"
+  },
+  "finishedAt": "2026-08-30T19:10:49.181Z"
+}

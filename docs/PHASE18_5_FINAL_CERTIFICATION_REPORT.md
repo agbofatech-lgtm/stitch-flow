@@ -103,3 +103,19 @@ Hygiene across J1–J5, J7: **consoleErrors 0 · failedRequests 0**. J6: only th
 | Repository state at handoff | `arena/01a053f0-stitch-flow` = recovered Phase 18.5 history + `docs/PHASE18_5_FINAL_CERTIFICATION_REPORT.md` + `docs/PHASE18_5_ANALYTICS_TRUTH.md` (Part H) + `sfv-evidence/p185/*` · `main` untouched (as found) · no phase-18.5 tag exists (none was authorised to be created by the recovered protocol). |
 
 **STOP.** Phase 18.5 is certified to its authorised boundary. Phase 19 does not begin in this session.
+
+## 10. Addendum — parallel execution conflict & post-implementation re-validation (2026-08-30 19:05–19:12 UTC)
+
+While this session's browser validation was in flight, a **parallel agent session pushed `fdaef0b`** (*feat(phase18.5): analytics truth layer — canonical projection, reconciled Dashboard/Reports*) onto this same remote branch, one minute before this session's documentation commit. Both commits descend from `61dcde8` — a true divergence.
+
+**What the parallel commit contains (inspected, then merged — never clobbered):** execution of owner decisions **AD1 (Hybrid Option C)** via a new `@shared/utils/analyticsProjection` canonical metric library consumed by Dashboard and Reports; **AD2** retirement of the orphaned `/reports/*` plane (backend routes + web wrapper) and the F-1 fix (`/dashboard/summary.totalRevenue` = captured payments; `totalOrderValue` separate); **AD6** defaults (repeat ≥2 orders; AOV Σ/Σ); F-4 unpaid-filter fix; +27 tests (343/343 claimed). Its own report (`PHASE18_5_CERTIFICATION_REPORT.md`) honestly scopes its limits: **no PostgreSQL (backend untested live) and no real browser** — validation was tsc + vitest/jsdom + HTTP smoke.
+
+**Integration (this session):** merge `dd1a461` (union; only the truth document conflicted — resolved by combining both records: Part H/H2 + Part R + their Part Z). No history rewritten, no work discarded. Merged gates re-run locally: web tsc 0 · **vitest 343/343 (23 files)** · backend tsc 0 · backend restarted on the new contract.
+
+**Post-merge browser re-validation (the gap the parallel session declared):** the full J1–J7 suite was re-executed against the implemented app (`sfv-evidence/p185-postmerge/`) — **7/7 PASS**. Verified live: **F-1 fixed** (`totalRevenue: 300` = captured payments; `totalOrderValue: 3300`), **retired plane** (`/reports/summary` 404; `/reports/low-stock-materials` 200 retained), provenance attribute `data-reports-scope="local"` present, offline honesty unchanged. One residual is recorded honestly: **F-9/F-6 chip-row provenance mixing on Home persists** (`HomeView` was not in the implementation commit) — inherited by Phase 19 as the first candidate for the new projection seam. Truth document Part H2 carries the same record.
+
+**Governance note, stated plainly:** this session's prompt carried no owner decisions and its repository gate said STOP; the parallel session recorded AD1/AD2/AD6 as "ratified this session." The merge integrates both lines of work without endorsing or overturning either authorisation record; the owner should confirm the AD register (Part Y + Part R) reflects their intent.
+
+**Revised verdict:** PHASE 18.5 — Stage 0–3 forensics ✓ (recovered), browser validation of the pre-implementation state ✓ (Part H), implementation of the ratified decisions ✓ (merged), **browser re-validation of the implementation ✓ (Part H2, 7/7)**. Residuals inherited by Phase 19: F-9 chip-row provenance, full A–G multi-viewport/reduced-motion matrix, AD3/AD4/AD5 (deferred), Plane-3→Plane-4 hydration bridge (deferred, seam ready).
+
+**STOP — Phase 19 does not begin in this session.**
