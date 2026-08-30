@@ -208,6 +208,19 @@ export function getReadyForDeliveryCount<T extends MinimalOrder>(
   }).length;
 }
 
+/** PHASE 18.5 — explicit evidence check: are there delivered orders WITH
+ *  created→delivered timing? Distinguishes "no measurement" (N/A) from a real
+ *  0-day turnaround (AT4/AT8). */
+export function hasTurnaroundEvidence<T extends MinimalOrder>(
+  orders: T[],
+  range?: ReportingDateRange
+) {
+  const scopedOrders = range ? filterOrdersByDateRange(orders, range) : orders;
+  return scopedOrders.some(
+    (order) => !!getDeliveredAt(order) && !!parseDate(order.createdAt)
+  );
+}
+
 export function getAverageTurnaroundDays<T extends MinimalOrder>(
   orders: T[],
   range?: ReportingDateRange
