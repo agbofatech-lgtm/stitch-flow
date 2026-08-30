@@ -43,6 +43,8 @@ Dashboard→HomeView (REPLACED content; old Dashboard.tsx retained on disk unref
 
 ## L. Known limitations
 - Customer edit/delete actions from the old list are not yet surfaced in the new list (capabilities exist in `customerApi`; exposing them = small follow-up; legacy screen retained). UNRESOLVED (owner preference).
+  - **[Stage 13 correction]** The pre-Stage-13 audit verified that only *edit* exists in `customerApi` — customer **delete never existed server-side** (no DELETE route; only `deleted_at IS NULL` filters). Edit was made reachable again in Stage 13 (`Edit details` in the customer workspace). Delete remains absent by design, not deferred.
+
 - Payments per customer shown via Finance only (invoice→customer linkage exists but a per-customer financial tab is Stage 8+/Finance-stage scope).
 - ModalShell retains legacy visual styling (slate palette) — deliberate: reused validated behavior; visual refresh deferred to avoid scope creep (documented, not silent).
 - DOM-level browser validation only (no vision); WCAG audit remains Stage 13.
