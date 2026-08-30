@@ -25,6 +25,17 @@ import {
   type ValueInput,
 } from './validationService';
 
+/**
+ * Canonical measurement-profile identifier contract (Phase 13).
+ *
+ * Every profile id is issued below as `mp-<uuid>` (createProfile and
+ * newProfileVersion are the ONLY issuance sites). Downstream consumers —
+ * including the Phase 17 AI routes — must validate against THIS shape, never
+ * a bare UUID: the id is an opaque domain string owned by this module.
+ */
+export const MEASUREMENT_PROFILE_ID_REGEX =
+  /^mp-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export interface ProfileFull {
   profile: MeasurementProfile;
   sets: (MeasurementSet & { values: MeasurementValue[] })[];

@@ -28,6 +28,7 @@ import { ApiError } from '../utils/apiError';
 import { pool } from '../config/db';
 import { getProviderStatus } from '../modules/ai/aiGateway';
 import * as advisor from '../modules/ai/tailoringAdvisor';
+import { MEASUREMENT_PROFILE_ID_REGEX } from '../modules/measurements/profileService';
 import { auditLogService } from '../services/auditLogService';
 import type { AIAdvisory } from '../modules/ai/types';
 
@@ -139,7 +140,20 @@ aiRoutes.get(
 
 aiRoutes.post(
   '/measurement-review/:profileId',
-  validate(z.object({ params: z.object({ profileId: z.string().uuid() }) })),
+  // Cross-phase contract: Phase 13 issues profile ids as `mp-<uuid>` (see
+  // profileService — the only issuance site). A bare-uuid check here rejected
+  // every REAL issued id with 400 "Invalid uuid" (R3 integration defect).
+  // Unknown-but-well-formed ids still 404 inside reviewMeasurements via the
+  // workspace-scoped lookup, and foreign-workspace ids 404 (never leak).
+  validate(
+    z.object({
+      params: z.object({
+        profileId: z
+          .string()
+          .regex(MEASUREMENT_PROFILE_ID_REGEX, 'profileId must be a measurement profile id (mp-<uuid>)'),
+      }),
+    })
+  ),
   asyncHandler(async (req, res) => {
     const caller = callerFrom(req as never);
     guardRateLimit(caller.workspaceId);
