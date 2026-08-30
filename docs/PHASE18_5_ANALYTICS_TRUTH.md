@@ -1,0 +1,177 @@
+# Phase 18.5 — Analytics Truth & Client Business Intelligence
+
+**Status: Stage 0–3 COMPLETE (baseline, forensics, domain truth mapping, metric contract audit). Stage 4 (architecture decision) prepared with evidence — awaiting owner decisions AD1/AD2 before projection-layer implementation.**
+**Principle: One workspace, one business truth.**
+
+---
+
+## Part A — Mission
+
+Establish a trustworthy, unified business-intelligence truth layer for every StitchFlow client workspace before Phase 19 commercialization. Dashboard and Reports must stop operating as competing analytical truths. Every metric must have an explicit definition and traceable provenance. No fabricated data, no invented metrics, no misleading zero-history charts, no duplicated business truth.
+
+Out of scope (Phase boundary): Phase 19 billing/subscriptions/entitlements, Control Center (Plane B), Public API, AI autonomy, 3D, production/finance/materials system rewrites.
+
+## Part B — Baseline (Stage 0, verified 2026-08-30)
+
+| Gate | Result |
+|---|---|
+| Branch / commit | `arena/01a04eef-stitch-flow` @ `7812963` (= remote tip, Stage 14 certified) |
+| Working tree | clean (after standard sandbox re-provision repair: fetch → reset --hard → clean → npm ci) |
+| Tests | **316/316 pass** (21 files). vitest exit 1 due to **3 pre-existing unhandled stderr errors** in `tests/offline/phase18-stage10.test.tsx` (error-boundary exercise throwing inside `ProductionView.tsx:194` during a `.map`) — present at the certified commit, not a regression; tests themselves pass. |
+| TypeScript | **0 errors** (`tsc --noEmit`) |
+| Build | **PASS** |
+| PWA precache | **132 entries / 6418.78 KiB** (unchanged from Stage 14) |
+| Chunks | FinanceView 396 · index 340 · AuthenticatedApp **320** · DesignStudio 72 · Reports 48 · ControlCenter 48 KB |
+| Protected assets | `DesignStudio.tsx` / `patternEngine.ts` / `productionAssistant.ts` — **0-diff** |
+
+## Part C — Forensic method
+
+Read every analytical surface's actual implementation (no assumptions): `Reports.tsx` (2076 lines), `Dashboard.tsx` (940), `DashboardSummaryCard.tsx`, `dashboardRoutes.ts` (181), `reportRoutes.ts` (273), `AppContext.tsx` state origin, `syncEngine.ts`, `shared/lib/db.ts` (AppContext persistence), `db/database.ts` (Dexie), `reporting.ts` (497, the metric library), `Invoices.tsx`, `ProductionBoard.tsx`, `Materials.tsx`, `seedData.ts`, plus consumers/importers of each.
+
+## Part D — Analytics surfaces inventory (evidence table)
+
+| Surface | Location | Data source | Calculation | Authoritative? |
+|---|---|---|---|---|
+| **Dashboard summary cards** | `Dashboard.tsx` + `DashboardSummaryCard.tsx` | **SERVER** `GET /dashboard/summary` (`dashboardApi.ts`) | SQL aggregates (see Part F) | Server-side yes; **but `totalRevenue` is order-value, not revenue** (F-1) |
+| **Dashboard payments chart** | `Dashboard.tsx` | **SERVER** `GET /dashboard/payments-analytics` | Weekly captured-payment sums + trend % | Yes (captured-payment semantic — convergent with Reports' week metric) |
+| **Dashboard lists** (recent orders, overdue invoices, due today) | `Dashboard.tsx` | **SERVER** orders+invoices bundle (`dashboardDataApi.ts`) | Client filters over server arrays | Yes (server records) |
+| **Dashboard inventory summary + low stock** | `Dashboard.tsx` | **LOCAL** `fabricRecords` (AppContext) + `getLowStockMaterials()` | Sums over device-local material records | **DEVICE-LOCAL** (writes never reach server — Stage 14 S8) |
+| **Reports & Analytics (all 6 sections)** | `Reports.tsx` | **LOCAL** AppContext: `payments, invoices, orders, customers, fabricRecords, materialUsages` | One `reportData` useMemo + `@shared/utils/reporting` helpers | **DEVICE-LOCAL projection** — never hydrated from server (F-2) |
+| **Finance view figures** | `Invoices.tsx` | **SERVER** `fetchInvoices()` + payments | Displays server-returned `amountPaid`/`balanceDue`/status | **Yes — server-authoritative money** (Stage 14 certified) |
+| **Production board** | `ProductionBoard.tsx` | **SERVER** `fetchOrders()` | Stage state machine display | Yes (server records; canonical 9 stages) |
+| **Materials view** | `Materials.tsx` | **LOCAL** `fabricRecords` | Summary cards, low-stock, reorder suggestions | **DEVICE-LOCAL** (same store as Reports materials) |
+| **Server reports API** | `reportRoutes.ts` (`/summary`, `/order-status`, `/monthly-revenue`, `/overdue-orders`, `/low-stock-materials`) | SERVER SQL | Aggregates over DB | Server-side yes — **but consumed by NO view** (F-3) |
+| **Server reports client wrapper** | `shared/api/reports.ts` | — | fetch wrappers | **Orphaned** — zero importers (F-3) |
+| **Dexie sync mirror** | `db/database.ts` + `syncEngine.applyDeltaBatch` | **SERVER deltas** → IndexedDB tables (customers, orders, measurementProfiles, invoices, payments, fabrics, materialUsages, productionStages, settings) | none (storage only) | **Authoritative mirror consumed by NO analytics surface** (F-2) |
+| `apps/api` (license/admin/events) | `apps/api/src/routes` | — | — | Plane B adjacent — out of scope, untouched |
+
+## Part E — Domain truth map (the five planes and two seams)
+
+```
+PLANE 1 — SERVER AGGREGATES          PLANE 2 — SERVER RECORDS
+/dashboard/summary                   /orders  /invoices  /payments
+/dashboard/payments-analytics            │
+    │                                    │ consumed by Dashboard lists,
+    │ consumed by                        │ Finance view, Production board
+    │ Dashboard cards                    │
+    ▼                                    ▼
+PLANE 3 — DEXIE SYNC MIRROR  ◄── syncEngine.applyDeltaBatch() writes here
+(IndexedDB: orders/invoices/payments/fabrics/materialUsages/…)
+    │
+    │  ◄── SEAM #1: nothing bridges Dexie → AppContext.
+    │       Synced server data NEVER reaches Reports.
+    ▼
+PLANE 4 — APPCONTEXT LOCAL STORE (localStorage keys, shared/lib/db.ts)
+(payments, invoices, orders, customers, fabricRecords, materialUsages)
+    │
+    │  consumed by Reports (ALL sections) + Materials view
+    │  + Dashboard inventory summary (mixed plane!)
+    ▼
+PLANE 5 — ORPHANED SERVER REPORTS (/reports/* + shared/api/reports.ts — no consumers)
+```
+
+Consequences (empirically certified in Stage 14, now explained structurally):
+- A fresh browser on a data-bearing account: Dashboard shows server numbers; Reports shows honest-empty (S9) — **the same business, two different truths**.
+- Same device over time: Reports reflects only what was *written from this device* (plus mock-seed legacy in old stores).
+- Money shown by Finance (server) can disagree with money shown by Reports (local) for the same workspace.
+
+## Part F — Metric contract audit (current formulas, semantics, defects)
+
+### F.1 Revenue family — **DEFECT F-1 (semantic mislabel)**
+
+| Metric | Where | Current formula | Verdict |
+|---|---|---|---|
+| Dashboard `totalRevenue` | `dashboardRoutes.ts:53-56` | `SUM(orders.total_amount) WHERE status != 'cancelled'` | **This is ORDER VALUE, labelled "revenue"** — never payments. Mislabel; overstates collected money by construction. |
+| Reports "Collected Revenue (month/week)" | `Reports.tsx:83-106` | Σ payments where `paymentStatus='captured'` AND `paidAt` in period | Correct **Collected Revenue** semantic (payment-event timestamp ✓) — but computed over device-local payments only. |
+| Dashboard weekly chart | `dashboardRoutes.ts` `/payments-analytics` | Σ captured payments by day, this week vs previous | Correct semantic, server scope. **Convergent definition with Reports-week** (good) over different record sets. |
+
+Required vocabulary (mandate §8.1) — proposed canonical names, no silent renames in UI until AD1/AD2:
+- **Order Value** = Σ `orders.totalAmount` (excl. cancelled)
+- **Invoiced Value** = Σ `invoices.totalAmount`
+- **Collected Revenue** = Σ captured `payments.amount` (event time = `paidAt`)
+- **Outstanding** = Σ `invoices.balanceDue` over unpaid statuses
+- **Overdue Exposure** = Σ `invoices.balanceDue` where `status='overdue'`
+
+### F.2 Invoice status vocabulary — **DEFECT F-4 (filter misses a status class)**
+
+Canonical statuses **actually written**: creation → `'pending'` (`Orders.tsx:1604`, `OrderCard.tsx:474/488`); payment recalculation → `'partial' | 'paid' | 'pending'` (`paymentRoutes.ts`); overdue upgrade → `'overdue'` from `('pending','partial')` (`invoiceRoutes.ts:144-149`). The type union's `'sent'` is **never written by real flows**.
+
+- Server unpaid filter: `('pending','partial','overdue')` ✓ correct.
+- **Reports unpaid filter: `('sent','partial','overdue')`** (`Reports.tsx:108-110`) — **misses every `'pending'` invoice** (i.e., every fresh unpaid invoice) → local Reports understates Outstanding and customer pending balances whenever local invoices exist.
+
+### F.3 Customer metrics (local plane, `Reports.tsx:121-205`)
+
+| Metric | Current formula | Notes |
+|---|---|---|
+| Orders per customer | count over ALL local orders | includes drafts/cancelled (definition choice to ratify) |
+| Total spent | Σ captured payments matched `payment.orderId → order.customerId` | payment-attribution via local orders |
+| Pending balance | Σ unpaid-invoice `balanceDue` (F-4 filter) | inherits F-4 |
+| Avg order value | Σ`order.totalAmount` / ordersCount | 0 when no orders (honest-empty enforced at render) |
+| **Repeat customer** | `ordersCount >= 2` | existing de-facto definition — ratify in contract |
+| Workspace AOV | mean of per-customer AOV (not Σ/Σ) | **differs from Σ value/Σ orders** — must pick one definition |
+
+### F.4 Order metrics (local, `Reports.tsx:226-260`)
+
+- Status counts over `draft | in_progress | ready | delivered | cancelled` (web order status vocabulary — distinct from invoice vocabulary; keep separate).
+- Completion rate = delivered / non-draft (verify exact denominator in code during implementation; record).
+- Overdue orders: local `getOverdueOrdersCount` (dueDate past + active) — mirrors server `/dashboard/summary.dueAlerts` logic but over local records.
+
+### F.5 Production metrics (local orders + `reporting.ts`)
+
+- `buildOrdersByStage` (canonical 9 stages ✓), `getBottleneckView`, `getAverageTurnaroundDays`, `getReadyForDeliveryCount`, `getMaterialConsumptionByGarmentType`, `resolveReportingDateRange` (presets incl. last30Days/custom).
+- **These helpers are the de-facto metric library but are imported ONLY by Reports.tsx** — Dashboard does not share them (duplication risk). Turnaround/bottleneck already guard missing timestamps (honest N/A — verified Stage 13/14).
+
+### F.6 Financial metrics
+
+Finance view displays server-returned money only (Stage 14 certified) — Reports must consume the **same semantics** (authoritative fields, never recompute) once AD1/AD2 fix the record source.
+
+### F.7 Materials metrics — provenance classification (mandate §23)
+
+| Metric | Source | Classification |
+|---|---|---|
+| Inventory units/value, low stock, reorder suggestions | AppContext `fabricRecords` (device writes only) | **DEVICE-LOCAL** — must never claim synced/workspace truth |
+| Usage/consumption, most-used, slow-moving | AppContext `materialUsages` (device-local; server `POST /materials/usages` exists, unused by UI) | **DEVICE-LOCAL** |
+| Server `/reports/low-stock-materials` | server `fabric_records` | ORPHANED (F-3) |
+
+### F.8 Defect & risk register (forensic output)
+
+| ID | Finding | Impact |
+|---|---|---|
+| **F-1** | Dashboard `totalRevenue` = order value, labelled revenue | Overstates collected money; violates one-definition rule |
+| **F-2** | Dexie sync mirror never feeds AppContext → Reports blind to server data | The root cause of Dashboard/Reports divergence (Stage 14 S9) |
+| **F-3** | Server `/reports/*` + client wrapper orphaned | Dead competing plane; either adopt or retire (AD2) |
+| **F-4** | Reports unpaid filter uses `'sent'`; real unpaid status is `'pending'` | Local Outstanding understated |
+| **F-5** | `reporting.ts` library consumed by Reports only | Metric definitions can drift between views |
+| **F-6** | Dashboard mixes planes (server cards + local materials summary) | Materials numbers on Dashboard are device-local, unlabeled |
+| **F-7** | AOV: mean-of-means vs Σ/Σ ambiguity | Inconsistent customer-value story |
+
+## Part G — Analytics architecture options (Stage 4 preparation — OWNER DECISION AD1/AD2)
+
+Evidence-based analysis; **not decided here**.
+
+| | Option A — server-authoritative | Option B — offline-first projection | **Option C — hybrid (recommended for investigation, per mandate §11-direction)** |
+|---|---|---|---|
+| Record source for analytics | server aggregates (`/dashboard/*`, `/reports/*`) | Dexie mirror (already receives server deltas) | **One projection library** over a unified workspace record set: Dexie mirror as the local input, refreshed by sync; server remains authoritative for money-critical aggregates (parity-checkable) |
+| Dashboard+Reports consistency | both consume server | both consume projection | **both consume the SAME projection module** (extended `reporting.ts`) — one definition, multiple presentations |
+| Offline honesty | "Last synced" cache labels | full offline analytics | offline analytics from mirror + honest `Last synced`/`Updated from this device` labels; server parity check (AT2/AT3) |
+| Cost / risk | loses offline analytics depth; needs endpoint completion | mirror exists but AppContext seam must be bridged carefully (tombstones, anti-resurrection already handled in engine) | bridge is the missing piece either way; C reuses it and keeps server auditability |
+| Notes | simplest truth story | strongest offline story | matches product's offline-first direction AND the mandate's projection-layer diagram |
+
+Recommendation (for owner ratification): **Option C** — bridge the existing Dexie mirror into a read-only analytics projection module (one definition per metric, consumed by Dashboard AND Reports), keep server endpoints as the authoritative cross-check, label provenance honestly, classify materials metrics DEVICE-LOCAL until a separately-authorized materials reconciliation.
+
+## Part Y — Decision register
+
+| ID | Question | Evidence | Status |
+|---|---|---|---|
+| AD1 | Analytics source of truth | Parts D–F | **OPEN — owner decision** (recommendation: Option C) |
+| AD2 | Server vs local projection (adopt or retire `/reports/*`; fix F-1 label) | F-1, F-3 | **OPEN — owner decision** |
+| AD3 | Materials synchronization | Stage 14 S8 + F.7 | Deferred (device-local classification until separately authorized) |
+| AD4 | Analytics export | No export path audited yet (audit due at Stage 15-equivalent) | Future |
+| AD5 | Advanced forecasting | Roadmap | Future |
+| AD6 | Repeat-customer definition (`>=2 orders`) + AOV definition (mean-of-means vs Σ/Σ) | F.3, F.7 | **Proposed for ratification with AD1** |
+
+## Part Z — Phase 19 handoff (to be completed at certification)
+
+Pending: projection layer (Stage 5), Dashboard/Reports reconciliation (6–7), filtering/time (9), offline truth model (10), authorization audit (11), performance (12), accessibility (13), AT suite (29), browser journeys A–G (30), responsive matrix (31), PWA (33), final gates (39).
+
+**STOP: implementation of Stages 5+ requires owner decisions AD1/AD2 (and AD6 ratification).**
