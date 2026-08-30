@@ -239,6 +239,28 @@ orderRoutes.post('/:orderId/production-stages/:stageCode/transition', async (req
       null
     );
 
+    // Phase 18.5 (analytics truth): the transition refreshed the canonical
+    // order snapshot (orders.status + orders.production_stages) inside
+    // syncOrderStageSnapshot. Propagate that snapshot through the change log
+    // so other devices' mirrors — and the analytics projection consuming
+    // them (Dashboard/Reports stage distribution, bottleneck, turnaround) —
+    // see the same stage history. Read-only projection: the stage engine and
+    // its tables remain the authoritative source (F-8 forensics).
+    const updated = await query<OrderRow>(
+      `SELECT * FROM orders WHERE id = $1 AND workspace_id = $2 AND deleted_at IS NULL`,
+      [orderId, req.workspaceId]
+    );
+    if (updated.rows.length > 0) {
+      await recordSyncChange({
+        workspaceId: req.workspaceId!,
+        userId: req.user!.sub,
+        entity: 'orders',
+        entityId: orderId,
+        operation: 'update',
+        payload: mapOrderRow(updated.rows[0]) as unknown as Record<string, unknown>,
+      });
+    }
+
     return res.json(result);
   } catch (err) {
     console.error(err);
