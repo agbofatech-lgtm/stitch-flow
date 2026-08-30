@@ -18,6 +18,10 @@ export interface ApiPayment {
   paidAt: string;
   notes: string;
   createdAt: string;
+  /** Present (true) when the server acknowledged an idempotent replay of the
+   *  same clientMutationId instead of creating a second payment (mirrors
+   *  POST /payments in apps/backend/src/routes/paymentRoutes.ts). */
+  duplicate?: boolean;
 }
 
 /** Body accepted by POST /payments. */

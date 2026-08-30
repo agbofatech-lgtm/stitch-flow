@@ -240,8 +240,8 @@ const [_items, _setItems] = useState([
                           <span className="font-medium text-slate-900">{invoice.invoiceNumber}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-slate-600">{customer?.fullName || '—'}</td>
-                      <td className="px-5 py-4 text-slate-600">{order?.orderNumber || '—'}</td>
+                      <td className="px-5 py-4 text-slate-600">{customer?.fullName || 'ï¿½'}</td>
+                      <td className="px-5 py-4 text-slate-600">{order?.orderNumber || 'ï¿½'}</td>
                       <td className="px-5 py-4">
                         <span
                           className={
@@ -250,7 +250,7 @@ const [_items, _setItems] = useState([
                               : 'text-slate-600'
                           }
                         >
-                          {invoice.dueDate ? format(new Date(invoice.dueDate), 'MMM d, yyyy') : '—'}
+                          {invoice.dueDate ? format(new Date(invoice.dueDate), 'MMM d, yyyy') : 'ï¿½'}
                         </span>
                       </td>
                       <td className="px-5 py-4">
@@ -452,7 +452,7 @@ function InvoiceDetailsModal({
             <div>
               <InvoiceStatusBadge status={invoice.status} />
               <p className="mt-2 text-sm text-slate-500">
-                Due: {invoice.dueDate ? format(new Date(invoice.dueDate), 'MMMM d, yyyy') : '—'}
+                Due: {invoice.dueDate ? format(new Date(invoice.dueDate), 'MMMM d, yyyy') : 'ï¿½'}
               </p>
             </div>
             <div className="text-right">
@@ -469,8 +469,8 @@ function InvoiceDetailsModal({
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <DetailCard label="Customer" value={customer?.fullName || '—'} />
-            <DetailCard label="Order" value={order?.orderNumber || '—'} />
+            <DetailCard label="Customer" value={customer?.fullName || 'ï¿½'} />
+            <DetailCard label="Order" value={order?.orderNumber || 'ï¿½'} />
             <DetailCard
               label="Amount Paid"
               value={formatCurrency(invoice.amountPaid, safeCurrency(invoice.currency, 'GHS'))}
@@ -546,7 +546,7 @@ function InvoiceDetailsModal({
                       </p>
                       <p className="text-xs text-slate-500">
                         {format(new Date(payment.paidAt), 'MMM d, yyyy')}
-                        {payment.notes ? ` • ${payment.notes}` : ''}
+                        {payment.notes ? ` ï¿½ ${payment.notes}` : ''}
                       </p>
                     </div>
                     <span className="text-xs font-medium text-green-700">
@@ -581,7 +581,7 @@ function DetailCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-function InvoiceModal({
+export function InvoiceModal({
   mode,
   customers,
   orders,
