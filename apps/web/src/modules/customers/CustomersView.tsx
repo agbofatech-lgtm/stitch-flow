@@ -31,10 +31,12 @@ import {
   Button, EmptyState, ErrorState, Skeleton, Surface, Section, Body, Label, Numeric, Badge, Input,
 } from '../../design-system';
 import { emptyStateSrc } from '../workspace/assets';
+import { OrderWorkflow } from '../orders/OrderWorkflow';
 
 /* ── Customer context (single selected customer) ────────────────────────── */
 function CustomerWorkspace({ customer, onBack }: { customer: ApiCustomer; onBack: () => void }) {
   const { setView } = useApp();
+  const [ordering, setOrdering] = useState(false);
   const [orders, setOrders] = useState<ApiOrder[] | null>(null);
   const [ordersError, setOrdersError] = useState(false);
 
@@ -45,6 +47,14 @@ function CustomerWorkspace({ customer, onBack }: { customer: ApiCustomer; onBack
   useEffect(load, [customer.id]);
 
   const activeOrders = (orders ?? []).filter((o) => ['draft', 'in_progress', 'ready'].includes(o.status));
+
+  if (ordering) {
+    return (
+      <OrderWorkflow customer={customer}
+        onExit={() => setOrdering(false)}
+        onCompleted={() => { setOrdering(false); setView('orders'); }} />
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6" data-view="customer-workspace">
@@ -62,8 +72,8 @@ function CustomerWorkspace({ customer, onBack }: { customer: ApiCustomer; onBack
               {!customer.phone && !customer.email && <span className="text-ink-mute">No contact details on record</span>}
             </div>
           </div>
-          {/* Stage 8 handoff — existing Orders surface, not the new wizard */}
-          <Button variant="primary" onClick={() => setView('orders')} data-handoff="stage8-orders">
+          {/* Stage 8: the order workflow now launches HERE (customer context retained) */}
+          <Button variant="primary" onClick={() => setOrdering(true)} data-handoff="stage8-order-workflow">
             <Plus className="h-4 w-4" aria-hidden="true" /> New order
           </Button>
         </div>
