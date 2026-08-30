@@ -1,6 +1,6 @@
 # Phase 18.5 — Analytics Truth & Client Business Intelligence
 
-**Status: Stage 0–3 COMPLETE (baseline, forensics, domain truth mapping, metric contract audit). Stage 4 (architecture decision) prepared with evidence — awaiting owner decisions AD1/AD2 before projection-layer implementation.**
+**Status: Stage 0–3 COMPLETE (baseline, forensics, domain truth mapping, metric contract audit). Browser validation J1–J7 executed 2026-08-30 — 7/7 PASS against the real running stack (Part H; full record: PHASE18_5_FINAL_CERTIFICATION_REPORT.md). Stage 4 (architecture decision) prepared with evidence — awaiting owner decisions AD1/AD2 before projection-layer implementation.**
 **Principle: One workspace, one business truth.**
 
 ---
@@ -170,8 +170,24 @@ Recommendation (for owner ratification): **Option C** — bridge the existing De
 | AD5 | Advanced forecasting | Roadmap | Future |
 | AD6 | Repeat-customer definition (`>=2 orders`) + AOV definition (mean-of-means vs Σ/Σ) | F.3, F.7 | **Proposed for ratification with AD1** |
 
+## Part H — Browser validation record (J1–J7, added at certification 2026-08-30)
+
+Executed against the real running application (PostgreSQL 18.4 + Redis 7.2.5 + Express API + web app, headless Chromium 149; fresh workspace per run; one real UI login; server seed data via the product REST API only). Full method, matrices, screenshots (`sfv-evidence/p185/`), probe-defect register, and new forensic facts **F-8…F-11**: see `docs/PHASE18_5_FINAL_CERTIFICATION_REPORT.md` §3–§7.
+
+| Journey | Validates | Result |
+|---|---|---|
+| J1 fresh workspace | Honest empty everywhere (Home chips 0/—, Reports 5×`data-chart-empty`, Materials demo-free) + provenance footnote | PASS (0 console errors) |
+| J2 server truth | Server planes flow to Home (SF-P185-A, ACTIVE ORDERS 1), Finance (INV-P185-1 Total 800 / Paid 600 / Balance 200, explicitly labelled), Production (delivered order) | PASS |
+| J3 F-1 | `/dashboard/summary.totalRevenue` = **3300** (order value) vs captured payments **300** — mislabel confirmed at contract level; live Home renders **no** revenue figure (mislabelled card is unreachable dead code, only importer `App.tsx.bak`) → **F-8** | PASS |
+| J4 F-2 | Reports honest-empty (5 charts) in the SAME session that displays server data — two truths reproduced | PASS |
+| J5 F-6/S8 | Home chip row mixes planes live (`CUSTOMERS 0` local vs server `totalCustomers: 2`; "No customers yet" beside active server invoice) → **F-9**; UI-created material invisible to server (S8 re-confirmed) | PASS |
+| J6 offline | Home → "Live figures unavailable" honest error, `PENDING BALANCES —`; Reports stays honest-empty; no fabricated offline numbers | PASS |
+| J7 charts/a11y | `data-chart-empty` honesty attributes + sr-only text alternatives verified in live DOM | PASS |
+
+Baseline gates re-verified at `61dcde8` before validation: tsc 0 errors · 316/316 tests · build PASS · precache 132 / 6418.78 KiB (byte-identical).
+
 ## Part Z — Phase 19 handoff (to be completed at certification)
 
-Pending: projection layer (Stage 5), Dashboard/Reports reconciliation (6–7), filtering/time (9), offline truth model (10), authorization audit (11), performance (12), accessibility (13), AT suite (29), browser journeys A–G (30), responsive matrix (31), PWA (33), final gates (39).
+Pending: projection layer (Stage 5), Dashboard/Reports reconciliation (6–7), filtering/time (9), offline truth model (10), authorization audit (11), performance (12), accessibility (13), AT suite (29), responsive matrix (31), PWA (33), final gates (39). ~~Browser journeys (30)~~ — a first fresh-workspace journey set (J1–J7) was executed at certification (Part H); the full A–G matrix (data-bearing account, multi-viewport, reduced-motion) remains a Stage-5+ deliverable. Handoff state: `PHASE18_5_FINAL_CERTIFICATION_REPORT.md` §9.
 
 **STOP: implementation of Stages 5+ requires owner decisions AD1/AD2 (and AD6 ratification).**
