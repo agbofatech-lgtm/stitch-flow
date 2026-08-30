@@ -19,12 +19,12 @@
  */
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { format } from 'date-fns';
-import { Search, Plus, Phone, Mail, ArrowLeft, ArrowRight, Scissors, RefreshCw } from 'lucide-react';
+import { Search, Plus, Phone, Mail, ArrowLeft, ArrowRight, Scissors, RefreshCw, Pencil } from 'lucide-react';
 import { clsx } from 'clsx';
-import { getCustomers, createCustomer, type ApiCustomer } from '@shared/utils/customerApi';
+import { getCustomers, createCustomer, updateCustomer, type ApiCustomer } from '@shared/utils/customerApi';
 import { getCustomerOrders } from '@shared/utils/customerOrdersApi';
 import type { ApiOrder } from '@shared/api/orders';
-import { AddCustomerModal } from '../../components/Customers';
+import { AddCustomerModal, EditCustomerModal } from '../../components/Customers';
 import { CustomerDetail } from '../../components/CustomerDetail';
 import { useApp } from '../../context/AppContext';
 import {
@@ -65,9 +65,10 @@ function MeasurementContextStrip({ customerId }: { customerId: string }) {
   );
 }
 
-function CustomerWorkspace({ customer, onBack }: { customer: ApiCustomer; onBack: () => void }) {
+function CustomerWorkspace({ customer, onBack, onUpdated }: { customer: ApiCustomer; onBack: () => void; onUpdated: (c: ApiCustomer) => void }) {
   const { setView } = useApp();
   const [ordering, setOrdering] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [orders, setOrders] = useState<ApiOrder[] | null>(null);
   const [ordersError, setOrdersError] = useState(false);
 
@@ -103,10 +104,17 @@ function CustomerWorkspace({ customer, onBack }: { customer: ApiCustomer; onBack
               {!customer.phone && !customer.email && <span className="text-ink-mute">No contact details on record</span>}
             </div>
           </div>
-          {/* Stage 8: the order workflow now launches HERE (customer context retained) */}
-          <Button variant="primary" onClick={() => setOrdering(true)} data-handoff="stage8-order-workflow">
-            <Plus className="h-4 w-4" aria-hidden="true" /> New order
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Stage 13 reconciliation (audit P2): the existing edit capability
+                (EditCustomerModal + updateCustomer API) is reachable again. */}
+            <Button variant="secondary" onClick={() => setEditing(true)} data-action="edit-customer">
+              <Pencil className="h-4 w-4" aria-hidden="true" /> Edit details
+            </Button>
+            {/* Stage 8: the order workflow now launches HERE (customer context retained) */}
+            <Button variant="primary" onClick={() => setOrdering(true)} data-handoff="stage8-order-workflow">
+              <Plus className="h-4 w-4" aria-hidden="true" /> New order
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -146,6 +154,19 @@ function CustomerWorkspace({ customer, onBack }: { customer: ApiCustomer; onBack
         <Body className="text-ink-mute">Profiles are versioned — updating a profile here never changes a past order's saved measurements.</Body>
         <CustomerDetail customerId={customer.id} customer={customer} />
       </section>
+
+      {/* Existing validated modal reused (validation/error/saving states inside) */}
+      {editing && (
+        <EditCustomerModal
+          customer={customer}
+          onClose={() => setEditing(false)}
+          onSave={async (customerId, updates) => {
+            await updateCustomer(customerId, updates);
+            setEditing(false);
+            onUpdated({ ...customer, ...updates } as ApiCustomer);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -176,7 +197,7 @@ export function CustomersView() {
     load(); // list refresh, then the natural next step is opening the customer
   };
 
-  if (selected) return <CustomerWorkspace customer={selected} onBack={() => { setSelected(null); load(); }} />;
+  if (selected) return <CustomerWorkspace customer={selected} onBack={() => { setSelected(null); load(); }} onUpdated={setSelected} />;
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5" data-view="customers">

@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useId,
   useMemo,
   useState,
   type Dispatch,
@@ -8,6 +9,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from 'react';
+import { useModalBehaviour } from '../design-system/Overlay';
 import { BRAND } from '../config/brand';
 import {
   Plus,
@@ -584,7 +586,7 @@ export function AddCustomerModal({
   );
 }
 
-function EditCustomerModal({
+export function EditCustomerModal({
   customer,
   onClose,
   onSave,
@@ -686,11 +688,14 @@ function ModalShell({
   onClose: () => void;
   children: ReactNode;
 }) {
+  // Stage 13 §15/§16 — keyboard contract composed from the existing DS
+  // primitive: Escape closes, focus moves in/traps/restores, scroll locked.
+  const dialogRef = useModalBehaviour(true, onClose);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       {/* Stage 7 a11y repair (narrow): dialog semantics + labelled close for the
           legacy modal shell, reused by the new CustomersView create flow. */}
-      <div role="dialog" aria-modal="true" aria-label={title} className="w-full max-w-2xl rounded-[24px] bg-white shadow-xl">
+      <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label={title} className="w-full max-w-2xl rounded-[24px] bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-slate-200 p-4">
           <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
           <button onClick={onClose} aria-label={`Close ${title.toLowerCase()}`} className="rounded-lg p-1 hover:bg-slate-100">
@@ -780,13 +785,18 @@ function FormFields({
     }>
   >;
 }) {
+  // Stage 13 §18 — every label is programmatically associated (useId) so
+  // screen readers announce fields; required fields carry aria-required.
+  const uid = useId();
   return (
     <>
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">
+        <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor={`${uid}-fullName`}>
           Full Name *
         </label>
         <input
+          id={`${uid}-fullName`}
+          aria-required="true"
           type="text"
           value={formData.fullName}
           onChange={(e) => setFormData((f) => ({ ...f, fullName: e.target.value }))}
@@ -796,10 +806,11 @@ function FormFields({
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">
+        <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor={`${uid}-phone`}>
           Phone
         </label>
         <input
+          id={`${uid}-phone`}
           type="tel"
           value={formData.phone}
           onChange={(e) => setFormData((f) => ({ ...f, phone: e.target.value }))}
@@ -809,10 +820,11 @@ function FormFields({
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">
+        <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor={`${uid}-email`}>
           Email
         </label>
         <input
+          id={`${uid}-email`}
           type="email"
           value={formData.email}
           onChange={(e) => setFormData((f) => ({ ...f, email: e.target.value }))}
@@ -822,10 +834,11 @@ function FormFields({
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">
+        <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor={`${uid}-address`}>
           Address
         </label>
         <textarea
+          id={`${uid}-address`}
           value={formData.address}
           onChange={(e) => setFormData((f) => ({ ...f, address: e.target.value }))}
           rows={2}
@@ -835,10 +848,11 @@ function FormFields({
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">
+        <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor={`${uid}-notes`}>
           Notes
         </label>
         <textarea
+          id={`${uid}-notes`}
           value={formData.notes}
           onChange={(e) => setFormData((f) => ({ ...f, notes: e.target.value }))}
           rows={2}
