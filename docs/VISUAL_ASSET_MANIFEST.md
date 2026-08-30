@@ -1,6 +1,6 @@
 # StitchFlow — Visual Asset Manifest
 **Phase 18 · Stage 4 · Status: IN PROGRESS** (begun during acquisition per mandate §15; updated per batch)
-**Pipeline:** `_originals/` (SOURCE ARCHIVE · NON-RUNTIME · never bundled into PWA payload) → ImageMagick optimization → production derivatives (AVIF/WebP) under `apps/web/public/assets/`.
+**Pipeline:** `apps/web/assets-src/` (SOURCE ARCHIVE · NON-RUNTIME · never served or bundled into PWA payload — relocated out of `public/` in Stage 5 after the build proved `_originals/` inflated the PWA precache 13.6→6.4 MB; derivatives only are runtime) → ImageMagick optimization → production derivatives (AVIF/WebP) under `apps/web/public/assets/`.
 **Naming:** `[category]-[subject]-[variant]-[size].[format]` · no upscaling ever · variants only with a defined consumer.
 
 ## 1. Requirement classification (quality-over-count, mandate §2)
@@ -74,7 +74,7 @@ Technical validation = automated (format/dimensions/size/integrity). **Automated
 | etsy.com listing (Dutch wax fabric) | REJECTED | shop/product copyright |
 
 ## 6. Usage map (§21 original mandate)
-Landing hero + craftsmanship → **Stage 11 Public Landing** · Production imagery → **Stage 10 Production Workflow** · Fabric macro/drape → **Stage 8/9 material workflow** · Garment cards → **Stage 8 Customer/Order workflow** · Empty states → **Stage 5 primitives** + implementation stages · Brand (existing, untouched) → all surfaces, PRECACHE REQUIRED · `_originals/` → NON-RUNTIME.
+Landing hero + craftsmanship → **Stage 11 Public Landing** · Production imagery → **Stage 10 Production Workflow** · Fabric macro/drape → **Stage 8/9 material workflow** · Garment cards → **Stage 8 Customer/Order workflow** · Empty states → **Stage 5 primitives** + implementation stages · Brand (existing, untouched) → all surfaces, PRECACHE REQUIRED · `apps/web/assets-src/` → NON-RUNTIME.
 
 ## 7. Garment Card Quality Review Register (mandate §1)
 
@@ -114,7 +114,7 @@ Family status: TECHNICALLY_VALIDATED · AUTO-INSPECTION: LIMITED · HUMAN REVIEW
 **C Fabric system:** surface characteristics ✓ (8 macros) · flowing ✓ silk · structured ✓ denim · sheer/delicate ✓ lace · traditional identity ✓ kente (macro + drape) & ankara (macro).
 **D Production system:** measurement / cutting (layout) / sewing (assembly) / fitting (pinning on form) / finishing (press) — 5 distinct operational moments vs workflow spine ✓; embroidery stage imagery intentionally folded into "sewing/assembly" (not separately acquired — canonical stage *model* untouched; imagery is human-concept, §10 original mandate).
 **E Empty states:** coherent 7-member family ✓ (provisional).
-**F Reuse classification:** heroes/story = PUBLIC-surface-specific · production = cross-surface (Workspace Stage 10 + Public MAKE section reuse) · fabrics = cross-surface (Stage 8/9 + Public MATERIALS) · garments = Workspace Stage 8 (+ future Public marketing OPTIONAL) · illustrations = cross-surface PRECACHE · `_originals/` = NON-RUNTIME. No remaining product moment lacks required visual support within the accepted provisional-quality caveat.
+**F Reuse classification:** heroes/story = PUBLIC-surface-specific · production = cross-surface (Workspace Stage 10 + Public MAKE section reuse) · fabrics = cross-surface (Stage 8/9 + Public MATERIALS) · garments = Workspace Stage 8 (+ future Public marketing OPTIONAL) · illustrations = cross-surface PRECACHE · `apps/web/assets-src/` = NON-RUNTIME (Stage 5 relocation, provenance unchanged). No remaining product moment lacks required visual support within the accepted provisional-quality caveat.
 
 ## 10. Deferred assets (controlled omissions — architecture, not gaps)
 
@@ -122,11 +122,11 @@ Family status: TECHNICALLY_VALIDATED · AUTO-INSPECTION: LIMITED · HUMAN REVIEW
 
 ## 11. Human review queue
 
-**P0 — before UI implementation:** all 5 garment cards (detail sufficiency; replacement risk MEDIUM) · 3 heroes (art-direction fit). **P1 — during Stage 5:** 7 empty-state illustrations (family coherence on real surfaces) · 4 drapes · fabric macro quality-vs-byte tuning in UI context (exception review: YES). **P2 — before public release:** 6 craftsmanship story images · production set as used in Stage 10 · PWA/manifest visual coherence. **P3 — future acquisition:** authentic photography per gap register; optional garment variants; dark-mode variants.
+**P0 — before UI implementation:** all 5 garment cards (detail sufficiency; replacement risk MEDIUM) · 3 heroes (art-direction fit). *Stage 5 update: P0/P1 assets now render in real component context on the `/design-system` showcase (browser-verified loading; 2 garment cards, 1 hero, kente macro, 1 illustration) — technical in-context rendering confirmed; visual/art-direction acceptance still PENDING; statuses remain VISUALLY_PROVISIONAL.* **P1 — during Stage 5:** 7 empty-state illustrations (family coherence on real surfaces) · 4 drapes · fabric macro quality-vs-byte tuning in UI context (exception review: YES). **P2 — before public release:** 6 craftsmanship story images · production set as used in Stage 10 · PWA/manifest visual coherence. **P3 — future acquisition:** authentic photography per gap register; optional garment variants; dark-mode variants.
 
 ## 12. Stage 5 handoff
 
-**May use immediately (technically validated):** token-gap work (no assets involved); asset paths in *design specs only*. **Must evaluate in real UI context:** fabric macro byte/quality tuning (documented mitigations); garment cards 800/480 in card layouts; illustration scale/whitespace on real surfaces; hero AVIF/WebP loading strategy (runtime = `assets/**` derivatives only). **Must not use until human review:** any P0 asset in shipped UI (garment cards, heroes). **Intentionally deferred:** §10 list. **Open gaps:** authentic photography (register §2). Runtime/original separation: `_originals/` = SOURCE ARCHIVE, NON-RUNTIME, never bundled/precached.
+**May use immediately (technically validated):** token-gap work (no assets involved); asset paths in *design specs only*. **Must evaluate in real UI context:** fabric macro byte/quality tuning (documented mitigations); garment cards 800/480 in card layouts; illustration scale/whitespace on real surfaces; hero AVIF/WebP loading strategy (runtime = `assets/**` derivatives only). **Must not use until human review:** any P0 asset in shipped UI (garment cards, heroes). **Intentionally deferred:** §10 list. **Open gaps:** authentic photography (register §2). Runtime/original separation: `apps/web/assets-src/` = SOURCE ARCHIVE, NON-RUNTIME, never bundled/precached.
 
 ## 13. Completion checklist (§10)
 
