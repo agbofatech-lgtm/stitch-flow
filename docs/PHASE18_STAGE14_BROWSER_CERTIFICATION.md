@@ -3,7 +3,7 @@
 **Stage:** 14 (final Phase 18 release gate)
 **Date:** 2026-08-30
 **Baseline:** `cf317ae` (Stage 13 tip) — working tree clean, zero source changes during certification
-**Verdict:** **PASS — browser-emulated certification achieved across all 13 domains, full viewport matrix, journeys X1–X5, Reports R1–R5, and the Finance critical test. Zero P0/P1/P2 defects. Four P3 observations documented below (no scope expansion).**
+**Verdict:** **PASS — browser-emulated certification achieved across all 13 domains, full viewport matrix, journeys X1–X5, Reports R1–R5, the Finance critical test, and a supplemental pass covering every §20 sub-check (§6a). Zero P0/P1/P2 defects. Five P3 observations documented below (no scope expansion).**
 
 ---
 
@@ -79,7 +79,7 @@ The UI never invents money: every figure displayed comes from the server respons
 
 ## 6. Defect register (final run)
 
-**P0: none. P1: none. P2: none.**
+**P0: none. P1: none. P2: none. P3: five (S14-1 … S14-5).**
 
 | ID | Severity | Observation | Evidence | Disposition |
 |----|----------|-------------|----------|-------------|
@@ -87,6 +87,32 @@ The UI never invents money: every figure displayed comes from the server respons
 | S14-2 | P3 | `POST /payments` with a **non-UUID** `clientMutationId` returns 500 (`22P02` from the uuid-typed sync-change column) instead of 400. Fail-closed: the whole transaction (payment + invoice reconciliation + sync records) rolls back atomically; no partial state. The UI always sends `crypto.randomUUID()`, so no user-facing path exists. | Direct API reproduction + server stack trace; contract verified correct with UUID (201/200 `duplicate:true`) | Documented; recommend 400 validation hardening later. Not a certification blocker. |
 | S14-3 | P3 | Settings save failure surfaces as terse `"HTTP 500"` (red, visible) rather than the server’s message — `apiPut` throws `Error(\`HTTP ${status}\`)`. Honest (no false “saved.” — verified), but terse. Related: `updateWorkspaceProfile(payload)` writes the local profile store optimistically *before* the server accepts, so a rejected save leaves the local cache ahead of the server until next refresh. | `settings_failureEvidence: "HTTP 500×6"`; source `apps/web/src/shared/utils/api.ts:209`, `Settings.tsx:249-275` | Documented; message wording + optimistic-local-write ordering deferred. |
 | S14-4 | P3 (informational) | sr-only chart summaries read 0 bars while charts are empty (correct behaviour, since no bars exist) — certification asserts them post-data instead. Recorded so the 0 is not misread as a defect. | `r4_srOnlySummaries: 0` empty vs `r4_srOnlyWithData: 2` | No action. |
+| S14-5 | P3 | Materials Add/Edit modal is a hand-rolled overlay: no `role="dialog"` / `aria-modal` / Escape / focus trap, and its `<Field>` labels are unassociated with inputs. Same family Stage 13 fixed elsewhere via ModalShell/FormFields. The mandate's Domain 11 matrix does not require dialog a11y for Materials, so it is out-of-matrix — documented, not fixed, to avoid silent scope expansion. | `MaterialModal` source (`Materials.tsx:710-760`): plain `div.fixed` overlay, bare `<label>`; browser: modal opens but exposes no dialog semantics | Defer to the a11y/visual-modernization register (pre-Phase 19 owner decision). |
+
+
+## 6a. Supplemental certification pass (mandate §20 sub-checks covered implicitly by the main matrix)
+
+Run after the main PASS, certification-only, no source changes (`probe17b-supplement.mjs`, 1440×900, data-bearing account; plus focused diagnostics). Where a check succeeded in some runs and was obscured by harness interference in others, the *observed product behaviour* is stated with verbatim evidence.
+
+| # | Sub-check (mandate §20) | Verdict | Evidence |
+|---|--------------------------|---------|----------|
+| S1 | Domain 2 — Session handling (token refresh) | **VERIFIED** | Invalid access + valid refresh token → silent refresh → authenticated shell (`s1_sessionRefresh` true, reproduced across runs). Refresh tokens rotate; replaying a rotated refresh token is **rejected fail-closed** (app signs out to /login — observed when a stale token was re-injected). |
+| S2 | Domain 3 — Focus restoration | **VERIFIED** | Account menu: Escape closes and focus returns to the account button (`s2_focusRestoreAccount` true). Modal focus traps/Escape were Stage-13-verified and re-exercised by the main matrix dialogs. |
+| S3 | Domain 4 — Customers error state | **VERIFIED (two honest behaviours)** | (a) *Graceful degradation:* with REST `/customers` failing, the view serves the local store/sync data — “**32 of 32 customers**” — real data, no fabrication, no crash, no false error (`s3_localStoreResilience` true, reproduced twice). (b) *Honest error surface* when no data is available, verbatim: “⚠ Customers unavailable — Saved lists could not be loaded (HTTP 401). You may be offline — try…” (real status code shown, retry offered). View-level error UI confirmed in source (`Customers.tsx:203-225`). |
+| S4 | Domain 4 — Customer workspace | **VERIFIED** | Row → `[data-view="customer-workspace"]` with measurements context (also exercised in all four main deep passes before edit). |
+| S5 | Domain 5 — Validation | **VERIFIED** | Order workflow measurements step: with empty required fields the wizard **refuses to advance** — next-step disabled and step unchanged (`s5_validationBlocksEmpty` + `s5_stillOnMeasurements` true). |
+| S6 | Domain 6 — Missing-data honesty | **VERIFIED** | Deterministic readiness card reports `data-ready="false"` **before** data entry; still `false` after only 1 of N fields — readiness never overstates completeness. (The `missing` IntelligenceCard kind is not rendered in this flow; `data-ready=false` is the honesty signal.) |
+| S7 | Domain 8 — Audit timestamps | **VERIFIED** | Production timeline renders per-stage datetimes: “Measurement — Completed / **completed 30 Aug, 15:22** / canonical code: measurement / Reopen” (`s7_auditTimestamps` true). |
+| S8 | Domain 11 — Materials functional depth | **VERIFIED (supported behaviour)** | UI Add Material → item appears in list; low-stock computed correctly client-side (qty 2 ≤ reorder 5 → item retained under the Low-stock filter). **Decision-register evidence:** the UI-created fabric is **not** pushed to the server (`s8_serverSeesUiFabric:false`; `addFabricRecord` is state-only) — the documented device-local/server drift, quantified for the materials reconciliation decision. |
+| S9 | Domain 10 — Reports on hydrated (non-session) data | **VERIFIED honest-empty; decision-register evidence** | In a fresh browser context against a data-bearing account, Reports (local scope) shows 5 honest empty charts and 0 sr-only bars — no fabricated analytics. Implication for the analytics-truth decision: the local analytics projection reflects **session-local writes only**; server-hydrated data does not feed it. This is precisely the Option A/B/C question — no change made under certification. |
+
+Supplemental run hygiene: `consoleErrors 0 · failedRequests 0 · overflow 0`. Harness note: `/auth/login` and `/auth/refresh` share the 5/900 s limiter; the app's own refresh retries during deliberate bad-token tests can consume that window (test-environment behaviour, restarted between runs — not a product defect).
+
+## 6b. Architecture decision register — new quantified evidence
+
+1. **Analytics truth (Option A/B/C):** local Reports projection = session-local writes only; server-hydrated orders/payments do **not** propagate into it (S9). Any option chosen must define whether hydrated server data feeds local analytics.
+2. **Materials reconciliation:** the write path is one-way (UI → local store only; S8). Server material contracts exist (`POST /materials/fabrics` + idempotent usages) but are not called by the UI today.
+3. **Developer entitlement:** unchanged (fail-closed 403, X5). Server-signal + hide recommendation stands.
 
 ## 7. Probe defects found & fixed during certification (not product defects)
 
@@ -98,12 +124,12 @@ The UI never invents money: every figure displayed comes from the server respons
 
 ## 8. Stage 14 verdict & handoff
 
-- **Certification: PASS.** All 13 domains, 6 viewports (+reduced-motion), X1–X5, R1–R5, Finance critical test, lazy-load integrity, zero console errors / failed requests / overflow.
+- **Certification: PASS.** All 13 domains, 6 viewports (+reduced-motion), X1–X5, R1–R5, Finance critical test, supplemental §20 sub-check pass (§6a: session refresh, focus restoration, customers error/resilience, workflow validation, missing-data honesty, audit timestamps, materials functional depth, hydrated-Reports honesty), lazy-load integrity, zero console errors / failed requests / overflow.
 - Phase 18 is now **ready for owner acceptance and freeze**. No source files were modified in this stage (certification-only mandate honored).
 - Per the Stage 13 handoff, the following architecture decisions remain queued for the owner **after** acceptance, before any Phase 19 work:
-  1. Analytics truth (Option A/B/C — investigate C);
+  1. Analytics truth (Option A/B/C — investigate C; now with §6b evidence: local projection = session-local writes only);
   2. Developer entitlement (recommend server signal + hide);
-  3. Materials reconciliation;
-  4. Deferred visual modernization (incl. S13 contrast remediation hexes, S14-1 logout destination, S14-2 payment validation hardening, S14-3 settings error wording).
+  3. Materials reconciliation (now with §6b evidence: UI write path is local-only, one-way);
+  4. Deferred visual modernization (incl. S13 contrast remediation hexes, S14-1 logout destination, S14-2 payment validation hardening, S14-3 settings error wording, S14-5 Materials modal semantics/labels).
 
 **Phase 19 remains PROHIBITED until owner acceptance of this report.**
