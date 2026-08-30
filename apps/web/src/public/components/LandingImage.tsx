@@ -27,6 +27,8 @@ export function LandingImage({
         {mobile && <source media="(max-width: 767px)" srcSet={`${asset.base}-${mobile}`} type="image/webp" />}
         {avif && <source srcSet={`${asset.base}-${avif}`} type="image/avif" />}
         {webp && <source srcSet={`${asset.base}-${webp}`} type="image/webp" />}
+        {/* Stage 13: lowercase fetchpriority — React warns on the camelCase prop;
+            browsers take the lowercase hint. Behavior unchanged for the hero. */}
         <img
           src={`${asset.base}-${webp ?? '1280.webp'}`}
           alt={asset.alt}
@@ -34,7 +36,7 @@ export function LandingImage({
           height={asset.height}
           loading={eager ? 'eager' : 'lazy'}
           decoding="async"
-          {...(eager ? { fetchPriority: 'high' } : {})}
+          {...(eager ? ({ fetchpriority: 'high' } as Record<string, string>) : {})}
           className="h-auto w-full object-cover"
         />
       </picture>
