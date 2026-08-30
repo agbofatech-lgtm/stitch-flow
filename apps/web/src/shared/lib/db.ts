@@ -2,6 +2,30 @@ import { STORAGE_KEYS, STORAGE_VERSION } from './storageKeys';
 import { deserializeFromStorage, serializeForStorage } from './serializers';
 import { createSeedData, type PersistedAppData } from './seedData';
 
+/** Stage 13 (audit P1 — Outcome D): operational initialization seeds EMPTY
+ *  collections. The Phase-≤12 demo dataset (Emma Thompson, Wedding-Gown
+ *  orders, GHS 702/2,164 invoices/payments, starter inventory) must never
+ *  enter business storage as if it were the studio's own records.
+ *  `createSeedData()` remains the development/test fixture (Outcome B).
+ *  Existing devices keep their stored data — the storage version is
+ *  intentionally NOT bumped (nothing is ever destroyed by this change). */
+export function createEmptySeedData(): PersistedAppData {
+  const fixture = createSeedData(); // workspace scaffolding + demo-tool ids only
+  return {
+    ...fixture,
+    customers: [],
+    orders: [],
+    invoices: [],
+    payments: [],
+    dueAlerts: [],
+    fabricRecords: [],
+    materialUsages: [],
+    designInspirations: [],
+    patternLibrary: [],
+    measurementProfiles: [],
+  };
+}
+
 type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
 const memoryStore = new Map<string, string>();
@@ -92,7 +116,7 @@ export function seedAppStorage(
 export function initializeAppStorage(): PersistedAppData {
   const storage = getStorage();
   const version = storage.getItem(STORAGE_KEYS.version);
-  const seed = createSeedData();
+  const seed = createEmptySeedData();
 
   if (!version) {
     return seedAppStorage(seed, true);
