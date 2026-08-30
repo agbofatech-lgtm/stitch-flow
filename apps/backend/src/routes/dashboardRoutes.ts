@@ -9,6 +9,10 @@ type RevenueRow = {
   total_revenue: string | null;
 };
 
+type OrderValueRow = {
+  total_order_value: string | null;
+};
+
 type BalanceRow = {
   pending_balances: string | null;
 };
@@ -28,6 +32,7 @@ dashboardRoutes.get('/summary', async (req, res) => {
       ordersResult,
       pendingOrdersResult,
       revenueResult,
+      orderValueResult,
       balancesResult,
       dueAlertsResult,
     ] = await Promise.all([
@@ -48,9 +53,20 @@ dashboardRoutes.get('/summary', async (req, res) => {
         `,
         [ws]
       ),
+      // F-1 fix: "revenue" is Collected Revenue = captured payments (event time),
+      // NEVER order value. Order Value is returned separately below.
       query<RevenueRow>(
         `
-        SELECT COALESCE(SUM(total_amount), 0)::text AS total_revenue
+        SELECT COALESCE(SUM(amount), 0)::text AS total_revenue
+        FROM payments
+        WHERE workspace_id = $1
+          AND payment_status = 'captured'
+        `,
+        [ws]
+      ),
+      query<OrderValueRow>(
+        `
+        SELECT COALESCE(SUM(total_amount), 0)::text AS total_order_value
         FROM orders
         WHERE workspace_id = $1 AND deleted_at IS NULL
           AND status != 'cancelled'
@@ -96,6 +112,7 @@ dashboardRoutes.get('/summary', async (req, res) => {
       totalOrders: Number(ordersResult.rows[0]?.count || 0),
       pendingOrders: Number(pendingOrdersResult.rows[0]?.count || 0),
       totalRevenue: Number(revenueResult.rows[0]?.total_revenue || 0),
+      totalOrderValue: Number(orderValueResult.rows[0]?.total_order_value || 0),
       pendingBalances: Number(balancesResult.rows[0]?.pending_balances || 0),
       dueAlerts: Number(dueAlertsResult.rows[0]?.count || 0),
       currency: 'GHS',

@@ -36,6 +36,12 @@ import {
   resolveReportingDateRange,
   type ReportingDatePreset,
 } from '@shared/utils/reporting';
+// Phase 18.5 (AD1: hybrid) — canonical metric definitions shared with Dashboard.
+import {
+  isUnpaidInvoice,
+  isCapturedPayment,
+  workspaceAverageOrderValue,
+} from '@shared/utils/analyticsProjection';
 
 export function Reports() {
   const {
@@ -84,7 +90,7 @@ export function Reports() {
     const paymentsThisMonth = payments.filter((payment) => {
       const paidAt = new Date(payment.paidAt);
       return (
-        payment.paymentStatus === 'captured' &&
+        isCapturedPayment(payment) &&
         paidAt.getMonth() === currentMonth &&
         paidAt.getFullYear() === currentYear
       );
@@ -92,7 +98,7 @@ export function Reports() {
 
     const paymentsThisWeek = payments.filter((payment) => {
       const paidAt = new Date(payment.paidAt);
-      return payment.paymentStatus === 'captured' && paidAt >= startOfWeek;
+      return isCapturedPayment(payment) && paidAt >= startOfWeek;
     });
 
     const revenueThisMonth = paymentsThisMonth.reduce(
@@ -105,9 +111,8 @@ export function Reports() {
       0
     );
 
-    const unpaidInvoices = invoices.filter((invoice) =>
-      ['sent', 'partial', 'overdue'].includes(invoice.status)
-    );
+    // F-4 fix: unpaid class includes `pending` (real fresh-unpaid status).
+    const unpaidInvoices = invoices.filter((invoice) => isUnpaidInvoice(invoice));
 
     const unpaidBalanceTotal = unpaidInvoices.reduce(
       (sum, invoice) => sum + invoice.balanceDue,
@@ -146,7 +151,7 @@ export function Reports() {
       );
     }
 
-    for (const payment of payments.filter((p) => p.paymentStatus === 'captured')) {
+    for (const payment of payments.filter((p) => isCapturedPayment(p))) {
       const order = orders.find((o) => o.id === payment.orderId);
       if (!order) continue;
 
@@ -156,9 +161,8 @@ export function Reports() {
       );
     }
 
-    for (const invoice of invoices.filter((inv) =>
-      ['sent', 'partial', 'overdue'].includes(inv.status)
-    )) {
+    // F-4 fix: pending balances use the canonical unpaid class.
+    for (const invoice of invoices.filter((inv) => isUnpaidInvoice(inv))) {
       const order = orders.find((o) => o.id === invoice.orderId);
       if (!order) continue;
 
@@ -332,11 +336,8 @@ export function Reports() {
       0
     );
 
-    const averageCustomerOrderValue =
-      customerInsights.length > 0
-        ? customerInsights.reduce((sum, item) => sum + item.averageOrderValue, 0) /
-          customerInsights.length
-        : 0;
+    // AD6: workspace AOV = Σ order value / Σ orders (Σ/Σ, not mean-of-means).
+    const averageCustomerOrderValue = workspaceAverageOrderValue(orders);
 
     const orderStatusCounts = {
       draft: orders.filter((order) => order.status === 'draft').length,
@@ -417,7 +418,7 @@ export function Reports() {
         .filter((payment) => {
           const paidAt = new Date(payment.paidAt);
           return (
-            payment.paymentStatus === 'captured' &&
+            isCapturedPayment(payment) &&
             paidAt.getMonth() === month &&
             paidAt.getFullYear() === year
           );
@@ -440,7 +441,7 @@ export function Reports() {
         .filter((payment) => {
           const paidAt = new Date(payment.paidAt);
           return (
-            payment.paymentStatus === 'captured' &&
+            isCapturedPayment(payment) &&
             paidAt >= dayStart &&
             paidAt <= dayEnd
           );
@@ -455,7 +456,7 @@ export function Reports() {
       .reduce((sum, invoice) => sum + invoice.totalAmount, 0);
 
     const unpaidTotal = invoices
-      .filter((invoice) => ['sent', 'partial', 'overdue'].includes(invoice.status))
+      .filter((invoice) => isUnpaidInvoice(invoice))
       .reduce((sum, invoice) => sum + invoice.balanceDue, 0);
 
     const overdueTrend = (monthLabels ?? []).map((_, index) => {
