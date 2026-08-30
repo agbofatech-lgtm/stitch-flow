@@ -79,7 +79,8 @@ describe('CW2 · Home offline/API failure is honest', () => {
   it('shows an actionable error, never fabricated figures', async () => {
     const real = bundleMock; bundleMock = Promise.reject(new Error('offline'));
     render(<HomeView />);
-    expect(await screen.findByText(/Live figures unavailable/i)).toBeTruthy();
+    // Phase 18.5 CH4: the title must not claim "live" figures (claim-ban).
+    expect(await screen.findByText(/Figures could not be loaded right now/i)).toBeTruthy();
     expect(screen.queryByText(/SO-1001/)).toBeNull();
     bundleMock = real;
   });

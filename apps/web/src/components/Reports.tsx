@@ -1406,7 +1406,7 @@ export function Reports() {
                     reportData.revenueThisMonth,
                     safeCurrency(workspaceCurrency)
                   )}
-                  description="Monthly captured revenue gives a live snapshot of current business performance."
+                  description="Captured payments recorded this month, calculated from your workspace records."
                   icon={TrendingUp}
                   tone="brand"
                 />

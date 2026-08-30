@@ -95,7 +95,7 @@ export function HomeView() {
       </header>
 
       {apiError && (
-        <ErrorState title="Live figures unavailable" message="Orders and finance figures could not be loaded (you may be offline). They will refresh when you reconnect — your locally saved data is untouched."
+        <ErrorState title="Figures could not be loaded right now" message="Orders and finance figures could not be loaded (you may be offline). They will refresh when you reconnect — your locally saved data is untouched."
           onRetry={() => setView('dashboard')} errorId="home/api" />
       )}
 
