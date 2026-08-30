@@ -576,6 +576,14 @@ export function Reports() {
 
   return (
     <div className="p-4 lg:p-8">
+        {/* Stage 13 §6.3 — honest data-source classification. Local Reports
+            compute from THIS DEVICE's offline store; live workspace reporting
+            lives in Home (server /dashboard). Never labelled live/synced. */}
+        <p className="rounded-2xl border border-sky-100 bg-sky-50/70 px-4 py-3 text-sm text-slate-600" data-reports-scope="local">
+          <span className="font-semibold text-slate-900">Locally calculated</span> — from the
+          records stored on this device. Server workspace totals are shown in Home; payment
+          truth is server-authoritative in Finance.
+        </p>
       <div className="mx-auto max-w-7xl space-y-8">
         <section className="relative overflow-hidden rounded-[28px] border border-white/50 bg-gradient-to-r from-[#0F6E8C] via-[#117793] to-[#0C5C74] p-6 text-white shadow-2xl">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.10),transparent_24%)]" />
@@ -983,6 +991,7 @@ export function Reports() {
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <ChartCard
             title="Revenue by Month"
+                  formatValue={(v) => formatCurrency(v, workspaceCurrency)}
             subtitle="Last 6 months"
             data={trends.revenueByMonth}
             tone="brand"
@@ -990,6 +999,7 @@ export function Reports() {
 
           <ChartCard
             title="Revenue by Week"
+                  formatValue={(v) => formatCurrency(v, workspaceCurrency)}
             subtitle="Current week"
             data={trends.revenueByWeek}
             tone="sky"
@@ -1007,6 +1017,7 @@ export function Reports() {
 
           <ChartCard
             title="Overdue Invoice Trend"
+                  formatValue={(v) => formatCurrency(v, workspaceCurrency)}
             subtitle="Overdue value by month"
             data={trends.overdueTrend}
             tone="amber"
@@ -1676,13 +1687,19 @@ function ChartCard({
   subtitle,
   data,
   tone,
+  formatValue,
 }: {
   title: string;
   subtitle: string;
   data: Array<{ label: string; value: number }>;
   tone: 'brand' | 'sky' | 'amber';
+  /** Stage 13 §21 — accessible interpretation: values must reach assistive
+   *  technology, not only bar heights. */
+  formatValue?: (value: number) => string;
 }) {
   const max = Math.max(...(data ?? []).map((item) => item.value), 1);
+  const hasData = (data ?? []).some((item) => item.value > 0);
+  const fmt = formatValue ?? ((value: number) => String(value));
 
   const barTones = {
     brand: 'bg-[#0F6E8C]',
@@ -1697,24 +1714,42 @@ function ChartCard({
         <p className="text-sm text-slate-500">{subtitle}</p>
       </div>
 
-      <div className="flex h-48 items-end gap-3">
-        {(data ?? []).map((item) => (
-          <div key={item.label} className="flex flex-1 flex-col items-center gap-2">
-            <div className="flex h-36 w-full items-end">
-              <div
-                className={`w-full rounded-t-xl ${barTones[tone]}`}
-                style={{
-                  height: `${Math.max(
-                    (item.value / max) * 100,
-                    item.value > 0 ? 8 : 0
-                  )}%`,
-                }}
-              />
+      {/* Stage 13 §6.4 — no recorded observations is an honest empty state,
+          never a zero-height chart that implies history. */}
+      {!hasData ? (
+        <p
+          className="flex h-48 items-center justify-center text-sm text-slate-500"
+          data-chart-empty="true"
+        >
+          No data recorded yet
+        </p>
+      ) : (
+        <div className="flex h-48 items-end gap-3" data-chart="bars">
+          {(data ?? []).map((item) => (
+            <div key={item.label} className="flex flex-1 flex-col items-center gap-2">
+              <div className="flex h-36 w-full items-end">
+                <div
+                  aria-hidden="true"
+                  className={`w-full rounded-t-xl ${barTones[tone]}`}
+                  style={{
+                    height: `${Math.max(
+                      (item.value / max) * 100,
+                      item.value > 0 ? 8 : 0
+                    )}%`,
+                  }}
+                />
+              </div>
+              <p className="text-center text-xs font-medium text-slate-500">
+                {item.label}
+                <span className="sr-only">{`: ${fmt(item.value)}`}</span>
+              </p>
             </div>
-            <p className="text-center text-xs font-medium text-slate-500">{item.label}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+          <p className="sr-only">
+            {title}: {data.map((item) => `${item.label} ${fmt(item.value)}`).join(', ')}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
