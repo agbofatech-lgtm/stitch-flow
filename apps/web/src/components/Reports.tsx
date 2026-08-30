@@ -25,6 +25,18 @@ import measuringTapeSoft from '@shared/assets/measuring-tape-soft.svg';
 import sewingMachineSoft from '@shared/assets/sewing-machine-soft.svg';
 import needleSoft from '@shared/assets/needle-soft.svg';
 import { FeatureGate } from './FeatureGate';
+import { useAnalytics } from '@modules/analytics/useAnalytics';
+import {
+  UNPAID_INVOICE_STATUSES,
+  collectedRevenue,
+  outstandingBalance,
+  overdueExposure,
+  customerIntelligence,
+  orderIntelligence,
+  materialIntelligence,
+  toReportingOrders,
+  toReportingUsages,
+} from '@modules/analytics/projection';
 import {
   buildOrdersByStage,
   filterOrdersByDateRange,
@@ -38,16 +50,17 @@ import {
 } from '@shared/utils/reporting';
 
 export function Reports() {
+  const { currentWorkspace, setView } = useApp();
+
+  /* PHASE 18.5 — single analytics record source: the workspace sync mirror
+   * (server-authoritative rows) merged with this device's writes. One record
+   * set feeds the projection layer; Reports no longer reads domain arrays
+   * straight from AppContext (forensic defect F-2 fixed here). */
+  const analytics = useAnalytics();
   const {
-    payments,
-    invoices,
-    orders,
-    customers,
-    fabricRecords,
-    materialUsages,
-    currentWorkspace,
-    setView,
-  } = useApp();
+    records: { payments, invoices, orders, customers, fabricRecords, materialUsages },
+    lastSyncedAt,
+  } = analytics;
 
   const workspaceCurrency = currentWorkspace.defaultCurrency || 'GHS';
 
@@ -81,120 +94,44 @@ export function Reports() {
   );
 
   const reportData = useMemo(() => {
-    const paymentsThisMonth = payments.filter((payment) => {
-      const paidAt = new Date(payment.paidAt);
-      return (
-        payment.paymentStatus === 'captured' &&
-        paidAt.getMonth() === currentMonth &&
-        paidAt.getFullYear() === currentYear
-      );
+    /* PHASE 18.5 — every metric is a projection-layer call: ONE metric
+     * definition shared with the Dashboard (AT2/AT15). Fixes F-1 (no
+     * order-value-labelled-as-revenue), F-4 (unpaid statuses) and F-5. */
+    const monthStart = new Date(currentYear, currentMonth, 1);
+    const monthEndExclusive = new Date(currentYear, currentMonth + 1, 1);
+
+    const revenueThisMonth = collectedRevenue(payments, {
+      from: monthStart,
+      to: new Date(monthEndExclusive.getTime() - 1),
     });
 
-    const paymentsThisWeek = payments.filter((payment) => {
-      const paidAt = new Date(payment.paidAt);
-      return payment.paymentStatus === 'captured' && paidAt >= startOfWeek;
-    });
-
-    const revenueThisMonth = paymentsThisMonth.reduce(
-      (sum, payment) => sum + payment.amount,
-      0
-    );
-
-    const revenueThisWeek = paymentsThisWeek.reduce(
-      (sum, payment) => sum + payment.amount,
-      0
-    );
+    const revenueThisWeek = collectedRevenue(payments, { from: startOfWeek });
 
     const unpaidInvoices = invoices.filter((invoice) =>
-      ['sent', 'partial', 'overdue'].includes(invoice.status)
+      (UNPAID_INVOICE_STATUSES as readonly string[]).includes(invoice.status)
     );
 
-    const unpaidBalanceTotal = unpaidInvoices.reduce(
-      (sum, invoice) => sum + invoice.balanceDue,
-      0
-    );
+    const unpaidBalanceTotal = outstandingBalance(invoices);
 
     const overdueInvoices = invoices.filter((invoice) => invoice.status === 'overdue');
 
-    const overdueAmount = overdueInvoices.reduce(
-      (sum, invoice) => sum + invoice.balanceDue,
-      0
-    );
+    const overdueAmount = overdueExposure(invoices);
 
     const paidInvoicesThisMonth = invoices.filter((invoice) => {
+      if (invoice.status !== 'paid' || !invoice.issueDate) return false;
       const issueDate = new Date(invoice.issueDate);
       return (
-        invoice.status === 'paid' &&
         issueDate.getMonth() === currentMonth &&
         issueDate.getFullYear() === currentYear
       );
     }).length;
 
-    const customerSpendMap = new Map<string, number>();
-    const customerOrderMap = new Map<string, number>();
-    const customerPendingMap = new Map<string, number>();
-    const customerOrderValueMap = new Map<string, number>();
+    const customerInsights = customerIntelligence(customers, orders, invoices, payments);
 
-    for (const order of orders) {
-      customerOrderMap.set(
-        order.customerId,
-        (customerOrderMap.get(order.customerId) || 0) + 1
-      );
-      customerOrderValueMap.set(
-        order.customerId,
-        (customerOrderValueMap.get(order.customerId) || 0) + order.totalAmount
-      );
-    }
-
-    for (const payment of payments.filter((p) => p.paymentStatus === 'captured')) {
-      const order = orders.find((o) => o.id === payment.orderId);
-      if (!order) continue;
-
-      customerSpendMap.set(
-        order.customerId,
-        (customerSpendMap.get(order.customerId) || 0) + payment.amount
-      );
-    }
-
-    for (const invoice of invoices.filter((inv) =>
-      ['sent', 'partial', 'overdue'].includes(inv.status)
-    )) {
-      const order = orders.find((o) => o.id === invoice.orderId);
-      if (!order) continue;
-
-      customerPendingMap.set(
-        order.customerId,
-        (customerPendingMap.get(order.customerId) || 0) + invoice.balanceDue
-      );
-    }
-
-    const customerInsights = customers
-      .map((customer) => {
-        const ordersCount = customerOrderMap.get(customer.id) || 0;
-        const totalSpent = customerSpendMap.get(customer.id) || 0;
-        const pendingBalance = customerPendingMap.get(customer.id) || 0;
-        const totalOrderValue = customerOrderValueMap.get(customer.id) || 0;
-        const averageOrderValue = ordersCount > 0 ? totalOrderValue / ordersCount : 0;
-
-        return {
-          customer,
-          ordersCount,
-          totalSpent,
-          pendingBalance,
-          totalOrderValue,
-          averageOrderValue,
-          isRepeatCustomer: ordersCount >= 2,
-        };
-      })
-      .filter(
-        (item) =>
-          item.ordersCount > 0 ||
-          item.totalSpent > 0 ||
-          item.pendingBalance > 0 ||
-          item.totalOrderValue > 0
-      );
-
-    const topCustomerEntry = Array.from(customerSpendMap.entries()).sort(
+    const spendByCustomer = new Map(
+      customerInsights.map((item) => [item.customer.id, item.totalSpent] as const)
+    );
+    const topCustomerEntry = Array.from(spendByCustomer.entries()).sort(
       (a, b) => b[1] - a[1]
     )[0];
 
@@ -227,82 +164,30 @@ export function Reports() {
       .sort((a, b) => b.pendingBalance - a.pendingBalance)
       .slice(0, 5);
 
-    const orderTypeMap = new Map<string, number>();
-    const orderTypeRevenueMap = new Map<string, number>();
-
-    for (const order of orders) {
-      orderTypeMap.set(order.orderType, (orderTypeMap.get(order.orderType) || 0) + 1);
-      orderTypeRevenueMap.set(
-        order.orderType,
-        (orderTypeRevenueMap.get(order.orderType) || 0) + order.totalAmount
-      );
-    }
-
-    const bestSellingOrderTypes = Array.from(orderTypeMap.entries())
-      .map(([name, count]) => ({
-        name,
-        count,
-        revenue: orderTypeRevenueMap.get(name) || 0,
-      }))
-      .sort((a, b) => {
-        if (b.count !== a.count) return b.count - a.count;
-        return b.revenue - a.revenue;
-      })
-      .slice(0, 5);
-
+    const orderIntel = orderIntelligence(orders, now);
+    const orderStatusCounts = orderIntel.statusCounts;
+    const openOverdueOrders = orderIntel.openOverdueOrders;
+    const completionRate = orderIntel.completionRate;
+    const activeWorkflowOrders = orderIntel.activeWorkflowOrders;
+    const bestSellingOrderTypes = orderIntel.bestSellingOrderTypes;
     const topOrderTypeEntry = bestSellingOrderTypes[0] || null;
 
-    const usageByMaterialMap = new Map<string, number>();
-    const costByMaterialMap = new Map<string, number>();
+    const materialInsights = materialIntelligence(fabricRecords, materialUsages);
 
-    for (const usage of materialUsages) {
-      usageByMaterialMap.set(
-        usage.fabricRecordId,
-        (usageByMaterialMap.get(usage.fabricRecordId) || 0) + usage.quantityUsed
-      );
-
-      const fabric = fabricRecords.find((item) => item.id === usage.fabricRecordId);
-      const unitCost = fabric?.costPerUnit || 0;
-
-      costByMaterialMap.set(
-        usage.fabricRecordId,
-        (costByMaterialMap.get(usage.fabricRecordId) || 0) +
-          usage.quantityUsed * unitCost
-      );
-    }
-
-    const topMaterialEntry = Array.from(usageByMaterialMap.entries()).sort(
+    const usageByMaterial = new Map(
+      materialInsights.map((item) => [item.material.id, item.totalUsed] as const)
+    );
+    const topMaterialEntry = Array.from(usageByMaterial.entries()).sort(
       (a, b) => b[1] - a[1]
     )[0];
 
     const topMaterial = topMaterialEntry
       ? {
           material:
-            fabricRecords.find((material) => material.id === topMaterialEntry[0]) ||
-            null,
-          quantity: topMaterialEntry[1],
+            fabricRecords.find((item) => item.id === topMaterialEntry[0]) || null,
+          totalUsed: topMaterialEntry[1],
         }
       : null;
-
-    const materialInsights = (fabricRecords ?? []).map((material) => {
-      const totalUsed = usageByMaterialMap.get(material.id) || 0;
-      const totalCostUsed = costByMaterialMap.get(material.id) || 0;
-      const isInactive = material.isActive === false;
-      const isSlowMoving = totalUsed === 0 && material.isActive !== false;
-      const isLowStock =
-        material.isActive !== false &&
-        typeof material.reorderLevel === 'number' &&
-        material.quantityInStock <= material.reorderLevel;
-
-      return {
-        material,
-        totalUsed,
-        totalCostUsed,
-        isInactive,
-        isSlowMoving,
-        isLowStock,
-      };
-    });
 
     const mostUsedMaterials = [...materialInsights]
       .filter((item) => item.totalUsed > 0)
@@ -312,19 +197,19 @@ export function Reports() {
       })
       .slice(0, 5);
 
-    const slowMovingMaterials = [...materialInsights]
+    const slowMovingMaterials = materialInsights
       .filter((item) => item.isSlowMoving)
-      .sort((a, b) => a.material.name.localeCompare(b.material.name))
+      .sort((a, b) => (a.material.name ?? '').localeCompare(b.material.name ?? ''))
       .slice(0, 5);
 
-    const inactiveMaterials = [...materialInsights]
+    const inactiveMaterials = materialInsights
       .filter((item) => item.isInactive)
-      .sort((a, b) => a.material.name.localeCompare(b.material.name))
+      .sort((a, b) => (a.material.name ?? '').localeCompare(b.material.name ?? ''))
       .slice(0, 5);
 
-    const lowStockMaterials = [...materialInsights]
+    const lowStockMaterials = materialInsights
       .filter((item) => item.isLowStock)
-      .sort((a, b) => a.material.quantityInStock - b.material.quantityInStock)
+      .sort((a, b) => (a.material.quantityInStock ?? 0) - (b.material.quantityInStock ?? 0))
       .slice(0, 5);
 
     const totalMaterialUsageCost = materialInsights.reduce(
@@ -337,26 +222,6 @@ export function Reports() {
         ? customerInsights.reduce((sum, item) => sum + item.averageOrderValue, 0) /
           customerInsights.length
         : 0;
-
-    const orderStatusCounts = {
-      draft: orders.filter((order) => order.status === 'draft').length,
-      in_progress: orders.filter((order) => order.status === 'in_progress').length,
-      ready: orders.filter((order) => order.status === 'ready').length,
-      delivered: orders.filter((order) => order.status === 'delivered').length,
-      cancelled: orders.filter((order) => order.status === 'cancelled').length,
-    };
-
-    const openOverdueOrders = orders.filter((order) => {
-      if (!order.dueDate) return false;
-      if (['delivered', 'cancelled'].includes(order.status)) return false;
-      return new Date(order.dueDate) < now;
-    });
-
-    const completionRate =
-      orders.length > 0 ? (orderStatusCounts.delivered / orders.length) * 100 : 0;
-
-    const activeWorkflowOrders =
-      orderStatusCounts.draft + orderStatusCounts.in_progress + orderStatusCounts.ready;
 
     return {
       revenueThisMonth,
@@ -413,18 +278,16 @@ export function Reports() {
       const month = monthDate.getMonth();
       const year = monthDate.getFullYear();
 
-      const amount = payments
-        .filter((payment) => {
-          const paidAt = new Date(payment.paidAt);
-          return (
-            payment.paymentStatus === 'captured' &&
-            paidAt.getMonth() === month &&
-            paidAt.getFullYear() === year
-          );
-        })
-        .reduce((sum, payment) => sum + payment.amount, 0);
+      const amount = collectedRevenue(payments, {
+        from: new Date(year, month, 1),
+        to: new Date(new Date(year, month + 1, 1).getTime() - 1),
+      });
 
-      return { label: monthLabels[index], value: amount };
+      // §20 chart integrity: label the ACTUAL month, not a hardcoded array
+      // (the window ends at the current month; Jan–Jun labels were wrong
+      // for 11 of 12 possible current months).
+      const label = monthDate.toLocaleString('en', { month: 'short' });
+      return { label, value: amount };
     });
 
     const weekLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -436,16 +299,7 @@ export function Reports() {
       const dayEnd = new Date(dayStart);
       dayEnd.setHours(23, 59, 59, 999);
 
-      const amount = payments
-        .filter((payment) => {
-          const paidAt = new Date(payment.paidAt);
-          return (
-            payment.paymentStatus === 'captured' &&
-            paidAt >= dayStart &&
-            paidAt <= dayEnd
-          );
-        })
-        .reduce((sum, payment) => sum + payment.amount, 0);
+      const amount = collectedRevenue(payments, { from: dayStart, to: dayEnd });
 
       return { label, value: amount };
     });
@@ -454,9 +308,7 @@ export function Reports() {
       .filter((invoice) => invoice.status === 'paid')
       .reduce((sum, invoice) => sum + invoice.totalAmount, 0);
 
-    const unpaidTotal = invoices
-      .filter((invoice) => ['sent', 'partial', 'overdue'].includes(invoice.status))
-      .reduce((sum, invoice) => sum + invoice.balanceDue, 0);
+    const unpaidTotal = outstandingBalance(invoices);
 
     const overdueTrend = (monthLabels ?? []).map((_, index) => {
       const monthDate = new Date(
@@ -469,16 +321,17 @@ export function Reports() {
 
       const amount = invoices
         .filter((invoice) => {
+          if (invoice.status !== 'overdue' || !invoice.dueDate) return false;
           const dueDate = new Date(invoice.dueDate);
           return (
-            invoice.status === 'overdue' &&
             dueDate.getMonth() === month &&
             dueDate.getFullYear() === year
           );
         })
         .reduce((sum, invoice) => sum + invoice.balanceDue, 0);
 
-      return { label: monthLabels[index], value: amount };
+      const label = monthDate.toLocaleString('en', { month: 'short' });
+      return { label, value: amount };
     });
 
     const completionTrend = (monthLabels ?? []).map((_, index) => {
@@ -491,15 +344,16 @@ export function Reports() {
       const year = monthDate.getFullYear();
 
       const count = orders.filter((order) => {
+        if (order.status !== 'delivered' || !order.createdAt) return false;
         const createdAt = new Date(order.createdAt);
         return (
-          order.status === 'delivered' &&
           createdAt.getMonth() === month &&
           createdAt.getFullYear() === year
         );
       }).length;
 
-      return { label: monthLabels[index], value: count };
+      const label = monthDate.toLocaleString('en', { month: 'short' });
+      return { label, value: count };
     });
 
     const overdueOrdersTrend = (monthLabels ?? []).map((_, index) => {
@@ -522,7 +376,8 @@ export function Reports() {
         );
       }).length;
 
-      return { label: monthLabels[index], value: count };
+      const label = monthDate.toLocaleString('en', { month: 'short' });
+      return { label, value: count };
     });
 
     return {
@@ -537,29 +392,30 @@ export function Reports() {
   }, [payments, invoices, orders, currentMonth, currentYear, startOfWeek, now]);
 
   const productionKpis = useMemo(() => {
-    const filteredOrders = filterOrdersByDateRange(orders, selectedProductionRange);
-    const ordersByStage = buildOrdersByStage(orders, selectedProductionRange);
+    const reportingOrders = toReportingOrders(orders);
+    const filteredOrders = filterOrdersByDateRange(reportingOrders, selectedProductionRange);
+    const ordersByStage = buildOrdersByStage(reportingOrders, selectedProductionRange);
     const overdueOrdersCount = getOverdueOrdersCount(
-      orders,
+      reportingOrders,
       selectedProductionRange,
       7,
       now
     );
     const readyForDeliveryCount = getReadyForDeliveryCount(
-      orders,
+      reportingOrders,
       selectedProductionRange
     );
     const averageTurnaroundDays = getAverageTurnaroundDays(
-      orders,
+      reportingOrders,
       selectedProductionRange
     );
     const materialConsumption = getMaterialConsumptionByGarmentType(
-      orders,
-      materialUsages,
+      reportingOrders,
+      toReportingUsages(materialUsages),
       fabricRecords,
       selectedProductionRange
     );
-    const bottleneckView = getBottleneckView(orders, selectedProductionRange);
+    const bottleneckView = getBottleneckView(reportingOrders, selectedProductionRange);
     const topBottleneck = bottleneckView[0] || null;
 
     return {
@@ -579,10 +435,14 @@ export function Reports() {
         {/* Stage 13 §6.3 — honest data-source classification. Local Reports
             compute from THIS DEVICE's offline store; live workspace reporting
             lives in Home (server /dashboard). Never labelled live/synced. */}
-        <p className="rounded-2xl border border-sky-100 bg-sky-50/70 px-4 py-3 text-sm text-slate-600" data-reports-scope="local">
-          <span className="font-semibold text-slate-900">Locally calculated</span> — from the
-          records stored on this device. Server workspace totals are shown in Home; payment
-          truth is server-authoritative in Finance.
+        <p className="rounded-2xl border border-sky-100 bg-sky-50/70 px-4 py-3 text-sm text-slate-600" data-reports-scope="local" data-analytics-provenance={analytics.provenance}>
+          <span className="font-semibold text-slate-900">Locally calculated</span> — from your
+          workspace records on this device.{' '}
+          {lastSyncedAt
+            ? `Workspace data last synced ${new Date(lastSyncedAt).toLocaleString()}.`
+            : 'Workspace data updated from this device (not yet synced).'}{' '}
+          Material figures are recorded on this device only. Payment truth remains
+          server-authoritative in Finance.
         </p>
       <div className="mx-auto max-w-7xl space-y-8">
         <section className="relative overflow-hidden rounded-[28px] border border-white/50 bg-gradient-to-r from-[#0F6E8C] via-[#117793] to-[#0C5C74] p-6 text-white shadow-2xl">
@@ -1070,7 +930,7 @@ export function Reports() {
                     <RankedCustomerCard
                       key={entry.customer.id}
                       rank={index + 1}
-                      name={entry.customer.fullName}
+                      name={entry.customer.fullName ?? 'Customer'}
                       subtitle={`${entry.ordersCount} order${entry.ordersCount === 1 ? '' : 's'}`}
                       metrics={[
                         {
