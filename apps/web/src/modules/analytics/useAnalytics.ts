@@ -24,6 +24,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import type { LocalRow } from '../../db/database';
+import type { MinimalProductionStage } from '@shared/utils/reporting';
 import {
   type AnalyticsCustomer,
   type AnalyticsFabric,
@@ -85,6 +86,10 @@ function mirrorOrder(row: MirrorRow): AnalyticsOrder {
     totalAmount: num(row.totalAmount),
     dueDate: (row.dueDate as string) ?? null,
     createdAt: (row.createdAt as string) ?? null,
+    garmentType: (row.garmentType as string) ?? null,
+    productionStages: Array.isArray(row.productionStages)
+      ? (row.productionStages as MinimalProductionStage[])
+      : null,
   };
 }
 
@@ -178,6 +183,10 @@ function ctxOrders(value: UnknownRecord[] | undefined): AnalyticsOrder[] {
     totalAmount: num(o.totalAmount),
     dueDate: (o.dueDate as string) ?? null,
     createdAt: (o.createdAt as string) ?? null,
+    garmentType: (o.garmentType as string) ?? null,
+    productionStages: Array.isArray(o.productionStages)
+      ? (o.productionStages as MinimalProductionStage[])
+      : null,
   }));
 }
 

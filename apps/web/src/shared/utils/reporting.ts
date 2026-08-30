@@ -24,7 +24,7 @@ type MinimalOrder = {
   productionStages?: MinimalProductionStage[] | null;
 };
 
-type MinimalProductionStage = {
+export type MinimalProductionStage = {
   name?: string | null;
   label?: string | null;
   title?: string | null;

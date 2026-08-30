@@ -49,6 +49,9 @@ export type AnalyticsOrder = {
   createdAt?: string | null;
   /** canonical production stage code when the order carries one */
   productionStage?: string | null;
+  /** embedded canonical stage history (server order payload carries it) */
+  productionStages?: MinimalProductionStage[] | null;
+  garmentType?: string | null;
 };
 
 export type AnalyticsInvoice = {
@@ -317,7 +320,7 @@ export function orderIntelligence(orders: AnalyticsOrder[], now: Date = new Date
   };
 }
 
-import { getAverageTurnaroundDays, hasTurnaroundEvidence } from '@shared/utils/reporting';
+import { getAverageTurnaroundDays, hasTurnaroundEvidence, type MinimalProductionStage } from '@shared/utils/reporting';
 
 /* ── Production intelligence — the canonical-stage helpers from
       @shared/utils/reporting remain THE definitions (fixes F-5: they are now
