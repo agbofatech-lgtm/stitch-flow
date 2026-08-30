@@ -6,8 +6,8 @@
 import { useEffect, useState } from 'react';
 import { useApp } from './context/AppContext';
 import { WorkspaceShell } from './shell/WorkspaceShell';
-import { Dashboard } from './components/Dashboard';
-import { Customers } from './components/Customers';
+import { HomeView } from './modules/workspace/HomeView';
+import { CustomersView } from './modules/customers/CustomersView';
 import { Orders } from './components/Orders';
 import { ProductionBoard } from './components/ProductionBoard';
 import { Invoices } from './components/Invoices';
@@ -36,9 +36,9 @@ export default function AuthenticatedApp() {
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard />;
+        return <HomeView />;
       case 'customers':
-        return <Customers />;
+        return <CustomersView />;
       case 'orders':
         return <Orders />;
       case 'production-board':
@@ -58,7 +58,7 @@ export default function AuthenticatedApp() {
       case 'platform':
         return <ControlCenter />;
       default:
-        return <Dashboard />;
+        return <HomeView />;
     }
   };
 

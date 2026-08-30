@@ -494,7 +494,8 @@ function CustomerOrdersModal({
   );
 }
 
-function AddCustomerModal({
+/** Stage 7: exported for reuse by the new CustomersView (same validated behavior). */
+export function AddCustomerModal({
   onClose,
   onAdd,
 }: {
@@ -687,10 +688,12 @@ function ModalShell({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-[24px] bg-white shadow-xl">
+      {/* Stage 7 a11y repair (narrow): dialog semantics + labelled close for the
+          legacy modal shell, reused by the new CustomersView create flow. */}
+      <div role="dialog" aria-modal="true" aria-label={title} className="w-full max-w-2xl rounded-[24px] bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-slate-200 p-4">
           <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-          <button onClick={onClose} className="rounded-lg p-1 hover:bg-slate-100">
+          <button onClick={onClose} aria-label={`Close ${title.toLowerCase()}`} className="rounded-lg p-1 hover:bg-slate-100">
             <X className="h-5 w-5 text-slate-500" />
           </button>
         </div>
