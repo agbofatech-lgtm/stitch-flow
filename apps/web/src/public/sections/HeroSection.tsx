@@ -2,6 +2,8 @@ import { BRAND } from '../../config/brand';
 import { navigate } from '@shared/router';
 import { Button } from '../../components/ui/Button';
 import { useInView } from '../hooks/useInView';
+import { LandingImage } from '../components/LandingImage';
+import { HERO_IMAGE } from '../components/landingAssets';
 
 /** Phase 12 — hero: one statement, one visual breath, two CTAs. */
 export function HeroSection() {
@@ -45,7 +47,10 @@ export function HeroSection() {
             Sign In
           </Button>
         </div>
-        <div aria-hidden="true" className="mt-16 h-14 w-px bg-gradient-to-b from-gold to-transparent" />
+        <div aria-hidden="true" className="mt-12 h-10 w-px bg-gradient-to-b from-gold to-transparent" />
+        {/* Cinematic image moment — manifest VA-LDR-01 (AVIF primary + WebP,
+            768 mobile), eager for LCP, intrinsic size so it never shifts. */}
+        <LandingImage asset={HERO_IMAGE} eager reveal={false} className="mt-2 w-full max-w-3xl" />
       </div>
     </section>
   );

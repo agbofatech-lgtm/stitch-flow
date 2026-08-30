@@ -4,11 +4,11 @@ import { useInView } from '../hooks/useInView';
 import { MeasureArt, DesignArt, PatternArt, ProduceArt, ManageArt } from '../components/StageIllustrations';
 
 const ART: Record<string, ReactNode> = {
-  measure: <MeasureArt />,
-  design: <DesignArt />,
-  pattern: <PatternArt />,
-  produce: <ProduceArt />,
-  manage: <ManageArt />,
+  customer: <MeasureArt />,
+  garment: <DesignArt />,
+  context: <PatternArt />,
+  production: <ProduceArt />,
+  finance: <ManageArt />,
 };
 
 function Stage({ stage, flip }: { stage: WorkflowStage; flip: boolean }) {
@@ -33,7 +33,7 @@ function Stage({ stage, flip }: { stage: WorkflowStage; flip: boolean }) {
   );
 }
 
-/** Phase 12 — the sequential Measure→Manage narrative with a connecting spine. */
+/** Stage 11 · ACT IV — the journey: customer → garment → context → work → loop. */
 export function WorkflowSections() {
   return (
     <div className="relative">
