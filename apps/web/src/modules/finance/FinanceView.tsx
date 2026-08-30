@@ -25,6 +25,7 @@ import {
   Button, Badge, Body, Label, Numeric, Section, Surface, Skeleton, EmptyState, ErrorState, Input, Textarea, Metric,
 } from '../../design-system';
 import { InvoiceModal } from '../../components/Invoices';
+import { useModalBehaviour } from '../../design-system/Overlay';
 import { emptyStateSrc } from '../workspace/assets';
 
 /** Non-colour financial status semantics (§41) — InvoiceStatus is VERIFIED as
@@ -111,6 +112,7 @@ export function FinanceView() {
   useEffect(() => {
     if (payFor) { setAmount(String(payFor.balanceDue || '')); setMethod(''); setReference(''); setNotes(''); setPayError(null); setPayOutcome(null); }
   }, [payFor]);
+  const paySheetRef = useModalBehaviour(!!payFor, () => setPayFor(null));
 
   const submitPayment = async () => {
     if (!payFor) return;
@@ -173,7 +175,7 @@ export function FinanceView() {
           <Section>Finance</Section>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Input aria-label="Search invoices by number, customer or order" placeholder="Search invoice, customer, order…" value={search} onChange={(e) => setSearch(e.target.value)} className="w-60" />
+          <Input aria-label="Search invoices by number, customer or order" placeholder="Search invoice, customer, order…" value={search} onChange={(e) => setSearch(e.target.value)} className="w-full sm:w-60" />
           <Button variant="secondary" onClick={load}><RefreshCw className="h-4 w-4" aria-hidden="true" /> Refresh</Button>
           <Button variant="primary" data-action="new-invoice" onClick={() => setModal({ mode: 'create' })}><Plus className="h-4 w-4" aria-hidden="true" /> New invoice</Button>
         </div>
@@ -221,11 +223,11 @@ export function FinanceView() {
                     {paymentCount > 0 ? ` · ${paymentCount} payment${paymentCount === 1 ? '' : 's'} recorded` : ''}
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+                <div className="w-full grid grid-cols-3 gap-x-4 gap-y-1 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-x-5">
                   <span className="text-sm text-ink-soft">Total <Numeric>{formatCurrency(inv.totalAmount, inv.currency as never)}</Numeric></span>
                   <span className="text-sm text-ink-soft">Paid <Numeric>{formatCurrency(inv.amountPaid, inv.currency as never)}</Numeric></span>
                   <span className="text-sm text-ink-soft" data-balance={inv.balanceDue}>Balance <Numeric>{formatCurrency(inv.balanceDue, inv.currency as never)}</Numeric></span>
-                  <span data-status={inv.status}><Badge tone={meta.tone}>{meta.icon} {meta.label}</Badge></span>
+                  <span data-status={inv.status} className="col-span-full sm:col-span-1"><Badge tone={meta.tone}>{meta.icon} {meta.label}</Badge></span>
                   {inv.status !== 'paid' && inv.status !== 'void' && (
                     <Button variant="secondary" className="min-h-[var(--ds-touch-min)]" data-action={`record-payment-${inv.id}`} onClick={() => setPayFor(inv)}>Record payment</Button>
                   )}
@@ -243,8 +245,9 @@ export function FinanceView() {
 
       {/* Record payment — idempotent write with honest outcomes */}
       {payFor && (
-        <div className="fixed inset-0 z-[var(--sf-z-modal)] flex items-end justify-center bg-ink/40 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-label={`Record payment for ${payFor.invoiceNumber}`} data-dialog="record-payment">
-          <Surface className="flex w-full max-w-md flex-col gap-3 p-5">
+        <div className="fixed inset-0 z-[var(--sf-z-modal)] flex items-end justify-center bg-ink/40 p-4 pb-0 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Record payment for ${payFor.invoiceNumber}`} data-dialog="record-payment">
+          <div ref={paySheetRef} tabIndex={-1} className="flex max-h-[85dvh] w-full max-w-md flex-col overflow-hidden">
+          <Surface className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
             <Section>Record payment</Section>
             <Body className="text-sm text-ink-soft">
               {payFor.invoiceNumber} · balance <Numeric>{formatCurrency(payFor.balanceDue, payFor.currency as never)}</Numeric> of <Numeric>{formatCurrency(payFor.totalAmount, payFor.currency as never)}</Numeric>
@@ -273,6 +276,7 @@ export function FinanceView() {
               </>
             )}
           </Surface>
+          </div>
         </div>
       )}
 
