@@ -9,8 +9,8 @@ import { WorkspaceShell } from './shell/WorkspaceShell';
 import { HomeView } from './modules/workspace/HomeView';
 import { CustomersView } from './modules/customers/CustomersView';
 import { Orders } from './components/Orders';
-import { ProductionBoard } from './components/ProductionBoard';
-import { Invoices } from './components/Invoices';
+import { ProductionView } from './modules/production/ProductionView'; // Stage 10 (legacy components/ProductionBoard.tsx retained)
+import { FinanceView } from './modules/finance/FinanceView'; // Stage 10 (legacy components/Invoices.tsx retained; InvoiceModal reused)
 import { DesignStudio } from './components/DesignStudio';
 import { Materials } from './components/Materials';
 import { Reports } from './components/Reports';
@@ -42,9 +42,9 @@ export default function AuthenticatedApp() {
       case 'orders':
         return <Orders />;
       case 'production-board':
-        return <ProductionBoard />;
+        return <ProductionView />;
       case 'invoices':
-        return <Invoices />;
+        return <FinanceView />;
       case 'design-studio':
         return <DesignStudio />;
       case 'materials':

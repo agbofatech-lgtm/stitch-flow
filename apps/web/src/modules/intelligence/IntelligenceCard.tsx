@@ -67,9 +67,9 @@ export function IntelligenceCard({ kind, title, children, basedOn, disclosure, c
 
 export function MissingDataNotice({ children }: { children: ReactNode }) {
   return (
-    <Body className="flex items-start gap-2 text-sm text-ink-soft" data-notice="missing-data">
+    <span data-notice="missing-data" className="flex items-start gap-2 text-sm text-ink-soft">
       <span aria-hidden="true">⚠</span>
-      <span>{children}</span>
-    </Body>
+      <Body className="text-ink-soft"><span>{children}</span></Body>
+    </span>
   );
 }
