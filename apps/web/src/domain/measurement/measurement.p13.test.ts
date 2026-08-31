@@ -6,6 +6,7 @@ import { migrateLocalSchema } from '../../shared/persistence/schema';
 import { generateStylePattern } from '../../modules/services/patternEngine';
 import { classifyMeasurementRecord } from './taxonomy';
 import {
+  assessGarmentTypeCompleteness,
   assessPatternInputCompleteness,
   assertPatternInputComplete,
 } from './completeness';
@@ -65,6 +66,34 @@ test('completeness uses PATTERN_INPUT_FIELDS and does not fill hip/bust defaults
   );
   assert.equal(trouser.missing.includes('hip'), true);
   assert.equal(hipConflictUnresolved(), true);
+});
+
+test('garment types map through existing gateway; dress completeness is bodice not Studio hip/skirt', () => {
+  const dress = assessGarmentTypeCompleteness(separateLegacyMeasurementBlob(BODICE_COMPLETE), 'dress');
+  assert.equal(dress.patternKind, 'bodice');
+  assert.equal(dress.complete, true);
+
+  const senator = assessGarmentTypeCompleteness(
+    separateLegacyMeasurementBlob({ bust: 96, neck: 36, shoulder: 12, sleeve: 24, backLength: 40 }),
+    'senator'
+  );
+  assert.equal(senator.patternKind, 'shirt');
+  assert.equal(senator.complete, true);
+
+  const agbada = assessGarmentTypeCompleteness(
+    separateLegacyMeasurementBlob({ chest: 96, shoulder: 12, backLength: 40, neck: 36 }),
+    'agbada'
+  );
+  assert.equal(agbada.patternKind, 'kaftan');
+  assert.equal(agbada.complete, true);
+
+  const dressUiExtra = assessGarmentTypeCompleteness(
+    separateLegacyMeasurementBlob({ waist: 72, hip: 100, skirtLength: 90 }),
+    'gown'
+  );
+  assert.equal(dressUiExtra.patternKind, 'bodice');
+  assert.equal(dressUiExtra.complete, false);
+  assert.ok(dressUiExtra.missing.includes('bust'));
 });
 
 test('shirt completeness accepts bust alias for chest without a second vocabulary', () => {

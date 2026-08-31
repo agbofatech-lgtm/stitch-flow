@@ -1,14 +1,16 @@
 # Phase 13 Stop Conditions
 
+Aligned to owner PART XI (31/08/2026). Stop only on these. Otherwise continue autonomously.
+
 | ID | Trigger | Action |
 |---|---|---|
-| STOP-P13-A | Protected Pattern Engine / Production Assistant / Design Studio hashes change, or formulas are copied into a second engine | IMMEDIATE STOP |
-| STOP-P13-B | A second measurement source of truth is created (new localStorage key, parallel field vocabulary, or AppContext replaced without ADR) | STOP |
-| STOP-P13-C | Invented formulas, invented required-field lists, or invented min/max ranges (including copying `MEASUREMENT_RANGES` into domain) | STOP |
-| STOP-P13-D | Hip/bust/chest defaults 98/100/102 (or 90/96) are silently reconciled or applied by Phase 13 | STOP |
-| STOP-P13-E | AI, 3D, billing, or Control Center work is started | STOP |
-| STOP-P13-F | Phase 13 completion tag created without owner acceptance | STOP |
+| STOP-P13-A | Required measurement intelligence would require modifying protected deterministic formulas | IMMEDIATE STOP |
+| STOP-P13-B | Repository evidence contains contradictory anatomical or tailoring semantics with no authority | STOP |
+| STOP-P13-C | A proposed measurement derivation introduces undocumented tailoring mathematics | STOP |
+| STOP-P13-D | Measurement intelligence would silently overwrite historical measurement versions | STOP |
+| STOP-P13-E | Implementation would create a second authoritative measurement source | STOP |
+| STOP-P13-F | An implementation conflicts with an Accepted ADR | STOP |
 
-Micro-gates are prohibited. T0–T10 tags must not be moved. Existing `phase-13-complete` (legacy programme) must not be retagged.
+Also held (not stop-ids): AI / 3D / billing / Control Center remain LOCKED; no Phase 13 completion tag until owner acceptance; do not move T0–T10 or legacy `phase-13-complete`.
 
-Transformation programme is complete at T10. This is product Phase 13, not T11.
+T10 C1–C7 remain permanent. Hip 98/100/102 must not be silently canonicalized (would also trip STOP-P13-C / T10 C3).

@@ -13,7 +13,7 @@
 | Module | Role |
 |---|---|
 | `domain/measurement/taxonomy.ts` | Classify live profile / MeasurementSet / MeasurementVersion / order snapshot / derived pattern / legacy draft |
-| `domain/measurement/completeness.ts` | Required keys = T3 `PATTERN_INPUT_FIELDS`. Missing keys STOP. No engine defaults. |
+| `domain/measurement/completeness.ts` | Required keys = T3 `PATTERN_INPUT_FIELDS`. Garment types use `mapGarmentTypeToPatternKind`. Missing keys STOP. No engine defaults. |
 | `domain/measurement/plausibility.ts` | Structural validation ≠ plausibility. Engine ranges observed via `PatternValidationError`. Ranges not copied. |
 | `application/measurement/versionAuthority.ts` | Freeze live blob → T8 MeasurementVersion → T2 create-only |
 | `application/measurement/t10Integration.ts` | Frozen version → completeness gate → T10 governed pattern |

@@ -4,6 +4,7 @@
  */
 
 import { PATTERN_INPUT_FIELDS, type PatternKind } from './fields';
+import { mapGarmentTypeToPatternKind } from '../pattern/gateway';
 import { projectPatternMeasurements, type SeparatedMeasurements } from './separate';
 
 export type CompletenessReport = {
@@ -38,6 +39,24 @@ export function assessPatternInputCompleteness(
     complete: missing.length === 0,
     filledByEngineDefaults: false,
   };
+}
+
+export type GarmentTypeCompletenessReport = CompletenessReport & {
+  garmentType: string;
+  patternKind: PatternKind;
+};
+
+/**
+ * Garment UI types map through the existing Design Studio FACT in mapGarmentTypeToPatternKind.
+ * Does not copy Studio MEASUREMENT_FIELD_MAP (experience sliders ≠ engine required keys).
+ */
+export function assessGarmentTypeCompleteness(
+  separated: SeparatedMeasurements,
+  garmentType: string
+): GarmentTypeCompletenessReport {
+  const patternKind = mapGarmentTypeToPatternKind(garmentType);
+  const report = assessPatternInputCompleteness(separated, patternKind);
+  return { ...report, garmentType, patternKind };
 }
 
 export function assertPatternInputComplete(report: CompletenessReport): void {

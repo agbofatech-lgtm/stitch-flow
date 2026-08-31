@@ -48,6 +48,7 @@ export { persistMeasurementVersion } from './persistence/measurementVersionStore
 export { classifyMeasurementRecord } from './measurement/taxonomy';
 export {
   assessPatternInputCompleteness,
+  assessGarmentTypeCompleteness,
   assertPatternInputComplete,
 } from './measurement/completeness';
 export { assessStructuralValidation, observeEnginePlausibility } from './measurement/plausibility';
