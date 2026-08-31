@@ -10,8 +10,9 @@ import {
   type StylePatternKind,
   type StylePatternResult,
 } from '../design/patternAdapter';
-import { convertFieldMap, ENGINE_LENGTH_UNIT, type LengthUnit } from './units';
+import { type LengthUnit } from './units';
 import { patternProvenance, type TailoringProvenance } from './provenance';
+import { governedPatternFromLoose } from './governedAdapter';
 
 export { generateStylePattern, generateStudioPattern, PatternValidationError };
 export type { StylePatternKind, StylePatternResult };
@@ -28,24 +29,15 @@ export type PatternContractResult = {
   provenance: TailoringProvenance;
 };
 
-function toEngineMeasurements(
-  measurements: Record<string, number | undefined>,
-  declaredUnit: LengthUnit
-): Record<string, number | undefined> {
-  if (declaredUnit === ENGINE_LENGTH_UNIT) return measurements;
-  const numeric: Record<string, number> = {};
-  for (const [key, value] of Object.entries(measurements)) {
-    if (typeof value === 'number') numeric[key] = value;
-  }
-  return convertFieldMap(numeric, declaredUnit, ENGINE_LENGTH_UNIT);
-}
-
 export function runPatternContract(input: PatternContractInput): PatternContractResult {
-  const declaredUnit = input.declaredUnit || ENGINE_LENGTH_UNIT;
-  const measurements = toEngineMeasurements(input.measurements, declaredUnit);
-  const result = generateStudioPattern(input.kind, measurements);
+  const executed = governedPatternFromLoose({
+    kind: input.kind,
+    measurements: input.measurements,
+    declaredUnit: input.declaredUnit,
+    measurementVersionId: input.measurementVersionId,
+  });
   return {
-    result,
+    result: executed.result,
     provenance: patternProvenance({
       measurementVersionId: input.measurementVersionId,
     }),

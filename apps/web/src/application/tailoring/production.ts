@@ -18,6 +18,7 @@ import {
   productionPlanProvenance,
   type TailoringProvenance,
 } from './provenance';
+import { governedProductionFromLoose } from './governedAdapter';
 
 export {
   analyzeDesignInspiration,

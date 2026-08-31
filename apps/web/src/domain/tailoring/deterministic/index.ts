@@ -23,6 +23,17 @@ export {
   assertSameUnitFamily,
 } from './units';
 export { DEFAULT_AUTHORITY_INVENTORY, HIP_DEFAULT_CONFLICT } from './defaultsInventory';
+export {
+  governedMeasurementsFromUnknown,
+  assertNoSilentCoercion,
+  PATTERN_DECLARED_FIELDS,
+} from './inputAuthority';
+export {
+  CONFIGURATION_AUTHORITY_REGISTRY,
+  defaultsForPath,
+  hipConflictUnresolved,
+  selectConfigurationPath,
+} from './configuration';
 export type {
   DeterministicPatternRequest,
   DeterministicProductionRequest,
