@@ -77,3 +77,9 @@ export {
   fingerprintGarmentSpecification,
   GARMENT_SPEC_FINGERPRINT_ALGORITHM,
 } from './garment/canonicalize';
+export {
+  freezeGarmentSpecification,
+  refuseFrozenGarmentSpecificationMutation,
+  historicalGarmentSpecificationIntact,
+} from './garment/version';
+export { persistGarmentSpecificationVersion } from './persistence/garmentSpecificationVersionStore';
