@@ -4,9 +4,10 @@
 |---|---|
 | Date | 2026-08-31 |
 | T5 implementation | **COMPLETE as shell** |
-| Owner acceptance | **PENDING** |
-| T5 completion tag | **NOT CREATED** |
-| T6+ | **LOCKED** |
+| Owner acceptance | **ACCEPTED** — Agbofa Benjamin, 31/08/2026 |
+| T5 completion tag | `transformation-t5-studio-shell-complete` |
+| T6 | Implementation authorized only **after** this T5 checkpoint is on origin. |
+| T7+ | **LOCKED** |
 
 | Marker | Status |
 |---|---|

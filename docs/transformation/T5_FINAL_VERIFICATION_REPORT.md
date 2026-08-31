@@ -15,4 +15,6 @@ Design Studio: hosted, not edited. No T5 tag. T6 locked.
 
 Implementation commit: `0e025534146f296aa3a22c1408b22774148f3df4`
 
-Owner Decision: **PENDING**.
+Owner Decision: **ACCEPT** — Agbofa Benjamin, 31/08/2026.
+
+T6 authorized after checkpoint. T7 locked.

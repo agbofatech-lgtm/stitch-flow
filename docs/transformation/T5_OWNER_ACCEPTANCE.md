@@ -5,7 +5,8 @@
 | Owner | Agbofa Benjamin |
 | Position | Owner and Chief Engineer |
 | Stage | T5 — StitchFlow Studio Shell |
-| Decision | **PENDING** |
-| Checkpoint | **NOT CREATED** |
+| Decision | **ACCEPT** — Agbofa Benjamin, 31/08/2026 |
+| Implementation | `0e025534146f296aa3a22c1408b22774148f3df4` |
+| Checkpoint | `transformation-t5-studio-shell-complete` |
 
-Do not create `transformation-t5-studio-shell-complete` until an explicit ACCEPT.
+T6 implementation authorized only after this checkpoint is on origin. T7 remains LOCKED.

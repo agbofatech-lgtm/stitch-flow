@@ -49,8 +49,9 @@ T1 STATUS: **COMPLETE** — `transformation-t1-runtime-authority-complete`
 T2 STATUS: **COMPLETE** — `transformation-t2-data-offline-foundation-complete`  
 T3 STATUS: **COMPLETE** — `transformation-t3-domain-boundary-isolation-complete`  
 T4 STATUS: **COMPLETE** — `transformation-t4-experience-foundation-complete`  
-T5 STATUS: **AUTHORIZED after T4 checkpoint** — not complete until Owner Acceptance  
-T6+ STATUS: **LOCKED**
+T5 STATUS: **COMPLETE** — `transformation-t5-studio-shell-complete`  
+T6 STATUS: **AUTHORIZED after T5 checkpoint** — not complete until Owner Acceptance  
+T7+ STATUS: **LOCKED**
 
 T0 final verification: [`docs/transformation/T0_FINAL_VERIFICATION_REPORT.md`](../../transformation/T0_FINAL_VERIFICATION_REPORT.md)  
 T0 closure: [`docs/transformation/T0_CLOSURE_RECORD.md`](../../transformation/T0_CLOSURE_RECORD.md)
