@@ -6,7 +6,7 @@
 | T2 implementation | **COMPLETE as infrastructure** |
 | Owner acceptance | **ACCEPTED** — Agbofa Benjamin, 31/08/2026 |
 | T2 completion tag | `transformation-t2-data-offline-foundation-complete` |
-| T3 | **LOCKED** |
+| T3 | Implementation authorized only **after** this T2 checkpoint is on origin. Completion still requires later Owner Acceptance. |
 
 | Marker | Status |
 |---|---|
