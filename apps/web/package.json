@@ -18,7 +18,8 @@
     "test:tailoring": "tsx --test src/application/tailoring/tailoring.test.ts",
     "test:deterministic": "tsx --test src/domain/tailoring/deterministic/*.test.ts",
     "test:execution": "tsx --test src/domain/tailoring/execution/execution.p16.test.ts",
-    "test:intelligence": "tsx --test src/domain/intelligence/intelligence.p17.test.ts"
+    "test:intelligence": "tsx --test src/domain/intelligence/intelligence.p17.test.ts",
+    "test:golden-path": "tsx --test src/domain/certification/goldenPath.p18.test.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
