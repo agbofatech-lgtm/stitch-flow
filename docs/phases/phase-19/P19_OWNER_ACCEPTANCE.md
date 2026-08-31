@@ -1,20 +1,33 @@
 # Phase 19 Owner Acceptance
 
-**Status:** PENDING — Stage 0 forensics only. Implementation is **LOCKED**. Do not tick a decision except the Owner.
+Owner: Agbofa Benjamin. Agents must not tick these.
+
+---
+
+## A. P19.1 Constitution review (current)
 
 ```
-OWNER ACCEPTANCE — PHASE 19 STAGE 0
-COMMERCIALIZATION & PLATFORM ECONOMY — FORENSICS
+OWNER REVIEW — PHASE 19.1 COMMERCIAL AUTHORITY CONSTITUTION
 
-Decision:
-[ ] ACCEPT FORENSICS — AUTHORIZE IMPLEMENTATION SLICES
-[ ] ACCEPT FORENSICS — PAUSE IMPLEMENTATION
-[ ] REJECT / RETURN FOR INVESTIGATION
+[ ] ACCEPT CONSTITUTION — decisions recorded in P19_OWNER_DECISION_REGISTER
+[ ] ACCEPT CONSTITUTION — pause all further P19 implementation
+[ ] REJECT / RETURN
 
-Owner:
-Agbofa Benjamin
-Position: Owner and Chief Engineer
-Date: __________________
+Decisions OD-P19-01 … OD-P19-05 must be ticked in the register before P19.2+.
+
+Owner / date: __________________
 ```
 
-No billing SDK, subscription schema, entitlement engine, or Control Center implementation until explicit authorization after this pack.
+---
+
+## B. Phase 19 completion (LOCKED — do not use yet)
+
+```
+OWNER ACCEPTANCE — PHASE 19 COMMERCIAL PLATFORM
+[ ] ACCEPT
+[ ] ACCEPT WITH CONDITIONS
+[ ] REJECT
+
+PHASE 19 TAG: NOT CREATED
+COMMERCIAL PLATFORM: NOT READY
+```
