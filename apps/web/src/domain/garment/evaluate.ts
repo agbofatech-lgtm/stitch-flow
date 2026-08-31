@@ -43,7 +43,7 @@ const OPTIONAL_KEYS = [
   'pocketStyle',
   'fabricType',
   'designCategory',
-  'notes',
+  'styleNotes',
 ] as const;
 
 export function assessGarmentSpecificationCompleteness(

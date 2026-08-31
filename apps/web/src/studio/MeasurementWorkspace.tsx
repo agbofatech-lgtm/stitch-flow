@@ -12,6 +12,9 @@ import { executeGovernedPatternFromVersion } from '../application/measurement/t1
 import { freezeLiveBlobToVersion } from '../application/measurement/versionAuthority';
 import { getDataAuthorityRuntime } from '../shared/persistence';
 import { useWorkflow } from '../workflow/WorkflowContext';
+import { evaluateStudioGarmentIntent } from '../application/garment/studioAdapter';
+import { freezeStudioGarmentSpecification } from '../application/garment/intelligence';
+import { KNOWN_GARMENT_TYPES, type KnownGarmentType } from '../domain/garment/taxonomy';
 
 const PATTERN_KINDS: PatternKind[] = ['bodice', 'shirt', 'trouser', 'skirt', 'kaftan'];
 
@@ -22,6 +25,7 @@ export function MeasurementWorkspace() {
   const [error, setError] = useState<string | null>(null);
   const [patternKind, setPatternKind] = useState<PatternKind>('bodice');
   const [frozenLocalId, setFrozenLocalId] = useState<string | null>(null);
+  const [garmentType, setGarmentType] = useState<KnownGarmentType | ''>('');
 
   const rows = useMemo(
     () =>
@@ -200,6 +204,52 @@ export function MeasurementWorkspace() {
         </Button>
         <Button size="sm" variant="secondary" onClick={() => void runGovernedFromFrozenVersion()}>
           Governed pattern from frozen version
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => {
+            setError(null);
+            const evaluated = evaluateStudioGarmentIntent({
+              garmentType: garmentType || undefined,
+              orderId: workflow.orderId,
+              customerId: workflow.customerId,
+            });
+            setMessage(
+              `Garment specification ${evaluated.completeness}. Type ${evaluated.canonical.garmentTypeStatus}. Optional absent: ${evaluated.optionalAbsent.join(', ') || 'none'}. Not pattern geometry.`
+            );
+          }}
+        >
+          Evaluate garment specification
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => {
+            void (async () => {
+              setError(null);
+              setMessage(null);
+              const runtime = getDataAuthorityRuntime();
+              if (!runtime) {
+                setError('T2 data authority runtime is not started. Specification was not written to a new store.');
+                return;
+              }
+              try {
+                const frozen = await freezeStudioGarmentSpecification(runtime.repositories.garment, {
+                  garmentType: garmentType || undefined,
+                  orderId: workflow.orderId,
+                  customerId: workflow.customerId,
+                });
+                setMessage(
+                  `GarmentSpecificationVersion ${frozen.version.id} frozen. Live Studio/Order type remains mutable. Fingerprint ${frozen.version.fingerprint.value}.`
+                );
+              } catch (err) {
+                setError(err instanceof Error ? err.message : 'Specification freeze failed');
+              }
+            })();
+          }}
+        >
+          Freeze garment specification
         </Button>
         {rows.slice(0, 6).map((row) => (
           <span key={row.id} className="flex flex-wrap gap-2">

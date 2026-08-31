@@ -19,7 +19,7 @@ const INTENT_KEYS = [
   'pocketStyle',
   'fabricType',
   'designCategory',
-  'notes',
+  'styleNotes',
   'customerId',
   'orderId',
   'measurementVersionId',

@@ -42,7 +42,7 @@ export type GarmentIntentInput = {
   pocketStyle?: unknown;
   fabricType?: unknown;
   designCategory?: unknown;
-  notes?: unknown;
+  styleNotes?: unknown;
   customerId?: string | null;
   orderId?: string | null;
   measurementVersionId?: string | null;
@@ -63,7 +63,7 @@ export type CanonicalGarmentSpecification = {
   pocketStyle?: string;
   fabricType?: string;
   designCategory?: string;
-  notes?: string;
+  styleNotes?: string;
   customerId?: string | null;
   orderId?: string | null;
   measurementVersionId?: string | null;
@@ -133,7 +133,7 @@ export function buildCanonicalGarmentSpecification(
   const pocketStyle = optionalTrimmedString(input.pocketStyle);
   const fabricType = optionalTrimmedString(input.fabricType);
   const designCategory = optionalTrimmedString(input.designCategory);
-  const notes = optionalTrimmedString(input.notes);
+  const styleNotes = optionalTrimmedString(input.styleNotes);
 
   if (sleeveStyle) spec.sleeveStyle = sleeveStyle;
   if (collarStyle) spec.collarStyle = collarStyle;
@@ -142,7 +142,7 @@ export function buildCanonicalGarmentSpecification(
   if (pocketStyle) spec.pocketStyle = pocketStyle;
   if (fabricType) spec.fabricType = fabricType;
   if (designCategory) spec.designCategory = designCategory;
-  if (notes) spec.notes = notes;
+  if (styleNotes) spec.styleNotes = styleNotes;
   if (input.customerId !== undefined) spec.customerId = input.customerId;
   if (input.orderId !== undefined) spec.orderId = input.orderId;
   if (input.measurementVersionId !== undefined) spec.measurementVersionId = input.measurementVersionId;
