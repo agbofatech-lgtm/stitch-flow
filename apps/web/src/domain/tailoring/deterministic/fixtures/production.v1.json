@@ -1,0 +1,518 @@
+[
+  {
+    "fixtureId": "FX-PRODUCTION-SHIRT-01",
+    "purpose": "Observed Production Assistant plan including fabric yards; generatedAt excluded from identity",
+    "computationType": "production-plan",
+    "computationVersion": "production-plan-v1",
+    "canonicalUnit": "cm",
+    "fabricOutputUnit": "yards",
+    "sourceOfExpectedValue": "protected productionAssistant T0 sha256 140a646d2bfa933e47951169b953f29bef108b6e0e48dd8dfe99a3c66ad571c4",
+    "certificationStatus": "observed-behavior",
+    "toleranceRule": "exact deep equality of normalizedOutput (generatedAt stripped); fingerprint ignores clock",
+    "input": {
+      "garmentType": "shirt",
+      "measurements": {
+        "bust": 90,
+        "chest": 90,
+        "waist": 72,
+        "hip": 98,
+        "neck": 36,
+        "shoulder": 12,
+        "backLength": 40,
+        "bustSpan": 11,
+        "armholeDepth": 22,
+        "sleeve": 24,
+        "thigh": 58,
+        "knee": 42,
+        "ankle": 28,
+        "trouserLength": 108,
+        "skirtLength": 75
+      },
+      "declaredUnit": "cm"
+    },
+    "expectedFingerprint": {
+      "algorithm": "fnv1a-64",
+      "value": "fd528ed5b6185da7"
+    },
+    "expectedNormalizedOutput": {
+      "cuttingList": [
+        {
+          "fabric": "main",
+          "name": "Front Shirt Panel",
+          "quantity": 2
+        },
+        {
+          "cutOnFold": true,
+          "fabric": "main",
+          "name": "Back Shirt Panel",
+          "quantity": 1
+        },
+        {
+          "fabric": "main",
+          "name": "Sleeve",
+          "quantity": 2
+        },
+        {
+          "fabric": "main",
+          "name": "Collar",
+          "notes": "Fuse one side",
+          "quantity": 2
+        },
+        {
+          "fabric": "main",
+          "name": "Collar Stand",
+          "quantity": 2
+        },
+        {
+          "fabric": "interfacing",
+          "name": "Front Placket",
+          "quantity": 2
+        },
+        {
+          "fabric": "main",
+          "name": "Cuff",
+          "quantity": 2
+        },
+        {
+          "fabric": "main",
+          "name": "Pocket",
+          "notes": "Optional if style needs it",
+          "quantity": 1
+        }
+      ],
+      "fabricEstimate": {
+        "fabricType": "cotton",
+        "interfacingQty": 0.4,
+        "mainFabricQty": 2.6,
+        "notes": [
+          "Recommended fabric direction: Cotton, Linen, Silk.",
+          "Add a small extra allowance for shrinkage, seam testing, and matching."
+        ],
+        "unit": "yards"
+      },
+      "fitRisks": [],
+      "garmentType": "shirt",
+      "sewingChecklist": [
+        {
+          "category": "prep",
+          "description": "Confirm garment style, fabric direction, fit intention, closure choice, and finishing method before cutting.",
+          "step": 1,
+          "title": "Review design brief"
+        },
+        {
+          "category": "prep",
+          "description": "Inspect flaws, pre-shrink if needed, press flat, and align grain before laying out pattern pieces.",
+          "step": 2,
+          "title": "Check and prepare fabric"
+        },
+        {
+          "category": "cutting",
+          "description": "Transfer notches, darts, grain lines, waistlines, center lines, zipper points, and fitting marks clearly.",
+          "step": 3,
+          "title": "Mark pattern pieces"
+        },
+        {
+          "category": "assembly",
+          "description": "Fuse and sew plackets, then topstitch cleanly.",
+          "step": 4,
+          "title": "Prepare front opening"
+        },
+        {
+          "category": "assembly",
+          "description": "Assemble shoulder/yoke area and press flat for clean collar setup.",
+          "step": 5,
+          "title": "Join shoulders and yoke"
+        },
+        {
+          "category": "assembly",
+          "description": "Fuse one collar layer, stitch collar, attach stand, and check symmetry.",
+          "step": 6,
+          "title": "Build collar and stand"
+        },
+        {
+          "category": "assembly",
+          "description": "Sew sleeves into armholes and smooth ease carefully.",
+          "step": 7,
+          "title": "Attach sleeves"
+        },
+        {
+          "category": "assembly",
+          "description": "Join underarm and side seams with matching notches and armhole points.",
+          "step": 8,
+          "title": "Close side seams and sleeve seams"
+        },
+        {
+          "category": "finishing",
+          "description": "Attach cuffs if used, hem body, and finalize topstitching.",
+          "step": 9,
+          "title": "Finish cuffs and hem"
+        },
+        {
+          "category": "finishing",
+          "description": "Mark button/buttonhole points, sew, test closure, and final press.",
+          "step": 10,
+          "title": "Button placement and pressing"
+        }
+      ],
+      "tailorNotes": [
+        "Primary garment interpretation: Shirt.",
+        "Cross-check bust/chest ease against intended style before cutting all major pieces.",
+        "Finalize front opening, collar height, and sleeve finish before bulk cutting.",
+        "Confirm collar, cuff, and front opening decisions before cutting."
+      ]
+    },
+    "expectedFabricEstimate": {
+      "fabricType": "cotton",
+      "mainFabricQty": 2.6,
+      "interfacingQty": 0.4,
+      "unit": "yards",
+      "notes": [
+        "Recommended fabric direction: Cotton, Linen, Silk.",
+        "Add a small extra allowance for shrinkage, seam testing, and matching."
+      ]
+    }
+  },
+  {
+    "fixtureId": "FX-PRODUCTION-TROUSER-01",
+    "purpose": "Observed Production Assistant plan including fabric yards; generatedAt excluded from identity",
+    "computationType": "production-plan",
+    "computationVersion": "production-plan-v1",
+    "canonicalUnit": "cm",
+    "fabricOutputUnit": "yards",
+    "sourceOfExpectedValue": "protected productionAssistant T0 sha256 140a646d2bfa933e47951169b953f29bef108b6e0e48dd8dfe99a3c66ad571c4",
+    "certificationStatus": "observed-behavior",
+    "toleranceRule": "exact deep equality of normalizedOutput (generatedAt stripped); fingerprint ignores clock",
+    "input": {
+      "garmentType": "trouser",
+      "measurements": {
+        "bust": 90,
+        "chest": 90,
+        "waist": 72,
+        "hip": 98,
+        "neck": 36,
+        "shoulder": 12,
+        "backLength": 40,
+        "bustSpan": 11,
+        "armholeDepth": 22,
+        "sleeve": 24,
+        "thigh": 58,
+        "knee": 42,
+        "ankle": 28,
+        "trouserLength": 108,
+        "skirtLength": 75
+      },
+      "declaredUnit": "cm"
+    },
+    "expectedFingerprint": {
+      "algorithm": "fnv1a-64",
+      "value": "f91f4794c6dc9e2b"
+    },
+    "expectedNormalizedOutput": {
+      "cuttingList": [
+        {
+          "fabric": "main",
+          "name": "Front Leg",
+          "quantity": 2
+        },
+        {
+          "fabric": "main",
+          "name": "Back Leg",
+          "quantity": 2
+        },
+        {
+          "fabric": "main",
+          "name": "Waistband",
+          "quantity": 1
+        },
+        {
+          "fabric": "lining",
+          "name": "Pocket Bag",
+          "quantity": 2
+        },
+        {
+          "fabric": "main",
+          "name": "Fly Shield",
+          "quantity": 1
+        },
+        {
+          "fabric": "interfacing",
+          "name": "Fly Facing",
+          "quantity": 1
+        }
+      ],
+      "fabricEstimate": {
+        "fabricType": "cotton",
+        "interfacingQty": 0.2,
+        "liningQty": 0.4,
+        "mainFabricQty": 2.8,
+        "notes": [
+          "Recommended fabric direction: Cotton, Linen, Wool.",
+          "Add a small extra allowance for shrinkage, seam testing, and matching."
+        ],
+        "unit": "yards"
+      },
+      "fitRisks": [],
+      "garmentType": "trouser",
+      "sewingChecklist": [
+        {
+          "category": "prep",
+          "description": "Confirm garment style, fabric direction, fit intention, closure choice, and finishing method before cutting.",
+          "step": 1,
+          "title": "Review design brief"
+        },
+        {
+          "category": "prep",
+          "description": "Inspect flaws, pre-shrink if needed, press flat, and align grain before laying out pattern pieces.",
+          "step": 2,
+          "title": "Check and prepare fabric"
+        },
+        {
+          "category": "cutting",
+          "description": "Transfer notches, darts, grain lines, waistlines, center lines, zipper points, and fitting marks clearly.",
+          "step": 3,
+          "title": "Mark pattern pieces"
+        },
+        {
+          "category": "assembly",
+          "description": "Assemble pocket bags, fly shield, and interfaced facing before main joining.",
+          "step": 4,
+          "title": "Prepare pockets and fly pieces"
+        },
+        {
+          "category": "assembly",
+          "description": "Join darts if any, then sew leg shaping and press seams open or toward back.",
+          "step": 5,
+          "title": "Sew front and back leg seams"
+        },
+        {
+          "category": "assembly",
+          "description": "Match rise carefully and reinforce stress point at crotch curve.",
+          "step": 6,
+          "title": "Join crotch seam"
+        },
+        {
+          "category": "assembly",
+          "description": "Check leg balance, knee line, and hem width before closing all long seams.",
+          "step": 7,
+          "title": "Join inseam and side seam"
+        },
+        {
+          "category": "assembly",
+          "description": "Fuse waistband, attach evenly, and confirm waist measurement before closure.",
+          "step": 8,
+          "title": "Attach waistband"
+        },
+        {
+          "category": "fitting",
+          "description": "Check waist, seat, thigh ease, crotch depth, and hem length.",
+          "step": 9,
+          "title": "First fitting"
+        },
+        {
+          "category": "finishing",
+          "description": "Mark final length, hem cleanly, and final press crease if needed.",
+          "step": 10,
+          "title": "Hem and finish"
+        }
+      ],
+      "tailorNotes": [
+        "Primary garment interpretation: Trouser.",
+        "Cross-check bust/chest ease against intended style before cutting all major pieces.",
+        "Confirm crotch depth and hem break during fitting before final waistband finishing.",
+        "Confirm rise, seat ease, and hem opening before final cut."
+      ]
+    },
+    "expectedFabricEstimate": {
+      "fabricType": "cotton",
+      "mainFabricQty": 2.8,
+      "liningQty": 0.4,
+      "interfacingQty": 0.2,
+      "unit": "yards",
+      "notes": [
+        "Recommended fabric direction: Cotton, Linen, Wool.",
+        "Add a small extra allowance for shrinkage, seam testing, and matching."
+      ]
+    }
+  },
+  {
+    "fixtureId": "FX-PRODUCTION-DRESS-01",
+    "purpose": "Observed Production Assistant plan including fabric yards; generatedAt excluded from identity",
+    "computationType": "production-plan",
+    "computationVersion": "production-plan-v1",
+    "canonicalUnit": "cm",
+    "fabricOutputUnit": "yards",
+    "sourceOfExpectedValue": "protected productionAssistant T0 sha256 140a646d2bfa933e47951169b953f29bef108b6e0e48dd8dfe99a3c66ad571c4",
+    "certificationStatus": "observed-behavior",
+    "toleranceRule": "exact deep equality of normalizedOutput (generatedAt stripped); fingerprint ignores clock",
+    "input": {
+      "garmentType": "dress",
+      "measurements": {
+        "bust": 90,
+        "chest": 90,
+        "waist": 72,
+        "hip": 98,
+        "neck": 36,
+        "shoulder": 12,
+        "backLength": 40,
+        "bustSpan": 11,
+        "armholeDepth": 22,
+        "sleeve": 24,
+        "thigh": 58,
+        "knee": 42,
+        "ankle": 28,
+        "trouserLength": 108,
+        "skirtLength": 75
+      },
+      "declaredUnit": "cm"
+    },
+    "expectedFingerprint": {
+      "algorithm": "fnv1a-64",
+      "value": "b5629dd89eddb466"
+    },
+    "expectedNormalizedOutput": {
+      "cuttingList": [
+        {
+          "cutOnFold": true,
+          "fabric": "main",
+          "name": "Front Bodice",
+          "quantity": 1
+        },
+        {
+          "fabric": "main",
+          "name": "Back Bodice",
+          "quantity": 2
+        },
+        {
+          "cutOnFold": true,
+          "fabric": "main",
+          "name": "Front Skirt Panel",
+          "quantity": 1
+        },
+        {
+          "fabric": "main",
+          "name": "Back Skirt Panel",
+          "quantity": 2
+        },
+        {
+          "fabric": "main",
+          "name": "Sleeve",
+          "quantity": 2
+        },
+        {
+          "cutOnFold": true,
+          "fabric": "lining",
+          "name": "Bodice Lining",
+          "quantity": 1
+        },
+        {
+          "fabric": "lining",
+          "name": "Back Bodice Lining",
+          "quantity": 2
+        },
+        {
+          "fabric": "interfacing",
+          "name": "Neck Facing",
+          "quantity": 2
+        }
+      ],
+      "fabricEstimate": {
+        "fabricType": "silk",
+        "interfacingQty": 0.3,
+        "liningQty": 1.2,
+        "mainFabricQty": 4.3,
+        "notes": [
+          "Recommended fabric direction: Silk, Cotton, Lace.",
+          "Add a small extra allowance for shrinkage, seam testing, and matching."
+        ],
+        "unit": "yards"
+      },
+      "fitRisks": [],
+      "garmentType": "dress",
+      "sewingChecklist": [
+        {
+          "category": "prep",
+          "description": "Confirm garment style, fabric direction, fit intention, closure choice, and finishing method before cutting.",
+          "step": 1,
+          "title": "Review design brief"
+        },
+        {
+          "category": "prep",
+          "description": "Inspect flaws, pre-shrink if needed, press flat, and align grain before laying out pattern pieces.",
+          "step": 2,
+          "title": "Check and prepare fabric"
+        },
+        {
+          "category": "cutting",
+          "description": "Transfer notches, darts, grain lines, waistlines, center lines, zipper points, and fitting marks clearly.",
+          "step": 3,
+          "title": "Mark pattern pieces"
+        },
+        {
+          "category": "assembly",
+          "description": "Sew darts or princess seams and confirm bodice balance before joining skirt.",
+          "step": 4,
+          "title": "Assemble bodice shaping"
+        },
+        {
+          "category": "assembly",
+          "description": "Construct neckline around the selected neckline and secure shoulder seams.",
+          "step": 5,
+          "title": "Finish neckline and shoulders"
+        },
+        {
+          "category": "assembly",
+          "description": "Set selected sleeve if required and smooth sleeve head.",
+          "step": 6,
+          "title": "Attach sleeves or complete armhole finish"
+        },
+        {
+          "category": "assembly",
+          "description": "Assemble front and back skirt pieces, pockets, and any panel details.",
+          "step": 7,
+          "title": "Join skirt panels"
+        },
+        {
+          "category": "assembly",
+          "description": "Match waist seam accurately at center and side seam reference points.",
+          "step": 8,
+          "title": "Join bodice to skirt"
+        },
+        {
+          "category": "assembly",
+          "description": "Install zipper, loop, or button closure before lining closure.",
+          "step": 9,
+          "title": "Insert closure"
+        },
+        {
+          "category": "fitting",
+          "description": "Check bust, waist, hip, armhole, neckline, and overall length balance.",
+          "step": 10,
+          "title": "First fitting"
+        },
+        {
+          "category": "finishing",
+          "description": "Level hem, finish lining, trim threads, and press garment for delivery.",
+          "step": 11,
+          "title": "Finish hem and final press"
+        }
+      ],
+      "tailorNotes": [
+        "Primary garment interpretation: Dress.",
+        "Cross-check bust/chest ease against intended style before cutting all major pieces.",
+        "Balance bodice fit before attaching final skirt or completing full lining close.",
+        "Check whether lining or facing is needed for shape control and clean finish."
+      ]
+    },
+    "expectedFabricEstimate": {
+      "fabricType": "silk",
+      "mainFabricQty": 4.3,
+      "liningQty": 1.2,
+      "interfacingQty": 0.3,
+      "unit": "yards",
+      "notes": [
+        "Recommended fabric direction: Silk, Cotton, Lace.",
+        "Add a small extra allowance for shrinkage, seam testing, and matching."
+      ]
+    }
+  }
+]
