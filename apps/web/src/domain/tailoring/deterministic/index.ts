@@ -18,6 +18,7 @@ export {
 export {
   CM_PER_INCH,
   ENGINE_LENGTH_UNIT,
+  toCentimetres,
   refuseImplicitBodyToFabricConversion,
   assertSameUnitFamily,
 } from './units';

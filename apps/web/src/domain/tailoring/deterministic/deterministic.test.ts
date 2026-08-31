@@ -38,8 +38,8 @@ const SAMPLE = {
   skirtLength: 75,
 };
 
-function fileSha256(relFromRepo: string) {
-  const abs = new URL(`../../../../../${relFromRepo}`, import.meta.url);
+function fileSha256(relFromThisFile: string) {
+  const abs = new URL(relFromThisFile, import.meta.url);
   const buf = readFileSync(abs);
   return createHash('sha256').update(buf).digest('hex');
 }
@@ -165,8 +165,8 @@ test('hip default conflict remains unreconciled', () => {
 });
 
 test('engine source identity matches protected T0 hashes', () => {
-  const pattern = fileSha256('apps/web/src/modules/services/patternEngine.ts');
-  const assistant = fileSha256('apps/web/src/modules/services/productionAssistant.ts');
+  const pattern = fileSha256('../../../modules/services/patternEngine.ts');
+  const assistant = fileSha256('../../../modules/services/productionAssistant.ts');
   assert.equal(PATTERN_ENGINE_SOURCE_IDENTITY, `sha256:${pattern}`);
   assert.equal(PRODUCTION_ASSISTANT_SOURCE_IDENTITY, `sha256:${assistant}`);
 });
