@@ -12,6 +12,7 @@ export type DomainOwner =
   | 'production-domain'
   | 'experience-not-domain'
   | 't2-persistence'
+  | 'intelligence-application'
   | 'unassignable';
 
 export type OwnershipRecord = {
@@ -104,10 +105,10 @@ export const DOMAIN_OWNERSHIP: OwnershipRecord[] = [
   },
   {
     capability: 'ai-advisory',
-    owner: 'unassignable',
-    layer: 'LOCKED',
-    fact: 'ADR-004. productionAssistant is not an AI model. T3 must not invent AI ownership.',
-    assignable: false,
+    owner: 'intelligence-application',
+    layer: 'APPLICATION',
+    fact: 'Phase 17 read-only advisory (ADR-004). Must not mutate P13–P16 authorities. productionAssistant remains a heuristic, not an LLM.',
+    assignable: true,
   },
   {
     capability: '3d-fitting',

@@ -101,3 +101,12 @@ export {
   EXECUTION_CONTRACT_VERSION,
 } from './tailoring/execution';
 export { persistTrustedTailoringExecution } from './persistence/trustedTailoringExecutionStore';
+export {
+  INTELLIGENCE_CONTRACT_VERSION,
+  buildGovernedIntelligenceContext,
+  interpretGovernedContext,
+  refuseIntelligenceMutationOfMeasurement,
+  refuseIntelligenceMutationOfSpecification,
+  refuseIntelligenceMutationOfComposition,
+  refuseIntelligenceMutationOfExecution,
+} from './intelligence';

@@ -165,9 +165,11 @@ test('production merge advances completed stages and conflicts skip vs complete'
 });
 
 test('locked capabilities are unassignable', () => {
-  assert.throws(() => requireOwner('ai-advisory'), DomainUnassignableError);
+  assert.throws(() => requireOwner('3d-fitting'), DomainUnassignableError);
   assert.throws(() => requireOwner('saas-billing'), DomainUnassignableError);
   assert.equal(requireOwner('pattern-draft-generation').owner, 'pattern-engine');
+  assert.equal(requireOwner('ai-advisory').owner, 'intelligence-application');
+  assert.equal(requireOwner('ai-advisory').layer, 'APPLICATION');
 });
 
 test('T3 measurement persist uses T2 repository, not localStorage', async () => {
