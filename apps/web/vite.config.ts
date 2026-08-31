@@ -7,6 +7,15 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
+    allowedHosts: true,
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        experience: path.resolve(__dirname, 'experience-preview.html'),
+      },
+    },
   },
   resolve: {
     alias: {
@@ -14,6 +23,7 @@ export default defineConfig({
       '@modules': path.resolve(__dirname, 'src/modules'),
       '@shared': path.resolve(__dirname, 'src/shared'),
       '@assets': path.resolve(__dirname, 'src/assets'),
+      '@experience': path.resolve(__dirname, 'src/experience'),
     },
   },
 });

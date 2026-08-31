@@ -17,7 +17,8 @@
       "@data/*": ["src/data/*"],
       "@assets/*": ["src/assets/*"],
       "@utils/*": ["src/utils/*"],
-      "@shared/*": ["src/shared/*"]
+      "@shared/*": ["src/shared/*"],
+      "@experience/*": ["src/experience/*"]
     }
   },
   "include": ["src"]
