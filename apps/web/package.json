@@ -15,7 +15,7 @@
     "test:workflow": "tsx --test src/workflow/workflow.test.ts",
     "test:design": "tsx --test src/application/design/design.test.ts",
     "test:tailoring": "tsx --test src/application/tailoring/tailoring.test.ts",
-    "test:deterministic": "tsx --test src/domain/tailoring/deterministic/deterministic.test.ts src/domain/tailoring/deterministic/fixtures.test.ts src/domain/tailoring/deterministic/input.test.ts"
+    "test:deterministic": "tsx --test src/domain/tailoring/deterministic/*.test.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
