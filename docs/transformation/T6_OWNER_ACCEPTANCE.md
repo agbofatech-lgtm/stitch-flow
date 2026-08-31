@@ -5,21 +5,21 @@
 | Owner | Agbofa Benjamin |
 | Position | Owner and Chief Engineer |
 | Stage | T6 — Workflow Migration |
-| Decision | **PENDING** |
+| Decision | **ACCEPT** — Agbofa Benjamin, 31/08/2026 |
 | Implementation | `2dd11917fc6a2108cbe91bb148d3eb24d5d6826a` |
-| Checkpoint | **not created** until ACCEPT |
+| Checkpoint | `transformation-t6-workflow-migration-complete` |
 
 ```
 OWNER ACCEPTANCE — T6
 
 Decision:
-[ ] ACCEPT
+[x] ACCEPT
 [ ] ACCEPT WITH CONDITIONS
 [ ] REJECT / RETURN FOR INVESTIGATION
 
 Owner: Agbofa Benjamin
 Position: Owner and Chief Engineer
-Date:
+Date: 31/08/2026
 ```
 
-T6 tag is forbidden until this form records explicit ACCEPT. T7 remains LOCKED.
+T7 is authorized after this checkpoint is on origin. T7 initial scope is forensic dependency mapping only. AI / 3D / commercial / Control Center remain LOCKED.
