@@ -6,7 +6,7 @@
 | Position | Owner and Chief Engineer |
 | Stage | T2 — Data Authority + Offline-First Foundation |
 | Decision | **PENDING** |
-| Implementation Commit | *(filled after git commit)* |
+| Implementation Commit | `ff47cc6f6fc61c9ac9a59d067fffdd5667d19a8e` |
 | Verification | same commit (tests run before commit) |
 | Checkpoint | **NOT CREATED** |
 
