@@ -1,6 +1,6 @@
 # Phase 15 Owner Acceptance
 
-**Status:** PENDING — Stage 0 forensics only. Implementation is **LOCKED**. Do not tick a decision except the Owner.
+**Status:** PENDING — implementation complete; Owner decision required. Do not tick a decision except the Owner. Checkpoint tag must not be created until Owner ACCEPT.
 
 ```
 OWNER ACCEPTANCE — PHASE 15

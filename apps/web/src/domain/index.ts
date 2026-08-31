@@ -83,3 +83,14 @@ export {
   historicalGarmentSpecificationIntact,
 } from './garment/version';
 export { persistGarmentSpecificationVersion } from './persistence/garmentSpecificationVersionStore';
+export {
+  COMPOSITION_SCHEMA_VERSION,
+  evaluateComposition,
+  validateComposition,
+  canonicalizeGarmentComposition,
+  fingerprintGarmentComposition,
+  freezeComposition,
+  refuseFrozenCompositionMutation,
+  historicalCompositionIntact,
+} from './composition';
+export { persistGarmentCompositionVersion } from './persistence/garmentCompositionVersionStore';
