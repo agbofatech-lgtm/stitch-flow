@@ -167,8 +167,6 @@ This report file is T1 **closure documentation** only. If committed, that commit
 
 No mandatory verification gate **FAIL**.
 
-**FINAL STATUS: READY FOR OWNER ACCEPTANCE**
-
-Do **not** create `transformation-t1-complete` until Owner accepts.
+**FINAL STATUS: OWNER ACCEPTED.** Checkpoint tag authorized separately: `transformation-t1-runtime-authority-complete`.
 
 T2 remains **LOCKED**.
