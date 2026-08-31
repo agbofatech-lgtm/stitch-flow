@@ -1,6 +1,6 @@
 # T9 Implementation Boundary
 
-**Status:** IMPLEMENTED for the authorized wrap/re-point slice. Owner ACCEPT of implementation is **PENDING**. T9 tag is **NOT CREATED**.
+**Status:** IMPLEMENTED and **ACCEPTED WITH CONDITIONS** (31/08/2026, Agbofa Benjamin). Checkpoint `transformation-t9-tailoring-intelligence-boundary-complete`. T10 **LOCKED**.
 
 ## T9 vs Phase 13+
 

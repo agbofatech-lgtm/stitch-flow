@@ -5,8 +5,8 @@
 | Date | 2026-08-31 |
 | Owner | Agbofa Benjamin |
 | Stage | T9 — Deterministic Tailoring Intelligence Isolation (implementation slice) |
-| Owner acceptance | **PENDING** |
-| T9 completion tag | **NOT CREATED** |
+| Owner acceptance | **ACCEPT WITH CONDITIONS** — Agbofa Benjamin, 31/08/2026 |
+| T9 completion tag | `transformation-t9-tailoring-intelligence-boundary-complete` |
 
 ## What T9 isolated
 
