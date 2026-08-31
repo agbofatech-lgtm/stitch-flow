@@ -4,23 +4,23 @@
 |---|---|
 | Owner | Agbofa Benjamin |
 | Position | Owner and Chief Engineer |
-| Stage | T7 — Design Studio Extraction (forensic cycle) |
+| Stage | T7 — Design Studio Extraction (adapter slice) |
 | Decision | **PENDING** |
-| Implementation | none (docs only) |
+| Implementation | adapters/contracts + Design Studio import re-point (see T7_IMPLEMENTATION_REPORT) |
 | Checkpoint | **not created** |
 
 ```
-OWNER ACCEPTANCE — T7 FORENSICS
+OWNER ACCEPTANCE — T7
 
 Decision:
-[ ] ACCEPT forensic map; authorize next extraction slice
+[ ] ACCEPT adapter extraction; authorize T8 only after checkpoint
 [ ] ACCEPT WITH CONDITIONS
 [ ] REJECT / RETURN FOR INVESTIGATION
-[ ] PAUSE — do not extract
+[ ] PAUSE — do not proceed
 
 Owner: Agbofa Benjamin
 Position: Owner and Chief Engineer
 Date:
 ```
 
-Deep extraction is forbidden until this form records an explicit authorization that extraction is SAFE.
+T7 completion tag `transformation-t7-design-studio-extraction-complete` is forbidden until this form records ACCEPT. T8 / Phases 13–19 remain LOCKED. AI / 3D / commercial / Control Center remain LOCKED.

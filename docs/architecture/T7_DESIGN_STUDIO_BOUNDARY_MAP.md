@@ -19,7 +19,13 @@ LOCAL DRAFT (legacy)
 DOMAIN GATEWAY (T3 — unused by DesignStudio today)
   requestPattern / requestProductionPlan / measurement separate
 
-PROTECTED ENGINES (called DIRECTLY today)
+APPLICATION ADAPTERS (T7 — DesignStudio imports these)
+  application/design/patternAdapter           → generateStylePattern
+  application/design/productionAdapter        → generateProductionPlan / analyze / infer
+  application/design/draftStore               → stitchflow:design-studio:drafts
+  application/design/saveContract             → two distinct save paths
+
+PROTECTED ENGINES (unchanged; invoked only via adapters)
   patternEngine.generateStylePattern          → pieces preview
   productionAssistant.generateProductionPlan  → assistant panel + save
   productionAssistant.analyzeDesignInspiration
@@ -39,10 +45,10 @@ T6 WORKFLOW (parallel, not consumed here)
 | Draft localStorage → second measurement SoT | STOP-ADR-02 if treated as authority. |
 | T6 freeze snapshot ↔ Studio `buildMeasurementSnapshot` | Different shapes. Do not silently merge. |
 
-## Safe later extract candidates (PROPOSAL only)
+## Safe later extract candidates (PROPOSAL only — not this slice)
 
-1. Engine **imports** re-pointed to T3 wrappers after equality + UI regression.
+1. Re-point adapters to T3 `requestPattern` / `requestProductionPlan` only after proving no measurement-separation drift in Studio.
 2. Measurement alias helpers aligned to `domain/measurement` after snapshot-shape fixtures.
 3. Canvas silhouette module **copied** with pixel/path fixtures — not rewritten.
 
-None of these are authorized in the T7 forensic cycle.
+T7 forensic cycle is complete. Adapter import extraction is implemented; owner ACCEPT is pending.

@@ -1,29 +1,30 @@
 # T7 Design Studio Extraction Plan
 
-**Status:** Plan only. **No extraction in this cycle.**
+**Status:** Authorized adapter slice **implemented**. Owner Acceptance **PENDING**.
 
 ## Gate
 
-T7 deep extraction requires owner confirmation after this forensic stage.
+T7 deep rewrite remains forbidden. This cycle extracted imports/persistence helpers only.
 
-## Order of operations (PROPOSAL)
+## Order of operations
 
-1. **Freeze** `DesignStudio.tsx` as behavioural reference (already T0 protected).
-2. **Fixtures** (not started): canvas pieces vs silhouette; `handleSaveToOrder` payload; draft read/write; garment-type mapping.
-3. **Re-point** engine imports to T3 wrappers only if fixtures stay green.
-4. **Do not** move silhouette builders into `patternEngine.ts`.
-5. **Do not** redesign the UI, tokens, or layout as a “new Design Studio”.
-6. **Do not** remove `stitchflow:design-studio:drafts` without an ADR.
-7. **Do not** unify Studio save with T6 `saveStudioOutputToOrder` without documenting snapshot-shape differences.
+1. **Freeze** engines and canvas/UI as behavioural reference — **DONE** (engines T0 hashes).
+2. **Adapters** wrapping existing engine signatures — **DONE**.
+3. **Re-point** Design Studio engine/draft imports — **DONE**.
+4. **Do not** move silhouette builders into `patternEngine.ts` — **HELD**.
+5. **Do not** redesign the UI, tokens, or layout — **HELD**.
+6. **Do not** remove `stitchflow:design-studio:drafts` — **HELD** (moved to `draftStore.ts`, same key).
+7. **Do not** unify Studio save with T6 `saveStudioOutputToOrder` — **HELD** (`saveContract.ts`).
 
-## Stop conditions
+## Stop conditions (still live)
 
-- Any visual or numeric drift vs current Studio → STOP.
 - Any Pattern Engine / Production Assistant byte change → STOP.
-- Extraction that requires guessing untyped `../types` fields → STOP.
-- Material risk remaining after forensics → wait for owner.
+- Merging the two save paths without owner authorization → STOP.
+- New localStorage key → STOP.
+- T7 tag without owner ACCEPT → STOP.
+- T8 / Phase 13 without T7 checkpoint → STOP.
 
 ## This cycle
 
-IMPLEMENTED: forensic map, boundary map, this plan, architecture gate, pending owner form.  
-NOT STARTED: code extraction.
+IMPLEMENTED: adapters, save-path contract, draft store (legacy key), specification serializer, Design Studio import re-point, tests, verification docs.  
+NOT STARTED: canvas extraction, T3 gateway re-point inside Studio, T2 draft migration, T8.

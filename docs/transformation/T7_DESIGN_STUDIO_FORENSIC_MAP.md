@@ -5,10 +5,10 @@
 | Date | 2026-08-31 |
 | T6 checkpoint | `transformation-t6-workflow-migration-complete` → `d0d43a04c1b4878b25a9e00c13b786262288c00d` |
 | Asset | `apps/web/src/components/DesignStudio.tsx` |
-| Size | 4075 lines |
-| SHA-256 | `78ddd839fe2baeeedd37408b3ef9aaead0b8b1e1863ebec438e72334ae4e9507` (T0 unchanged) |
+| Size | 4047 lines (was 4075 at T0; import/draft extraction only) |
+| SHA-256 | `5059c0db5633d9340793e620863cfc521ee8118a2f3188ead9082ee2c1ae783b` (T0 was `78ddd839…e9507`) |
 | Host | T5 `StudioShell` workspace `design` |
-| T7 implementation | **NOT STARTED** |
+| T7 implementation | **COMPLETE as adapters/contracts**; owner ACCEPT **PENDING** |
 
 Legend: **FACT** / **INFERENCE** / **PROPOSAL** / **IMPLEMENTED**
 
@@ -30,8 +30,9 @@ Legend: **FACT** / **INFERENCE** / **PROPOSAL** / **IMPLEMENTED**
 | `../config/brand` | Export title string |
 | `./FeatureGate` | Simulated tier locks (upgrade `window.alert`) |
 | `lucide-react` | Icons |
-| `@modules/services/patternEngine` | `generateStylePattern`, `PatternValidationError`, `StylePatternKind` |
-| `@modules/services/productionAssistant` | `analyzeDesignInspiration`, `generateProductionPlan`, `inferGarmentTypeFromInspiration` |
+| `../application/design` | `generateStylePattern`, `PatternValidationError`, `StylePatternKind`, `analyzeDesignInspiration`, `generateProductionPlan`, `inferGarmentTypeFromInspiration`, `getDraftStorageKey`, `readStudioDrafts`, `writeStudioDrafts` |
+
+**FACT:** Direct `@modules/services/patternEngine` / `productionAssistant` imports were removed from this file in the T7 adapter slice.
 
 **FACT:** T3 gateways (`requestPattern`, `requestProductionPlan`) are **not** imported.
 
