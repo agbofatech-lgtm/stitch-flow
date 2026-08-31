@@ -1,6 +1,6 @@
 import { BRAND } from '../../config/brand';
 import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
-import { generateStylePattern, type StylePatternKind } from './patternEngine';
+import { generateStylePattern, type StylePatternKind } from '../../application/tailoring';
 import type {
   DesignInspiration,
   FabricRecord,
@@ -694,7 +694,7 @@ export function exportOrderJobSheetPdf({
       <div>
         <h1 style="margin:0;">${escapeHtml(workspaceName || BRAND.productName)}</h1>
         <p style="margin:2px 0 0; font-size:12px;">
-          ${escapeHtml(phone || '')} ${phone ? '•' : ''}
+          ${escapeHtml(phone || '')} ${phone ? 'ï¿½' : ''}
           ${escapeHtml(email || '')}
         </p>
         <p style="margin:2px 0 0; font-size:12px;">
