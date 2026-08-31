@@ -44,7 +44,6 @@ export async function freezeStudioGarmentSpecification(
   repository: EntityRepository,
   source: Record<string, unknown>
 ) {
-  const { extractStudioGarmentIntent } = await import('./studioAdapter');
   return freezeGovernedGarmentSpecification(repository, {
     intent: extractStudioGarmentIntent(source),
     source: 'studio',
