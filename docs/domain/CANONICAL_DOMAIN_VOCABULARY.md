@@ -89,8 +89,8 @@ Intended separation (ADR-003): Body vs Garment vs Pattern.
 | **BodyMeasurement** | Body-taken dimensions | `BodyMeasurements` (required bust, waist, neck, shoulder, backLength; extends garment fields) |
 | **GarmentMeasurement** | Garment-oriented dimensions / ease-aware fields | `GarmentMeasurements` (40+ optional numerics + notes) |
 | **PatternMeasurement** | Values the pattern engine actually consumes | Engine input map; not a separate type |
-| **MeasurementVersion** | Immutable snapshot of a MeasurementSet | Not implemented as versions |
-| **MeasurementProvenance** | How/when/who captured the set | Not implemented |
+| **MeasurementVersion** | Immutable snapshot of a MeasurementSet | T8 `MeasurementVersionRecord` (`kind: MeasurementVersion`, frozen, T2 measurement repository). AppContext `Order.measurementSnapshot` remains TRANSITIONAL. |
+| **MeasurementProvenance** | How/when/who captured the set | T8 `MeasurementProvenance` (source, capturedBy, capturedAt, version, verification) |
 | **OrderMeasurementSnapshot** | Freeze of measurements onto an Order | `OrderMeasurementSnapshot` type exists |
 
 SYNONYMS already in UI (FACT — mapping layer required later, do not “fix” in T1):

@@ -8,7 +8,7 @@ Intended ADR-003 split is now **enforced at the domain gateway**. Legacy types i
 | GarmentMeasurement | Garment lengths / notes | `garment.fields` + `notes` |
 | PatternMeasurement | Engine input projection | derived from body+garment; **not SoT** |
 
-Units: centimetres. No conversion layer (ADR-001).
+Units: centimetres inside the Pattern Engine (ADR-001). T8 adds an explicit conversion boundary (`cm`/`in` → centimetres) **in front of** the engine; it does not change engine formulas.
 
 Unknown numeric keys **STOP** (`DomainUnassignableError` / throw). Do not guess.
 
