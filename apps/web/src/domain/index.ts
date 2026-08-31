@@ -30,3 +30,18 @@ export {
   mergeEntityPayloads,
 } from './conflict/merge';
 export { persistSeparatedMeasurements } from './persistence/measurementStore';
+export {
+  ENGINE_LENGTH_UNIT,
+  CM_PER_INCH,
+  toCentimetres,
+  fromCentimetres,
+  convertLength,
+} from './measurement/units';
+export { createProvenance, isDerivedSource } from './measurement/provenance';
+export {
+  freezeMeasurementVersion,
+  historicalVersionIntact,
+  refuseFrozenMutation,
+} from './measurement/version';
+export { engineInputFromVersion, validateMeasurementValue } from './measurement/contract';
+export { persistMeasurementVersion } from './persistence/measurementVersionStore';

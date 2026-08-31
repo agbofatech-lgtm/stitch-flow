@@ -9,7 +9,7 @@
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit",
     "test:persistence": "tsx --test src/shared/persistence/persistence.test.ts",
-    "test:domain": "tsx --test src/domain/domain.test.ts",
+    "test:domain": "tsx --test src/domain/domain.test.ts src/domain/measurement/measurement.t8.test.ts",
     "test:experience": "tsx --test src/experience/experience.test.ts",
     "test:studio": "tsx --test src/studio/studio.test.ts",
     "test:workflow": "tsx --test src/workflow/workflow.test.ts",
