@@ -44,10 +44,12 @@ Gates are independent of feature completeness.
 | E | PASS (docs only) |
 | J | **ACCEPTED** (T0 closed). T1 **LOCKED**. |
 
-T0 STATUS: **COMPLETE**  
-T0 OWNER ACCEPTANCE: **ACCEPTED**  
-T0 BASELINE TAG: `transformation-t0-baseline-accepted`  
-T1 STATUS: **LOCKED**
+T0 STATUS: **COMPLETE** — `transformation-t0-baseline-accepted`  
+T1 STATUS: **COMPLETE** — `transformation-t1-runtime-authority-complete`  
+T2 STATUS: **COMPLETE** — `transformation-t2-data-offline-foundation-complete`  
+T3 STATUS: **COMPLETE** — `transformation-t3-domain-boundary-isolation-complete`  
+T4 STATUS: **AUTHORIZED after T3 checkpoint** — not complete until Owner Acceptance  
+T5+ STATUS: **LOCKED**
 
 T0 final verification: [`docs/transformation/T0_FINAL_VERIFICATION_REPORT.md`](../../transformation/T0_FINAL_VERIFICATION_REPORT.md)  
 T0 closure: [`docs/transformation/T0_CLOSURE_RECORD.md`](../../transformation/T0_CLOSURE_RECORD.md)

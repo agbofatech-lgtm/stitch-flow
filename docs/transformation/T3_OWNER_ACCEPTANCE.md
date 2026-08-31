@@ -5,11 +5,20 @@
 | Owner | Agbofa Benjamin |
 | Position | Owner and Chief Engineer |
 | Stage | T3 — Domain Boundary & Intelligence Isolation |
-| Decision | **PENDING** |
+| Decision | **ACCEPT** — Agbofa Benjamin, 31/08/2026 |
 | Implementation Commit | `8cee3af999d2a2d1de7bf6abe6bde21a36fdc4e4` |
 | Verification docs | `7466b6bafd7ea400e4d8ff06d5c2bc387976e3f9` |
-| Checkpoint | **NOT CREATED** |
+| Checkpoint | `transformation-t3-domain-boundary-isolation-complete` |
 
-Do not mark ACCEPTED unless the Owner explicitly accepts.
+| Gate | Status |
+|---|---|
+| Protected Assets | PASS |
+| Domain Boundaries | PASS |
+| Measurement Separation | PASS |
+| Conflict Merge | PASS (no silent overwrite) |
+| T2 Repositories | PASS |
+| Scope Integrity | PASS |
+| Working Tree | *(after commit)* |
+| Remote | *(after push)* |
 
-Do not create `transformation-t3-*` until that acceptance is recorded.
+Owner decision **ACCEPT** recorded 31/08/2026. T4 implementation authorized separately after this checkpoint.

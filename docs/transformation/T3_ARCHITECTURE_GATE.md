@@ -7,9 +7,10 @@
 | T1 | COMPLETE / ACCEPTED |
 | T2 | COMPLETE / ACCEPTED (`transformation-t2-data-offline-foundation-complete`) |
 | T3 implementation | **COMPLETE as isolation** |
-| Owner acceptance | **PENDING** |
-| T3 completion tag | **NOT CREATED** |
-| T4+ | **LOCKED** |
+| Owner acceptance | **ACCEPTED** — Agbofa Benjamin, 31/08/2026 |
+| T3 completion tag | `transformation-t3-domain-boundary-isolation-complete` |
+| T4 | Implementation authorized only **after** this T3 checkpoint is on origin. Completion still requires later Owner Acceptance. |
+| T5+ | **LOCKED** |
 
 | Marker | Status |
 |---|---|
@@ -23,4 +24,4 @@
 | T3.8-REGRESSION-FIXTURES | PASS (wrapper = engine) |
 | T3.9-STUDIO-UNEDITED | PASS |
 
-T4 remains LOCKED until Owner Acceptance of T3.
+T4 implementation is authorized only after this T3 checkpoint. T5 remains LOCKED.

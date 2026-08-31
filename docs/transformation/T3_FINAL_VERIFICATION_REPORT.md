@@ -15,4 +15,6 @@
 | Unauthenticated CRUD | not mounted |
 | T4 | LOCKED |
 
-Owner Decision: **PENDING**.
+Owner Decision: **ACCEPT** — Agbofa Benjamin, 31/08/2026.
+
+Re-verified 31/08/2026 before checkpoint: `test:persistence` 10 pass / 0 fail; `test:domain` 15 pass / 0 fail; protected SHA-256 unchanged.
