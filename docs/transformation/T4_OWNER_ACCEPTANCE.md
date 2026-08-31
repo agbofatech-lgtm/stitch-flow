@@ -5,29 +5,21 @@
 | Owner | Agbofa Benjamin |
 | Position | Owner and Chief Engineer |
 | Stage | T4 — Experience Foundation |
-| Decision | **PENDING** |
-| Checkpoint | **NOT CREATED** |
+| Decision | **ACCEPT** — Agbofa Benjamin, 31/08/2026 |
+| Implementation HEAD at acceptance | `a780ad7bd2af81a206f85b8f9735eb5c1b802905` |
+| Checkpoint | `transformation-t4-experience-foundation-complete` |
 
 ```
 OWNER ACCEPTANCE — T4
 
 Decision:
-[ ] ACCEPT
+[x] ACCEPT
 [ ] ACCEPT WITH CONDITIONS
 [ ] REJECT / RETURN FOR INVESTIGATION
 
-Owner:
-Agbofa Benjamin
-
-Position:
-Owner and Chief Engineer
-
-Date:
-31/08/2026
-
-Comments:
-________________________________
-________________________________
+Owner: Agbofa Benjamin
+Position: Owner and Chief Engineer
+Date: 31/08/2026
 ```
 
-Do not create `transformation-t4-experience-foundation-complete` until an explicit ACCEPT.
+T5 implementation authorized separately after this checkpoint. T6 remains LOCKED.

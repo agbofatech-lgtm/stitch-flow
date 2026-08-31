@@ -4,9 +4,10 @@
 |---|---|
 | Date | 2026-08-31 |
 | T4 implementation | **COMPLETE as foundation** |
-| Owner acceptance | **PENDING** |
-| T4 completion tag | **NOT CREATED** |
-| T5 | **LOCKED** |
+| Owner acceptance | **ACCEPTED** — Agbofa Benjamin, 31/08/2026 |
+| T4 completion tag | `transformation-t4-experience-foundation-complete` |
+| T5 | Implementation authorized only **after** this T4 checkpoint is on origin. |
+| T6+ | **LOCKED** |
 
 | Marker | Status |
 |---|---|
