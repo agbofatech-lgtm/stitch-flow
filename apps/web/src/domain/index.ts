@@ -45,3 +45,9 @@ export {
 } from './measurement/version';
 export { engineInputFromVersion, validateMeasurementValue } from './measurement/contract';
 export { persistMeasurementVersion } from './persistence/measurementVersionStore';
+export { classifyMeasurementRecord } from './measurement/taxonomy';
+export {
+  assessPatternInputCompleteness,
+  assertPatternInputComplete,
+} from './measurement/completeness';
+export { assessStructuralValidation, observeEnginePlausibility } from './measurement/plausibility';

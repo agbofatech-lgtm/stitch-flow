@@ -1,16 +1,27 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Badge, Button, DataTable, ExperienceEmptyState, Panel } from '../experience';
+import { Badge, Button, DataTable, ExperienceEmptyState, Panel, Select } from '../experience';
 import { separateLegacyMeasurementBlob } from '../domain/measurement/separate';
 import { persistSeparatedMeasurements } from '../domain/persistence/measurementStore';
+import { readMeasurementVersion } from '../domain/persistence/measurementVersionStore';
+import { assessPatternInputCompleteness } from '../domain/measurement/completeness';
+import { classifyMeasurementRecord } from '../domain/measurement/taxonomy';
+import { observeEnginePlausibility } from '../domain/measurement/plausibility';
+import type { PatternKind } from '../domain/measurement/fields';
+import { executeGovernedPatternFromVersion } from '../application/measurement/t10Integration';
+import { freezeLiveBlobToVersion } from '../application/measurement/versionAuthority';
 import { getDataAuthorityRuntime } from '../shared/persistence';
 import { useWorkflow } from '../workflow/WorkflowContext';
+
+const PATTERN_KINDS: PatternKind[] = ['bodice', 'shirt', 'trouser', 'skirt', 'kaftan'];
 
 export function MeasurementWorkspace() {
   const { measurementProfiles, customers } = useApp();
   const workflow = useWorkflow();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [patternKind, setPatternKind] = useState<PatternKind>('bodice');
+  const [frozenLocalId, setFrozenLocalId] = useState<string | null>(null);
 
   const rows = useMemo(
     () =>
@@ -18,7 +29,9 @@ export function MeasurementWorkspace() {
         .filter((profile) => !workflow.customerId || profile.customerId === workflow.customerId)
         .map((profile) => {
         const blob = (profile.measurements || {}) as Record<string, unknown>;
-        const separated = separateLegacyMeasurementBlob(blob);
+        const separated = separateLegacyMeasurementBlob(blob, patternKind);
+        const completeness = assessPatternInputCompleteness(separated, patternKind);
+        const taxonomy = classifyMeasurementRecord({ isLiveProfile: true });
         const customer = customers.find((item) => item.id === profile.customerId);
         return {
           id: profile.id,
@@ -26,11 +39,63 @@ export function MeasurementWorkspace() {
           customer: customer?.fullName || profile.customerId,
           bodyCount: Object.keys(separated.body.fields).length,
           garmentCount: Object.keys(separated.garment.fields).length,
+          completeness,
+          taxonomy: taxonomy.authority,
           blob,
+          customerId: profile.customerId,
+          separated,
         };
       }),
-    [customers, measurementProfiles, workflow.customerId]
+    [customers, measurementProfiles, patternKind, workflow.customerId]
   );
+
+  async function freezeVersionToRepository(row: (typeof rows)[number]) {
+    setError(null);
+    setMessage(null);
+    const runtime = getDataAuthorityRuntime();
+    if (!runtime) {
+      setError('T2 data authority runtime is not started. Measurement version was not written to a new store.');
+      return;
+    }
+    try {
+      const { record, version } = await freezeLiveBlobToVersion(runtime.repositories.measurement, {
+        blob: row.blob,
+        patternKind,
+        customerId: row.customerId,
+        profileId: row.id,
+        source: 'profile',
+      });
+      setFrozenLocalId(record.metadata.localId);
+      setMessage(
+        `MeasurementVersion ${version.id} frozen to T2. Live profile “${row.label}” remains transitional.`
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Version freeze failed');
+    }
+  }
+
+  async function runGovernedFromFrozenVersion() {
+    setError(null);
+    setMessage(null);
+    const runtime = getDataAuthorityRuntime();
+    if (!runtime || !frozenLocalId) {
+      setError('Freeze a MeasurementVersion to T2 before governed execution.');
+      return;
+    }
+    try {
+      const version = await readMeasurementVersion(runtime.repositories.measurement, frozenLocalId);
+      if (!version) {
+        setError('Frozen measurement version was not found.');
+        return;
+      }
+      const executed = executeGovernedPatternFromVersion(version, patternKind);
+      setMessage(
+        `Governed ${patternKind} fingerprint ${executed.fingerprint.value} (version ${version.id}). Engine not rewritten.`
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Governed execution failed');
+    }
+  }
 
   async function snapshotToRepository(row: (typeof rows)[number]) {
     setError(null);
@@ -66,25 +131,55 @@ export function MeasurementWorkspace() {
         <p className="text-label text-action-primary">Measurement workspace</p>
         <h1 className="mt-1 text-heading text-ink-primary">Body, garment, pattern</h1>
         <p className="mt-2 text-body text-ink-secondary">
-          Pattern values remain a derived projection. Snapshots use T2 repositories only. Freeze writes the existing order measurement snapshot — live profile edits do not silently rewrite history.
+          Live profiles stay transitional. Pattern values remain derived. Completeness uses T3 required keys and does not apply engine hip/bust defaults. Frozen MeasurementVersion is T2 create-only. Governed T10 execution requires a complete frozen version.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge>Body</Badge>
           <Badge tone="neutral">Garment</Badge>
           <Badge tone="warning">Pattern derived</Badge>
+          <Badge tone="neutral">Profile live</Badge>
+          <Badge>Version frozen</Badge>
         </div>
+        <label className="mt-4 block text-label text-ink-secondary" htmlFor="p13-pattern-kind">
+          Pattern kind for completeness
+        </label>
+        <Select
+          id="p13-pattern-kind"
+          className="mt-1 max-w-xs"
+          value={patternKind}
+          onChange={(event) => setPatternKind(event.target.value as PatternKind)}
+        >
+          {PATTERN_KINDS.map((kind) => (
+            <option key={kind} value={kind}>
+              {kind}
+            </option>
+          ))}
+        </Select>
       </Panel>
 
       {message ? <p className="text-body text-status-success">{message}</p> : null}
       {error ? <p className="text-body text-status-danger">{error}</p> : null}
+      {rows[0] ? (
+        <p className="text-meta text-ink-muted">
+          Engine range observation for first profile ({patternKind}):{' '}
+          {observeEnginePlausibility(rows[0].separated, patternKind).status}. Incomplete sets are not sent to the
+          engine.
+        </p>
+      ) : null}
 
       <DataTable
         caption="Customer measurement profiles"
         columns={[
           { id: 'label', header: 'Profile', cell: (row) => row.label },
           { id: 'customer', header: 'Customer', cell: (row) => row.customer },
+          { id: 'taxonomy', header: 'Authority', cell: (row) => row.taxonomy },
           { id: 'body', header: 'Body fields', cell: (row) => String(row.bodyCount) },
           { id: 'garment', header: 'Garment fields', cell: (row) => String(row.garmentCount) },
+          {
+            id: 'complete',
+            header: `${patternKind} complete`,
+            cell: (row) => (row.completeness.complete ? 'yes' : `missing ${row.completeness.missing.join(', ')}`),
+          },
         ]}
         rows={rows}
       />
