@@ -16,7 +16,12 @@ import { separateLegacyMeasurementBlob } from './separate';
 import { hipConflictUnresolved } from '../tailoring/deterministic/configuration';
 import { freezeLiveBlobToVersion, rejectLivePatchOnFrozenVersion } from '../../application/measurement/versionAuthority';
 import { executeGovernedPatternFromVersion } from '../../application/measurement/t10Integration';
+import {
+  evaluateMeasurementIntelligence,
+  executeGovernedPatternFromVersionForGarment,
+} from '../../application/measurement/intelligence';
 import { requestPattern } from '../pattern/gateway';
+import { classifyMeasurementValueKey, assertNotDerivedCapture } from './derived';
 
 const BODICE_COMPLETE = {
   bust: 90,
@@ -169,6 +174,36 @@ test('T10 governed execute from frozen version matches engine and refuses incomp
     () => executeGovernedPatternFromVersion(skirtMissingHip, 'skirt'),
     /incomplete for skirt \(missing hip\)/
   );
+});
+
+test('derived pattern outputs are not capture fields', () => {
+  assert.equal(classifyMeasurementValueKey('bust'), 'body');
+  assert.equal(classifyMeasurementValueKey('skirtLength'), 'garment');
+  assert.equal(classifyMeasurementValueKey('quarterBust'), 'derived-output');
+  assert.throws(() => assertNotDerivedCapture({ quarterBust: 23 }), /derived pattern output/);
+});
+
+test('intelligence evaluate then governed execute for dress maps to bodice without filling hip', () => {
+  const evaluated = evaluateMeasurementIntelligence({
+    blob: BODICE_COMPLETE,
+    garmentType: 'dress',
+    isLiveProfile: true,
+  });
+  assert.equal(evaluated.taxonomy.authority, 'live-profile');
+  assert.equal(evaluated.patternKind, 'bodice');
+  assert.equal(evaluated.completeness.complete, true);
+  assert.equal(evaluated.validation.status, 'pass');
+  assert.equal(evaluated.plausibility.status, 'engine-accepted');
+
+  const version = freezeMeasurementVersion({
+    blob: BODICE_COMPLETE,
+    patternKind: 'bodice',
+    source: 'profile',
+    id: 'mv-p13-dress',
+  });
+  const governed = executeGovernedPatternFromVersionForGarment(version, 'dress');
+  assert.equal(governed.provenance.measurementVersionId, 'mv-p13-dress');
+  assert.deepEqual(governed.result, generateStylePattern('bodice', BODICE_COMPLETE));
 });
 
 test('complete skirt with explicit hip does not reconcile 98/100/102', () => {

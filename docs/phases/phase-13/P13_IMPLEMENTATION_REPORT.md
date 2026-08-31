@@ -16,6 +16,8 @@
 | `domain/measurement/completeness.ts` | Required keys = T3 `PATTERN_INPUT_FIELDS`. Garment types use `mapGarmentTypeToPatternKind`. Missing keys STOP. No engine defaults. |
 | `domain/measurement/plausibility.ts` | Structural validation ≠ plausibility. Engine ranges observed via `PatternValidationError`. Ranges not copied. |
 | `application/measurement/versionAuthority.ts` | Freeze live blob → T8 MeasurementVersion → T2 create-only |
+| `domain/measurement/derived.ts` | PatternOutput keys (quarterBust, …) are derived, not capture |
+| `application/measurement/intelligence.ts` | Evaluate → freeze → T10 execute for garment types via existing map |
 | `application/measurement/t10Integration.ts` | Frozen version → completeness gate → T10 governed pattern |
 | Measurement workspace | Completeness by kind; freeze version; governed execute. No new localStorage. |
 

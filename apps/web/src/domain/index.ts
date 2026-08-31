@@ -52,3 +52,8 @@ export {
   assertPatternInputComplete,
 } from './measurement/completeness';
 export { assessStructuralValidation, observeEnginePlausibility } from './measurement/plausibility';
+export {
+  DERIVED_PATTERN_OUTPUT_KEYS,
+  classifyMeasurementValueKey,
+  assertNotDerivedCapture,
+} from './measurement/derived';

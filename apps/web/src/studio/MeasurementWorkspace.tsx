@@ -192,16 +192,24 @@ export function MeasurementWorkspace() {
             if (!result.success) setError(result.error || 'Freeze failed');
             else {
               setError(null);
-              setMessage('Measurement version frozen onto the selected order.');
+              setMessage('TRANSITIONAL order snapshot frozen. Live profile edits do not silently rewrite it.');
             }
           }}
         >
           Freeze selected profile onto order
         </Button>
+        <Button size="sm" variant="secondary" onClick={() => void runGovernedFromFrozenVersion()}>
+          Governed pattern from frozen version
+        </Button>
         {rows.slice(0, 6).map((row) => (
-          <Button key={row.id} variant="secondary" size="sm" onClick={() => void snapshotToRepository(row)}>
-            Snapshot {row.label}
-          </Button>
+          <span key={row.id} className="flex flex-wrap gap-2">
+            <Button variant="secondary" size="sm" onClick={() => void freezeVersionToRepository(row)}>
+              Freeze version {row.label}
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => void snapshotToRepository(row)}>
+              Snapshot {row.label}
+            </Button>
+          </span>
         ))}
       </div>
     </div>
