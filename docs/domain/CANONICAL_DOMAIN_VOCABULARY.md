@@ -2,11 +2,11 @@
 
 | Field | Value |
 |---|---|
-| Status | **Active starter** — binding for *new* names; existing files are not mass-renamed |
+| Status | **T3 field lock (partial)** — binding for *new* names; existing files are not mass-renamed |
 | Date | 2026-08-31 |
 | Authority | ADR-003 |
 | Owner of this glossary | Principal Architecture Governance until a Domain Owner is named |
-| Full lock | T3 (vocabulary lock). This file is the T0/ADR starter. |
+| Full lock | T3 locked Body vs Garment vs Pattern classes and money field `totalAmount`. Legacy type names remain. |
 
 Governing ADR: [`docs/architecture/adr/ADR-003-canonical-domain-vocabulary.md`](../architecture/adr/ADR-003-canonical-domain-vocabulary.md)
 
@@ -78,8 +78,9 @@ FORBIDDEN parallel: `/clients`, `/people`, `customer_data` as a second SoT.
 
 ## 4. Measurement
 
-Intended separation (PROPOSAL / ADR-003): Body vs Garment vs Pattern.  
-**T0 FACT:** they are one blob with aliases. Do not pretend the split is enforced.
+Intended separation (ADR-003): Body vs Garment vs Pattern.  
+**T0 FACT:** they were one blob with aliases.  
+**T3 FACT:** the split is enforced in `apps/web/src/domain/measurement` without renaming `shared/types`. Legacy UI blobs remain mixed until T7.
 
 | Canonical | Definition | FACT (repo) |
 |---|---|---|
@@ -172,7 +173,7 @@ Shop-floor **Invoice** and **Payment** (customer jobs) are StitchFlow operationa
 | **MaterialUsage** | Fabric consumed by an Order | AppContext; auto-deduct on cutting start |
 | **JobSheet** | Printable production sheet | `jobSheetExport.ts` |
 
-Money field drift (FACT): `totalAmount` vs `amount`; `date` vs `createdAt`. Canonical names for money fields will be locked in T3; until then new DTOs must pick one and document it in the contract (ADR-010).
+Money field lock (T3): Order/Invoice **totalAmount** is canonical. Payment **amount** is the transfer, not an order total. Record birth **createdAt**; due **dueDate**. Informal `date` is a synonym, not a second field. New DTOs must not introduce `amount` on Order.
 
 ---
 
@@ -257,4 +258,4 @@ Known path conflicts (FACT — T1 contract baseline must resolve, not T0 rename)
 
 ---
 
-**Starter glossary complete.** T3 will lock remaining field-level measurement names and money-field canonicals with mapping tables.
+**T3 glossary lock (partial).** Field-class tables live in `apps/web/src/domain/measurement/fields.ts`. Mapping layers for remaining UI synonyms continue in T7; do not mass-rename protected files.

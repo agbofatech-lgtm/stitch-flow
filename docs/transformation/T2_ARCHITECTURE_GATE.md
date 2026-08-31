@@ -28,4 +28,4 @@
 3. Measurement/order/production conflict **merge** deferred to T3.
 4. Empty backend Jest suites remain pre-existing FAIL.
 
-T3 remains LOCKED.
+T3 implementation proceeded after this checkpoint. T3 completion still requires Owner Acceptance. T4 remains LOCKED.
