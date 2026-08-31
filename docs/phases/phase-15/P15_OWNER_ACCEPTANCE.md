@@ -1,23 +1,33 @@
 # Phase 15 Owner Acceptance
 
-**Status:** PENDING — implementation complete; Owner decision required. Do not tick a decision except the Owner. Checkpoint tag must not be created until Owner ACCEPT.
+**Status:** ACCEPT — recorded 31/08/2026. Do not alter this decision except the Owner.
 
 ```
 OWNER ACCEPTANCE — PHASE 15
 GARMENT COMPOSITION INTELLIGENCE
 
-Decision:
-[ ] ACCEPT
-[ ] ACCEPT WITH CONDITIONS
-[ ] REJECT / RETURN FOR INVESTIGATION
-[ ] PAUSE — DO NOT START PHASE 16
+Decision: ACCEPT
 
-Owner:
-Agbofa Benjamin
+Owner: Agbofa Benjamin
 Position: Owner and Chief Engineer
-Date: __________________
+Date: 31/08/2026
+
+I accept Phase 15 — Garment Composition Intelligence — based on the
+implemented composition authority, canonical contract, evidence model,
+relationship model, unknown/unsupported preservation, deterministic
+evaluation, immutable versioning, Phase 14 integration, T10 deterministic
+reuse, regression results, and protected asset integrity.
+
+Phase 15 is authorized to be formally closed and checkpoint-tagged.
 ```
 
-This Stage 0 pack maps garment-structure **candidates**. It does not establish a composition graph, does not certify tailoring accuracy, and does not authorize Phase 16.
+Permanent conditions carried forward:
 
-No Phase 15 implementation or completion tag until explicit Owner authorization **after** forensics review.
+- T10 C1–C7 remain permanent.
+- P14 C1–C5 remain: live Studio/Order/AppContext/drafts are transitional; unknown types are not coerced to bodice; hip 98/100/102 remain unresolved; canvas ≠ geometry; specification ≠ composition.
+- Canonical required-component rules remain empty. OBSERVED pattern projection is not composition identity.
+- Production Assistant cutting lists remain heuristics, not composition law.
+- `sleeveStyle` is not a `SleeveComponent`.
+- Phase 15 does not certify tailoring accuracy, complete component graphs, pattern geometry, fabric calculation, AI, or 3D.
+
+Phase 16 is authorized only after this checkpoint exists.
