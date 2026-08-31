@@ -1,14 +1,12 @@
-# Phase 16 Architecture Gate — Stage 0
+# Phase 16 Architecture Gate
 
 | Field | Value |
 |---|---|
-| Forensics | **PASS WITH CONDITIONS** |
-| Implementation | **COMPLETE — OWNER ACCEPTANCE PENDING** |
-| Hip 98/100/102 | **UNRESOLVED** |
-| Engine rewrite | **FORBIDDEN / NOT DONE** |
-| Checkpoint tag | **NOT CREATED** |
-| Phase 17 | **LOCKED** |
+| Date | 2026-08-31 |
+| Stage | CLOSED |
+| Implementation | **COMPLETE** |
+| Owner decision | **ACCEPT WITH CONDITIONS** — Agbofa Benjamin — 31/08/2026 |
+| Checkpoint tag | `transformation-phase-16-trusted-deterministic-execution-complete` |
+| Phase 17 | **AUTHORIZED UNDER SEPARATE FORENSIC GOVERNANCE** — not started |
 
-Conditions: composition may be PARTIAL; pattern projection is not identity; production remains heuristic; T10 C1–C7 and P14/P15 conditions remain.
-
-No STOP-P16-A–H triggered for **orchestration** implementation.
+Hip 98/100/102 unresolved. Engine rewrite forbidden / not done. T10 C1–C7, P14 C1–C5, and Phase 15 composition conditions remain.
