@@ -4,27 +4,27 @@
 |---|---|
 | Owner | Agbofa Benjamin |
 | Position | Owner and Chief Engineer |
-| Stage | T10 — Deterministic Tailoring Core Consolidation (forensic cycle) |
+| Stage | T10 — Deterministic Tailoring Core Consolidation & Certification |
 | Decision | **PENDING** |
-| Implementation | none (docs only) |
+| Certification | **CONDITIONAL** (see `T10_6_TRUSTED_CORE_CERTIFICATION.md`) |
 | Checkpoint | **not created** |
 
 ```
-OWNER ACCEPTANCE — T10 FORENSICS
+OWNER ACCEPTANCE — T10
 
 Decision:
-[ ] ACCEPT forensic map; authorize T10.1 computation-contract slice
+[ ] ACCEPT
 [ ] ACCEPT WITH CONDITIONS
 [ ] REJECT / RETURN FOR INVESTIGATION
-[ ] PAUSE — do not implement T10.1
+[ ] PAUSE
 
 Owner: Agbofa Benjamin
 Position: Owner and Chief Engineer
 Date:
+
+Comments:
+
+Conditions:
 ```
 
-T10 implementation (contracts, provenance envelopes in callers, fingerprints, regression fixtures) is forbidden until this form records an explicit authorization.
-
-T10 completion tag `transformation-t10-deterministic-tailoring-core-complete` is forbidden until implementation + verification + later ACCEPT of that implementation.
-
-Phase 13 remains LOCKED. AI / 3D / billing / commercial / Control Center remain LOCKED.
+Do not create `transformation-t10-deterministic-tailoring-core-complete` until this form records ACCEPT. T11 and Phase 13 remain LOCKED. AI / 3D / billing / Control Center remain LOCKED.
