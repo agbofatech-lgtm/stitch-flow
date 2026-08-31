@@ -44,12 +44,13 @@ import {
   generateStylePattern,
   PatternValidationError,
   type StylePatternKind,
-} from '@modules/services/patternEngine';
-import {
   analyzeDesignInspiration,
   generateProductionPlan,
   inferGarmentTypeFromInspiration,
-} from '@modules/services/productionAssistant';
+  getDraftStorageKey,
+  readStudioDrafts,
+  writeStudioDrafts,
+} from '../application/design';
 import type {
   BodyMeasurements,
   DesignCategory,
@@ -171,8 +172,6 @@ const CORE_MEASUREMENT_KEYS: StudioMeasurementKey[] = [
   'armholeDepth',
   'aroundWrist',
 ];
-
-const STUDIO_DRAFT_STORAGE_KEY = 'stitchflow:design-studio:drafts';
 
 const GARMENT_OPTIONS: Array<{
   value: SupportedGarmentType;
@@ -925,33 +924,6 @@ function getOrderMissingAlerts(params: {
   }
 
   return alerts;
-}
-
-function readStudioDrafts(): Record<string, StudioDraftRecord> {
-  if (typeof window === 'undefined') return {};
-
-  try {
-    const raw = window.localStorage.getItem(STUDIO_DRAFT_STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as Record<string, StudioDraftRecord>;
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
-function writeStudioDrafts(drafts: Record<string, StudioDraftRecord>) {
-  if (typeof window === 'undefined') return;
-
-  try {
-    window.localStorage.setItem(STUDIO_DRAFT_STORAGE_KEY, JSON.stringify(drafts));
-  } catch {
-    // ignore storage write failures
-  }
-}
-
-function getDraftStorageKey(orderId?: string | null) {
-  return orderId ? `order:${orderId}` : 'draft:unlinked';
 }
 
 function traceClosedPath(ctx: CanvasRenderingContext2D, points: RenderPoint[]) {
@@ -1830,7 +1802,7 @@ export function DesignStudio() {
 
   useEffect(() => {
     const draftKey = getDraftStorageKey(selectedOrderId);
-    const drafts = readStudioDrafts();
+    const drafts = readStudioDrafts<StudioDraftRecord>();
     const draft = drafts[draftKey];
 
     if (!draft) return;
@@ -1894,7 +1866,7 @@ export function DesignStudio() {
 
   const clearStudioDraft = useCallback(() => {
     const draftKey = getDraftStorageKey(selectedOrderId);
-    const drafts = readStudioDrafts();
+    const drafts = readStudioDrafts<StudioDraftRecord>();
     delete drafts[draftKey];
     writeStudioDrafts(drafts);
     setLastDraftSavedAt(null);

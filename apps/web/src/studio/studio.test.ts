@@ -35,3 +35,9 @@ test('studio shell hosts Design Studio and does not import engines', () => {
   assert.equal(shell.includes('localStorage'), false);
   assert.equal(shell.includes('react-router'), false);
 });
+
+test('design workspace still hosts DesignStudio without a new router', () => {
+  const shell = readFileSync(new URL('./StudioShell.tsx', import.meta.url), 'utf8');
+  assert.match(shell, /workspace === 'design'/);
+  assert.equal(shell.includes('createBrowserRouter'), false);
+});
