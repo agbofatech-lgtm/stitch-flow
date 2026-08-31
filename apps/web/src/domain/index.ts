@@ -57,3 +57,16 @@ export {
   classifyMeasurementValueKey,
   assertNotDerivedCapture,
 } from './measurement/derived';
+export {
+  KNOWN_GARMENT_TYPES,
+  KNOWN_FIT_TYPES,
+  classifyGarmentType,
+  classifyFitType,
+  legacyPatternKindCompatibility,
+} from './garment/taxonomy';
+export {
+  GARMENT_SPECIFICATION_SCHEMA_VERSION,
+  buildCanonicalGarmentSpecification,
+  assertNoUiStateInGarmentIntent,
+  assertNoMeasurementOrDerivedInGarmentIntent,
+} from './garment/contract';

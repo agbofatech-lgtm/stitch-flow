@@ -1,6 +1,7 @@
 /**
  * GarmentSpecification is the T6 handoff artifact.
  * Fields are FACT from existing Order / profile types — not invented completeness.
+ * Phase 14: TRANSITIONAL / PROJECTION / INPUT CANDIDATE — not GarmentSpecificationVersion.
  */
 
 import type { GarmentType, Order, CustomerMeasurementProfile } from '../../shared/types';
