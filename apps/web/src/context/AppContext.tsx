@@ -36,7 +36,7 @@ import {
   analyzeDesignInspiration,
   generateProductionPlan,
   inferGarmentTypeFromInspiration,
-} from '@modules/services/productionAssistant';
+} from '../application/tailoring';
 import { initializeAppStorage, saveAppStorage } from '@shared/lib/db';
 
 type AppState = Omit<

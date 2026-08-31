@@ -47,7 +47,7 @@ import {
 import {
   analyzeDesignInspiration,
   generateProductionPlan,
-} from '@modules/services/productionAssistant';
+} from '../application/tailoring';
 
 const statusFilters = ['all', 'draft', 'in_progress', 'ready', 'delivered', 'cancelled'] as const;
 
@@ -384,7 +384,7 @@ export function Orders() {
 
           <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
           <p className="mt-1 text-slate-500">
-            {orders.length} total orders • linked to customers, garments, measurements, design work, and materials
+            {orders.length} total orders ï¿½ linked to customers, garments, measurements, design work, and materials
           </p>
         </div>
 
@@ -612,7 +612,7 @@ export function Orders() {
                         }`}
                       >
                         {stage.status === 'completed' ? '? ' : ''}
-                        {stage.status === 'active' ? '• ' : ''}
+                        {stage.status === 'active' ? 'ï¿½ ' : ''}
                         {stage.label}
                       </span>
                     ))}
@@ -650,7 +650,7 @@ export function Orders() {
                             onClick={(e) => e.stopPropagation()}
                           >
                             <span>
-                              {material?.name || 'Material'} • {usage.quantityUsed} {usage.unit}
+                              {material?.name || 'Material'} ï¿½ {usage.quantityUsed} {usage.unit}
                             </span>
                             <button
                               onClick={() => deleteMaterialUsage(usage.id)}
@@ -1186,7 +1186,7 @@ function OrderFormModal({
                       <option value="">No inspiration linked</option>
                       {(inspirations ?? []).map((item) => (
                         <option key={item.id} value={item.id}>
-                          {item.title} • {titleCase(item.category)}
+                          {item.title} ï¿½ {titleCase(item.category)}
                         </option>
                       ))}
                     </select>
@@ -1205,7 +1205,7 @@ function OrderFormModal({
                         .filter((item) => item.isActive !== false)
                         .map((material) => (
                           <option key={material.id} value={material.id}>
-                            {material.name} • {material.quantityInStock} {material.unit}
+                            {material.name} ï¿½ {material.quantityInStock} {material.unit}
                           </option>
                         ))}
                     </select>
@@ -1405,7 +1405,7 @@ function AddMaterialToOrderModal({
               ) : (
                 (activeMaterials ?? []).map((material) => (
                   <option key={material.id} value={material.id}>
-                    {material.name} • {material.quantityInStock} {material.unit} left
+                    {material.name} ï¿½ {material.quantityInStock} {material.unit} left
                   </option>
                 ))
               )}
