@@ -20,6 +20,10 @@ Protected SHA-256 vs T0 — unchanged:
 | shared/types/index.ts | `424ef6181705cffcbcbbf7008ddf85c61b65cd3a820bb167d1fb4033eee3d0d9` |
 | productionStageService.ts | `eef8854f42b6aa41930f74d18e7ab35cfc709240c5a3254c60981e0dfccd67c8` |
 
-Owner Decision: **PENDING**.
+Owner Decision: **ACCEPT** — Agbofa Benjamin, 31/08/2026.
 
-T8 tag **not created**. T9 / Phases 17–19 not started. AI / 3D / commercial / Control Center locked.
+Forensics: `e80950192bc1c0b3e321534b48cf99905aa6a296`  
+Implementation: `69b71de974eae3422c6b122395ac572cc4dcd7a4`  
+Verification: `39eb64fecfa02c52b8a32442e023bf4529443d32`
+
+T8 tag created only after this closure commit. T9 forensic mapping authorized next. T9 implementation not started until T9.0. AI / 3D / commercial / Control Center locked.
