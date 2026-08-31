@@ -21,11 +21,11 @@ export function compareVersions(localVersion: number, remoteVersion: number): Ve
 
 export const ENTITY_CONFLICT_POLICY: Record<string, ConflictPolicy> = {
   customer: 'detect-only',
-  measurement: 'domain-deferred',
-  garment: 'domain-deferred',
+  measurement: 'domain-merge',
+  garment: 'detect-only',
   design: 'detect-only',
-  order: 'domain-deferred',
-  production: 'domain-deferred',
+  order: 'domain-merge',
+  production: 'domain-merge',
   material: 'detect-only',
   inventory: 'detect-only',
   invoice: 'detect-only',

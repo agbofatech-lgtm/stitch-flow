@@ -61,6 +61,7 @@ export type ConflictPolicy =
   | 'detect-only'
   | 'server-authoritative'
   | 'manual'
-  | 'domain-deferred';
+  | 'domain-deferred'
+  | 'domain-merge';
 
 export type CacheClass = 'local-first' | 'cacheable' | 'remote-only' | 'derived' | 'ephemeral';

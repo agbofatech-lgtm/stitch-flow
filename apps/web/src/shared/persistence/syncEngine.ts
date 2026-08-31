@@ -2,6 +2,7 @@ import type { LocalStore } from './store';
 import type { SyncOperation } from './types';
 import { ConnectivityMonitor } from './connectivity';
 import { compareVersions, ENTITY_CONFLICT_POLICY, mustNotSilentOverwrite } from './conflict';
+import { mergeEntityPayloads } from '../../domain/conflict/merge';
 
 export class RemoteAuthorizationBlockedError extends Error {
   constructor(message: string) {
@@ -54,6 +55,38 @@ export class SyncEngine {
           const comparison = compareVersions(record.metadata.version, ack.remoteVersion);
           const policy = ENTITY_CONFLICT_POLICY[next.entity];
           if (comparison.result === 'conflict' && mustNotSilentOverwrite(policy)) {
+            if (policy === 'domain-merge' && ack.remotePayload) {
+              const merged = mergeEntityPayloads(
+                next.entity,
+                record.payload as Record<string, unknown>,
+                ack.remotePayload
+              );
+              if (merged.status === 'merged') {
+                await this.store.putRecord({
+                  ...record,
+                  payload: merged.value,
+                  metadata: {
+                    ...record.metadata,
+                    remoteId: ack.remoteId,
+                    syncStatus: 'synced',
+                    lastSyncedAt: new Date().toISOString(),
+                  },
+                });
+                await this.store.putOperation({ ...next, status: 'acked' });
+                continue;
+              }
+              await this.store.putRecord({
+                ...record,
+                payload: merged.value,
+                metadata: { ...record.metadata, syncStatus: 'conflict' },
+              });
+              await this.store.putOperation({
+                ...next,
+                status: 'conflict',
+                lastError: `domain merge unresolved: ${merged.conflicts.map((c) => c.path).join(', ')}`,
+              });
+              continue;
+            }
             await this.store.putRecord({
               ...record,
               metadata: { ...record.metadata, syncStatus: 'conflict' },

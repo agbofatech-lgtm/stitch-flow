@@ -8,7 +8,8 @@
     "preview": "vite preview",
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit",
-    "test:persistence": "tsx --test src/shared/persistence/persistence.test.ts"
+    "test:persistence": "tsx --test src/shared/persistence/persistence.test.ts",
+    "test:domain": "tsx --test src/domain/domain.test.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
