@@ -94,3 +94,10 @@ export {
   historicalCompositionIntact,
 } from './composition';
 export { persistGarmentCompositionVersion } from './persistence/garmentCompositionVersionStore';
+export {
+  executeTrustedTailoring,
+  freezeTrustedTailoringExecution,
+  refuseFrozenExecutionMutation,
+  EXECUTION_CONTRACT_VERSION,
+} from './tailoring/execution';
+export { persistTrustedTailoringExecution } from './persistence/trustedTailoringExecutionStore';

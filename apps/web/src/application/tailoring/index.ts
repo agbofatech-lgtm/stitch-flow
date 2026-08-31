@@ -41,3 +41,5 @@ export {
   productionPlanProvenance,
   type TailoringProvenance,
 } from './provenance';
+
+export { evaluateTrustedTailoring, freezeGovernedTrustedTailoring } from './trustedExecution';
