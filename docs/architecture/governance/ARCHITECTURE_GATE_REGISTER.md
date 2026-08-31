@@ -50,7 +50,7 @@ T2 STATUS: **COMPLETE** — `transformation-t2-data-offline-foundation-complete`
 T3 STATUS: **COMPLETE** — `transformation-t3-domain-boundary-isolation-complete`  
 T4 STATUS: **COMPLETE** — `transformation-t4-experience-foundation-complete`  
 T5 STATUS: **COMPLETE** — `transformation-t5-studio-shell-complete`  
-T6 STATUS: **AUTHORIZED after T5 checkpoint** — not complete until Owner Acceptance  
+T6 STATUS: **IMPLEMENTATION SUBMITTED** — `2dd11917fc6a2108cbe91bb148d3eb24d5d6826a` — not complete until Owner Acceptance; **no T6 tag**  
 T7+ STATUS: **LOCKED**
 
 T0 final verification: [`docs/transformation/T0_FINAL_VERIFICATION_REPORT.md`](../../transformation/T0_FINAL_VERIFICATION_REPORT.md)  
