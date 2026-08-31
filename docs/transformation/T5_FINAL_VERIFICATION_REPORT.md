@@ -13,4 +13,6 @@ Protected SHA-256 unchanged vs T0 (patternEngine, productionAssistant, DesignStu
 
 Design Studio: hosted, not edited. No T5 tag. T6 locked.
 
+Implementation commit: `0e025534146f296aa3a22c1408b22774148f3df4`
+
 Owner Decision: **PENDING**.
