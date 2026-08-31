@@ -51,7 +51,7 @@ T3 STATUS: **COMPLETE** — `transformation-t3-domain-boundary-isolation-complet
 T4 STATUS: **COMPLETE** — `transformation-t4-experience-foundation-complete`  
 T5 STATUS: **COMPLETE** — `transformation-t5-studio-shell-complete`  
 T6 STATUS: **COMPLETE** — `transformation-t6-workflow-migration-complete`  
-T7 STATUS: **AUTHORIZED after T6 checkpoint** — forensics / boundary mapping only; deep extraction not started  
+T7 STATUS: **FORENSICS SUBMITTED** — deep extraction **NOT STARTED**; Owner Acceptance pending  
 T7+ product phases / AI / 3D / commercial / Control Center: **LOCKED**
 
 T0 final verification: [`docs/transformation/T0_FINAL_VERIFICATION_REPORT.md`](../../transformation/T0_FINAL_VERIFICATION_REPORT.md)  
