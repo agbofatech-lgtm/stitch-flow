@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit",
     "test:persistence": "tsx --test src/shared/persistence/persistence.test.ts",
     "test:domain": "tsx --test src/domain/domain.test.ts",
-    "test:experience": "tsx --test src/experience/experience.test.ts"
+    "test:experience": "tsx --test src/experience/experience.test.ts",
+    "test:studio": "tsx --test src/studio/studio.test.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
