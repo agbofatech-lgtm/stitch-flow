@@ -5,10 +5,10 @@
 | Owner | Agbofa Benjamin |
 | Position | Owner and Chief Engineer |
 | Stage | T2 — Data Authority + Offline-First Foundation |
-| Decision | **PENDING** |
+| Decision | **ACCEPT** — Agbofa Benjamin, 31/08/2026 |
 | Implementation Commit | `ff47cc6f6fc61c9ac9a59d067fffdd5667d19a8e` |
 | Verification | same commit (tests run before commit) |
-| Checkpoint | **NOT CREATED** |
+| Checkpoint | `transformation-t2-data-offline-foundation-complete` |
 
 | Gate | Status |
 |---|---|
@@ -22,4 +22,4 @@
 | Working Tree | *(after commit)* |
 | Remote | *(after push)* |
 
-Do not mark ACCEPTED unless the Owner explicitly accepts.
+Owner decision **ACCEPT** recorded 31/08/2026. T3 implementation authorized separately after this checkpoint.
