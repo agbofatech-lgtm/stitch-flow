@@ -2,12 +2,14 @@
 
 | Field | Value |
 |---|---|
-| Status | **PROPOSED** — not implemented; awaits Owner `AUTHORIZE T1 IMPLEMENTATION` |
+| Status | **IMPLEMENTED with STOP D constraint** — boot path live; business CRUD remains unmounted by default |
 | Date | 2026-08-31 |
 | Derived from | T1 forensic report + T0 runtime map + ADR-009 / ADR-010 / ADR-011 |
 | Classification | Target law for T1 implementation **only after Owner authorization** |
 
-This contract is **not** current runtime truth. Current truth remains: npm starts stub `server.ts`.
+Implementation (2026-08-31) established `server.ts` → `createApp()`. Owner implementation prompt **STOP D** forbids exposing previously unmounted CRUD without an auth decision. Therefore business routers are **not** mounted unless `MOUNT_UNAUTHENTICATED_BUSINESS_ROUTES=true`.
+
+Application factory: `createApp()` in `app.ts` (replaces a single `export const app` that imported all routers at load).
 
 ---
 
@@ -22,11 +24,12 @@ Official startup command
         ↓
 Authoritative entrypoint: apps/backend/src/server.ts
         ↓
-Authoritative application: apps/backend/src/app.ts  (export const app)
+Authoritative application: apps/backend/src/app.ts  (createApp)
         ↓
 Mounted middleware (cors, helmet, json, request log)
         ↓
-Mounted routes (as already declared on app.ts)
+Always: GET / GET /health GET /ready
+Opt-in: business routers (default off)
         ↓
 Route handlers / productionStageService (unmodified)
         ↓
@@ -161,6 +164,6 @@ Anything beyond this is out of T1.
 
 1. What starts the backend? → `npm run dev:backend` / `npm start`
 2. Which file is the entrypoint? → `src/server.ts`
-3. Which app object is authoritative? → `app` from `src/app.ts`
-4. Which routes are mounted? → those `app.use`d in `app.ts`
+3. Which app object is authoritative? → `createApp()` in `src/app.ts`
+4. Which routes are mounted? → `/`, `/health`, `/ready` always; business CRUD only if `MOUNT_UNAUTHENTICATED_BUSINESS_ROUTES=true`
 5. Which runtime does the web call? → `VITE_API_BASE_URL` or `http://localhost:5000`
