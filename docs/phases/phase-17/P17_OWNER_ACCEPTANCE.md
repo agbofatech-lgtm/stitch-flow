@@ -1,6 +1,6 @@
 # Phase 17 Owner Acceptance
 
-**Status:** PENDING — do not tick a decision except the Owner.
+**Status:** PENDING — independent verification complete. Do not tick a decision except the Owner. Do not create the checkpoint tag until Owner ACCEPT / ACCEPT WITH CONDITIONS.
 
 ```
 OWNER ACCEPTANCE — PHASE 17
