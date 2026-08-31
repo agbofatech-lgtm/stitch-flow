@@ -5,7 +5,7 @@
 ```
 UI (Studio / ProductionBoard / WorkflowPanel)
         │
-Application (T7 adapters, AppContext TRANSITIONAL, jobSheet, alerts)
+Application (T7 adapters, T9 tailoring contracts, AppContext TRANSITIONAL, jobSheet, alerts)
         │
 Domain (T3 gateways, T8 measurement version, T6 specification)
         │

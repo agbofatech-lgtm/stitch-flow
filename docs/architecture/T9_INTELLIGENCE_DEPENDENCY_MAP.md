@@ -26,8 +26,9 @@ JOB SHEET / ALERTS / STAGES
 | DesignStudio (T7 adapters) | `generateStylePattern`, `generateProductionPlan`, analyze/infer | AUTHORITATIVE wrap of protected engines |
 | T3 `requestPattern` / `requestProductionPlan` | engines + measurement separate | AUTHORITATIVE gateway |
 | T6 `orchestrate.ts` | T3 + GarmentSpecification + T2 garment repo | AUTHORITATIVE workflow |
-| AppContext `saveStudioOutputToOrder` | productionAssistant **direct** | TRANSITIONAL / DUPLICATED path |
-| `jobSheetExport.ts` | patternEngine **direct** + Order/plan | PARTIAL / DUPLICATED caller |
+| AppContext `saveStudioOutputToOrder` | T9 `application/tailoring` → T7 production adapter | TRANSITIONAL save path; engine no longer imported directly |
+| `Orders.tsx` | T9 `application/tailoring` → T7 production adapter | TRANSITIONAL; engine no longer imported directly |
+| `jobSheetExport.ts` | T9 `application/tailoring` → T7 pattern adapter | Pattern caller isolated; PDF layout unchanged / UNKNOWN |
 | `productionAlerts.ts` | Order completeness + `DEFAULT_STAGE_DURATION_DAYS` | TRANSITIONAL heuristic |
 | ProductionBoard | job sheet + alerts | EXPERIENCE |
 | `garmentLogic.ts` | garment-type mapping + studio field maps | LEGACY / unused duplicate of Studio + T3 maps |

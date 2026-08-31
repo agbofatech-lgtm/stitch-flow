@@ -1,6 +1,6 @@
 # T9 Implementation Boundary
 
-**Status:** PROPOSAL. **Not implemented.** Forensic gate must pass and owner must authorize a slice.
+**Status:** IMPLEMENTED for the authorized wrap/re-point slice. Owner ACCEPT of implementation is **PENDING**. T9 tag is **NOT CREATED**.
 
 ## T9 vs Phase 13+
 

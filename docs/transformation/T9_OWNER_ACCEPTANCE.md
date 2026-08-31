@@ -5,22 +5,22 @@
 | Owner | Agbofa Benjamin |
 | Position | Owner and Chief Engineer |
 | Stage | T9 — Deterministic Tailoring Intelligence Isolation (forensic cycle) |
-| Decision | **PENDING** |
-| Implementation | none (docs only) |
+| Decision | **ACCEPT** forensic map; authorize isolation slice — Agbofa Benjamin, 31/08/2026 |
+| Implementation | authorized; see `T9_IMPLEMENTATION_OWNER_ACCEPTANCE.md` (**PENDING**) |
 | Checkpoint | **not created** |
 
 ```
 OWNER ACCEPTANCE — T9 FORENSICS
 
 Decision:
-[ ] ACCEPT forensic map; authorize next isolation slice
+[x] ACCEPT forensic map; authorize next isolation slice
 [ ] ACCEPT WITH CONDITIONS
 [ ] REJECT / RETURN FOR INVESTIGATION
 [ ] PAUSE — do not isolate further
 
 Owner: Agbofa Benjamin
 Position: Owner and Chief Engineer
-Date:
+Date: 31/08/2026
 ```
 
-Deep T9 implementation is forbidden until this form records an explicit authorization that isolation is SAFE. T9 completion tag is forbidden until implementation + verification + this form’s later ACCEPT of that implementation.
+Implementation ACCEPT lives in `T9_IMPLEMENTATION_OWNER_ACCEPTANCE.md`. T9 completion tag remains forbidden until that later ACCEPT.

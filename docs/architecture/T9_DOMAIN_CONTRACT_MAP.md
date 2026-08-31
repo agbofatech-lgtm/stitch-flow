@@ -14,7 +14,7 @@
 | ProductionPlan | assistant output on Order | Dual save paths (T7) |
 | ProductionStage | backend codes + T3 sequence | Frontend `productionStages[]` TRANSITIONAL |
 | FabricRecord / MaterialUsage | AppContext | Estimate ≠ stock |
-| JobSheet | `jobSheetExport.ts` | No domain contract; calls engine directly |
+| JobSheet | `jobSheetExport.ts` | Calls `application/tailoring` (T9); PDF layout unchanged; visual PDF UNKNOWN |
 | Order | AppContext + T2 `order` repo unused by UI | TRANSITIONAL SoT |
 
 **FORBIDDEN parallels if T9 later implements:** second pattern engine, second yardage formula set, second stage code list, new localStorage measurement store, AI-generated measurements.
