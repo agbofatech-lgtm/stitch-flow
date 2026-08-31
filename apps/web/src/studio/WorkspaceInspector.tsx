@@ -45,7 +45,9 @@ export function WorkspaceInspector({
             <li>Fitting notes</li>
             <li>Timeline</li>
           </ul>
-          <p className="mt-3 text-meta text-ink-muted">{customers} customers in transitional store. Deep workflow is T6.</p>
+          <p className="mt-3 text-meta text-ink-muted">
+            {customers} AppContext customers (measurement chain). HTTP Customers screen is a separate T0 population.
+          </p>
         </Panel>
       ) : null}
 
@@ -65,7 +67,7 @@ export function WorkspaceInspector({
         <Panel>
           <p className="text-label">Protected design</p>
           <p className="mt-2 text-body text-ink-secondary">
-            Design Studio is hosted, not extracted. Pattern Engine remains behind T3.
+            Design Studio is hosted, not extracted. Save studio output from the workflow inspector. Pattern Engine remains behind T3.
           </p>
         </Panel>
       ) : null}

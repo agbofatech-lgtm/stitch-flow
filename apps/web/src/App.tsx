@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AppProvider } from './context/AppContext';
 import { SplashScreen } from './components/SplashScreen';
 import { StudioShell } from './studio/StudioShell';
+import { WorkflowProvider } from './workflow/WorkflowContext';
 
 function AppContent() {
   const [showSplash, setShowSplash] = useState(true);
@@ -15,7 +16,11 @@ function AppContent() {
     return <SplashScreen />;
   }
 
-  return <StudioShell />;
+  return (
+    <WorkflowProvider>
+      <StudioShell />
+    </WorkflowProvider>
+  );
 }
 
 export default function App() {

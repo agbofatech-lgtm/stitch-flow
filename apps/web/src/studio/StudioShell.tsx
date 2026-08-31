@@ -46,6 +46,7 @@ import {
   type StudioWorkspaceId,
 } from './workspaces';
 import { WorkspaceInspector } from './WorkspaceInspector';
+import { WorkflowPanel } from '../workflow/WorkflowPanel';
 
 const ICONS: Record<StudioWorkspaceId, typeof LayoutDashboard> = {
   command: LayoutDashboard,
@@ -81,6 +82,7 @@ export function StudioShell() {
   const [commandOpen, setCommandOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [connectivity, setConnectivity] = useState<ConnectivityState>('offline');
+  const [pendingOps, setPendingOps] = useState(0);
 
   useEffect(() => {
     if (workspace === 'measurements') return;
@@ -94,6 +96,9 @@ export function StudioShell() {
     const runtime = getDataAuthorityRuntime();
     if (!runtime) return;
     setConnectivity(runtime.connectivity.getState());
+    void runtime.store.listOperations().then((ops) => {
+      setPendingOps(ops.filter((op) => op.status === 'pending').length);
+    });
     return runtime.connectivity.subscribe(setConnectivity);
   }, []);
 
@@ -250,6 +255,7 @@ export function StudioShell() {
 
           {inspectorOpen ? (
             <aside className="hidden w-80 shrink-0 overflow-auto border-l border-line bg-surface-workspace xl:block">
+              <WorkflowPanel />
               <WorkspaceInspector
                 workspace={workspace}
                 business={business}
@@ -270,7 +276,7 @@ export function StudioShell() {
             <Badge tone={connectivity === 'online' ? 'success' : connectivity === 'offline' ? 'neutral' : 'warning'}>
               {connectivity}
             </Badge>
-            T2 sync queue
+            T2 sync queue {pendingOps}
           </span>
         </footer>
 

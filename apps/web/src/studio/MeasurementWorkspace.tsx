@@ -4,15 +4,19 @@ import { Badge, Button, DataTable, ExperienceEmptyState, Panel } from '../experi
 import { separateLegacyMeasurementBlob } from '../domain/measurement/separate';
 import { persistSeparatedMeasurements } from '../domain/persistence/measurementStore';
 import { getDataAuthorityRuntime } from '../shared/persistence';
+import { useWorkflow } from '../workflow/WorkflowContext';
 
 export function MeasurementWorkspace() {
   const { measurementProfiles, customers } = useApp();
+  const workflow = useWorkflow();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const rows = useMemo(
     () =>
-      measurementProfiles.map((profile) => {
+      measurementProfiles
+        .filter((profile) => !workflow.customerId || profile.customerId === workflow.customerId)
+        .map((profile) => {
         const blob = (profile.measurements || {}) as Record<string, unknown>;
         const separated = separateLegacyMeasurementBlob(blob);
         const customer = customers.find((item) => item.id === profile.customerId);
@@ -25,7 +29,7 @@ export function MeasurementWorkspace() {
           blob,
         };
       }),
-    [customers, measurementProfiles]
+    [customers, measurementProfiles, workflow.customerId]
   );
 
   async function snapshotToRepository(row: (typeof rows)[number]) {
@@ -62,7 +66,7 @@ export function MeasurementWorkspace() {
         <p className="text-label text-action-primary">Measurement workspace</p>
         <h1 className="mt-1 text-heading text-ink-primary">Body, garment, pattern</h1>
         <p className="mt-2 text-body text-ink-secondary">
-          Pattern values remain a derived projection. Snapshots use T2 repositories only.
+          Pattern values remain a derived projection. Snapshots use T2 repositories only. Freeze writes the existing order measurement snapshot — live profile edits do not silently rewrite history.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge>Body</Badge>
@@ -86,6 +90,19 @@ export function MeasurementWorkspace() {
       />
 
       <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          onClick={() => {
+            const result = workflow.freezeMeasurementsOnOrder();
+            if (!result.success) setError(result.error || 'Freeze failed');
+            else {
+              setError(null);
+              setMessage('Measurement version frozen onto the selected order.');
+            }
+          }}
+        >
+          Freeze selected profile onto order
+        </Button>
         {rows.slice(0, 6).map((row) => (
           <Button key={row.id} variant="secondary" size="sm" onClick={() => void snapshotToRepository(row)}>
             Snapshot {row.label}

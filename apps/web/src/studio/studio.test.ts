@@ -29,6 +29,9 @@ test('legacy views map into workspaces without a new router', () => {
 test('studio shell hosts Design Studio and does not import engines', () => {
   const shell = readFileSync(new URL('./StudioShell.tsx', import.meta.url), 'utf8');
   assert.match(shell, /DesignStudio/);
+  assert.match(shell, /WorkflowPanel/);
   assert.equal(shell.includes('patternEngine'), false);
+  assert.equal(shell.includes('productionAssistant'), false);
   assert.equal(shell.includes('localStorage'), false);
+  assert.equal(shell.includes('react-router'), false);
 });
