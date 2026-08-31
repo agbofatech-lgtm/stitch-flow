@@ -1,7 +1,8 @@
 # T10.6 Trusted Deterministic Core Certification
 
 **Date:** 2026-08-31  
-**Result:** **CONDITIONAL**
+**Result:** **CONDITIONAL**  
+**Owner:** ACCEPT WITH CONDITIONS — Agbofa Benjamin, 31/08/2026. Conditions C1–C7 permanent. This tag does not certify tailoring accuracy, exclusive Studio path, canvas geometry, PDF visual equivalence, historical inches, or hip-default reconciliation.
 
 This is not a claim of tailoring accuracy, PDF visual equivalence, or cryptographic integrity.
 

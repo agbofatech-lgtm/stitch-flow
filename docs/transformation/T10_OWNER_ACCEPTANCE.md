@@ -4,27 +4,32 @@
 |---|---|
 | Owner | Agbofa Benjamin |
 | Position | Owner and Chief Engineer |
-| Stage | T10 — Deterministic Tailoring Core Consolidation & Certification |
-| Decision | **PENDING** |
-| Certification | **CONDITIONAL** (see `T10_6_TRUSTED_CORE_CERTIFICATION.md`) |
-| Checkpoint | **not created** |
+| Stage | T10 — Trusted Deterministic Core |
+| Decision | **ACCEPT WITH CONDITIONS** — Agbofa Benjamin, 31/08/2026 |
+| Certification | **CONDITIONAL** (permanent) |
+| Checkpoint | `transformation-t10-trusted-deterministic-core-complete` |
 
 ```
 OWNER ACCEPTANCE — T10
 
 Decision:
 [ ] ACCEPT
-[ ] ACCEPT WITH CONDITIONS
+[x] ACCEPT WITH CONDITIONS
 [ ] REJECT / RETURN FOR INVESTIGATION
 [ ] PAUSE
 
 Owner: Agbofa Benjamin
 Position: Owner and Chief Engineer
-Date:
+Date: 31/08/2026
 
-Comments:
-
-Conditions:
+Conditions (permanent):
+C1 Governed execution boundary — certification applies to governed paths; legacy Studio identity re-exports are not falsely migrated.
+C2 Tailoring accuracy is not certified.
+C3 Hip defaults 98/100/102 remain unresolved; no silent global canonical.
+C4 Canvas remains distinct from manufacturing geometry; no px/cm assumed.
+C5 PDF visual equivalence remains UNKNOWN.
+C6 Historical inch snapshot compatibility remains UNKNOWN.
+C7 Runtime provenance is not persistent auditability.
 ```
 
-Do not create `transformation-t10-deterministic-tailoring-core-complete` until this form records ACCEPT. T11 and Phase 13 remain LOCKED. AI / 3D / billing / Control Center remain LOCKED.
+Phase 13 is authorized after this checkpoint is on origin. T11 is not invented. AI / 3D / billing / Control Center remain LOCKED unless a later programme authorizes them.
