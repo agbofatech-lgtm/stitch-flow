@@ -21,6 +21,8 @@ Protected SHA-256 vs T0:
 | productionStageService.ts | `eef8854f42b6aa41930f74d18e7ab35cfc709240c5a3254c60981e0dfccd67c8` | unchanged |
 | DesignStudio.tsx | `5059c0db5633d9340793e620863cfc521ee8118a2f3188ead9082ee2c1ae783b` | authorized import/draft extraction (was `78ddd839…e9507`) |
 
-Owner Decision: **PENDING**.
+Owner Decision: **ACCEPT** — Agbofa Benjamin, 31/08/2026.
 
-T7 tag **not created**. T8 / Phases 13–19 not started. AI / 3D / commercial / Control Center locked.
+Implementation: `64d5906d21708967d3c57ea33266be068c84a425`
+
+T7 tag created only after this closure commit. T8 forensic mapping authorized next. T8 implementation not started until T8.0. AI / 3D / commercial / Control Center locked.
