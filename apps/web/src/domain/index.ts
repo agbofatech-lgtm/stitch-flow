@@ -72,3 +72,8 @@ export {
 } from './garment/contract';
 export { evaluateGarmentSpecification, assessGarmentSpecificationCompleteness } from './garment/evaluate';
 export { createGarmentProvenance } from './garment/provenance';
+export {
+  canonicalizeGarmentSpecification,
+  fingerprintGarmentSpecification,
+  GARMENT_SPEC_FINGERPRINT_ALGORITHM,
+} from './garment/canonicalize';
