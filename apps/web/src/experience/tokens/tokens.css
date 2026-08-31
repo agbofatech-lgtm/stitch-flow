@@ -1,0 +1,101 @@
+:root {
+  --sf-surface-canvas: #f4f8fa;
+  --sf-surface-workspace: #f8fbfc;
+  --sf-surface-panel: #ffffff;
+  --sf-surface-elevated: #ffffff;
+  --sf-text-primary: #1e2933;
+  --sf-text-secondary: #334155;
+  --sf-text-muted: #64748b;
+  --sf-text-inverse: #ffffff;
+  --sf-action-primary: #0f6e8c;
+  --sf-action-primary-hover: #0c5c74;
+  --sf-action-secondary: #e8f2f6;
+  --sf-status-success: #16a34a;
+  --sf-status-warning: #d97706;
+  --sf-status-danger: #dc2626;
+  --sf-status-info: #0284c7;
+  --sf-border-default: #d9e5ea;
+  --sf-border-strong: #b7c9d1;
+  --sf-focus-ring: #0f6e8c;
+
+  --sf-font-sans: Inter, system-ui, sans-serif;
+  --sf-font-display: Inter, system-ui, sans-serif;
+  --sf-font-numeric: Inter, ui-monospace, monospace;
+
+  --sf-text-display: 2rem;
+  --sf-text-heading-lg: 1.5rem;
+  --sf-text-heading: 1.25rem;
+  --sf-text-heading-sm: 1.0625rem;
+  --sf-text-body: 0.9375rem;
+  --sf-text-label: 0.8125rem;
+  --sf-text-meta: 0.75rem;
+  --sf-text-numeric: 0.875rem;
+
+  --sf-space-1: 0.25rem;
+  --sf-space-2: 0.5rem;
+  --sf-space-3: 0.75rem;
+  --sf-space-4: 1rem;
+  --sf-space-5: 1.25rem;
+  --sf-space-6: 1.5rem;
+  --sf-space-8: 2rem;
+  --sf-space-10: 2.5rem;
+  --sf-space-12: 3rem;
+
+  --sf-radius-sm: 0.375rem;
+  --sf-radius-md: 0.75rem;
+  --sf-radius-lg: 1rem;
+  --sf-radius-workspace: 1.5rem;
+  --sf-radius-pill: 999px;
+
+  --sf-elevation-none: none;
+  --sf-elevation-sm: 0 1px 2px rgb(15 110 140 / 0.08);
+  --sf-elevation-md: 0 8px 24px rgb(30 41 51 / 0.08);
+  --sf-elevation-lg: 0 24px 48px rgb(30 41 51 / 0.16);
+
+  --sf-z-base: 0;
+  --sf-z-sticky: 20;
+  --sf-z-dropdown: 40;
+  --sf-z-overlay: 50;
+  --sf-z-modal: 60;
+  --sf-z-toast: 70;
+
+  --sf-duration-instant: 80ms;
+  --sf-duration-fast: 140ms;
+  --sf-duration-base: 220ms;
+  --sf-duration-slow: 360ms;
+  --sf-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --sf-ease-emphasize: cubic-bezier(0.2, 0, 0, 1.2);
+  --sf-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+}
+
+[data-theme='dark'] {
+  --sf-surface-canvas: #0f171c;
+  --sf-surface-workspace: #132026;
+  --sf-surface-panel: #1a2a31;
+  --sf-surface-elevated: #21353e;
+  --sf-text-primary: #f8fbfc;
+  --sf-text-secondary: #d9e5ea;
+  --sf-text-muted: #93a4ad;
+  --sf-text-inverse: #0f171c;
+  --sf-action-primary: #3aa0bf;
+  --sf-action-primary-hover: #5bb4ce;
+  --sf-action-secondary: #1e333c;
+  --sf-border-default: #2c4550;
+  --sf-border-strong: #3d5c69;
+  --sf-focus-ring: #5bb4ce;
+  --sf-elevation-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --sf-elevation-md: 0 8px 24px rgb(0 0 0 / 0.4);
+  --sf-elevation-lg: 0 24px 48px rgb(0 0 0 / 0.55);
+}
+
+.sf-focus-ring:focus-visible {
+  outline: 2px solid var(--sf-focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-motion-safe {
+    animation: none !important;
+    transition: none !important;
+  }
+}
