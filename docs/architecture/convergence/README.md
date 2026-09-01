@@ -18,3 +18,5 @@ Labels used throughout:
 | **UNKNOWN** | Not verified this pass |
 
 This pack does not rewrite T0 maps, ADRs, or the continuity pack. Continuity describes *current* truth. This pack asks *how authorities can converge* without rewriting protected assets.
+
+SAC-1 implementation (owner acceptance pending): [`sac-1/README.md`](./sac-1/README.md). SAC-2 remains locked.
