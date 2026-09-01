@@ -57,7 +57,8 @@ SAC-3 authenticated `/shop` API: [`convergence/sac-3/README.md`](./convergence/s
 SAC-4 shop PostgreSQL path (`SHOP_DATABASE_MODE=postgres`): [`convergence/sac-4/README.md`](./convergence/sac-4/README.md). Platform remains file/memory.  
 SAC-5 offline sync (selected `/shop` domains, AppContext remains UI SoT): [`convergence/sac-5/README.md`](./convergence/sac-5/README.md).  
 SER-F0 frontend experience forensics: [`../experience/ser/f0/README.md`](../experience/ser/f0/README.md).  
-SER-F1 experience constitution: [`frontend/experience/README.md`](./frontend/experience/README.md). SER-F2 locked. 3D and Phase 20 remain locked.
+SER-F1 experience constitution: [`frontend/experience/README.md`](./frontend/experience/README.md).  
+SER-F2 visual language (product Floor): [`frontend/experience/SER-F2_FINAL_REPORT.md`](./frontend/experience/SER-F2_FINAL_REPORT.md). SER-F3 locked. 3D and Phase 20 remain locked.
 
 ---
 
