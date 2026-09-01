@@ -20,7 +20,7 @@ This directory is the **Level 2** governance layer.
 | [continuity/](./continuity/) | Synthesized runtime / data / protected / phase maps |
 | [convergence/](./convergence/) | SAC-0 forensics; SAC-1–SAC-5 implementation records (3D / Phase 20 locked) |
 | [../experience/ser/f0/](../experience/ser/f0/README.md) | SER-F0 experience forensics |
-| [frontend/experience/](./frontend/experience/README.md) | SER-F1 constitution + SER-F2 visual language (SER-F3 locked) |
+| [frontend/experience/](./frontend/experience/README.md) | SER-F1–F3 experience (SER-F4 locked) |
 | [adr/](./adr/) | Architecture Decision Records ADR-001 … ADR-011 |
 | [governance/](./governance/) | Constitution index, gate register, supersession policy |
 
