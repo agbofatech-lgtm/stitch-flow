@@ -18,6 +18,7 @@ This directory is the **Level 2** governance layer.
 |---|---|
 | [AGENT_START_HERE.md](./AGENT_START_HERE.md) | **Current continuity entrypoint** (2026-09-01) |
 | [continuity/](./continuity/) | Synthesized runtime / data / protected / phase maps |
+| [convergence/](./convergence/) | **SAC-0** authority convergence forensics (implementation not granted) |
 | [adr/](./adr/) | Architecture Decision Records ADR-001 … ADR-011 |
 | [governance/](./governance/) | Constitution index, gate register, supersession policy |
 

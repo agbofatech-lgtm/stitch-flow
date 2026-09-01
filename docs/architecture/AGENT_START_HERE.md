@@ -50,6 +50,8 @@ Code existence ≠ route mounted ≠ route authoritative ≠ product using it.
 
 Index of the pack: [`continuity/README.md`](./continuity/README.md).
 
+Authority **convergence** forensics (SAC-0, implementation not granted): [`convergence/README.md`](./convergence/README.md). SAC-1 is locked until the owner authorizes it.
+
 ---
 
 ## Locked until the owner authorizes a named programme
