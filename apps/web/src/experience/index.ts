@@ -10,6 +10,7 @@ export {
   ExperienceEmptyState,
   LoadingState,
   ErrorState,
+  WorkspaceSkeleton,
   Skeleton,
   Pagination,
   Toast,
@@ -25,3 +26,4 @@ export {
 } from './primitives/overlays';
 export { Tabs, Breadcrumb, CommandMenu } from './primitives/navigation';
 export { DataTable } from './primitives/DataTable';
+export * from './shell';

@@ -88,14 +88,30 @@ export function LoadingState({ label = 'Preparing workspace…' }: { label?: str
 export function ErrorState({
   title = 'Something went wrong',
   description,
+  action,
 }: {
   title?: string;
   description: string;
+  action?: ReactNode;
 }) {
   return (
     <div role="alert" className="rounded-sf border border-status-danger/30 bg-status-danger/5 p-4">
       <p className="text-label text-status-danger">{title}</p>
       <p className="mt-1 text-body text-ink-secondary">{description}</p>
+      {action ? <div className="mt-3">{action}</div> : null}
+    </div>
+  );
+}
+
+export function WorkspaceSkeleton({ label = 'Loading workspace' }: { label?: string }) {
+  return (
+    <div role="status" aria-label={label} className="space-y-4 p-6">
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-28 w-full" />
+      <div className="grid gap-4 md:grid-cols-2">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-32 w-full" />
+      </div>
     </div>
   );
 }

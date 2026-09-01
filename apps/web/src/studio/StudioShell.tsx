@@ -7,10 +7,15 @@ import {
   Palette,
   Scissors,
   Briefcase,
+  ClipboardList,
+  Warehouse,
+  Receipt,
+  BarChart3,
   Menu,
   Search,
   PanelRight,
   Settings as SettingsIcon,
+  Shield,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AtelierHome } from '../atelier/AtelierHome';
@@ -25,12 +30,23 @@ import { Materials } from '../components/Materials';
 import { Reports } from '../components/Reports';
 import { Settings } from '../components/Settings';
 import {
+  AtelierNavigation,
+  AtelierShell,
   Badge,
   Button,
-  CommandMenu,
+  CommandPalette,
+  ContextBar,
   IconButton,
+  InspectorPanel,
   Sheet,
+  StatusBar,
+  ToastRegion,
+  WorkspaceCanvas,
+  WorkspaceHeader,
   cn,
+  type CommandEntry,
+  type NavSection,
+  type ToastMessage,
 } from '../experience';
 import { motionOrInstant, motionPresets } from '../experience/motion/motion';
 import { getDataAuthorityRuntime } from '../shared/persistence';
@@ -40,6 +56,7 @@ import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
 import { MeasurementWorkspace } from './MeasurementWorkspace';
 import {
   BUSINESS_SURFACES,
+  NAV_SECTIONS,
   STUDIO_WORKSPACES,
   businessSurfaceFromView,
   viewForWorkspace,
@@ -50,13 +67,19 @@ import {
 import { WorkspaceInspector } from './WorkspaceInspector';
 import { WorkflowPanel } from '../workflow/WorkflowPanel';
 
-const ICONS: Record<StudioWorkspaceId, typeof LayoutDashboard> = {
+const ICONS: Record<string, typeof LayoutDashboard> = {
   command: LayoutDashboard,
   clients: Users,
   measurements: Ruler,
   design: Palette,
   production: Scissors,
   business: Briefcase,
+  'business:orders': ClipboardList,
+  'business:materials': Warehouse,
+  'business:invoices': Receipt,
+  'business:reports': BarChart3,
+  settings: SettingsIcon,
+  control: Shield,
 };
 
 export function StudioShell() {
@@ -68,6 +91,7 @@ export function StudioShell() {
     orders,
     customers,
     dueAlerts,
+    selectOrder,
   } = useApp();
 
   const [workspace, setWorkspace] = useState<StudioWorkspaceId>(() =>
@@ -86,6 +110,7 @@ export function StudioShell() {
   const [controlOpen, setControlOpen] = useState(false);
   const [connectivity, setConnectivity] = useState<ConnectivityState>('offline');
   const [pendingOps, setPendingOps] = useState(0);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   useEffect(() => {
     if (workspace === 'measurements') return;
@@ -102,12 +127,35 @@ export function StudioShell() {
     void runtime.store.listOperations().then((ops) => {
       setPendingOps(ops.filter((op) => op.status === 'pending').length);
     });
-    return runtime.connectivity.subscribe(setConnectivity);
+    return runtime.connectivity.subscribe((next) => {
+      setConnectivity(next);
+      setToasts((current) => [
+        ...current.slice(-2),
+        {
+          id: `sync-${Date.now()}`,
+          tone: next === 'online' ? 'success' : next === 'offline' ? 'warning' : 'info',
+          children: `Workspace connectivity is ${next}. Queue remains T2 authority.`,
+        },
+      ]);
+    });
+  }, []);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setCommandOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
 
   function goTo(next: StudioWorkspaceId, nextBusiness: BusinessSurface = business) {
     setWorkspace(next);
     setNavOpen(false);
+    setSettingsOpen(false);
+    setControlOpen(false);
     if (next === 'measurements') return;
     if (next === 'business') {
       setBusiness(nextBusiness);
@@ -119,8 +167,30 @@ export function StudioShell() {
     if (view) setView(view);
   }
 
+  function selectNav(id: string) {
+    if (id === 'settings') {
+      setControlOpen(false);
+      setSettingsOpen(true);
+      setView('settings');
+      setNavOpen(false);
+      return;
+    }
+    if (id === 'control') {
+      setSettingsOpen(false);
+      setControlOpen(true);
+      setNavOpen(false);
+      return;
+    }
+    if (id.startsWith('business:')) {
+      goTo('business', id.replace('business:', '') as BusinessSurface);
+      return;
+    }
+    goTo(id as StudioWorkspaceId);
+  }
+
   const meta = STUDIO_WORKSPACES.find((item) => item.id === workspace)!;
   const attention = (dueAlerts?.length || 0) + orders.filter((order) => order.status === 'in_progress').length;
+  const plane = controlOpen ? 'control' : 'atelier';
 
   const canvas = useMemo(() => {
     if (controlOpen) return <ControlCenter onExit={() => setControlOpen(false)} />;
@@ -140,178 +210,213 @@ export function StudioShell() {
     return <Orders />;
   }, [business, controlOpen, settingsOpen, workspace]);
 
-  const commands = [
+  const headerCopy = controlOpen
+    ? {
+        kicker: 'AGBOFA platform',
+        title: 'Control Center',
+        description: 'Operator command room. Tenant Settings is not this plane.',
+      }
+    : settingsOpen
+      ? {
+          kicker: 'Workspace',
+          title: 'Settings',
+          description: 'Tenant workspace configuration. Not commercial authority.',
+        }
+      : workspace === 'business'
+        ? {
+            kicker: 'Operations',
+            title: BUSINESS_SURFACES.find((item) => item.id === business)?.label || 'Orders',
+            description: meta.purpose,
+          }
+        : {
+            kicker: 'Atelier',
+            title: meta.label,
+            description: meta.purpose,
+          };
+
+  const commands: CommandEntry[] = [
     ...STUDIO_WORKSPACES.map((item) => ({
       id: item.id,
       label: item.label,
+      group: 'Navigate',
+      keywords: item.purpose,
+      onSelect: () => goTo(item.id),
+    })),
+    ...BUSINESS_SURFACES.map((surface) => ({
+      id: `business:${surface.id}`,
+      label: surface.label,
+      group: 'Operations',
+      onSelect: () => goTo('business', surface.id),
+    })),
+    ...customers.slice(0, 8).map((customer) => ({
+      id: `client-${customer.id}`,
+      label: customer.fullName,
+      group: 'Clients',
+      keywords: `${customer.phone || ''} ${customer.email || ''}`,
+      onSelect: () => goTo('clients'),
+    })),
+    ...orders.slice(0, 8).map((order) => ({
+      id: `order-${order.id}`,
+      label: order.orderNumber,
+      group: 'Orders',
+      keywords: order.orderType,
       onSelect: () => {
-        setControlOpen(false);
-        setSettingsOpen(false);
-        goTo(item.id);
+        selectOrder(order.id);
+        goTo('business', 'orders');
       },
     })),
     {
+      id: 'settings',
+      label: 'Workspace settings',
+      group: 'Workspace',
+      onSelect: () => selectNav('settings'),
+    },
+    {
       id: 'control-center',
       label: 'Open Control Center',
-      onSelect: () => {
-        setSettingsOpen(false);
-        setControlOpen(true);
-      },
+      group: 'Platform',
+      onSelect: () => selectNav('control'),
     },
   ];
 
-  const motion = motionOrInstant(motionPresets.panel);
+  const navSections: NavSection[] = NAV_SECTIONS.map((section) => ({
+    id: section.id,
+    label: section.label,
+    items: section.items.map((item) => {
+      const Icon = ICONS[item.id] || LayoutDashboard;
+      const current =
+        item.id === 'control'
+          ? controlOpen
+          : item.id === 'settings'
+            ? settingsOpen
+            : item.workspace === 'business'
+              ? !settingsOpen && !controlOpen && workspace === 'business' && business === item.business
+              : !settingsOpen && !controlOpen && workspace === item.workspace;
+      return {
+        id: item.id,
+        label: item.label,
+        current,
+        icon: <Icon className="h-4 w-4" />,
+      };
+    }),
+  }));
+
+  const motionPreset = motionOrInstant(motionPresets.panel);
 
   return (
-    <div className="flex min-h-screen bg-surface-canvas text-ink-primary">
-      {navOpen ? (
-        <button
-          type="button"
-          aria-label="Close navigation overlay"
-          className="fixed inset-0 z-overlay bg-ink-primary/35 lg:hidden"
-          onClick={() => setNavOpen(false)}
+    <AtelierShell
+      plane={plane}
+      navigation={
+        <AtelierNavigation
+          brand={
+            <>
+              <img src={stitchflowLogo} alt={BRAND.productName} className="h-9 w-auto" />
+              {!navCollapsed || navOpen ? (
+                <div className="min-w-0">
+                  <p className="truncate font-display text-label text-ink-primary">{BRAND.productName} Atelier</p>
+                  <p className="truncate text-meta text-ink-muted">{currentWorkspace.name}</p>
+                </div>
+              ) : null}
+            </>
+          }
+          workspaceName={currentWorkspace.name}
+          sections={navSections}
+          collapsed={navCollapsed}
+          mobileOpen={navOpen}
+          onCloseMobile={() => setNavOpen(false)}
+          onSelect={selectNav}
+          footer={
+            <div className="hidden lg:block">
+              <Button variant="ghost" size="sm" className="w-full" onClick={() => setNavCollapsed((value) => !value)}>
+                {navCollapsed ? 'Expand' : 'Collapse'}
+              </Button>
+            </div>
+          }
         />
-      ) : null}
-
-      <aside
-        className={cn(
-          'fixed inset-y-0 left-0 z-modal flex flex-col border-r border-line bg-surface-panel transition-[width,transform] duration-base ease-standard lg:static lg:translate-x-0',
-          navCollapsed ? 'lg:w-[4.5rem]' : 'lg:w-64',
-          navOpen ? 'w-64 translate-x-0' : 'w-64 -translate-x-full lg:translate-x-0'
-        )}
-      >
-        <div className="flex items-center gap-3 border-b border-line px-3 py-4">
-          <img src={stitchflowLogo} alt={BRAND.productName} className="h-9 w-auto" />
-          {!navCollapsed ? (
-            <div className="min-w-0">
-              <p className="truncate font-display text-label text-ink-primary">{BRAND.productName} Atelier</p>
-              <p className="truncate text-meta text-ink-muted">{currentWorkspace.name}</p>
-            </div>
-          ) : null}
-        </div>
-        <nav aria-label="Studio workspaces" className="flex-1 space-y-1 overflow-y-auto p-2">
-          {STUDIO_WORKSPACES.map((item) => {
-            const Icon = ICONS[item.id];
-            const active = item.id === workspace && !settingsOpen && !controlOpen;
-            return (
+      }
+      header={
+        <WorkspaceHeader
+          kicker={headerCopy.kicker}
+          title={headerCopy.title}
+          description={headerCopy.description}
+          state={
+            <>
+              {workspace === 'clients' ? (
+                <Badge tone="neutral">{customers.length} clients</Badge>
+              ) : null}
+              {workspace === 'business' ? (
+                <Badge tone="neutral">{orders.length} orders</Badge>
+              ) : null}
+              {attention > 0 && workspace === 'command' ? (
+                <Badge tone="warning">{attention} needing attention</Badge>
+              ) : null}
+            </>
+          }
+          actions={
+            <>
+              <IconButton label="Open navigation" className="lg:hidden" onClick={() => setNavOpen(true)}>
+                <Menu className="h-4 w-4" />
+              </IconButton>
+              <IconButton label="Search workspaces" onClick={() => setCommandOpen(true)}>
+                <Search className="h-4 w-4" />
+              </IconButton>
+              <IconButton
+                label={inspectorOpen ? 'Hide inspector' : 'Show inspector'}
+                onClick={() => setInspectorOpen((value) => !value)}
+              >
+                <PanelRight className="h-4 w-4" />
+              </IconButton>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden md:inline-flex"
+                onClick={() => selectNav('control')}
+              >
+                Control Center
+              </Button>
+              <IconButton label="Workspace settings" onClick={() => selectNav('settings')}>
+                <SettingsIcon className="h-4 w-4" />
+              </IconButton>
+            </>
+          }
+        />
+      }
+      toolbar={
+        workspace === 'business' && !settingsOpen && !controlOpen ? (
+          <ContextBar>
+            {BUSINESS_SURFACES.map((surface) => (
               <button
-                key={item.id}
+                key={surface.id}
                 type="button"
-                onClick={() => {
-                  setSettingsOpen(false);
-                  setControlOpen(false);
-                  goTo(item.id);
-                }}
+                onClick={() => goTo('business', surface.id)}
                 className={cn(
-                  'sf-focus-ring flex w-full items-center gap-3 rounded-sf px-3 py-2.5 text-left text-label',
-                  active ? 'bg-action-primary text-ink-inverse' : 'text-ink-secondary hover:bg-action-secondary'
+                  'sf-focus-ring min-h-10 rounded-sf-pill px-3 text-meta',
+                  business === surface.id ? 'bg-action-primary text-ink-inverse' : 'bg-action-secondary text-ink-secondary'
                 )}
-                aria-current={active ? 'page' : undefined}
               >
-                <Icon className="h-4 w-4 shrink-0" />
-                {!navCollapsed || navOpen ? <span>{item.label}</span> : <span className="sr-only">{item.label}</span>}
+                {surface.label}
               </button>
-            );
-          })}
-        </nav>
-        <div className="hidden border-t border-line p-2 lg:block">
-          <Button variant="ghost" size="sm" className="w-full" onClick={() => setNavCollapsed((value) => !value)}>
-            {navCollapsed ? '»' : 'Collapse'}
-          </Button>
-        </div>
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-sticky flex items-center gap-2 border-b border-line bg-surface-elevated px-3 py-2">
-          <IconButton label="Open navigation" className="lg:hidden" onClick={() => setNavOpen(true)}>
-            <Menu className="h-4 w-4" />
-          </IconButton>
-          <div className="min-w-0 flex-1">
-            <p className="text-meta uppercase tracking-[0.16em] text-ink-muted">
-              {controlOpen ? 'AGBOFA' : 'Atelier'}
-            </p>
-            <h1 className="truncate font-display text-heading-sm">
-              {controlOpen ? 'Control Center' : settingsOpen ? 'Settings' : meta.label}
-            </h1>
-          </div>
-          {workspace === 'business' && !settingsOpen ? (
-            <div className="hidden gap-1 md:flex">
-              {BUSINESS_SURFACES.map((surface) => (
-                <button
-                  key={surface.id}
-                  type="button"
-                  onClick={() => goTo('business', surface.id)}
-                  className={cn(
-                    'sf-focus-ring rounded-sf-pill px-3 py-1 text-meta',
-                    business === surface.id ? 'bg-action-primary text-ink-inverse' : 'bg-action-secondary text-ink-secondary'
-                  )}
-                >
-                  {surface.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-          <IconButton label="Search workspaces" onClick={() => setCommandOpen(true)}>
-            <Search className="h-4 w-4" />
-          </IconButton>
-          <IconButton
-            label={inspectorOpen ? 'Hide inspector' : 'Show inspector'}
-            onClick={() => setInspectorOpen((value) => !value)}
-          >
-            <PanelRight className="h-4 w-4" />
-          </IconButton>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="hidden md:inline-flex"
-            onClick={() => {
-              setSettingsOpen(false);
-              setControlOpen(true);
-            }}
-          >
-            Control Center
-          </Button>
-          <IconButton
-            label="Workspace settings"
-            onClick={() => {
-              setControlOpen(false);
-              setSettingsOpen(true);
-              setView('settings');
-            }}
-          >
-            <SettingsIcon className="h-4 w-4" />
-          </IconButton>
-        </header>
-
-        <div className="flex min-h-0 flex-1">
-          <main className="min-w-0 flex-1 overflow-auto">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${workspace}-${business}-${settingsOpen}-${controlOpen}`}
-                {...motion}
-                className="min-h-full"
-              >
-                {canvas}
-              </motion.div>
-            </AnimatePresence>
-          </main>
-
-          {inspectorOpen ? (
-            <aside className="hidden w-80 shrink-0 overflow-auto border-l border-line bg-surface-workspace xl:block">
-              <WorkflowPanel />
-              <WorkspaceInspector
-                workspace={workspace}
-                business={business}
-                customers={customers.length}
-                orders={orders.length}
-                attention={attention}
-                onOpenBusiness={(id) => goTo('business', id)}
-              />
-            </aside>
-          ) : null}
-        </div>
-
-        <footer className="flex items-center justify-between gap-3 border-t border-line bg-surface-panel px-3 py-2 text-meta text-ink-muted">
+            ))}
+          </ContextBar>
+        ) : undefined
+      }
+      inspector={
+        inspectorOpen && !controlOpen ? (
+          <InspectorPanel>
+            <WorkflowPanel />
+            <WorkspaceInspector
+              workspace={workspace}
+              business={business}
+              customers={customers.length}
+              orders={orders.length}
+              attention={attention}
+              onOpenBusiness={(id) => goTo('business', id)}
+            />
+          </InspectorPanel>
+        ) : undefined
+      }
+      statusBar={
+        <StatusBar>
           <span>
             {currentMember.user.fullName} · {currentMember.role}
           </span>
@@ -321,24 +426,22 @@ export function StudioShell() {
             </Badge>
             T2 sync queue {pendingOps}
           </span>
-        </footer>
-
-        <nav
-          aria-label="Mobile workspaces"
-          className="grid grid-cols-6 border-t border-line bg-surface-elevated lg:hidden"
-        >
+        </StatusBar>
+      }
+      mobileNav={
+        <nav aria-label="Mobile workspaces" className="grid grid-cols-6 border-t border-line bg-surface-elevated lg:hidden">
           {STUDIO_WORKSPACES.map((item) => {
-            const Icon = ICONS[item.id];
-            const active = item.id === workspace && !settingsOpen;
+            const Icon = ICONS[item.id] || LayoutDashboard;
+            const active = item.id === workspace && !settingsOpen && !controlOpen;
             return (
               <button
                 key={item.id}
                 type="button"
-                className={cn('sf-focus-ring flex flex-col items-center gap-1 py-2 text-[10px]', active ? 'text-action-primary' : 'text-ink-muted')}
-                onClick={() => {
-                  setSettingsOpen(false);
-                  goTo(item.id);
-                }}
+                className={cn(
+                  'sf-focus-ring flex min-h-12 flex-col items-center justify-center gap-1 text-[10px]',
+                  active ? 'text-action-primary' : 'text-ink-muted'
+                )}
+                onClick={() => goTo(item.id)}
               >
                 <Icon className="h-4 w-4" />
                 {item.label.split(' ')[0]}
@@ -346,8 +449,20 @@ export function StudioShell() {
             );
           })}
         </nav>
-      </div>
-
+      }
+      toasts={<ToastRegion toasts={toasts.slice(-3)} />}
+    >
+      <WorkspaceCanvas>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${workspace}-${business}-${settingsOpen}-${controlOpen}`}
+            {...motionPreset}
+            className="min-h-full"
+          >
+            {canvas}
+          </motion.div>
+        </AnimatePresence>
+      </WorkspaceCanvas>
       <div className="xl:hidden">
         <Sheet open={inspectorOpen} title="Inspector" onClose={() => setInspectorOpen(false)}>
           <WorkspaceInspector
@@ -360,8 +475,7 @@ export function StudioShell() {
           />
         </Sheet>
       </div>
-
-      <CommandMenu open={commandOpen} onClose={() => setCommandOpen(false)} commands={commands} />
-    </div>
+      <CommandPalette open={commandOpen} onClose={() => setCommandOpen(false)} commands={commands} />
+    </AtelierShell>
   );
 }

@@ -35,6 +35,7 @@ export function ControlCenter({ onExit }: { onExit: () => void }) {
       const st = await controlGet('/control/status', access);
       setStatus(st);
       setPlane('overview');
+      setPayload(st);
     } catch (err) {
       setToken(null);
       setStatus(null);
@@ -73,9 +74,9 @@ export function ControlCenter({ onExit }: { onExit: () => void }) {
     <AtelierCanvas>
       <Workroom>
         <PageHeader
-          kicker="AGBOFA Platform"
+          kicker="Platform command room"
           title="Control Center"
-          description="Operator command room. Tenant workspace Settings is not this plane. Numbers come from /control APIs only."
+          description="Governance plane. Tenant workspace Settings is not this room. Numbers come from /control APIs only."
           actions={
             <Button variant="secondary" onClick={onExit}>
               Return to atelier
@@ -114,7 +115,17 @@ export function ControlCenter({ onExit }: { onExit: () => void }) {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </Field>
-              {error ? <ErrorState title="Access denied" description={error} /> : null}
+              {error ? (
+                <ErrorState
+                  title="Access denied"
+                  description={error}
+                  action={
+                    <Button variant="secondary" size="sm" onClick={() => setError(null)}>
+                      Dismiss
+                    </Button>
+                  }
+                />
+              ) : null}
               <Button type="submit" loading={busy}>
                 Sign in
               </Button>
@@ -136,7 +147,7 @@ export function ControlCenter({ onExit }: { onExit: () => void }) {
                   key={id}
                   type="button"
                   onClick={() => void load(id)}
-                  className={`sf-focus-ring flex w-full rounded-sf px-3 py-2 text-left text-label ${
+                  className={`sf-focus-ring flex min-h-10 w-full rounded-sf px-3 py-2 text-left text-label ${
                     plane === id ? 'bg-action-primary text-ink-inverse' : 'hover:bg-action-secondary'
                   }`}
                 >
@@ -152,8 +163,17 @@ export function ControlCenter({ onExit }: { onExit: () => void }) {
                   <Badge tone="neutral">Postgres not verified</Badge>
                 </div>
               ) : null}
-              {busy ? <LoadingState label="Loading platform state..." /> : null}
-              {error ? <ErrorState description={error} /> : null}
+              {busy ? <LoadingState label="Loading platform state…" /> : null}
+              {error ? (
+                <ErrorState
+                  description={error}
+                  action={
+                    <Button variant="secondary" size="sm" onClick={() => void load(plane)}>
+                      Retry plane
+                    </Button>
+                  }
+                />
+              ) : null}
               {payload ? (
                 <pre className="mt-3 overflow-auto rounded-sf bg-surface-workspace p-4 font-numeric text-meta text-ink-secondary">
                   {JSON.stringify(payload, null, 2)}

@@ -62,6 +62,43 @@ export const BUSINESS_SURFACES: Array<{ id: BusinessSurface; label: string; view
   { id: 'reports', label: 'Reports', view: 'reports' },
 ];
 
+/** Canonical nav grammar. Does not invent Garments or Delivery destinations. */
+export const NAV_SECTIONS: Array<{
+  id: 'atelier' | 'operations' | 'workspace' | 'platform';
+  label: string;
+  items: Array<{ id: string; label: string; workspace?: StudioWorkspaceId; business?: BusinessSurface }>;
+}> = [
+  {
+    id: 'atelier',
+    label: 'Atelier',
+    items: STUDIO_WORKSPACES.filter((item) => item.id !== 'business').map((item) => ({
+      id: item.id,
+      label: item.label,
+      workspace: item.id,
+    })),
+  },
+  {
+    id: 'operations',
+    label: 'Operations',
+    items: BUSINESS_SURFACES.map((surface) => ({
+      id: `business:${surface.id}`,
+      label: surface.label,
+      workspace: 'business' as const,
+      business: surface.id,
+    })),
+  },
+  {
+    id: 'workspace',
+    label: 'Workspace',
+    items: [{ id: 'settings', label: 'Settings' }],
+  },
+  {
+    id: 'platform',
+    label: 'Platform',
+    items: [{ id: 'control', label: 'Control Center' }],
+  },
+];
+
 export function workspaceFromView(view: AppView): StudioWorkspaceId {
   switch (view) {
     case 'dashboard':

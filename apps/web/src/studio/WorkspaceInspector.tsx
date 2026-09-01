@@ -23,6 +23,7 @@ export function WorkspaceInspector({
       <div>
         <p className="text-meta uppercase tracking-[0.16em] text-ink-muted">Inspector</p>
         <h2 className="text-heading-sm text-ink-primary">Context</h2>
+        <p className="mt-1 text-meta text-ink-muted">Supporting information. Not a second domain authority.</p>
       </div>
 
       {workspace === 'command' ? (

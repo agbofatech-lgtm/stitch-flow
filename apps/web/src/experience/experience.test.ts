@@ -8,6 +8,7 @@ import { cn } from './lib/cn';
 import { Button } from './primitives/Button';
 import { Field, Input } from './primitives/forms';
 import { DataTable } from './primitives/DataTable';
+import { ErrorState } from './primitives/feedback';
 import { motionDuration, prefersReducedMotion } from './motion/motion';
 import { ENTITY_CONFLICT_POLICY } from '../shared/persistence/conflict';
 
@@ -69,4 +70,42 @@ test('experience layer does not import protected engines', () => {
 test('T2 domain-merge policy remains after T4', () => {
   assert.equal(ENTITY_CONFLICT_POLICY.measurement, 'domain-merge');
   assert.equal(ENTITY_CONFLICT_POLICY.order, 'domain-merge');
+});
+
+test('command palette groups and filters without inventing destinations', () => {
+  const { filterCommands, groupCommands } = require('./shell/commands') as typeof import('./shell/commands');
+  const commands = [
+    { id: 'a', label: 'Atelier Home', group: 'Navigate', onSelect: () => undefined },
+    { id: 'b', label: 'Orders', group: 'Operations', onSelect: () => undefined },
+    { id: 'c', label: 'Control Center', group: 'Platform', onSelect: () => undefined },
+  ];
+  const grouped = groupCommands(commands);
+  assert.deepEqual(grouped.map((item) => item.group), ['Navigate', 'Operations', 'Platform']);
+  assert.equal(filterCommands(commands, 'control')[0].id, 'c');
+  assert.equal(filterCommands(commands, 'garment-delivery-invented').length, 0);
+});
+
+test('atelier shell exposes skip link and workspace main', () => {
+  const { AtelierShell } = require('./shell/AtelierShell') as typeof import('./shell/AtelierShell');
+  const html = renderToStaticMarkup(
+    createElement(AtelierShell, {
+      navigation: createElement('nav', null, 'nav'),
+      header: createElement('header', null, 'header'),
+      children: 'canvas',
+    })
+  );
+  assert.match(html, /Skip to workspace/);
+  assert.match(html, /id="workspace-main"/);
+  assert.match(html, /data-plane="atelier"/);
+});
+
+test('error state can include recovery action', () => {
+  const html = renderToStaticMarkup(
+    createElement(ErrorState, {
+      description: 'Plane request failed',
+      action: createElement('button', { type: 'button' }, 'Retry'),
+    })
+  );
+  assert.match(html, /Retry/);
+  assert.match(html, /role="alert"/);
 });

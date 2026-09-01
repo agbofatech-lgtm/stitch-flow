@@ -77,6 +77,7 @@
   --sf-surface-workspace: #132026;
   --sf-surface-panel: #1a2a31;
   --sf-surface-elevated: #21353e;
+  --sf-surface-floating: #27414b;
   --sf-text-primary: #f8fbfc;
   --sf-text-secondary: #d9e5ea;
   --sf-text-muted: #93a4ad;
@@ -84,12 +85,45 @@
   --sf-action-primary: #3aa0bf;
   --sf-action-primary-hover: #5bb4ce;
   --sf-action-secondary: #1e333c;
+  --sf-border-subtle: #243940;
   --sf-border-default: #2c4550;
   --sf-border-strong: #3d5c69;
   --sf-focus-ring: #5bb4ce;
+  --sf-disabled: #5a6d75;
   --sf-elevation-sm: 0 1px 2px rgb(0 0 0 / 0.4);
   --sf-elevation-md: 0 8px 24px rgb(0 0 0 / 0.4);
   --sf-elevation-lg: 0 24px 48px rgb(0 0 0 / 0.55);
+}
+
+.sf-atelier-atmosphere {
+  background:
+    radial-gradient(1200px 420px at 0% -10%, rgb(15 110 140 / 0.07), transparent 58%),
+    radial-gradient(900px 360px at 100% 0%, rgb(183 168 148 / 0.16), transparent 52%),
+    var(--sf-surface-canvas);
+}
+
+.sf-nav-rail {
+  background:
+    linear-gradient(180deg, var(--sf-surface-elevated), var(--sf-surface-panel));
+}
+
+.sf-skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -3rem;
+  z-index: 80;
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-action-primary);
+  color: var(--sf-text-inverse);
+  padding: 0.5rem 0.75rem;
+}
+
+.sf-skip-link:focus {
+  top: 0.75rem;
+}
+
+[data-plane='control'] {
+  --sf-font-display: Inter, system-ui, sans-serif;
 }
 
 .sf-focus-ring:focus-visible {

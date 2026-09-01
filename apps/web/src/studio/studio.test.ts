@@ -6,6 +6,7 @@ import {
   viewForWorkspace,
   workspaceFromView,
   STUDIO_WORKSPACES,
+  NAV_SECTIONS,
 } from './workspaces';
 
 test('six primary studio workspaces exist', () => {
@@ -43,4 +44,25 @@ test('design workspace still hosts DesignStudio without a new router', () => {
   const shell = readFileSync(new URL('./StudioShell.tsx', import.meta.url), 'utf8');
   assert.match(shell, /workspace === 'design'/);
   assert.equal(shell.includes('createBrowserRouter'), false);
+});
+
+test('navigation uses canonical rooms and does not invent garments or delivery', () => {
+  assert.deepEqual(
+    NAV_SECTIONS.map((section) => section.id),
+    ['atelier', 'operations', 'workspace', 'platform']
+  );
+  const labels = NAV_SECTIONS.flatMap((section) => section.items.map((item) => item.label.toLowerCase()));
+  assert.equal(labels.includes('garments'), false);
+  assert.equal(labels.includes('delivery'), false);
+  assert.ok(labels.includes('client studio'));
+  assert.ok(labels.includes('control center'));
+});
+
+test('studio shell composes atelier primitives without engines', () => {
+  const shell = readFileSync(new URL('./StudioShell.tsx', import.meta.url), 'utf8');
+  assert.match(shell, /AtelierShell/);
+  assert.match(shell, /AtelierNavigation/);
+  assert.match(shell, /CommandPalette/);
+  assert.match(shell, /WorkspaceHeader/);
+  assert.equal(shell.includes('patternEngine'), false);
 });
