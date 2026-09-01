@@ -12,8 +12,29 @@ export class RemoteAuthorizationBlockedError extends Error {
 }
 
 export type RemoteTransport = {
-  push(op: SyncOperation): Promise<{ remoteId?: string; remoteVersion: number }>;
+  push(op: SyncOperation): Promise<{
+    remoteId?: string;
+    remoteVersion: number;
+    remotePayload?: Record<string, unknown>;
+    status?: 'acknowledged' | 'conflict';
+  }>;
 };
+
+export class SyncAuthBlockedError extends Error {
+  readonly status = 401;
+  constructor(message: string) {
+    super(message);
+    this.name = 'SyncAuthBlockedError';
+  }
+}
+
+export class SyncScopeQuarantinedError extends Error {
+  readonly status = 403;
+  constructor(message: string) {
+    super(message);
+    this.name = 'SyncScopeQuarantinedError';
+  }
+}
 
 export const blockedBusinessApiTransport: RemoteTransport = {
   async push() {
@@ -27,8 +48,12 @@ export class SyncEngine {
   constructor(
     private readonly store: LocalStore,
     private readonly connectivity: ConnectivityMonitor,
-    private readonly transport: RemoteTransport = blockedBusinessApiTransport
+    private transport: RemoteTransport = blockedBusinessApiTransport
   ) {}
+
+  setTransport(transport: RemoteTransport) {
+    this.transport = transport;
+  }
 
   async processQueue() {
     const operations = (await this.store.listOperations()).filter(
@@ -111,18 +136,31 @@ export class SyncEngine {
         await this.store.putOperation({ ...next, status: 'acked' });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
+        const statusCode = (error as { status?: number }).status;
+        const opStatus =
+          statusCode === 401 || error instanceof SyncAuthBlockedError
+            ? 'blocked_auth'
+            : statusCode === 403 || error instanceof SyncScopeQuarantinedError
+              ? 'quarantined'
+              : statusCode === 409
+                ? 'conflict'
+                : 'failed';
         await this.store.putOperation({
           ...next,
-          status: 'failed',
+          status: opStatus,
           lastError: message,
         });
         const record = await this.store.getRecord(next.entity, next.entityLocalId);
         if (record && record.metadata.syncStatus !== 'conflict') {
           await this.store.putRecord({
             ...record,
-            metadata: { ...record.metadata, syncStatus: 'failed' },
+            metadata: {
+              ...record.metadata,
+              syncStatus: opStatus === 'conflict' ? 'conflict' : opStatus === 'blocked_auth' ? 'blocked_auth' : opStatus === 'quarantined' ? 'quarantined' : 'failed',
+            },
           });
         }
+        if (opStatus === 'blocked_auth') break;
       }
     }
 

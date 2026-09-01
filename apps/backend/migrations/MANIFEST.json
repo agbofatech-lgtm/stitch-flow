@@ -3,7 +3,8 @@
   "ledgerTable": "schema_migrations",
   "active": [
     "001_init_extensions.sql",
-    "007_shop_authority.sql"
+    "007_shop_authority.sql",
+    "008_shop_sync.sql"
   ],
   "historicalEmpty": [
     "002_create_core_tables.sql",

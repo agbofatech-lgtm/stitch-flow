@@ -21,6 +21,26 @@ function handle(err: unknown, res: Response, next: NextFunction) {
   next(err);
 }
 
+shopRoutes.post('/sync/operations', async (req, res, next) => {
+  try {
+    const ctx = req.platformContext!;
+    const ack = await shopOf(req).applySyncOperation(ctx, req.shopWorkspaceId as string, req.body || {});
+    res.status(ack.status === 'conflict' ? 409 : 200).json(ack);
+  } catch (err) {
+    handle(err, res, next);
+  }
+});
+
+shopRoutes.get('/sync/changes', async (req, res, next) => {
+  try {
+    const ctx = req.platformContext!;
+    const cursor = typeof req.query.cursor === 'string' ? req.query.cursor : undefined;
+    res.json(await shopOf(req).listSyncChanges(ctx, req.shopWorkspaceId as string, cursor));
+  } catch (err) {
+    handle(err, res, next);
+  }
+});
+
 shopRoutes.get('/customers', async (req, res, next) => {
   try {
     const ctx = req.platformContext!;

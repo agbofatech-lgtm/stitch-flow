@@ -35,17 +35,27 @@ describe('SAC-4 shop PostgreSQL persistence', () => {
 
   test('fresh migration is idempotent and ledger matches canonical files', async () => {
     const again = await applyShopMigrations(pool, defaultMigrationsDir());
-    expect(again.applied).toEqual(['001_init_extensions.sql', '007_shop_authority.sql']);
+    expect(again.applied).toEqual([
+      '001_init_extensions.sql',
+      '007_shop_authority.sql',
+      '008_shop_sync.sql',
+    ]);
     const tables = await pool.query(
       `SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename LIKE 'shop_%' ORDER BY tablename`
     );
     expect(tables.rows.map((row) => row.tablename)).toEqual([
+      'shop_change_log',
       'shop_customers',
       'shop_orders',
+      'shop_sync_operations',
       'shop_trusted_artifacts',
     ]);
     const ledger = await pool.query(`SELECT id FROM schema_migrations ORDER BY id`);
-    expect(ledger.rows.map((row) => row.id)).toEqual(['001_init_extensions.sql', '007_shop_authority.sql']);
+    expect(ledger.rows.map((row) => row.id)).toEqual([
+      '001_init_extensions.sql',
+      '007_shop_authority.sql',
+      '008_shop_sync.sql',
+    ]);
   });
 
   test('postgres mode without a URL fails closed (no memory fallback)', async () => {

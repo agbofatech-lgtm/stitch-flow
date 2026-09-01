@@ -7,7 +7,9 @@ export type SyncStatus =
   | 'syncing'
   | 'conflict'
   | 'failed'
-  | 'deleted';
+  | 'deleted'
+  | 'blocked_auth'
+  | 'quarantined';
 
 export type ConnectivityState = 'online' | 'offline' | 'syncing' | 'degraded' | 'failed';
 
@@ -23,7 +25,8 @@ export type EntityName =
   | 'invoice'
   | 'payment'
   | 'user'
-  | 'workspace';
+  | 'workspace'
+  | 'trustedArtifact';
 
 export type SyncMetadata = {
   localId: string;
@@ -53,7 +56,7 @@ export type SyncOperation = {
   expectedVersion: number;
   createdAt: string;
   attemptCount: number;
-  status: 'pending' | 'syncing' | 'acked' | 'failed' | 'conflict';
+  status: 'pending' | 'syncing' | 'acked' | 'failed' | 'conflict' | 'blocked_auth' | 'quarantined';
   lastError?: string;
 };
 

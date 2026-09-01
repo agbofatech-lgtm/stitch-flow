@@ -180,6 +180,7 @@ export function createRepositories(store: LocalStore) {
     payment: new EntityRepository(store, 'payment'),
     user: new EntityRepository(store, 'user'),
     workspace: new EntityRepository(store, 'workspace'),
+    trustedArtifact: new EntityRepository(store, 'trustedArtifact'),
   };
 }
 

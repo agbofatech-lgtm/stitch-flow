@@ -15,6 +15,8 @@ export type ShopCustomer = {
   notes: string;
   createdAt: string;
   updatedAt: string;
+  version: number;
+  deletedAt: string | null;
 };
 
 export type ShopStage = {
@@ -43,6 +45,8 @@ export type ShopOrder = {
   productionStages: ShopStage[];
   createdAt: string;
   updatedAt: string;
+  version: number;
+  deletedAt: string | null;
 };
 
 export type ShopTrustedArtifact = {

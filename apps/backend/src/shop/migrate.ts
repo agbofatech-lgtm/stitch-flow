@@ -3,7 +3,11 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import type { Pool } from 'pg';
 
-export const SHOP_MIGRATION_FILES = ['001_init_extensions.sql', '007_shop_authority.sql'] as const;
+export const SHOP_MIGRATION_FILES = [
+  '001_init_extensions.sql',
+  '007_shop_authority.sql',
+  '008_shop_sync.sql',
+] as const;
 
 function checksum(sql: string) {
   return createHash('sha256').update(sql).digest('hex');

@@ -4,7 +4,7 @@ const { readFileSync } = require('fs');
 const { join } = require('path');
 const { Pool } = require('pg');
 
-const FILES = ['001_init_extensions.sql', '007_shop_authority.sql'];
+const FILES = ['001_init_extensions.sql', '007_shop_authority.sql', '008_shop_sync.sql'];
 
 async function main() {
   const url = process.env.SHOP_DATABASE_URL || process.env.DATABASE_URL;

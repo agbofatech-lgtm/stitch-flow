@@ -12,3 +12,12 @@ export {
   dualReadById,
 } from './legacyMirror';
 export { readTrustedExecutionById } from './trustedArtifactStore';
+export {
+  createShopCustomerLocal,
+  createShopOrderLocal,
+  putMeasurementSnapshotLocal,
+  transitionProductionLocal,
+  appendTrustedArtifactLocal,
+} from './shopSyncFacade';
+export { setShopSyncSession, getShopSyncSession, shopSyncTransport } from './shopSyncTransport';
+export { runShopSyncCycle } from './shopSyncCoordinator';
