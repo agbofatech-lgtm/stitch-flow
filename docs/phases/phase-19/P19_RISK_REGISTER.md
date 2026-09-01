@@ -14,3 +14,9 @@
 | P19-R10 | Secrets in client for future PSP | STOP-P19-K | Ports on server |
 | P19-R11 | Implement Stripe before constitution | STOP-P19-G | P19.6 locked |
 | P19-R12 | Treat glossary Tenant as live isolation | STOP-P19-C | Runtime Tenant ABSENT |
+| P19-R13 | File JSON mistaken for Postgres | P19.10 | Classified NOT VERIFIED |
+| P19-R14 | FeatureGate treated as server law | ADR-006 | UX_ONLY; server access/check is law |
+| P19-R15 | Test webhook as PSP certification | P19.5/P19.10 | LIVE PSP DEFERRED |
+| P19-R16 | CORS origin:true in production | CONDITIONAL | Owner/ops must tighten |
+| P19-R17 | No logout/refresh denylist | UNKNOWN | Not invented |
+| P19-R18 | Derived entitlements vs stored rows | FACT | Recover via subscription+plan |

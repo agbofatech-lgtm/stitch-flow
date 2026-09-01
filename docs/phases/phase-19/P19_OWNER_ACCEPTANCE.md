@@ -20,7 +20,7 @@ Owner / date: __________________
 
 ---
 
-## B. Phase 19 completion (LOCKED — do not use yet)
+## B. Phase 19 completion (Owner only — agents must not tick)
 
 ```
 OWNER ACCEPTANCE — PHASE 19 COMMERCIAL PLATFORM
@@ -29,5 +29,6 @@ OWNER ACCEPTANCE — PHASE 19 COMMERCIAL PLATFORM
 [ ] REJECT
 
 PHASE 19 TAG: NOT CREATED
-COMMERCIAL PLATFORM: NOT READY
+COMMERCIAL PLATFORM: CONDITIONALLY CERTIFIED — PENDING OWNER
+PHASE 20: LOCKED
 ```

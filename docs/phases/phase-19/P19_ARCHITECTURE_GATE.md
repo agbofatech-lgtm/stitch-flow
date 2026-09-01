@@ -9,7 +9,8 @@
 | P19.4+P19.5 Entitlement/billing | **IMPLEMENTED — CONDITIONAL** |
 | P19.6+P19.7 Operations + Control Center | **IMPLEMENTED — CONDITIONAL** |
 | P19.8+P19.9 Persistence + runtime | **IMPLEMENTED — CONDITIONAL** (file durability; Postgres not verified; PSP deferred) |
-| P19.10–P19.11 | **LOCKED** |
+| P19.10 Production hardening | **IMPLEMENTED — CONDITIONAL** (`05528f2f268a0a08e2b4e877466ac5200048d06b`) |
+| P19.11 Independent certification | **COMPLETE — CONDITIONALLY CERTIFIED** (Owner pending; no tag) |
 | Billing / PSP / subscription tables | **NOT STARTED** |
 | Trusted Core | **UNTOUCHED** |
 | Phase 18 conditions | **INHERITED** |
