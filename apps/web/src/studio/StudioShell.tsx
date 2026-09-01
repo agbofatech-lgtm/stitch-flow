@@ -51,7 +51,8 @@ import {
   type NavSection,
   type ToastMessage,
 } from '../experience';
-import { motionOrInstant, motionPresets } from '../experience/motion/motion';
+import { motionOrInstant, workspacePreset } from '../experience/motion/motion';
+import { registerAtelierRoomHandler } from '../experience/atelier/navigate';
 import { getDataAuthorityRuntime } from '../shared/persistence';
 import type { ConnectivityState } from '../shared/persistence/types';
 import { BRAND } from '../config/brand';
@@ -115,6 +116,7 @@ export function StudioShell() {
   const [connectivity, setConnectivity] = useState<ConnectivityState>('offline');
   const [pendingOps, setPendingOps] = useState(0);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [journeyFrom, setJourneyFrom] = useState(workspace);
 
   useEffect(() => {
     if (workspace === 'measurements') return;
@@ -144,6 +146,8 @@ export function StudioShell() {
     });
   }, []);
 
+  useEffect(() => registerAtelierRoomHandler((room) => goTo(room)));
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
@@ -156,6 +160,7 @@ export function StudioShell() {
   }, []);
 
   function goTo(next: StudioWorkspaceId, nextBusiness: BusinessSurface = business) {
+    setJourneyFrom(workspace);
     setWorkspace(next);
     setNavOpen(false);
     setSettingsOpen(false);
@@ -316,7 +321,7 @@ export function StudioShell() {
     }),
   }));
 
-  const motionPreset = motionOrInstant(motionPresets.panel);
+  const motionPreset = motionOrInstant(workspacePreset(journeyFrom, workspace));
 
   return (
     <AtelierShell
@@ -478,6 +483,7 @@ export function StudioShell() {
         <AnimatePresence mode="wait">
           <motion.div
             key={`${workspace}-${business}-${settingsOpen}-${controlOpen}`}
+            data-motion-category="workspace"
             {...motionPreset}
             className="min-h-full"
           >

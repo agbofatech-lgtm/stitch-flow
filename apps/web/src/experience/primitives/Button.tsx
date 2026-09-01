@@ -37,7 +37,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        'sf-focus-ring inline-flex items-center justify-center gap-2 rounded-sf font-semibold transition duration-fast ease-standard sf-motion-safe',
+        'sf-focus-ring sf-micro-press inline-flex items-center justify-center gap-2 rounded-sf font-semibold transition duration-fast ease-standard sf-motion-safe',
         variants[variant],
         sizes[size],
         (disabled || loading) && 'cursor-not-allowed',

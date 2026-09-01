@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   AtelierConfidence,
+  AtelierMilestone,
   AtelierPage,
   AtelierThread,
   Badge,
@@ -187,8 +188,17 @@ export function MeasurementWorkspace() {
         </Select>
       </Panel>
 
-      {message ? <p className="text-body text-status-success">{message}</p> : null}
-      {error ? <p className="text-body text-status-danger">{error}</p> : null}
+      <AtelierMilestone active={Boolean(message && /frozen|fingerprint/i.test(message))}>
+        {message}
+      </AtelierMilestone>
+      {message && !/frozen|fingerprint/i.test(message) ? (
+        <p className="text-body text-status-success">{message}</p>
+      ) : null}
+      {error ? (
+        <p role="alert" className="text-body text-status-danger">
+          {error}
+        </p>
+      ) : null}
       {rows[0] ? (
         <p className="text-meta text-ink-muted">
           Engine range observation for first profile ({patternKind}):{' '}

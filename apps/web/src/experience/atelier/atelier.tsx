@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '../lib/cn';
 import { PageHeader, Workroom } from '../layout/layout';
 import { Badge } from '../primitives/feedback';
+import { motionOrInstant, motionPresets } from '../motion/motion';
 
 export type ConfidenceState =
   | 'local'
@@ -56,27 +58,59 @@ export function AtelierThread({
   client?: string | null;
   order?: string | null;
 }) {
+  const key = `${room}|${client || ''}|${order || ''}`;
   return (
-    <p className="text-meta text-ink-secondary" data-atelier-thread="true">
-      <span className="text-ink-muted">{room}</span>
-      {client ? (
-        <>
-          <span aria-hidden="true"> · </span>
-          <span>Client {client}</span>
-        </>
-      ) : (
-        <>
-          <span aria-hidden="true"> · </span>
-          <span>No client selected</span>
-        </>
-      )}
-      {order ? (
-        <>
-          <span aria-hidden="true"> · </span>
-          <span className="font-numeric">{order}</span>
-        </>
+    <AnimatePresence mode="wait">
+      <motion.p
+        key={key}
+        className="text-meta text-ink-secondary"
+        data-atelier-thread="true"
+        data-motion-category="contextual"
+        {...motionOrInstant(motionPresets.contextual)}
+      >
+        <span className="text-ink-muted">{room}</span>
+        {client ? (
+          <>
+            <span aria-hidden="true"> · </span>
+            <span>Client {client}</span>
+          </>
+        ) : (
+          <>
+            <span aria-hidden="true"> · </span>
+            <span>No client selected</span>
+          </>
+        )}
+        {order ? (
+          <>
+            <span aria-hidden="true"> · </span>
+            <span className="font-numeric">{order}</span>
+          </>
+        ) : null}
+      </motion.p>
+    </AnimatePresence>
+  );
+}
+
+export function AtelierMilestone({
+  active,
+  children,
+}: {
+  active: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <AnimatePresence>
+      {active ? (
+        <motion.div
+          role="status"
+          data-motion-category="milestone"
+          className="rounded-sf-lg border border-action-primary/25 bg-action-secondary p-4 text-body text-ink-primary"
+          {...motionOrInstant(motionPresets.milestone)}
+        >
+          {children}
+        </motion.div>
       ) : null}
-    </p>
+    </AnimatePresence>
   );
 }
 

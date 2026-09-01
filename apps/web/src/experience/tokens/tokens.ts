@@ -101,13 +101,16 @@ export const breakpoint = {
 
 export const duration = {
   instant: 'var(--sf-duration-instant)',
+  micro: 'var(--sf-duration-micro)',
   fast: 'var(--sf-duration-fast)',
   base: 'var(--sf-duration-base)',
   slow: 'var(--sf-duration-slow)',
+  milestone: 'var(--sf-duration-milestone)',
 } as const;
 
 export const easing = {
   standard: 'var(--sf-ease-standard)',
+  enter: 'var(--sf-ease-enter)',
   emphasize: 'var(--sf-ease-emphasize)',
   exit: 'var(--sf-ease-exit)',
 } as const;

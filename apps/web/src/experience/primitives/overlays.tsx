@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '../lib/cn';
+import { motionOrInstant, motionPresets } from '../motion/motion';
 
 export function Tooltip({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -92,34 +94,44 @@ export function Dialog({
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  const dialogMotion = motionOrInstant(motionPresets.modal);
+  const overlayMotion = motionOrInstant(motionPresets.overlay);
 
   return (
-    <div className="fixed inset-0 z-modal flex items-end justify-center p-0 sm:items-center sm:p-4">
-      <button
-        type="button"
-        aria-label="Close dialog overlay"
-        className="absolute inset-0 bg-[var(--sf-overlay-dim)]"
-        onClick={onClose}
-      />
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={headingId}
-        tabIndex={-1}
-        className={cn(
-          'sf-focus-ring relative z-modal w-full rounded-t-sf-workspace bg-surface-elevated p-6 shadow-sf-lg sm:rounded-sf-workspace',
-          size === 'lg' ? 'max-w-2xl' : 'max-w-lg',
-          'max-h-[92vh] overflow-hidden'
-        )}
-      >
-        <h2 id={headingId} className="font-display text-heading text-ink-primary">
-          {title}
-        </h2>
-        <div className="mt-4 max-h-[75vh] overflow-y-auto">{children}</div>
-      </div>
-    </div>
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className="fixed inset-0 z-modal flex items-end justify-center p-0 sm:items-center sm:p-4"
+          data-motion-category="contextual"
+          {...overlayMotion}
+        >
+          <button
+            type="button"
+            aria-label="Close dialog overlay"
+            className="absolute inset-0 bg-[var(--sf-overlay-dim)]"
+            onClick={onClose}
+          />
+          <motion.div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={headingId}
+            tabIndex={-1}
+            className={cn(
+              'sf-focus-ring relative z-modal w-full rounded-t-sf-workspace bg-surface-elevated p-6 shadow-sf-lg sm:rounded-sf-workspace',
+              size === 'lg' ? 'max-w-2xl' : 'max-w-lg',
+              'max-h-[92vh] overflow-hidden'
+            )}
+            {...dialogMotion}
+          >
+            <h2 id={headingId} className="font-display text-heading text-ink-primary">
+              {title}
+            </h2>
+            <div className="mt-4 max-h-[75vh] overflow-y-auto">{children}</div>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }
 
@@ -143,21 +155,32 @@ export function Sheet({
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  if (!open) return null;
+  const sheetMotion = motionOrInstant(motionPresets.sheet);
+  const overlayMotion = motionOrInstant(motionPresets.overlay);
 
   return (
-    <div className="fixed inset-0 z-modal">
-      <button type="button" aria-label="Close sheet overlay" className="absolute inset-0 bg-ink-primary/40" onClick={onClose} />
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className="absolute inset-y-0 right-0 w-full max-w-md overflow-auto bg-surface-elevated p-6 shadow-sf-lg"
-      >
-        <h2 className="text-heading text-ink-primary">{title}</h2>
-        <div className="mt-4">{children}</div>
-      </aside>
-    </div>
+    <AnimatePresence>
+      {open ? (
+        <motion.div className="fixed inset-0 z-modal" data-motion-category="workspace" {...overlayMotion}>
+          <button
+            type="button"
+            aria-label="Close sheet overlay"
+            className="absolute inset-0 bg-[var(--sf-overlay-dim)]"
+            onClick={onClose}
+          />
+          <motion.aside
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
+            className="absolute inset-y-0 right-0 w-full max-w-md overflow-auto bg-surface-elevated p-6 shadow-sf-lg"
+            {...sheetMotion}
+          >
+            <h2 className="text-heading text-ink-primary">{title}</h2>
+            <div className="mt-4">{children}</div>
+          </motion.aside>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }
 

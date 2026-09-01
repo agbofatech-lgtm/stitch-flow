@@ -1,8 +1,8 @@
 /**
- * SER-F2 visual lab: headless screenshot of the REAL product (index.html), not experience-preview.
+ * SER visual lab: REAL product index.html, never experience-preview.html.
  */
 import { spawn } from 'node:child_process';
-import { mkdirSync, existsSync } from 'node:fs';
+import { existsSync, mkdirSync, renameSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,12 +24,8 @@ if (!browser) {
 }
 
 const url = process.env.SER_F2_URL || 'http://127.0.0.1:5173/';
-const shots = [
-  { file: 'floor-1280.png', size: '1280,800' },
-  { file: 'floor-390.png', size: '390,844' },
-];
 
-function shot(file, size) {
+function shot(file, size, extra = []) {
   return new Promise((resolve, reject) => {
     const out = join(outDir, file);
     const child = spawn(
@@ -40,19 +36,34 @@ function shot(file, size) {
         `--window-size=${size}`,
         '--hide-scrollbars',
         `--screenshot=${out}`,
-        '--virtual-time-budget=5000',
+        '--virtual-time-budget=6000',
+        ...extra,
         url,
       ],
-      { stdio: 'inherit' }
+      { stdio: 'inherit', cwd: outDir }
     );
     child.on('exit', (code) => {
-      if (code === 0) resolve(out);
-      else reject(new Error(`browser exit ${code}`));
+      const fallback = join(outDir, 'screenshot.png');
+      if (existsSync(fallback) && !existsSync(out)) {
+        renameSync(fallback, out);
+      }
+      if (code === 0 || existsSync(out)) resolve(out);
+      else reject(new Error(`browser exit ${code} missing ${file}`));
     });
   });
 }
 
-for (const item of shots) {
-  await shot(item.file, item.size);
-  console.log('captured', item.file);
+await shot('floor-1280.png', '1280,800');
+console.log('captured floor-1280.png');
+try {
+  await shot('floor-390.png', '390,844');
+  console.log('captured floor-390.png');
+} catch (err) {
+  console.warn('390 failed', err instanceof Error ? err.message : err);
+}
+try {
+  await shot('floor-1280-reduced.png', '1280,800', ['--force-prefers-reduced-motion']);
+  console.log('captured floor-1280-reduced.png');
+} catch (err) {
+  console.warn('reduced-motion shot failed', err instanceof Error ? err.message : err);
 }

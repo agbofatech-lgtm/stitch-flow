@@ -71,10 +71,13 @@
   --sf-z-toast: 70;
 
   --sf-duration-instant: 80ms;
+  --sf-duration-micro: 100ms;
   --sf-duration-fast: 140ms;
   --sf-duration-base: 220ms;
-  --sf-duration-slow: 360ms;
+  --sf-duration-slow: 280ms;
+  --sf-duration-milestone: 320ms;
   --sf-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --sf-ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
   --sf-ease-emphasize: cubic-bezier(0.2, 0, 0, 1.2);
   --sf-ease-exit: cubic-bezier(0.4, 0, 1, 1);
 }
@@ -157,9 +160,27 @@
   outline-offset: 2px;
 }
 
+.sf-micro-press {
+  transition: transform var(--sf-duration-micro) var(--sf-ease-standard);
+}
+
+.sf-micro-press:active {
+  transform: scale(0.98);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sf-motion-safe {
     animation: none !important;
     transition: none !important;
+  }
+
+  .sf-micro-press,
+  .sf-micro-press:active {
+    transform: none;
+    transition: none;
+  }
+
+  .animate-pulse {
+    animation: none !important;
   }
 }

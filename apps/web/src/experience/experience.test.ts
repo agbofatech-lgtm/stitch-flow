@@ -57,7 +57,22 @@ test('DataTable empty state does not invent domain rows', () => {
 
 test('motion durations are professional-speed, not decorative', () => {
   assert.ok(motionDuration.base <= 0.25);
+  assert.ok(motionDuration.milestone <= 0.36);
   assert.equal(prefersReducedMotion(), false);
+});
+
+test('workspace journey slides forward toward production, not a random fade', () => {
+  const { workspacePreset } = require('./motion/motion') as typeof import('./motion/motion');
+  const forward = workspacePreset('command', 'measurements');
+  const back = workspacePreset('production', 'clients');
+  assert.equal((forward.initial as { x: number }).x > 0, true);
+  assert.equal((back.initial as { x: number }).x < 0, true);
+});
+
+test('reduced motion keeps opacity feedback instead of removing state change', () => {
+  const { motionOrInstant, motionPresets } = require('./motion/motion') as typeof import('./motion/motion');
+  const reduced = motionOrInstant(motionPresets.modal);
+  assert.equal((reduced.animate as { opacity: number }).opacity, 1);
 });
 
 test('experience layer does not import protected engines', () => {

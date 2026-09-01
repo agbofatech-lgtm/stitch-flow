@@ -11,6 +11,7 @@ import {
   StatusBadge,
 } from '../experience';
 import { useApp } from '../context/AppContext';
+import { goAtelierRoom } from '../experience/atelier/navigate';
 
 export function AtelierHome() {
   const { currentMember, currentWorkspace, customers, orders, dueAlerts, setView, selectedOrderId } = useApp();
@@ -31,9 +32,14 @@ export function AtelierHome() {
         title={`Good day, ${firstName}`}
         description={`${currentWorkspace.name}. Work that needs a human, not a statistics wall.`}
         primaryAction={
-          <Button variant="primary" onClick={() => setView('customers')}>
-            Open client room
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="primary" onClick={() => setView('customers')}>
+              Open client room
+            </Button>
+            <Button variant="secondary" onClick={() => goAtelierRoom('measurements')}>
+              Continue to measurements
+            </Button>
+          </div>
         }
         thread={<AtelierThread room="Floor" client={threadClient} order={selectedOrder?.orderNumber} />}
         confidence={<AtelierConfidence state="local" detail="AppContext workspace store. Not remote shop authority." />}

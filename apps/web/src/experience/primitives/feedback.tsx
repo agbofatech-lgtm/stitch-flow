@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '../lib/cn';
+import { motionOrInstant, motionPresets } from '../motion/motion';
 
 const STATUS_LABEL: Record<string, string> = {
   draft: 'Draft',
@@ -76,17 +78,21 @@ export function ExperienceEmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-sf-lg border border-dashed border-line bg-surface-panel p-8 text-center">
+    <motion.div
+      className="rounded-sf-lg border border-dashed border-line bg-surface-panel p-8 text-center"
+      data-motion-category="contextual"
+      {...motionOrInstant(motionPresets.empty)}
+    >
       <h3 className="text-heading-sm text-ink-primary">{title}</h3>
       <p className="mx-auto mt-2 max-w-md text-body text-ink-muted">{description}</p>
       {action ? <div className="mt-4">{action}</div> : null}
-    </div>
+    </motion.div>
   );
 }
 
 export function LoadingState({ label = 'Preparing workspace…' }: { label?: string }) {
   return (
-    <div role="status" aria-live="polite" className="flex items-center gap-2 text-body text-ink-muted">
+    <div role="status" aria-live="polite" className="flex items-center gap-2 text-body text-ink-muted" data-motion-category="contextual">
       <span className="h-3 w-3 animate-pulse rounded-full bg-action-primary" />
       {label}
     </div>
@@ -103,7 +109,7 @@ export function ErrorState({
   action?: ReactNode;
 }) {
   return (
-    <div role="alert" className="rounded-sf border border-status-danger/30 bg-status-danger/5 p-4">
+    <div role="alert" className="rounded-sf border border-status-danger/30 bg-status-danger/5 p-4" data-motion-category="micro">
       <p className="text-label text-status-danger">{title}</p>
       <p className="mt-1 text-body text-ink-secondary">{description}</p>
       {action ? <div className="mt-3">{action}</div> : null}
