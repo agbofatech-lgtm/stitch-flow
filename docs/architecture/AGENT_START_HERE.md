@@ -55,7 +55,8 @@ SAC-1 trusted save (owner acceptance pending): [`convergence/sac-1/README.md`](.
 SAC-2 local T2 mirror (AppContext remains UI SoT): [`convergence/sac-2/README.md`](./convergence/sac-2/README.md).  
 SAC-3 authenticated `/shop` API: [`convergence/sac-3/README.md`](./convergence/sac-3/README.md).  
 SAC-4 shop PostgreSQL path (`SHOP_DATABASE_MODE=postgres`): [`convergence/sac-4/README.md`](./convergence/sac-4/README.md). Platform remains file/memory.  
-SAC-5 offline sync (selected `/shop` domains, AppContext remains UI SoT): [`convergence/sac-5/README.md`](./convergence/sac-5/README.md). 3D and Phase 20 remain locked.
+SAC-5 offline sync (selected `/shop` domains, AppContext remains UI SoT): [`convergence/sac-5/README.md`](./convergence/sac-5/README.md).  
+SER-F0 frontend experience forensics (investigation only): [`../experience/ser/f0/README.md`](../experience/ser/f0/README.md). SER-F1–F9 locked. 3D and Phase 20 remain locked.
 
 ---
 
