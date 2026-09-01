@@ -35,3 +35,19 @@ export {
   serializeGarmentSpecification,
   assertNoUiStateInSpecification,
 } from './studioSpecification';
+
+export {
+  assessTrustedReadiness,
+  intentFromWorkingDesign,
+  type TrustedWorkingDesign,
+  type TrustedReadinessResult,
+  type TrustedReadinessIssue,
+} from './trustedReadiness';
+
+export {
+  finalizeDesignForTrustedTailoring,
+  type TrustedFinalizationInput,
+  type TrustedFinalizationResult,
+  type TrustedTailoringArtifact,
+  type TrustedFinalizationPhase,
+} from './trustedFinalization';

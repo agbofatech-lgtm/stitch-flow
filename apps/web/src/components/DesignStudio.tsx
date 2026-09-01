@@ -50,7 +50,10 @@ import {
   getDraftStorageKey,
   readStudioDrafts,
   writeStudioDrafts,
+  finalizeDesignForTrustedTailoring,
+  type TrustedFinalizationResult,
 } from '../application/design';
+import { Badge, Button, Dialog } from '../experience';
 import type {
   BodyMeasurements,
   DesignCategory,
@@ -1522,6 +1525,9 @@ export function DesignStudio() {
   const [studioStatusMessage, setStudioStatusMessage] = useState<string | null>(null);
   const [restoredDraftMessage, setRestoredDraftMessage] = useState<string | null>(null);
   const [lastDraftSavedAt, setLastDraftSavedAt] = useState<string | null>(null);
+  const [trustedDialogOpen, setTrustedDialogOpen] = useState(false);
+  const [trustedBusy, setTrustedBusy] = useState(false);
+  const [trustedResult, setTrustedResult] = useState<TrustedFinalizationResult | null>(null);
 
   const [selectedPatternLibraryId, setSelectedPatternLibraryId] = useState<string | null>(
     null
@@ -2139,6 +2145,37 @@ export function DesignStudio() {
     setGarmentMeasurements,
     setSelectedGarmentType,
     updateOrder,
+  ]);
+
+  const handleFinalizeForTrustedTailoring = useCallback(async () => {
+    setTrustedBusy(true);
+    setTrustedDialogOpen(true);
+    try {
+      const result = await finalizeDesignForTrustedTailoring({
+        measurements: { ...measurements } as Record<string, unknown>,
+        garmentType,
+        fitType: selectedInspiration?.fitType || selectedOrder?.fitType,
+        sleeveStyle: selectedInspiration?.sleeveStyle,
+        collarStyle: selectedInspiration?.collarStyle,
+        customerId: selectedOrder?.customerId,
+        profileId: selectedMeasurementProfile?.id,
+        orderId: selectedOrder?.id,
+      });
+      setTrustedResult(result);
+    } catch (error) {
+      setTrustedResult(null);
+      setStudioStatusMessage(
+        error instanceof Error ? error.message : 'Trusted finalization failed'
+      );
+    } finally {
+      setTrustedBusy(false);
+    }
+  }, [
+    garmentType,
+    measurements,
+    selectedInspiration,
+    selectedMeasurementProfile,
+    selectedOrder,
   ]);
 
   const handleSavePatternToLibrary = useCallback(() => {
@@ -3615,6 +3652,93 @@ export function DesignStudio() {
                   ? `Save to ${selectedOrder.orderNumber}`
                   : 'Select an order to save'}
               </button>
+
+              <Button
+                variant="primary"
+                className="mt-3 w-full"
+                onClick={() => void handleFinalizeForTrustedTailoring()}
+                loading={trustedBusy}
+              >
+                Finalize for Production
+              </Button>
+              {trustedResult?.status === 'EXECUTED' ? (
+                <p className="mt-2 text-meta text-ink-muted">
+                  <Badge tone="success">Trusted tailoring execution complete</Badge>
+                </p>
+              ) : trustedResult?.status === 'INCOMPLETE' ? (
+                <p className="mt-2 text-meta text-ink-muted">
+                  <Badge tone="warning">Design in progress — draft unchanged</Badge>
+                </p>
+              ) : (
+                <p className="mt-2 text-meta text-ink-muted">
+                  <Badge tone="neutral">Working design — interactive, not authoritative</Badge>
+                </p>
+              )}
+
+              <Dialog
+                open={trustedDialogOpen}
+                title={
+                  trustedResult?.status === 'EXECUTED'
+                    ? 'Trusted tailoring execution'
+                    : trustedResult?.status === 'INCOMPLETE'
+                      ? 'Trusted tailoring check'
+                      : 'Trusted tailoring'
+                }
+                onClose={() => setTrustedDialogOpen(false)}
+                size="lg"
+              >
+                {trustedBusy ? (
+                  <p className="text-body text-ink-secondary">Validating working design…</p>
+                ) : null}
+                {trustedResult?.status === 'INCOMPLETE' ? (
+                  <div className="space-y-3">
+                    <p className="text-body text-ink-secondary">
+                      Required trusted inputs are missing. Your draft remains unchanged. No
+                      trusted artifact was created.
+                    </p>
+                    <ul className="list-disc space-y-1 pl-5 text-body text-ink-primary">
+                      {trustedResult.readiness.missing.map((item) => (
+                        <li key={`${item.domain}-${item.field}`}>
+                          {item.field}: {item.reason}
+                        </li>
+                      ))}
+                    </ul>
+                    <Button variant="secondary" onClick={() => setTrustedDialogOpen(false)}>
+                      Return to Design
+                    </Button>
+                  </div>
+                ) : null}
+                {trustedResult?.status === 'EXECUTED' && trustedResult.artifact ? (
+                  <div className="space-y-3">
+                    <p className="text-body text-ink-secondary">
+                      Inputs frozen. Deterministic pattern executed. Production plan generated as
+                      a heuristic. Fingerprint is fnv1a-64 identity, not a cryptographic seal.
+                    </p>
+                    <ul className="space-y-1 text-body text-ink-primary">
+                      <li>
+                        Pattern:{' '}
+                        {trustedResult.artifact.result.pattern.classification.replace(/_/g, ' ')}
+                      </li>
+                      <li>
+                        Production plan:{' '}
+                        {trustedResult.artifact.result.production.classification.replace(
+                          /_/g,
+                          ' '
+                        )}
+                      </li>
+                      <li>
+                        Persistence:{' '}
+                        {trustedResult.artifact.persistence === 't2'
+                          ? 'T2 repository snapshot (not AppContext SoT)'
+                          : 'session only — not AppContext / not shop API'}
+                      </li>
+                    </ul>
+                    <Button variant="primary" onClick={() => setTrustedDialogOpen(false)}>
+                      View trusted production package
+                    </Button>
+                  </div>
+                ) : null}
+              </Dialog>
 
               <button
                 onClick={() => {
