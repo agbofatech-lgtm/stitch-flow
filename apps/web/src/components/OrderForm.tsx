@@ -422,22 +422,22 @@ export function OrderForm({
   };
 
   return (
-    <div className="rounded-[28px] border border-slate-200 bg-white shadow-sm">
-      <div className="h-1.5 w-full bg-[#0F6E8C]" />
+    <div className="rounded-sf-workspace border border-line bg-surface-panel shadow-sm">
+      <div className="h-1.5 w-full bg-action-primary" />
 
-      <div className="border-b border-slate-200 p-5">
+      <div className="border-b border-line p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-sm font-medium text-[#0F6E8C]">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-action-secondary px-3 py-1 text-sm font-medium text-action-primary">
               <ClipboardList className="h-4 w-4" />
               Order Form
             </div>
 
-            <h2 className="text-2xl font-bold text-slate-900">
+            <h2 className="text-2xl font-bold text-ink-primary">
               {editingOrder ? `Edit ${editingOrder.orderNumber}` : 'Create New Order'}
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-ink-muted">
               Capture garment production data, attach a reusable profile, and prepare the order
               for Design Studio and Production Board.
             </p>
@@ -447,7 +447,7 @@ export function OrderForm({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-50"
+              className="rounded-xl border border-line p-2 text-ink-muted transition hover:bg-surface-workspace"
               aria-label="Close order form"
             >
               <X className="h-4 w-4" />
@@ -458,10 +458,10 @@ export function OrderForm({
 
       <div className="grid grid-cols-1 gap-6 p-5 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-6">
-          <section className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-4">
+          <section className="rounded-sf-lg border border-line bg-surface-workspace/60 p-4">
             <div className="mb-4 flex items-center gap-2">
-              <User className="h-4 w-4 text-sky-500" />
-              <h3 className="text-sm font-semibold text-slate-900">Customer + Order Setup</h3>
+              <User className="h-4 w-4 text-action-primary" />
+              <h3 className="text-sm font-semibold text-ink-primary">Customer + Order Setup</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -469,7 +469,7 @@ export function OrderForm({
                 <select
                   value={form.customerId}
                   onChange={(e) => handleCustomerChange(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                  className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                 >
                   <option value="">Select customer</option>
                   {(customers ?? []).map((customer) => (
@@ -494,7 +494,7 @@ export function OrderForm({
                           : prev.orderType,
                     }));
                   }}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                  className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                 >
                   {(GARMENT_OPTIONS ?? []).map((option) => (
                     <option key={option.value} value={option.value}>
@@ -514,13 +514,13 @@ export function OrderForm({
                     }))
                   }
                   placeholder="e.g. Fitted Bridal Gown"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                  className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                 />
               </Field>
 
               <Field label="Due Date">
                 <div className="relative">
-                  <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
                   <input
                     type="date"
                     value={form.dueDate}
@@ -530,7 +530,7 @@ export function OrderForm({
                         dueDate: e.target.value,
                       }))
                     }
-                    className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                    className="w-full rounded-xl border border-line bg-surface-panel py-2.5 pl-10 pr-3 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                   />
                 </div>
               </Field>
@@ -549,7 +549,7 @@ export function OrderForm({
                       subtotal: e.target.value,
                     }))
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                  className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                 />
               </Field>
 
@@ -565,7 +565,7 @@ export function OrderForm({
                       taxTotal: e.target.value,
                     }))
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                  className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                 />
               </Field>
 
@@ -581,16 +581,16 @@ export function OrderForm({
                       discountTotal: e.target.value,
                     }))
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                  className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                 />
               </Field>
             </div>
 
-            <div className="mt-4 rounded-2xl bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="mt-4 rounded-2xl bg-surface-panel p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                 Total Amount
               </p>
-              <p className="mt-2 text-xl font-bold text-slate-900">
+              <p className="mt-2 text-xl font-bold text-ink-primary">
                 {(totalAmount ?? 0).toFixed(2)} {currentWorkspace.defaultCurrency || 'GHS'}
               </p>
             </div>
@@ -607,16 +607,16 @@ export function OrderForm({
                     }))
                   }
                   placeholder="Special instructions, fitting notes, delivery notes..."
-                  className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                  className="w-full resize-none rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                 />
               </Field>
             </div>
           </section>
 
-          <section className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-4">
+          <section className="rounded-sf-lg border border-line bg-surface-workspace/60 p-4">
             <div className="mb-4 flex items-center gap-2">
-              <Ruler className="h-4 w-4 text-sky-500" />
-              <h3 className="text-sm font-semibold text-slate-900">Measurement Profile + Snapshot</h3>
+              <Ruler className="h-4 w-4 text-action-primary" />
+              <h3 className="text-sm font-semibold text-ink-primary">Measurement Profile + Snapshot</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -625,7 +625,7 @@ export function OrderForm({
                   value={form.selectedProfileId}
                   onChange={(e) => handleProfileChange(e.target.value)}
                   disabled={!form.customerId}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300 disabled:cursor-not-allowed disabled:bg-slate-100"
+                  className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary disabled:cursor-not-allowed disabled:bg-action-secondary"
                 >
                   <option value="">Select profile</option>
                   {(profiles ?? []).map((profile) => (
@@ -636,22 +636,22 @@ export function OrderForm({
                 </select>
               </Field>
 
-              <div className="rounded-2xl bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <div className="rounded-2xl bg-surface-panel p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                   Snapshot Coverage
                 </p>
-                <p className="mt-2 text-xl font-bold text-slate-900">
+                <p className="mt-2 text-xl font-bold text-ink-primary">
                   {countMeasurements(form.measurementSnapshot)} fields
                 </p>
-                <p className="mt-1 text-xs text-slate-400">
+                <p className="mt-1 text-xs text-ink-muted">
                   Selected profile copies values into the order snapshot.
                 </p>
               </div>
             </div>
 
             {selectedProfile?.notes && (
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">
-                <span className="font-semibold text-slate-800">Profile notes:</span>{' '}
+              <div className="mt-4 rounded-2xl border border-line bg-surface-panel p-4 text-sm leading-6 text-ink-secondary">
+                <span className="font-semibold text-ink-primary">Profile notes:</span>{' '}
                 {selectedProfile.notes}
               </div>
             )}
@@ -660,9 +660,9 @@ export function OrderForm({
               {(SNAPSHOT_FIELDS ?? []).map((field) => (
                 <div
                   key={field.key}
-                  className="rounded-2xl border border-slate-200 bg-white p-3"
+                  className="rounded-2xl border border-line bg-surface-panel p-3"
                 >
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-ink-muted">
                     {field.label}
                   </label>
                   <input
@@ -676,17 +676,17 @@ export function OrderForm({
                     }
                     onChange={(e) => handleMeasurementChange(field.key, e.target.value)}
                     placeholder="0.0"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                    className="w-full rounded-xl border border-line bg-surface-workspace px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                   />
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-4">
+          <section className="rounded-sf-lg border border-line bg-surface-workspace/60 p-4">
             <div className="mb-4 flex items-center gap-2">
-              <Layers className="h-4 w-4 text-sky-500" />
-              <h3 className="text-sm font-semibold text-slate-900">Inspiration + Fabric</h3>
+              <Layers className="h-4 w-4 text-action-primary" />
+              <h3 className="text-sm font-semibold text-ink-primary">Inspiration + Fabric</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -699,7 +699,7 @@ export function OrderForm({
                       designInspirationId: e.target.value,
                     }))
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                  className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                 >
                   <option value="">No inspiration linked</option>
                   {(designInspirations ?? []).map((item) => (
@@ -719,7 +719,7 @@ export function OrderForm({
                       selectedFabricId: e.target.value,
                     }))
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                  className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                 >
                   <option value="">No fabric selected</option>
                   {(fabricRecords ?? []).map((fabric) => (
@@ -735,10 +735,10 @@ export function OrderForm({
         </div>
 
         <div className="space-y-6">
-          <section className="rounded-[24px] border border-slate-200 bg-white p-5">
+          <section className="rounded-sf-lg border border-line bg-surface-panel p-5">
             <div className="mb-4 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <h3 className="text-sm font-semibold text-slate-900">Production Alerts Preview</h3>
+              <h3 className="text-sm font-semibold text-ink-primary">Production Alerts Preview</h3>
             </div>
 
             {alerts.length === 0 ? (
@@ -753,7 +753,7 @@ export function OrderForm({
                     className={`rounded-2xl border p-4 ${
                       alert.tone === 'warning'
                         ? 'border-amber-200 bg-amber-50 text-amber-800'
-                        : 'border-sky-200 bg-sky-50 text-sky-800'
+                        : 'border-line bg-action-secondary text-action-primary'
                     }`}
                   >
                     <p className="font-semibold">{alert.title}</p>
@@ -764,28 +764,28 @@ export function OrderForm({
             )}
           </section>
 
-          <section className="rounded-[24px] border border-slate-200 bg-white p-5">
+          <section className="rounded-sf-lg border border-line bg-surface-panel p-5">
             <div className="mb-4 flex items-center gap-2">
-              <Scissors className="h-4 w-4 text-sky-500" />
-              <h3 className="text-sm font-semibold text-slate-900">Workflow Initialization</h3>
+              <Scissors className="h-4 w-4 text-action-primary" />
+              <h3 className="text-sm font-semibold text-ink-primary">Workflow Initialization</h3>
             </div>
 
             <div className="space-y-3">
               {(DEFAULT_PRODUCTION_STAGES ?? []).map((stage, index) => (
                 <div
                   key={stage.code}
-                  className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+                  className="flex items-center justify-between rounded-2xl border border-line bg-surface-workspace px-4 py-3"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">{stage.label}</p>
-                    <p className="text-xs text-slate-400">{stage.code}</p>
+                    <p className="text-sm font-semibold text-ink-primary">{stage.label}</p>
+                    <p className="text-xs text-ink-muted">{stage.code}</p>
                   </div>
 
                   <span
                     className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                       index === 0
-                        ? 'bg-sky-100 text-[#0F6E8C]'
-                        : 'bg-slate-200 text-slate-600'
+                        ? 'bg-action-secondary text-action-primary'
+                        : 'bg-slate-200 text-ink-secondary'
                     }`}
                   >
                     {index === 0 ? 'Active on save' : 'Pending'}
@@ -795,22 +795,22 @@ export function OrderForm({
             </div>
           </section>
 
-          <section className="rounded-[24px] border border-slate-200 bg-white p-5">
+          <section className="rounded-sf-lg border border-line bg-surface-panel p-5">
             <div className="mb-4 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-sky-500" />
-              <h3 className="text-sm font-semibold text-slate-900">Next Steps</h3>
+              <Sparkles className="h-4 w-4 text-action-primary" />
+              <h3 className="text-sm font-semibold text-ink-primary">Next Steps</h3>
             </div>
 
-            <div className="space-y-3 text-sm text-slate-600">
-              <div className="rounded-2xl bg-slate-50 p-4">
+            <div className="space-y-3 text-sm text-ink-secondary">
+              <div className="rounded-2xl bg-surface-workspace p-4">
                 Save the order now to initialize production stages and preserve the measurement
                 snapshot.
               </div>
-              <div className="rounded-2xl bg-slate-50 p-4">
+              <div className="rounded-2xl bg-surface-workspace p-4">
                 Open Design Studio after save to generate the production plan and attach AI
                 production intelligence.
               </div>
-              <div className="rounded-2xl bg-slate-50 p-4">
+              <div className="rounded-2xl bg-surface-workspace p-4">
                 Production Board will later use these measurements and missing-data checks to flag
                 overdue or blocked orders.
               </div>
@@ -823,8 +823,8 @@ export function OrderForm({
                 disabled={!form.customerId || !form.orderType.trim()}
                 className={`flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition ${
                   form.customerId && form.orderType.trim()
-                    ? 'bg-[#0F6E8C] text-white hover:bg-[#0C5C74]'
-                    : 'cursor-not-allowed bg-slate-100 text-slate-400'
+                    ? 'bg-action-primary text-white hover:bg-action-hover'
+                    : 'cursor-not-allowed bg-action-secondary text-ink-muted'
                 }`}
               >
                 <Save className="h-4 w-4" />
@@ -837,8 +837,8 @@ export function OrderForm({
                 disabled={!form.customerId || !form.orderType.trim()}
                 className={`flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition ${
                   form.customerId && form.orderType.trim()
-                    ? 'border border-slate-200 bg-white text-slate-700 hover:bg-sky-50'
-                    : 'cursor-not-allowed bg-slate-100 text-slate-400'
+                    ? 'border border-line bg-surface-panel text-ink-secondary hover:bg-action-secondary'
+                    : 'cursor-not-allowed bg-action-secondary text-ink-muted'
                 }`}
               >
                 <Shirt className="h-4 w-4" />
@@ -861,7 +861,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+      <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-ink-muted">
         {label}
       </label>
       {children}

@@ -6,6 +6,7 @@ export { Button, IconButton } from './primitives/Button';
 export { Field, Input, Textarea, Select, Checkbox, Radio, Switch } from './primitives/forms';
 export {
   Badge,
+  StatusBadge,
   ExperienceEmptyState,
   LoadingState,
   ErrorState,

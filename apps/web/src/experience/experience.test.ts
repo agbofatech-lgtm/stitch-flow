@@ -13,6 +13,7 @@ import { ENTITY_CONFLICT_POLICY } from '../shared/persistence/conflict';
 
 test('semantic tokens exist for required surfaces and status', () => {
   assert.match(color.canvas, /--sf-surface-canvas/);
+  assert.match(color.floating, /--sf-surface-floating/);
   assert.match(color.actionPrimary, /--sf-action-primary/);
   assert.match(color.success, /--sf-status-success/);
   assert.match(color.focusRing, /--sf-focus-ring/);

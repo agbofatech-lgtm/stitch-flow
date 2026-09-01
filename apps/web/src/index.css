@@ -3,3 +3,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    font-family: var(--sf-font-sans);
+  }
+
+  body {
+    background-color: var(--sf-surface-canvas);
+    color: var(--sf-text-primary);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--sf-focus-ring);
+    outline-offset: 2px;
+  }
+}

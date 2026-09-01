@@ -323,28 +323,28 @@ export function CustomerDetail({
 
   if (!customer) {
     return (
-      <div className="rounded-[24px] border border-dashed border-slate-200 bg-white p-8 text-center">
-        <User className="mx-auto mb-3 h-8 w-8 text-slate-400" />
-        <p className="font-semibold text-slate-800">Customer not found</p>
+      <div className="rounded-sf-lg border border-dashed border-line bg-surface-panel p-8 text-center">
+        <User className="mx-auto mb-3 h-8 w-8 text-ink-muted" />
+        <p className="font-semibold text-ink-primary">Customer not found</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
-        <div className="h-1.5 w-full bg-[#0F6E8C]" />
+      <section className="overflow-hidden rounded-sf-workspace border border-line bg-surface-panel shadow-sm">
+        <div className="h-1.5 w-full bg-action-primary" />
 
         <div className="p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-sm font-medium text-[#0F6E8C]">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-action-secondary px-3 py-1 text-sm font-medium text-action-primary">
                 <Ruler className="h-4 w-4" />
                 Measurement Profiles
               </div>
 
-              <h2 className="text-2xl font-bold text-slate-900">{customer.fullName}</h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <h2 className="text-2xl font-bold text-ink-primary">{customer.fullName}</h2>
+              <p className="mt-1 text-sm text-ink-muted">
                 Save multiple fit profiles for different garment types and reuse them in orders
                 and Design Studio.
               </p>
@@ -353,7 +353,7 @@ export function CustomerDetail({
             <button
               type="button"
               onClick={startCreate}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0F6E8C] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#0C5C74]"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-action-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-action-hover"
             >
               <Plus className="h-4 w-4" />
               New Profile
@@ -395,13 +395,13 @@ export function CustomerDetail({
       </section>
 
       {showForm && (
-        <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="rounded-sf-workspace border border-line bg-surface-panel p-5 shadow-sm">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">
+              <h3 className="text-lg font-semibold text-ink-primary">
                 {editingProfileId ? 'Edit Measurement Profile' : 'Create Measurement Profile'}
               </h3>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-ink-muted">
                 Name profiles by fit or garment use, like “Fitted Gown” or “Senator Set”.
               </p>
             </div>
@@ -409,7 +409,7 @@ export function CustomerDetail({
             <button
               type="button"
               onClick={closeForm}
-              className="rounded-xl border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-50"
+              className="rounded-xl border border-line p-2 text-ink-muted transition hover:bg-surface-workspace"
               aria-label="Close profile form"
             >
               <X className="h-4 w-4" />
@@ -417,8 +417,8 @@ export function CustomerDetail({
           </div>
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
-            <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="rounded-sf-lg border border-line bg-surface-workspace p-4">
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-ink-muted">
                 Profile Label
               </label>
               <input
@@ -430,10 +430,10 @@ export function CustomerDetail({
                   }))
                 }
                 placeholder="e.g. Fitted Gown"
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
               />
 
-              <label className="mt-4 mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <label className="mt-4 mb-2 block text-xs font-semibold uppercase tracking-wide text-ink-muted">
                 Notes
               </label>
               <textarea
@@ -446,28 +446,28 @@ export function CustomerDetail({
                 }
                 rows={6}
                 placeholder="Special fit notes, posture notes, fitting preferences..."
-                className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                className="w-full resize-none rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
               />
 
-              <div className="mt-4 rounded-2xl bg-white p-3 text-xs leading-6 text-slate-500">
+              <div className="mt-4 rounded-2xl bg-surface-panel p-3 text-xs leading-6 text-ink-muted">
                 This profile can be copied into an order snapshot, loaded into Design Studio,
                 or reused for future orders.
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-slate-200 bg-white p-4">
+            <div className="rounded-sf-lg border border-line bg-surface-panel p-4">
               <div className="mb-4 flex items-center gap-2">
-                <BadgeInfo className="h-4 w-4 text-sky-500" />
-                <h4 className="text-sm font-semibold text-slate-900">Measurements</h4>
+                <BadgeInfo className="h-4 w-4 text-action-primary" />
+                <h4 className="text-sm font-semibold text-ink-primary">Measurements</h4>
               </div>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {(MEASUREMENT_FIELDS ?? []).map((field) => (
                   <div
                     key={field.key}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                    className="rounded-2xl border border-line bg-surface-workspace p-3"
                   >
-                    <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-ink-muted">
                       {field.label}
                     </label>
                     <input
@@ -482,7 +482,7 @@ export function CustomerDetail({
                         }))
                       }
                       placeholder="0.0"
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                      className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                     />
                   </div>
                 ))}
@@ -495,8 +495,8 @@ export function CustomerDetail({
                   disabled={!draft.label.trim()}
                   className={`inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
                     draft.label.trim()
-                      ? 'bg-[#0F6E8C] text-white hover:bg-[#0C5C74]'
-                      : 'cursor-not-allowed bg-slate-100 text-slate-400'
+                      ? 'bg-action-primary text-white hover:bg-action-hover'
+                      : 'cursor-not-allowed bg-action-secondary text-ink-muted'
                   }`}
                 >
                   <Save className="h-4 w-4" />
@@ -506,7 +506,7 @@ export function CustomerDetail({
                 <button
                   type="button"
                   onClick={closeForm}
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  className="rounded-2xl border border-line bg-surface-panel px-4 py-3 text-sm font-semibold text-ink-secondary transition hover:bg-surface-workspace"
                 >
                   Cancel
                 </button>
@@ -516,21 +516,21 @@ export function CustomerDetail({
         </section>
       )}
 
-      <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-sf-workspace border border-line bg-surface-panel p-5 shadow-sm">
         <div className="mb-5 flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">Saved Profiles</h3>
-            <p className="mt-1 text-sm text-slate-500">
+            <h3 className="text-lg font-semibold text-ink-primary">Saved Profiles</h3>
+            <p className="mt-1 text-sm text-ink-muted">
               Reuse profiles across order creation, editing, and studio drafting.
             </p>
           </div>
         </div>
 
         {profiles.length === 0 ? (
-          <div className="rounded-[24px] border border-dashed border-sky-200 bg-sky-50/60 p-10 text-center">
-            <Ruler className="mx-auto mb-3 h-8 w-8 text-sky-500" />
-            <p className="font-semibold text-slate-800">No measurement profiles yet</p>
-            <p className="mt-2 text-sm text-slate-500">
+          <div className="rounded-sf-lg border border-dashed border-line bg-action-secondary/60 p-10 text-center">
+            <Ruler className="mx-auto mb-3 h-8 w-8 text-action-primary" />
+            <p className="font-semibold text-ink-primary">No measurement profiles yet</p>
+            <p className="mt-2 text-sm text-ink-muted">
               Create a reusable fit profile for this customer to speed up orders and drafting.
             </p>
           </div>
@@ -542,15 +542,15 @@ export function CustomerDetail({
               return (
                 <div
                   key={profile.id}
-                  className="rounded-[24px] border border-slate-200 bg-slate-50/50 p-4"
+                  className="rounded-sf-lg border border-line bg-surface-workspace/50 p-4"
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0">
                       <div className="mb-2 flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-[#0F6E8C]">
+                        <span className="rounded-full bg-action-secondary px-3 py-1 text-xs font-semibold text-action-primary">
                           {profile.label}
                         </span>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-ink-muted">
                           Saved {new Date(profile.createdAt).toLocaleDateString()}
                         </span>
                       </div>
@@ -560,7 +560,7 @@ export function CustomerDetail({
                           {(highlights ?? []).map((item) => (
                             <span
                               key={`${profile.id}-${item.label}`}
-                              className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200"
+                              className="rounded-full bg-surface-panel px-2.5 py-1 text-xs font-medium text-ink-secondary ring-1 ring-line"
                             >
                               {item.label}: {item.value}
                             </span>
@@ -569,7 +569,7 @@ export function CustomerDetail({
                       )}
 
                       {profile.notes && (
-                        <p className="mt-3 text-sm leading-6 text-slate-600">{profile.notes}</p>
+                        <p className="mt-3 text-sm leading-6 text-ink-secondary">{profile.notes}</p>
                       )}
                     </div>
 
@@ -577,7 +577,7 @@ export function CustomerDetail({
                       <button
                         type="button"
                         onClick={() => handleLoadIntoStudio(profile)}
-                        className="rounded-xl bg-[#0F6E8C] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#0C5C74]"
+                        className="rounded-xl bg-action-primary px-3 py-2 text-xs font-semibold text-white transition hover:bg-action-hover"
                       >
                         Load into Studio
                       </button>
@@ -589,7 +589,7 @@ export function CustomerDetail({
                         className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${
                           selectedOrderMatchesCustomer
                             ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                            : 'cursor-not-allowed bg-slate-100 text-slate-400'
+                            : 'cursor-not-allowed bg-action-secondary text-ink-muted'
                         }`}
                       >
                         {selectedOrderMatchesCustomer && selectedOrder
@@ -604,7 +604,7 @@ export function CustomerDetail({
                         className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${
                           onCreateOrderFromProfile
                             ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                            : 'cursor-not-allowed bg-slate-100 text-slate-400'
+                            : 'cursor-not-allowed bg-action-secondary text-ink-muted'
                         }`}
                       >
                         Use for New Order
@@ -613,7 +613,7 @@ export function CustomerDetail({
                       <button
                         type="button"
                         onClick={() => startEdit(profile)}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                        className="rounded-xl border border-line bg-surface-panel px-3 py-2 text-xs font-semibold text-ink-secondary transition hover:bg-surface-workspace"
                       >
                         <Edit3 className="mr-1 inline h-3.5 w-3.5" />
                         Edit
@@ -651,17 +651,17 @@ function StatCard({
   tone: 'brand' | 'emerald' | 'amber';
 }) {
   const tones = {
-    brand: 'bg-sky-50 text-[#0F6E8C]',
+    brand: 'bg-action-secondary text-action-primary',
     emerald: 'bg-emerald-50 text-emerald-700',
     amber: 'bg-amber-50 text-amber-700',
   };
 
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-white p-4">
+    <div className="rounded-sf-lg border border-line bg-surface-panel p-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500">{label}</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
+          <p className="text-sm text-ink-muted">{label}</p>
+          <p className="mt-1 text-2xl font-bold text-ink-primary">{value}</p>
         </div>
         <div className={`rounded-2xl p-3 ${tones[tone]}`}>
           <Icon className="h-5 w-5" />

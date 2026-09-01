@@ -377,20 +377,20 @@ export function Orders() {
     <div className="p-4 lg:p-8">
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-sm font-medium text-[#0F6E8C]">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-line bg-action-secondary px-3 py-1 text-sm font-medium text-action-primary">
             <ClipboardList className="h-4 w-4" />
             {BRAND.productName} Order Workflow
           </div>
 
-          <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
-          <p className="mt-1 text-slate-500">
+          <h1 className="text-2xl font-bold text-ink-primary">Orders</h1>
+          <p className="mt-1 text-ink-muted">
             {orders.length} total orders � linked to customers, garments, measurements, design work, and materials
           </p>
         </div>
 
         <button
           onClick={openCreateOrderModal}
-          className="inline-flex items-center gap-2 rounded-2xl bg-[#0F6E8C] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0C5C74]"
+          className="inline-flex items-center gap-2 rounded-2xl bg-action-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-action-hover"
         >
           <Plus className="h-4 w-4" />
           New Order
@@ -435,20 +435,20 @@ export function Orders() {
       </div>
 
       <div className="mb-6 flex flex-col gap-4 xl:flex-row">
-        <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm xl:flex-1">
+        <div className="rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm xl:flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-muted" />
             <input
               type="text"
               placeholder="Search orders, customer name, garment, notes..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-4 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+              className="w-full rounded-xl border border-line py-2.5 pl-10 pr-4 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
             />
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm xl:w-auto">
+        <div className="rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm xl:w-auto">
           <div className="flex gap-2 overflow-x-auto pb-1">
             {(statusFilters ?? []).map((status) => (
               <button
@@ -456,13 +456,13 @@ export function Orders() {
                 onClick={() => setStatusFilter(status)}
                 className={`whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-colors ${
                   statusFilter === status
-                    ? 'bg-[#0F6E8C] text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-action-primary text-white'
+                    : 'bg-action-secondary text-ink-secondary hover:bg-slate-200'
                 }`}
               >
                 {status === 'all' ? 'All' : status.replace('_', ' ')}
                 {status !== 'all' && statusCounts[status] ? (
-                  <span className="ml-1.5 rounded bg-white/20 px-1.5 py-0.5 text-xs">
+                  <span className="ml-1.5 rounded bg-surface-panel/20 px-1.5 py-0.5 text-xs">
                     {statusCounts[status]}
                   </span>
                 ) : null}
@@ -501,18 +501,18 @@ export function Orders() {
             order.status === 'delivered'
               ? 'bg-green-500'
               : order.status === 'ready'
-              ? 'bg-cyan-500'
+              ? 'bg-action-secondary0'
               : order.status === 'cancelled'
               ? 'bg-red-400'
               : isDue
               ? 'bg-amber-400'
-              : 'bg-[#0F6E8C]';
+              : 'bg-action-primary';
 
           return (
             <div
               key={order.id}
-              className={`cursor-pointer overflow-hidden rounded-[24px] border bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
-                isDue ? 'border-amber-200' : 'border-slate-200'
+              className={`cursor-pointer overflow-hidden rounded-sf-lg border bg-surface-panel shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
+                isDue ? 'border-amber-200' : 'border-line'
               }`}
               onClick={() => {
                 selectOrder(order.id);
@@ -525,18 +525,18 @@ export function Orders() {
                 <div className="mb-3 flex items-start justify-between gap-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-semibold text-slate-900">{order.orderNumber}</h3>
+                      <h3 className="font-semibold text-ink-primary">{order.orderNumber}</h3>
                       <OrderStatusBadge status={order.status} />
                       {order.garmentType && (
-                        <span className="rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-[#0F6E8C]">
+                        <span className="rounded-full bg-action-secondary px-2 py-0.5 text-xs font-medium text-action-primary">
                           {titleCase(order.garmentType)}
                         </span>
                       )}
                     </div>
-                    <p className="mt-0.5 text-sm text-slate-500">{order.orderType}</p>
+                    <p className="mt-0.5 text-sm text-ink-muted">{order.orderType}</p>
                   </div>
 
-                  <span className="text-lg font-semibold text-slate-900">
+                  <span className="text-lg font-semibold text-ink-primary">
                     {formatCurrency(
                       order.totalAmount,
                       safeCurrency(order.currency, workspaceCurrency)
@@ -545,15 +545,15 @@ export function Orders() {
                 </div>
 
                 <div className="flex flex-wrap gap-4 text-sm">
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <User className="h-4 w-4 text-slate-400" />
+                  <div className="flex items-center gap-2 text-ink-secondary">
+                    <User className="h-4 w-4 text-ink-muted" />
                     {order.customer?.fullName || 'No customer linked'}
                   </div>
 
                   {order.dueDate && (
                     <div
                       className={`flex items-center gap-2 ${
-                        isDue ? 'text-amber-700' : 'text-slate-600'
+                        isDue ? 'text-amber-700' : 'text-ink-secondary'
                       }`}
                     >
                       <Calendar className="h-4 w-4" />
@@ -561,13 +561,13 @@ export function Orders() {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 text-slate-400">
+                  <div className="flex items-center gap-2 text-ink-muted">
                     <Clock className="h-4 w-4" />
                     Created: {format(new Date(order.createdAt), 'MMM d')}
                   </div>
 
                   {measurementCount > 0 && (
-                    <div className="flex items-center gap-2 text-[#0F6E8C]">
+                    <div className="flex items-center gap-2 text-action-primary">
                       <Ruler className="h-4 w-4" />
                       {measurementCount} measurements saved
                     </div>
@@ -588,13 +588,13 @@ export function Orders() {
                   )}
                 </div>
 
-                <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <div className="mt-4 rounded-2xl border border-line-subtle bg-surface-workspace p-4">
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <Scissors className="h-4 w-4 text-[#0F6E8C]" />
-                      <h4 className="text-sm font-semibold text-slate-900">Production Workflow</h4>
+                      <Scissors className="h-4 w-4 text-action-primary" />
+                      <h4 className="text-sm font-semibold text-ink-primary">Production Workflow</h4>
                     </div>
-                    <span className="text-xs font-medium text-slate-500">
+                    <span className="text-xs font-medium text-ink-muted">
                       {completedStages}/{stages.length} completed
                     </span>
                   </div>
@@ -607,8 +607,8 @@ export function Orders() {
                           stage.status === 'completed'
                             ? 'bg-green-100 text-green-700'
                             : stage.status === 'active'
-                            ? 'bg-sky-100 text-sky-700'
-                            : 'bg-slate-200 text-slate-600'
+                            ? 'bg-action-secondary text-action-primary'
+                            : 'bg-slate-200 text-ink-secondary'
                         }`}
                       >
                         {stage.status === 'completed' ? '? ' : ''}
@@ -619,9 +619,9 @@ export function Orders() {
                   </div>
 
                   {nextStage ? (
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-ink-muted">
                       Next step:{' '}
-                      <span className="font-medium text-slate-700">{nextStage.label}</span>
+                      <span className="font-medium text-ink-secondary">{nextStage.label}</span>
                     </p>
                   ) : (
                     <p className="text-xs font-medium text-green-600">Workflow completed</p>
@@ -632,9 +632,9 @@ export function Orders() {
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <Package className="h-4 w-4 text-rose-600" />
-                      <h4 className="text-sm font-semibold text-slate-900">Materials Used</h4>
+                      <h4 className="text-sm font-semibold text-ink-primary">Materials Used</h4>
                     </div>
-                    <span className="text-xs font-medium text-slate-500">
+                    <span className="text-xs font-medium text-ink-muted">
                       {materialUsages.length} item{materialUsages.length === 1 ? '' : 's'}
                     </span>
                   </div>
@@ -646,7 +646,7 @@ export function Orders() {
                         return (
                           <div
                             key={usage.id}
-                            className="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm"
+                            className="flex items-center gap-2 rounded-full bg-surface-panel px-3 py-1.5 text-xs font-medium text-ink-secondary shadow-sm"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <span>
@@ -664,14 +664,14 @@ export function Orders() {
                       })}
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500">No materials assigned yet.</p>
+                    <p className="text-xs text-ink-muted">No materials assigned yet.</p>
                   )}
                 </div>
 
                 {(order.notes || measurementCount > 0) && (
-                  <div className="mt-3 border-t border-slate-100 pt-3">
+                  <div className="mt-3 border-t border-line-subtle pt-3">
                     {order.notes && (
-                      <p className="mb-2 line-clamp-2 text-sm text-slate-500">{order.notes}</p>
+                      <p className="mb-2 line-clamp-2 text-sm text-ink-muted">{order.notes}</p>
                     )}
 
                     {measurementCount > 0 && (
@@ -679,7 +679,7 @@ export function Orders() {
                         {renderMeasurementChips(order.measurementSnapshot).map((item) => (
                           <span
                             key={item.label}
-                            className="rounded-full bg-sky-50 px-2.5 py-1 font-medium text-[#0F6E8C]"
+                            className="rounded-full bg-action-secondary px-2.5 py-1 font-medium text-action-primary"
                           >
                             {item.label}: {item.value}
                           </span>
@@ -690,7 +690,7 @@ export function Orders() {
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line-subtle bg-surface-workspace px-5 py-3">
                 <div className="flex flex-wrap gap-2">
                   {order.status === 'draft' && !order.productionStages?.length && (
                     <button
@@ -699,7 +699,7 @@ export function Orders() {
                         void handleInitializeWorkflow(order.id);
                       }}
                       disabled={isStageUpdating}
-                      className="rounded-xl bg-sky-100 px-3 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-200 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="rounded-xl bg-action-secondary px-3 py-1.5 text-xs font-medium text-action-primary hover:bg-sky-200 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isStageUpdating ? 'Starting...' : 'Start Workflow'}
                     </button>
@@ -712,7 +712,7 @@ export function Orders() {
                         void handleAdvanceStage(order);
                       }}
                       disabled={isStageUpdating}
-                      className="rounded-xl bg-[#0F6E8C]/10 px-3 py-1.5 text-xs font-medium text-[#0F6E8C] hover:bg-[#0F6E8C]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="rounded-xl bg-action-primary/10 px-3 py-1.5 text-xs font-medium text-action-primary hover:bg-action-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isStageUpdating ? 'Updating...' : nextStageActionLabel}
                     </button>
@@ -733,18 +733,18 @@ export function Orders() {
                       e.stopPropagation();
                       openEditOrderModal(order.id);
                     }}
-                    className="inline-flex items-center gap-1 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
+                    className="inline-flex items-center gap-1 rounded-xl bg-action-secondary px-3 py-1.5 text-xs font-medium text-ink-secondary hover:bg-slate-200"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     Edit
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2 text-slate-400">
+                <div className="flex items-center gap-2 text-ink-muted">
                   {completedStages === stages.length && (
                     <CheckCircle2 className="h-4 w-4 text-green-500" />
                   )}
-                  <ChevronRight className="h-5 w-5 text-slate-400" />
+                  <ChevronRight className="h-5 w-5 text-ink-muted" />
                 </div>
               </div>
             </div>
@@ -754,10 +754,10 @@ export function Orders() {
 
       {filteredOrders.length === 0 && (
         <div className="py-12 text-center">
-          <div className="mx-auto max-w-md rounded-[24px] border border-dashed border-slate-200 bg-white p-8">
-            <Boxes className="mx-auto mb-3 h-8 w-8 text-slate-400" />
-            <h3 className="text-lg font-semibold text-slate-900">No orders found</h3>
-            <p className="mt-2 text-sm text-slate-500">
+          <div className="mx-auto max-w-md rounded-sf-lg border border-dashed border-line bg-surface-panel p-8">
+            <Boxes className="mx-auto mb-3 h-8 w-8 text-ink-muted" />
+            <h3 className="text-lg font-semibold text-ink-primary">No orders found</h3>
+            <p className="mt-2 text-sm text-ink-muted">
               Create a new order, or change your search and filter.
             </p>
           </div>
@@ -941,31 +941,31 @@ function OrderFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] bg-white shadow-2xl">
-        <div className="h-1.5 w-full bg-[#0F6E8C]" />
+      <div className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-sf-workspace bg-surface-panel shadow-2xl">
+        <div className="h-1.5 w-full bg-action-primary" />
 
-        <div className="flex items-center justify-between border-b border-slate-200 p-5">
+        <div className="flex items-center justify-between border-b border-line p-5">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">
+            <h2 className="text-xl font-semibold text-ink-primary">
               {mode === 'create' ? 'Create Order' : 'Edit Order'}
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-ink-muted">
               Capture garment type, measurement snapshot, inspiration, fabric, and production setup.
             </p>
           </div>
 
-          <button onClick={onClose} className="rounded-xl p-2 hover:bg-slate-100">
-            <X className="h-5 w-5 text-slate-500" />
+          <button onClick={onClose} className="rounded-xl p-2 hover:bg-action-secondary">
+            <X className="h-5 w-5 text-ink-muted" />
           </button>
         </div>
 
         <form id="order-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5">
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.05fr_0.95fr]">
             <div className="space-y-6">
-              <section className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
+              <section className="rounded-sf-lg border border-line bg-surface-workspace/60 p-5">
                 <div className="mb-4 flex items-center gap-2">
-                  <ClipboardList className="h-5 w-5 text-[#0F6E8C]" />
-                  <h3 className="text-base font-semibold text-slate-900">Order Basics</h3>
+                  <ClipboardList className="h-5 w-5 text-action-primary" />
+                  <h3 className="text-base font-semibold text-ink-primary">Order Basics</h3>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -975,7 +975,7 @@ function OrderFormModal({
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, customerId: e.target.value }))
                       }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                     >
                       <option value="">Select customer</option>
                       {(customers ?? []).map((customer) => (
@@ -992,7 +992,7 @@ function OrderFormModal({
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, orderNumber: e.target.value }))
                       }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                     />
                   </FormField>
 
@@ -1013,7 +1013,7 @@ function OrderFormModal({
                               : titleCase(e.target.value),
                         }))
                       }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                     >
                       {(GARMENT_OPTIONS ?? []).map((option) => (
                         <option key={option.value} value={option.value}>
@@ -1030,7 +1030,7 @@ function OrderFormModal({
                         setForm((prev) => ({ ...prev, orderType: e.target.value }))
                       }
                       placeholder="Wedding gown, Senator set, Corporate shirt..."
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                     />
                   </FormField>
 
@@ -1041,7 +1041,7 @@ function OrderFormModal({
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, dueDate: e.target.value }))
                       }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                     />
                   </FormField>
 
@@ -1051,7 +1051,7 @@ function OrderFormModal({
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, currency: (e.target.value ?? "").toUpperCase() }))
                       }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm uppercase text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm uppercase text-ink-secondary outline-none focus:border-action-primary"
                     />
                   </FormField>
                 </div>
@@ -1066,7 +1066,7 @@ function OrderFormModal({
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, subtotal: e.target.value }))
                       }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                     />
                   </FormField>
 
@@ -1079,7 +1079,7 @@ function OrderFormModal({
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, taxTotal: e.target.value }))
                       }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                     />
                   </FormField>
 
@@ -1092,16 +1092,16 @@ function OrderFormModal({
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, discountTotal: e.target.value }))
                       }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                     />
                   </FormField>
                 </div>
 
-                <div className="mt-4 rounded-2xl bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <div className="mt-4 rounded-2xl bg-surface-panel p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                     Total Amount
                   </p>
-                  <p className="mt-2 text-2xl font-bold text-slate-900">
+                  <p className="mt-2 text-2xl font-bold text-ink-primary">
                     {formatCurrency(totalAmount, safeCurrency(undefined, form.currency || workspaceCurrency))}
                   </p>
                 </div>
@@ -1114,7 +1114,7 @@ function OrderFormModal({
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, notes: e.target.value }))
                       }
-                      className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full resize-none rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                       placeholder="Special instructions, delivery notes, finishing requirements..."
                     />
                   </FormField>
@@ -1128,17 +1128,17 @@ function OrderFormModal({
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, styleNotes: e.target.value }))
                       }
-                      className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full resize-none rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                       placeholder="Silhouette, fit direction, neckline preferences..."
                     />
                   </FormField>
                 </div>
               </section>
 
-              <section className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
+              <section className="rounded-sf-lg border border-line bg-surface-workspace/60 p-5">
                 <div className="mb-4 flex items-center gap-2">
-                  <Ruler className="h-5 w-5 text-[#0F6E8C]" />
-                  <h3 className="text-base font-semibold text-slate-900">Measurement Snapshot</h3>
+                  <Ruler className="h-5 w-5 text-action-primary" />
+                  <h3 className="text-base font-semibold text-ink-primary">Measurement Snapshot</h3>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -1158,7 +1158,7 @@ function OrderFormModal({
                             },
                           }))
                         }
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                        className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                         placeholder="0"
                       />
                     </FormField>
@@ -1168,10 +1168,10 @@ function OrderFormModal({
             </div>
 
             <div className="space-y-6">
-              <section className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
+              <section className="rounded-sf-lg border border-line bg-surface-workspace/60 p-5">
                 <div className="mb-4 flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-violet-600" />
-                  <h3 className="text-base font-semibold text-slate-900">Optional Design Links</h3>
+                  <h3 className="text-base font-semibold text-ink-primary">Optional Design Links</h3>
                 </div>
 
                 <div className="space-y-4">
@@ -1181,7 +1181,7 @@ function OrderFormModal({
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, designInspirationId: e.target.value }))
                       }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                     >
                       <option value="">No inspiration linked</option>
                       {(inspirations ?? []).map((item) => (
@@ -1198,7 +1198,7 @@ function OrderFormModal({
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, selectedFabricId: e.target.value }))
                       }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-sky-300"
+                      className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-secondary outline-none focus:border-action-primary"
                     >
                       <option value="">No fabric linked</option>
                       {materials
@@ -1215,28 +1215,28 @@ function OrderFormModal({
                 {(selectedInspiration || selectedMaterial) && (
                   <div className="mt-4 space-y-3">
                     {selectedInspiration && (
-                      <div className="rounded-2xl bg-white p-4">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      <div className="rounded-2xl bg-surface-panel p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                           Inspiration Linked
                         </p>
-                        <p className="mt-2 text-sm font-semibold text-slate-900">
+                        <p className="mt-2 text-sm font-semibold text-ink-primary">
                           {selectedInspiration.title}
                         </p>
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-ink-muted">
                           {titleCase(selectedInspiration.category)}
                         </p>
                       </div>
                     )}
 
                     {selectedMaterial && (
-                      <div className="rounded-2xl bg-white p-4">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      <div className="rounded-2xl bg-surface-panel p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                           Fabric Linked
                         </p>
-                        <p className="mt-2 text-sm font-semibold text-slate-900">
+                        <p className="mt-2 text-sm font-semibold text-ink-primary">
                           {selectedMaterial.name}
                         </p>
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-ink-muted">
                           {selectedMaterial.quantityInStock} {selectedMaterial.unit} in stock
                         </p>
                       </div>
@@ -1245,39 +1245,39 @@ function OrderFormModal({
                 )}
               </section>
 
-              <section className="rounded-[24px] border border-slate-200 bg-slate-50/60 p-5">
+              <section className="rounded-sf-lg border border-line bg-surface-workspace/60 p-5">
                 <div className="mb-4 flex items-center gap-2">
-                  <Shirt className="h-5 w-5 text-[#0F6E8C]" />
-                  <h3 className="text-base font-semibold text-slate-900">Production Ready Output</h3>
+                  <Shirt className="h-5 w-5 text-action-primary" />
+                  <h3 className="text-base font-semibold text-ink-primary">Production Ready Output</h3>
                 </div>
 
                 <div className="space-y-3 text-sm">
-                  <div className="rounded-2xl bg-white p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <div className="rounded-2xl bg-surface-panel p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                       Garment Type
                     </p>
-                    <p className="mt-2 font-semibold text-slate-900">
+                    <p className="mt-2 font-semibold text-ink-primary">
                       {titleCase(form.garmentType)}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-white p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <div className="rounded-2xl bg-surface-panel p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                       Measurement Fields Captured
                     </p>
-                    <p className="mt-2 font-semibold text-slate-900">
+                    <p className="mt-2 font-semibold text-ink-primary">
                       {Object.keys(parseMeasurementValues(form.measurements)).length}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-white p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <div className="rounded-2xl bg-surface-panel p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
                       Production Stages
                     </p>
-                    <p className="mt-2 font-semibold text-slate-900">
+                    <p className="mt-2 font-semibold text-ink-primary">
                       {existingOrder?.productionStages?.length || DEFAULT_PRODUCTION_STAGES.length} stages
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-ink-muted">
                       New orders auto-initialize workflow from Measurement.
                     </p>
                   </div>
@@ -1293,19 +1293,19 @@ function OrderFormModal({
           </div>
         </form>
 
-        <div className="border-t border-slate-200 p-5">
+        <div className="border-t border-line p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-2xl border border-slate-200 px-4 py-3 font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-2xl border border-line px-4 py-3 font-medium text-ink-secondary hover:bg-surface-workspace"
             >
               Cancel
             </button>
             <button
               type="submit"
               form="order-form"
-              className="rounded-2xl bg-[#0F6E8C] px-4 py-3 font-semibold text-white hover:bg-[#0C5C74]"
+              className="rounded-2xl bg-action-primary px-4 py-3 font-semibold text-white hover:bg-action-hover"
             >
               {mode === 'create' ? 'Create Order' : 'Save Changes'}
             </button>
@@ -1373,16 +1373,16 @@ function AddMaterialToOrderModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-[24px] bg-white shadow-xl">
-        <div className="h-1.5 w-full bg-[#0F6E8C]" />
+      <div className="w-full max-w-md rounded-sf-lg bg-surface-panel shadow-xl">
+        <div className="h-1.5 w-full bg-action-primary" />
 
-        <div className="flex items-center justify-between border-b border-slate-200 p-4">
+        <div className="flex items-center justify-between border-b border-line p-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">Add Material to Order</h2>
-            <p className="mt-1 text-sm text-slate-500">{orderLabel}</p>
+            <h2 className="text-lg font-semibold text-ink-primary">Add Material to Order</h2>
+            <p className="mt-1 text-sm text-ink-muted">{orderLabel}</p>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1 hover:bg-slate-100">
-            <X className="h-5 w-5 text-slate-500" />
+          <button onClick={onClose} className="rounded-lg p-1 hover:bg-action-secondary">
+            <X className="h-5 w-5 text-ink-muted" />
           </button>
         </div>
 
@@ -1394,11 +1394,11 @@ function AddMaterialToOrderModal({
           )}
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Material</label>
+            <label className="mb-1 block text-sm font-medium text-ink-secondary">Material</label>
             <select
               value={fabricRecordId}
               onChange={(e) => setFabricRecordId(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+              className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
             >
               {activeMaterials.length === 0 ? (
                 <option value="">No materials available</option>
@@ -1413,7 +1413,7 @@ function AddMaterialToOrderModal({
           </div>
 
           {selectedMaterial && (
-            <div className="rounded-2xl bg-slate-50 p-3 text-sm text-slate-700">
+            <div className="rounded-2xl bg-surface-workspace p-3 text-sm text-ink-secondary">
               <p>
                 <span className="font-medium">In stock:</span> {selectedMaterial.quantityInStock}{' '}
                 {selectedMaterial.unit}
@@ -1428,25 +1428,25 @@ function AddMaterialToOrderModal({
           )}
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Quantity Used</label>
+            <label className="mb-1 block text-sm font-medium text-ink-secondary">Quantity Used</label>
             <input
               type="number"
               min="0"
               step="0.01"
               value={quantityUsed}
               onChange={(e) => setQuantityUsed(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+              className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               placeholder="4"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Notes</label>
+            <label className="mb-1 block text-sm font-medium text-ink-secondary">Notes</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+              className="w-full resize-none rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               placeholder="Used for body, sleeve, collar, lining..."
             />
           </div>
@@ -1455,14 +1455,14 @@ function AddMaterialToOrderModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 font-medium text-slate-700 hover:bg-slate-50"
+              className="flex-1 rounded-xl border border-line px-4 py-2.5 font-medium text-ink-secondary hover:bg-surface-workspace"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!selectedMaterial}
-              className="flex-1 rounded-xl bg-[#0F6E8C] px-4 py-2.5 font-medium text-white hover:bg-[#0C5C74] disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="flex-1 rounded-xl bg-action-primary px-4 py-2.5 font-medium text-white hover:bg-action-hover disabled:cursor-not-allowed disabled:bg-slate-300"
             >
               Assign Material
             </button>
@@ -1482,7 +1482,7 @@ function FormField({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-ink-secondary">{label}</span>
       {children}
     </label>
   );
@@ -1502,19 +1502,19 @@ function SummaryCard({
   tone: 'brand' | 'sky' | 'amber' | 'slate';
 }) {
   const tones = {
-    brand: 'bg-sky-50 text-[#0F6E8C]',
-    sky: 'bg-cyan-50 text-cyan-700',
+    brand: 'bg-action-secondary text-action-primary',
+    sky: 'bg-action-secondary text-action-primary',
     amber: 'bg-amber-50 text-amber-700',
-    slate: 'bg-slate-100 text-slate-700',
+    slate: 'bg-action-secondary text-ink-secondary',
   };
 
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-sf-lg border border-line bg-surface-panel p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500">{title}</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
-          <p className="mt-1 text-xs text-slate-400">{subtitle}</p>
+          <p className="text-sm text-ink-muted">{title}</p>
+          <p className="mt-1 text-2xl font-bold text-ink-primary">{value}</p>
+          <p className="mt-1 text-xs text-ink-muted">{subtitle}</p>
         </div>
         <div className={`rounded-2xl p-3 ${tones[tone]}`}>
           <Icon className="h-5 w-5" />
@@ -1526,10 +1526,10 @@ function SummaryCard({
 
 function OrderStatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    draft: 'bg-slate-100 text-slate-700',
-    in_progress: 'bg-sky-100 text-sky-700',
+    draft: 'bg-action-secondary text-ink-secondary',
+    in_progress: 'bg-action-secondary text-action-primary',
     ready: 'bg-green-100 text-green-700',
-    delivered: 'bg-cyan-100 text-cyan-700',
+    delivered: 'bg-cyan-100 text-action-primary',
     cancelled: 'bg-red-100 text-red-700',
   };
 

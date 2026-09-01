@@ -32,13 +32,13 @@ export function ApiHealthCheck() {
   }, []);
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-900">Backend Status</h2>
-      <p className="mt-2 text-sm text-slate-500">{message}</p>
+    <div className="rounded-2xl border border-line bg-surface-panel p-4 shadow-sm">
+      <h2 className="text-lg font-semibold text-ink-primary">Backend Status</h2>
+      <p className="mt-2 text-sm text-ink-muted">{message}</p>
 
       <div className="mt-3">
         {status === 'loading' && (
-          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+          <span className="inline-flex rounded-full bg-action-secondary px-3 py-1 text-xs font-medium text-ink-secondary">
             Checking...
           </span>
         )}

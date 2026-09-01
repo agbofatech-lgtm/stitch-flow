@@ -12,6 +12,7 @@ module.exports = {
           workspace: "var(--sf-surface-workspace)",
           panel: "var(--sf-surface-panel)",
           elevated: "var(--sf-surface-elevated)",
+          floating: "var(--sf-surface-floating)",
         },
         ink: {
           primary: "var(--sf-text-primary)",
@@ -33,7 +34,9 @@ module.exports = {
         line: {
           DEFAULT: "var(--sf-border-default)",
           strong: "var(--sf-border-strong)",
+          subtle: "var(--sf-border-subtle)",
         },
+        disabled: "var(--sf-disabled)",
         ring: {
           focus: "var(--sf-focus-ring)",
         },

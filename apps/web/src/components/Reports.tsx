@@ -575,9 +575,9 @@ export function Reports() {
   }, [orders, materialUsages, fabricRecords, selectedProductionRange, now]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 p-4 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-surface-canvas via-surface-panel to-surface-workspace p-4 lg:p-8">
       <div className="mx-auto max-w-7xl space-y-8">
-        <section className="relative overflow-hidden rounded-[28px] border border-white/50 bg-gradient-to-r from-[#0F6E8C] via-[#117793] to-[#0C5C74] p-6 text-white shadow-2xl">
+        <section className="relative overflow-hidden rounded-sf-workspace border border-white/50 bg-gradient-to-r from-action-primary via-action-primary to-action-hover p-6 text-white shadow-2xl">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.10),transparent_24%)]" />
 
           <img
@@ -602,7 +602,7 @@ export function Reports() {
           <div className="relative grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
             <div>
               <div className="mb-4 flex flex-wrap items-center gap-3">
-                <div className="rounded-2xl bg-white px-3 py-2 shadow-sm">
+                <div className="rounded-2xl bg-surface-panel px-3 py-2 shadow-sm">
                   <img
                     src={stitchflowLogo}
                     alt={`${BRAND.productName} logo`}
@@ -610,7 +610,7 @@ export function Reports() {
                   />
                 </div>
 
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-sm backdrop-blur-sm">
+                <div className="inline-flex items-center gap-2 rounded-full bg-surface-panel/15 px-3 py-1 text-sm backdrop-blur-sm">
                   <Sparkles className="h-4 w-4" />
                   Business Intelligence
                 </div>
@@ -711,7 +711,7 @@ export function Reports() {
                 onChange={(e) =>
                   setProductionRangePreset(e.target.value as ReportingDatePreset)
                 }
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                className="rounded-xl border border-line bg-surface-panel px-3 py-2 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
               >
                 <option value="last7Days">Last 7 days</option>
                 <option value="last30Days">Last 30 days</option>
@@ -726,22 +726,22 @@ export function Reports() {
                     type="date"
                     value={customStartDate}
                     onChange={(e) => setCustomStartDate(e.target.value)}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                    className="rounded-xl border border-line bg-surface-panel px-3 py-2 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                   />
                   <input
                     type="date"
                     value={customEndDate}
                     onChange={(e) => setCustomEndDate(e.target.value)}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-sky-300"
+                    className="rounded-xl border border-line bg-surface-panel px-3 py-2 text-sm text-ink-secondary outline-none transition focus:border-action-primary"
                   />
                 </>
               )}
             </div>
           }
         >
-          <div className="mb-5 rounded-2xl border border-sky-100 bg-sky-50/70 px-4 py-3 text-sm text-slate-600">
+          <div className="mb-5 rounded-2xl border border-line bg-action-secondary/70 px-4 py-3 text-sm text-ink-secondary">
             Showing production KPIs for{' '}
-            <span className="font-semibold text-slate-900">
+            <span className="font-semibold text-ink-primary">
               {selectedProductionRange.label}
             </span>
             .
@@ -788,18 +788,18 @@ export function Reports() {
           </div>
 
           <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <div className="rounded-[24px] border border-white/60 bg-white/90 p-6 shadow-lg">
+            <div className="rounded-sf-lg border border-white/60 bg-surface-panel/90 p-6 shadow-lg">
               <div className="mb-4 flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900">
+                  <h3 className="text-lg font-semibold text-ink-primary">
                     Orders by Stage
                   </h3>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-ink-muted">
                     Current production load across stages
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-sky-50 px-3 py-2 text-sm font-medium text-[#0F6E8C]">
+                <div className="rounded-2xl bg-action-secondary px-3 py-2 text-sm font-medium text-action-primary">
                   {productionKpis.ordersByStage.length} stage
                   {productionKpis.ordersByStage.length === 1 ? '' : 's'}
                 </div>
@@ -824,13 +824,13 @@ export function Reports() {
               )}
             </div>
 
-            <div className="rounded-[24px] border border-white/60 bg-white/90 p-6 shadow-lg">
+            <div className="rounded-sf-lg border border-white/60 bg-surface-panel/90 p-6 shadow-lg">
               <div className="mb-4 flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900">
+                  <h3 className="text-lg font-semibold text-ink-primary">
                     Turnaround Snapshot
                   </h3>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-ink-muted">
                     Delivery speed and stage pressure signals
                   </p>
                 </div>
@@ -869,20 +869,20 @@ export function Reports() {
                 {productionKpis.ordersByStage.slice(0, 5).map((item) => (
                   <div
                     key={item.stage}
-                    className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+                    className="flex items-center justify-between rounded-2xl border border-line bg-surface-workspace px-4 py-3"
                   >
                     <div>
-                      <p className="font-medium text-slate-900">{item.stage}</p>
-                      <p className="text-sm text-slate-500">Current workload</p>
+                      <p className="font-medium text-ink-primary">{item.stage}</p>
+                      <p className="text-sm text-ink-muted">Current workload</p>
                     </div>
-                    <div className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-slate-700 shadow-sm">
+                    <div className="rounded-full bg-surface-panel px-3 py-1 text-sm font-semibold text-ink-secondary shadow-sm">
                       {item.count}
                     </div>
                   </div>
                 ))}
 
                 {productionKpis.ordersByStage.length === 0 && (
-                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center text-sm text-slate-500">
+                  <div className="rounded-2xl border border-dashed border-line bg-surface-workspace p-5 text-center text-sm text-ink-muted">
                     No stage distribution available for this date range.
                   </div>
                 )}
@@ -890,12 +890,12 @@ export function Reports() {
             </div>
           </div>
 
-          <div className="rounded-[24px] border border-slate-200 bg-slate-50/70 p-5">
+          <div className="rounded-sf-lg border border-line bg-surface-workspace/70 p-5">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-slate-900">
+              <h3 className="text-lg font-semibold text-ink-primary">
                 Advanced Production Reports
               </h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-ink-muted">
                 Material consumption and bottleneck views are available on Studio
               </p>
             </div>
@@ -907,8 +907,8 @@ export function Reports() {
               compact
             >
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-                <div className="rounded-[24px] border border-slate-200 bg-white p-5">
-                  <h4 className="mb-4 text-base font-semibold text-slate-900">
+                <div className="rounded-sf-lg border border-line bg-surface-panel p-5">
+                  <h4 className="mb-4 text-base font-semibold text-ink-primary">
                     Material Consumption by Garment Type
                   </h4>
 
@@ -919,37 +919,37 @@ export function Reports() {
                       description="Tracked material usage linked to orders will appear here."
                     />
                   ) : (
-                    <div className="overflow-hidden rounded-2xl border border-slate-200">
-                      <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-slate-50">
+                    <div className="overflow-hidden rounded-2xl border border-line">
+                      <table className="min-w-full divide-y divide-line">
+                        <thead className="bg-surface-workspace">
                           <tr>
-                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
                               Garment Type
                             </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
                               Quantity Used
                             </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
                               Usage Records
                             </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
                               Linked Orders
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 bg-white">
+                        <tbody className="divide-y divide-line bg-surface-panel">
                           {(productionKpis.materialConsumption ?? []).map((item) => (
                             <tr key={item.garmentType}>
-                              <td className="px-4 py-3 text-sm font-medium text-slate-900">
+                              <td className="px-4 py-3 text-sm font-medium text-ink-primary">
                                 {item.garmentType}
                               </td>
-                              <td className="px-4 py-3 text-sm text-slate-600">
+                              <td className="px-4 py-3 text-sm text-ink-secondary">
                                 {(item.totalQuantity ?? 0).toFixed(2)} {item.unitLabel}
                               </td>
-                              <td className="px-4 py-3 text-sm text-slate-600">
+                              <td className="px-4 py-3 text-sm text-ink-secondary">
                                 {item.usageCount}
                               </td>
-                              <td className="px-4 py-3 text-sm text-slate-600">
+                              <td className="px-4 py-3 text-sm text-ink-secondary">
                                 {item.orderCount}
                               </td>
                             </tr>
@@ -960,8 +960,8 @@ export function Reports() {
                   )}
                 </div>
 
-                <div className="rounded-[24px] border border-slate-200 bg-white p-5">
-                  <h4 className="mb-4 text-base font-semibold text-slate-900">
+                <div className="rounded-sf-lg border border-line bg-surface-panel p-5">
+                  <h4 className="mb-4 text-base font-semibold text-ink-primary">
                     Bottleneck View
                   </h4>
 
@@ -1045,7 +1045,7 @@ export function Reports() {
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             <div>
-              <h3 className="mb-3 text-base font-semibold text-slate-900">Top Customers</h3>
+              <h3 className="mb-3 text-base font-semibold text-ink-primary">Top Customers</h3>
 
               {reportData.topCustomers.length === 0 ? (
                 <EmptyBlock
@@ -1091,7 +1091,7 @@ export function Reports() {
             </div>
 
             <div>
-              <h3 className="mb-3 text-base font-semibold text-slate-900">
+              <h3 className="mb-3 text-base font-semibold text-ink-primary">
                 Repeat Customer Watch
               </h3>
 
@@ -1106,11 +1106,11 @@ export function Reports() {
                   {(reportData.repeatCustomers ?? []).map((entry) => (
                     <div
                       key={entry.customer.id}
-                      className="rounded-2xl border border-slate-200 bg-white p-4"
+                      className="rounded-2xl border border-line bg-surface-panel p-4"
                     >
                       <div className="mb-3">
-                        <p className="font-semibold text-slate-900">{entry.customer.fullName}</p>
-                        <p className="text-sm text-slate-500">
+                        <p className="font-semibold text-ink-primary">{entry.customer.fullName}</p>
+                        <p className="text-sm text-ink-muted">
                           Repeat client • {entry.ordersCount} orders
                         </p>
                       </div>
@@ -1148,7 +1148,7 @@ export function Reports() {
 
               {reportData.customersWithPendingBalances.length > 0 && (
                 <div className="mt-6">
-                  <h3 className="mb-3 text-base font-semibold text-slate-900">
+                  <h3 className="mb-3 text-base font-semibold text-ink-primary">
                     Pending Balance Watchlist
                   </h3>
 
@@ -1159,8 +1159,8 @@ export function Reports() {
                         className="flex items-center justify-between rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3"
                       >
                         <div>
-                          <p className="font-medium text-slate-900">{entry.customer.fullName}</p>
-                          <p className="text-sm text-slate-500">
+                          <p className="font-medium text-ink-primary">{entry.customer.fullName}</p>
+                          <p className="text-sm text-ink-muted">
                             {entry.ordersCount} order{entry.ordersCount === 1 ? '' : 's'}
                           </p>
                         </div>
@@ -1220,7 +1220,7 @@ export function Reports() {
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             <div>
-              <h3 className="mb-3 text-base font-semibold text-slate-900">Most Used Materials</h3>
+              <h3 className="mb-3 text-base font-semibold text-ink-primary">Most Used Materials</h3>
 
               {reportData.mostUsedMaterials.length === 0 ? (
                 <EmptyBlock
@@ -1233,16 +1233,16 @@ export function Reports() {
                   {(reportData.mostUsedMaterials ?? []).map((entry, index) => (
                     <div
                       key={entry.material.id}
-                      className="rounded-2xl border border-slate-200 bg-white p-4"
+                      className="rounded-2xl border border-line bg-surface-panel p-4"
                     >
                       <div className="mb-3 flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sm font-bold text-[#0F6E8C]">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-action-secondary text-sm font-bold text-action-primary">
                           {index === 0 ? <Crown className="h-5 w-5" /> : `#${index + 1}`}
                         </div>
 
                         <div>
-                          <p className="font-semibold text-slate-900">{entry.material.name}</p>
-                          <p className="text-sm text-slate-500">
+                          <p className="font-semibold text-ink-primary">{entry.material.name}</p>
+                          <p className="text-sm text-ink-muted">
                             {entry.material.fabricType} • {entry.material.color}
                           </p>
                         </div>
@@ -1364,7 +1364,7 @@ export function Reports() {
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             <div>
-              <h3 className="mb-3 text-base font-semibold text-slate-900">
+              <h3 className="mb-3 text-base font-semibold text-ink-primary">
                 Best-selling Order Types
               </h3>
 
@@ -1379,16 +1379,16 @@ export function Reports() {
                   {(reportData.bestSellingOrderTypes ?? []).map((item, index) => (
                     <div
                       key={item.name}
-                      className="rounded-2xl border border-slate-200 bg-white p-4"
+                      className="rounded-2xl border border-line bg-surface-panel p-4"
                     >
                       <div className="mb-3 flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sm font-bold text-[#0F6E8C]">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-action-secondary text-sm font-bold text-action-primary">
                           {index === 0 ? <Crown className="h-5 w-5" /> : `#${index + 1}`}
                         </div>
 
                         <div>
-                          <p className="font-semibold text-slate-900">{item.name}</p>
-                          <p className="text-sm text-slate-500">
+                          <p className="font-semibold text-ink-primary">{item.name}</p>
+                          <p className="text-sm text-ink-muted">
                             {item.count} order{item.count === 1 ? '' : 's'}
                           </p>
                         </div>
@@ -1417,7 +1417,7 @@ export function Reports() {
 
             <div className="space-y-6">
               <div>
-                <h3 className="mb-3 text-base font-semibold text-slate-900">
+                <h3 className="mb-3 text-base font-semibold text-ink-primary">
                   Workflow Distribution
                 </h3>
 
@@ -1485,12 +1485,12 @@ export function Reports() {
           </div>
         </SectionShell>
 
-        <section className="relative overflow-hidden rounded-[24px] border border-white/60 bg-white/90 p-6 shadow-lg">
+        <section className="relative overflow-hidden rounded-sf-lg border border-white/60 bg-surface-panel/90 p-6 shadow-lg">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-ink-primary">
               Studio-only Advanced Insights
             </h2>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-ink-muted">
               Premium studio-level business signals and operational summaries
             </p>
           </div>
@@ -1583,11 +1583,11 @@ function SectionShell({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-[24px] border border-white/60 bg-white/90 p-6 shadow-lg">
+    <section className="rounded-sf-lg border border-white/60 bg-surface-panel/90 p-6 shadow-lg">
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-          <p className="text-sm text-slate-500">{subtitle}</p>
+          <h2 className="text-lg font-semibold text-ink-primary">{title}</h2>
+          <p className="text-sm text-ink-muted">{subtitle}</p>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -1595,7 +1595,7 @@ function SectionShell({
           {actionLabel && onAction && (
             <button
               onClick={onAction}
-              className="text-sm font-medium text-[#0F6E8C] hover:text-[#0C5C74]"
+              className="text-sm font-medium text-action-primary hover:text-action-hover"
             >
               {actionLabel}
             </button>
@@ -1618,8 +1618,8 @@ function TopInfoCard({
   icon: ElementType;
 }) {
   return (
-    <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
+    <div className="rounded-2xl border border-white/15 bg-surface-panel/10 p-4 backdrop-blur-sm">
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-surface-panel/15">
         <Icon className="h-5 w-5 text-white" />
       </div>
       <p className="text-xs uppercase tracking-wide text-white/75">{label}</p>
@@ -1645,23 +1645,23 @@ function MetricCard({
 }) {
   const tones = {
     green: 'bg-green-100 text-green-600',
-    brand: 'bg-sky-100 text-[#0F6E8C]',
+    brand: 'bg-action-secondary text-action-primary',
     amber: 'bg-amber-100 text-amber-600',
     red: 'bg-red-100 text-red-600',
-    sky: 'bg-cyan-100 text-cyan-700',
+    sky: 'bg-cyan-100 text-action-primary',
   };
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="rounded-[24px] border border-white/60 bg-white/90 p-5 text-left shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
+      className="rounded-sf-lg border border-white/60 bg-surface-panel/90 p-5 text-left shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500">{title}</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
-          <p className="mt-1 text-xs text-slate-400">{subtitle}</p>
+          <p className="text-sm text-ink-muted">{title}</p>
+          <p className="mt-1 text-2xl font-bold text-ink-primary">{value}</p>
+          <p className="mt-1 text-xs text-ink-muted">{subtitle}</p>
         </div>
         <div className={`rounded-2xl p-3 ${tones[tone]}`}>
           <Icon className="h-5 w-5" />
@@ -1685,16 +1685,16 @@ function ChartCard({
   const max = Math.max(...(data ?? []).map((item) => item.value), 1);
 
   const barTones = {
-    brand: 'bg-[#0F6E8C]',
-    sky: 'bg-cyan-500',
+    brand: 'bg-action-primary',
+    sky: 'bg-action-secondary0',
     amber: 'bg-amber-500',
   };
 
   return (
-    <div className="rounded-[24px] border border-white/60 bg-white/90 p-6 shadow-lg">
+    <div className="rounded-sf-lg border border-white/60 bg-surface-panel/90 p-6 shadow-lg">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-        <p className="text-sm text-slate-500">{subtitle}</p>
+        <h2 className="text-lg font-semibold text-ink-primary">{title}</h2>
+        <p className="text-sm text-ink-muted">{subtitle}</p>
       </div>
 
       <div className="flex h-48 items-end gap-3">
@@ -1711,7 +1711,7 @@ function ChartCard({
                 }}
               />
             </div>
-            <p className="text-center text-xs font-medium text-slate-500">{item.label}</p>
+            <p className="text-center text-xs font-medium text-ink-muted">{item.label}</p>
           </div>
         ))}
       </div>
@@ -1733,9 +1733,9 @@ function ComparisonCard({
   rightValue: string;
 }) {
   return (
-    <div className="rounded-[24px] border border-white/60 bg-white/90 p-6 shadow-lg">
+    <div className="rounded-sf-lg border border-white/60 bg-surface-panel/90 p-6 shadow-lg">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+        <h2 className="text-lg font-semibold text-ink-primary">{title}</h2>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -1769,10 +1769,10 @@ function HighlightCard({
   tone: 'brand' | 'sky' | 'amber' | 'slate';
 }) {
   const tones = {
-    brand: 'bg-sky-50 text-[#0F6E8C]',
-    sky: 'bg-cyan-50 text-cyan-700',
+    brand: 'bg-action-secondary text-action-primary',
+    sky: 'bg-action-secondary text-action-primary',
     amber: 'bg-amber-50 text-amber-700',
-    slate: 'bg-slate-100 text-slate-700',
+    slate: 'bg-action-secondary text-ink-secondary',
   };
 
   return (
@@ -1796,8 +1796,8 @@ function MiniMetric({
   const tones = {
     green: 'bg-green-50 text-green-700',
     amber: 'bg-amber-50 text-amber-700',
-    brand: 'bg-sky-50 text-[#0F6E8C]',
-    sky: 'bg-cyan-50 text-cyan-700',
+    brand: 'bg-action-secondary text-action-primary',
+    sky: 'bg-action-secondary text-action-primary',
   };
 
   return (
@@ -1820,15 +1820,15 @@ function StatTile({
   tone: 'brand' | 'sky' | 'slate' | 'amber';
 }) {
   const tones = {
-    brand: 'bg-sky-50 text-[#0F6E8C]',
-    sky: 'bg-cyan-50 text-cyan-700',
-    slate: 'bg-slate-100 text-slate-700',
+    brand: 'bg-action-secondary text-action-primary',
+    sky: 'bg-action-secondary text-action-primary',
+    slate: 'bg-action-secondary text-ink-secondary',
     amber: 'bg-amber-50 text-amber-700',
   };
 
   return (
     <div className={`rounded-2xl p-4 ${tones[tone]}`}>
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white/70">
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-surface-panel/70">
         <Icon className="h-5 w-5" />
       </div>
       <p className="text-xs font-semibold uppercase tracking-wide opacity-80">
@@ -1855,15 +1855,15 @@ function RankedCustomerCard({
   }>;
 }) {
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col gap-4 rounded-2xl border border-line bg-surface-panel p-4 md:flex-row md:items-center md:justify-between">
       <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sm font-bold text-[#0F6E8C]">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-action-secondary text-sm font-bold text-action-primary">
           {rank === 1 ? <Crown className="h-5 w-5" /> : `#${rank}`}
         </div>
 
         <div>
-          <p className="font-semibold text-slate-900">{name}</p>
-          <p className="text-sm text-slate-500">{subtitle}</p>
+          <p className="font-semibold text-ink-primary">{name}</p>
+          <p className="text-sm text-ink-muted">{subtitle}</p>
         </div>
       </div>
 
@@ -1903,13 +1903,13 @@ function ListBlock({
 }) {
   const toneStyles = {
     amber: 'border-amber-100 bg-amber-50 text-amber-800 text-amber-700',
-    gray: 'border-slate-200 bg-slate-50 text-slate-700 text-slate-500',
+    gray: 'border-line bg-surface-workspace text-ink-secondary text-ink-muted',
     red: 'border-red-100 bg-red-50 text-red-700 text-red-600',
   } as const;
 
   return (
     <div>
-      <h3 className="mb-3 text-base font-semibold text-slate-900">{title}</h3>
+      <h3 className="mb-3 text-base font-semibold text-ink-primary">{title}</h3>
 
       {items.length === 0 ? (
         <EmptyBlock
@@ -1929,8 +1929,8 @@ function ListBlock({
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="font-medium text-slate-900">{item.name}</p>
-                    <p className="text-sm text-slate-500">{item.subtitle}</p>
+                    <p className="font-medium text-ink-primary">{item.name}</p>
+                    <p className="text-sm text-ink-muted">{item.subtitle}</p>
                   </div>
                   <div className="text-right">
                     <p className={`font-semibold ${parts[2]}`}>{item.value}</p>
@@ -1960,21 +1960,21 @@ function StudioInsightCard({
   tone: 'brand' | 'amber' | 'sky';
 }) {
   const tones = {
-    brand: 'bg-sky-50 text-[#0F6E8C]',
+    brand: 'bg-action-secondary text-action-primary',
     amber: 'bg-amber-50 text-amber-700',
-    sky: 'bg-cyan-50 text-cyan-700',
+    sky: 'bg-action-secondary text-action-primary',
   };
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-line-subtle bg-surface-panel p-5 shadow-sm">
       <div
         className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl ${tones[tone]}`}
       >
         <Icon className="h-5 w-5" />
       </div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</p>
-      <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">{title}</p>
+      <p className="mt-2 text-2xl font-bold text-ink-primary">{value}</p>
+      <p className="mt-2 text-sm leading-6 text-ink-muted">{description}</p>
     </div>
   );
 }
@@ -1996,21 +1996,21 @@ function HorizontalStageBars({
         <div key={item.stage}>
           <div className="mb-2 flex items-center justify-between gap-3">
             <div>
-              <p className="font-medium text-slate-900">{item.stage}</p>
-              <p className="text-sm text-slate-500">
+              <p className="font-medium text-ink-primary">{item.stage}</p>
+              <p className="text-sm text-ink-muted">
                 {item.sampleSize} completed stage
                 {item.sampleSize === 1 ? '' : 's'}
               </p>
             </div>
             <div className="text-right">
-              <p className="font-semibold text-slate-900">
+              <p className="font-semibold text-ink-primary">
                 {(item.averageDays ?? 0).toFixed(1)} days
               </p>
-              <p className="text-xs text-slate-500">Average duration</p>
+              <p className="text-xs text-ink-muted">Average duration</p>
             </div>
           </div>
 
-          <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+          <div className="h-3 overflow-hidden rounded-full bg-action-secondary">
             <div
               className="h-full rounded-full bg-amber-500"
               style={{ width: `${Math.max((item.averageDays / max) * 100, 8)}%` }}
@@ -2032,10 +2032,10 @@ function EmptyBlock({
   description: string;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-      <Icon className="mx-auto mb-3 h-8 w-8 text-slate-400" />
-      <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-      <p className="mt-2 text-sm text-slate-500">{description}</p>
+    <div className="rounded-2xl border border-dashed border-line bg-surface-workspace p-8 text-center">
+      <Icon className="mx-auto mb-3 h-8 w-8 text-ink-muted" />
+      <h3 className="text-base font-semibold text-ink-primary">{title}</h3>
+      <p className="mt-2 text-sm text-ink-muted">{description}</p>
     </div>
   );
 }

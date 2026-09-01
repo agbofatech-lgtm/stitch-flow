@@ -100,12 +100,12 @@ export function OrderCard({
       : order.status === 'delivered'
       ? 'bg-green-500'
       : order.status === 'ready'
-      ? 'bg-cyan-500'
+      ? 'bg-action-secondary0'
       : order.status === 'cancelled'
       ? 'bg-red-400'
       : isDue
       ? 'bg-amber-400'
-      : 'bg-[#0F6E8C]';
+      : 'bg-action-primary';
 
   const handleCardClick = () => {
     onSelect?.(order);
@@ -117,14 +117,14 @@ export function OrderCard({
 
   return (
     <div
-      className={`cursor-pointer overflow-hidden rounded-[24px] border bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
+      className={`cursor-pointer overflow-hidden rounded-sf-lg border bg-surface-panel shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
         alertSeverity === 'critical'
           ? 'border-red-200'
           : alertSeverity === 'warning'
           ? 'border-amber-200'
           : isDue
           ? 'border-amber-200'
-          : 'border-slate-200'
+          : 'border-line'
       } ${className}`}
       onClick={handleCardClick}
     >
@@ -134,7 +134,7 @@ export function OrderCard({
         <div className="mb-3 flex items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="font-semibold text-slate-900">{order.orderNumber}</h3>
+              <h3 className="font-semibold text-ink-primary">{order.orderNumber}</h3>
               <OrderStatusBadge status={order.status} />
               {alertSummary.isBlocked && (
                 <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
@@ -142,24 +142,24 @@ export function OrderCard({
                 </span>
               )}
             </div>
-            <p className="mt-0.5 text-sm text-slate-500">{order.orderType}</p>
+            <p className="mt-0.5 text-sm text-ink-muted">{order.orderType}</p>
           </div>
 
-          <span className="text-lg font-semibold text-slate-900">
+          <span className="text-lg font-semibold text-ink-primary">
             {formatCurrency(order.totalAmount, safeCurrency(order.currency, workspaceCurrency))}
           </span>
         </div>
 
         <div className="flex flex-wrap gap-4 text-sm">
-          <div className="flex items-center gap-2 text-slate-600">
-            <User className="h-4 w-4 text-slate-400" />
+          <div className="flex items-center gap-2 text-ink-secondary">
+            <User className="h-4 w-4 text-ink-muted" />
             {order.customer?.fullName || 'No customer linked'}
           </div>
 
           {order.dueDate && (
             <div
               className={`flex items-center gap-2 ${
-                isDue ? 'text-amber-700' : 'text-slate-600'
+                isDue ? 'text-amber-700' : 'text-ink-secondary'
               }`}
             >
               <Calendar className="h-4 w-4" />
@@ -167,13 +167,13 @@ export function OrderCard({
             </div>
           )}
 
-          <div className="flex items-center gap-2 text-slate-400">
+          <div className="flex items-center gap-2 text-ink-muted">
             <Clock className="h-4 w-4" />
             Created: {format(new Date(order.createdAt), 'MMM d')}
           </div>
 
           {measurementCount > 0 && (
-            <div className="flex items-center gap-2 text-[#0F6E8C]">
+            <div className="flex items-center gap-2 text-action-primary">
               <Ruler className="h-4 w-4" />
               {measurementCount} measurements saved
             </div>
@@ -181,7 +181,7 @@ export function OrderCard({
         </div>
 
         {alertSummary.alerts.length > 0 && (
-          <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+          <div className="mt-4 rounded-2xl border border-line-subtle bg-surface-workspace p-4">
             <div className="mb-3 flex items-center gap-2">
               <AlertTriangle
                 className={`h-4 w-4 ${
@@ -192,7 +192,7 @@ export function OrderCard({
                     : 'text-sky-600'
                 }`}
               />
-              <h4 className="text-sm font-semibold text-slate-900">Production Alerts</h4>
+              <h4 className="text-sm font-semibold text-ink-primary">Production Alerts</h4>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -209,7 +209,7 @@ export function OrderCard({
               ))}
 
               {alertSummary.alerts.length > 3 && (
-                <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700">
+                <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-medium text-ink-secondary">
                   +{alertSummary.alerts.length - 3} more
                 </span>
               )}
@@ -217,13 +217,13 @@ export function OrderCard({
           </div>
         )}
 
-        <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+        <div className="mt-4 rounded-2xl border border-line-subtle bg-surface-workspace p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 text-[#0F6E8C]" />
-              <h4 className="text-sm font-semibold text-slate-900">Production Workflow</h4>
+              <ClipboardList className="h-4 w-4 text-action-primary" />
+              <h4 className="text-sm font-semibold text-ink-primary">Production Workflow</h4>
             </div>
-            <span className="text-xs font-medium text-slate-500">
+            <span className="text-xs font-medium text-ink-muted">
               {completedStages}/{stages.length} completed
             </span>
           </div>
@@ -236,10 +236,10 @@ export function OrderCard({
                   stage.status === 'completed'
                     ? 'bg-green-100 text-green-700'
                     : stage.status === 'active'
-                    ? 'bg-sky-100 text-sky-700'
+                    ? 'bg-action-secondary text-action-primary'
                     : stage.status === 'skipped'
-                    ? 'bg-slate-200 text-slate-600'
-                    : 'bg-slate-200 text-slate-600'
+                    ? 'bg-slate-200 text-ink-secondary'
+                    : 'bg-slate-200 text-ink-secondary'
                 }`}
               >
                 {stage.status === 'completed' ? '✓ ' : ''}
@@ -249,8 +249,8 @@ export function OrderCard({
           </div>
 
           {nextStage ? (
-            <p className="text-xs text-slate-500">
-              Next step: <span className="font-medium text-slate-700">{nextStage.label}</span>
+            <p className="text-xs text-ink-muted">
+              Next step: <span className="font-medium text-ink-secondary">{nextStage.label}</span>
             </p>
           ) : (
             <p className="text-xs font-medium text-green-600">Workflow completed</p>
@@ -261,9 +261,9 @@ export function OrderCard({
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Package className="h-4 w-4 text-rose-600" />
-              <h4 className="text-sm font-semibold text-slate-900">Materials Used</h4>
+              <h4 className="text-sm font-semibold text-ink-primary">Materials Used</h4>
             </div>
-            <span className="text-xs font-medium text-slate-500">
+            <span className="text-xs font-medium text-ink-muted">
               {materialUsages.length} item{materialUsages.length === 1 ? '' : 's'}
             </span>
           </div>
@@ -276,7 +276,7 @@ export function OrderCard({
                 return (
                   <div
                     key={usage.id}
-                    className="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm"
+                    className="flex items-center gap-2 rounded-full bg-surface-panel px-3 py-1.5 text-xs font-medium text-ink-secondary shadow-sm"
                     onClick={stop}
                   >
                     <span>
@@ -297,14 +297,14 @@ export function OrderCard({
               })}
             </div>
           ) : (
-            <p className="text-xs text-slate-500">No materials assigned yet.</p>
+            <p className="text-xs text-ink-muted">No materials assigned yet.</p>
           )}
         </div>
 
         {(order.notes || measurementCount > 0) && (
-          <div className="mt-3 border-t border-slate-100 pt-3">
+          <div className="mt-3 border-t border-line-subtle pt-3">
             {order.notes && (
-              <p className="mb-2 line-clamp-2 text-sm text-slate-500">{order.notes}</p>
+              <p className="mb-2 line-clamp-2 text-sm text-ink-muted">{order.notes}</p>
             )}
 
             {measurementCount > 0 && (
@@ -312,7 +312,7 @@ export function OrderCard({
                 {renderMeasurementChips(order.measurementSnapshot).map((item) => (
                   <span
                     key={item.label}
-                    className="rounded-full bg-sky-50 px-2.5 py-1 font-medium text-[#0F6E8C]"
+                    className="rounded-full bg-action-secondary px-2.5 py-1 font-medium text-action-primary"
                   >
                     {item.label}: {item.value}
                   </span>
@@ -323,7 +323,7 @@ export function OrderCard({
         )}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line-subtle bg-surface-workspace px-5 py-3">
         <div className="flex flex-wrap gap-2">
           {order.status === 'draft' && !order.productionStages?.length && onInitializeWorkflow && (
             <button
@@ -331,7 +331,7 @@ export function OrderCard({
                 stop(event);
                 onInitializeWorkflow(order);
               }}
-              className="rounded-xl bg-sky-100 px-3 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-200"
+              className="rounded-xl bg-action-secondary px-3 py-1.5 text-xs font-medium text-action-primary hover:bg-sky-200"
             >
               Start Workflow
             </button>
@@ -346,7 +346,7 @@ export function OrderCard({
                   stop(event);
                   onAdvanceStage(order);
                 }}
-                className="rounded-xl bg-[#0F6E8C]/10 px-3 py-1.5 text-xs font-medium text-[#0F6E8C] hover:bg-[#0F6E8C]/20"
+                className="rounded-xl bg-action-primary/10 px-3 py-1.5 text-xs font-medium text-action-primary hover:bg-action-primary/20"
               >
                 {nextStage.status === 'active'
                   ? `Complete ${nextStage.label}`
@@ -367,7 +367,7 @@ export function OrderCard({
           )}
         </div>
 
-        <div className="flex items-center gap-2 text-slate-400">
+        <div className="flex items-center gap-2 text-ink-muted">
           {alertSummary.alerts.length > 0 && (
             <AlertTriangle
               className={`h-4 w-4 ${
@@ -375,7 +375,7 @@ export function OrderCard({
                   ? 'text-red-500'
                   : alertSeverity === 'warning'
                   ? 'text-amber-500'
-                  : 'text-sky-500'
+                  : 'text-action-primary'
               }`}
             />
           )}
@@ -383,7 +383,7 @@ export function OrderCard({
             <CheckCircle2 className="h-4 w-4 text-green-500" />
           )}
           {footerRight}
-          <ChevronRight className="h-5 w-5 text-slate-400" />
+          <ChevronRight className="h-5 w-5 text-ink-muted" />
         </div>
       </div>
     </div>
@@ -392,10 +392,10 @@ export function OrderCard({
 
 function OrderStatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    draft: 'bg-slate-100 text-slate-700',
-    in_progress: 'bg-sky-100 text-sky-700',
+    draft: 'bg-action-secondary text-ink-secondary',
+    in_progress: 'bg-action-secondary text-action-primary',
     ready: 'bg-green-100 text-green-700',
-    delivered: 'bg-cyan-100 text-cyan-700',
+    delivered: 'bg-cyan-100 text-action-primary',
     cancelled: 'bg-red-100 text-red-700',
   };
 
@@ -494,5 +494,5 @@ function getNormalizedStages(stages?: ProductionStage[]): ProductionStage[] {
 function getAlertChipClasses(alert: OrderAlert) {
   if (alert.severity === 'critical') return 'bg-red-100 text-red-700';
   if (alert.severity === 'warning') return 'bg-amber-100 text-amber-700';
-  return 'bg-sky-100 text-sky-700';
+  return 'bg-action-secondary text-action-primary';
 }

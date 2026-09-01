@@ -179,13 +179,13 @@ export function Materials() {
     <div className="p-4 lg:p-8">
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-sm font-medium text-[#0F6E8C]">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-line bg-action-secondary px-3 py-1 text-sm font-medium text-action-primary">
             <Warehouse className="h-4 w-4" />
             {BRAND.productName} Materials Inventory
           </div>
 
-          <h1 className="text-2xl font-bold text-slate-900">Materials</h1>
-          <p className="mt-1 text-slate-500">
+          <h1 className="text-2xl font-bold text-ink-primary">Materials</h1>
+          <p className="mt-1 text-ink-muted">
             Manage fabric inventory, stock levels, monthly consumption, reorder planning,
             and inactive stock.
           </p>
@@ -196,8 +196,8 @@ export function Materials() {
           disabled={!featureAccess.canManageMaterialInventory.allowed}
           className={`flex items-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-colors ${
             featureAccess.canManageMaterialInventory.allowed
-              ? 'bg-[#0F6E8C] text-white shadow-sm hover:bg-[#0C5C74]'
-              : 'cursor-not-allowed bg-slate-100 text-slate-400'
+              ? 'bg-action-primary text-white shadow-sm hover:bg-action-hover'
+              : 'cursor-not-allowed bg-action-secondary text-ink-muted'
           }`}
         >
           <Plus className="h-4 w-4" />
@@ -264,7 +264,7 @@ export function Materials() {
       </div>
 
       {reorderSuggestions.length > 0 && (
-        <div className="mb-6 rounded-[24px] border border-amber-200 bg-amber-50 p-5 shadow-sm">
+        <div className="mb-6 rounded-sf-lg border border-amber-200 bg-amber-50 p-5 shadow-sm">
           <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex gap-3">
               <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-700" />
@@ -298,12 +298,12 @@ export function Materials() {
             {(reorderSuggestions ?? []).map((item) => (
               <div
                 key={item.id}
-                className="rounded-2xl border border-amber-100 bg-white p-4"
+                className="rounded-2xl border border-amber-100 bg-surface-panel p-4"
               >
                 <div className="mb-2 flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="font-semibold text-slate-900">{item.name}</h3>
-                    <p className="text-sm text-slate-500">
+                    <h3 className="font-semibold text-ink-primary">{item.name}</h3>
+                    <p className="text-sm text-ink-muted">
                       {capitalize(item.fabricType)} • {item.color}
                     </p>
                   </div>
@@ -311,7 +311,7 @@ export function Materials() {
                   <ShoppingCart className="h-5 w-5 text-amber-600" />
                 </div>
 
-                <div className="space-y-1 text-sm text-slate-600">
+                <div className="space-y-1 text-sm text-ink-secondary">
                   <p>
                     In stock:{' '}
                     <span className="font-medium">
@@ -354,14 +354,14 @@ export function Materials() {
       )}
 
       {inactiveMaterials.length > 0 && (
-        <div className="mb-6 rounded-[24px] border border-slate-200 bg-slate-50 p-5 shadow-sm">
+        <div className="mb-6 rounded-sf-lg border border-line bg-surface-workspace p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <Archive className="mt-0.5 h-5 w-5 text-slate-600" />
+            <Archive className="mt-0.5 h-5 w-5 text-ink-secondary" />
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-ink-primary">
                 Inactive Materials
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-ink-secondary">
                 {inactiveMaterials.length} material
                 {inactiveMaterials.length > 1 ? 's are' : ' is'} currently inactive and
                 excluded from low-stock alerts and reorder planning.
@@ -372,20 +372,20 @@ export function Materials() {
       )}
 
       <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-muted" />
             <input
               type="text"
               placeholder="Search materials..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-4 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+              className="w-full rounded-xl border border-line py-2.5 pl-10 pr-4 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
             />
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
           <div className="flex flex-wrap gap-2">
             <FilterChip
               label="All"
@@ -428,12 +428,12 @@ export function Materials() {
           return (
             <div
               key={material.id}
-              className={`overflow-hidden rounded-[24px] border bg-white shadow-sm ${
+              className={`overflow-hidden rounded-sf-lg border bg-surface-panel shadow-sm ${
                 isInactive
-                  ? 'border-slate-200 opacity-90'
+                  ? 'border-line opacity-90'
                   : isLowStock
                   ? 'border-amber-200'
-                  : 'border-slate-200'
+                  : 'border-line'
               }`}
             >
               <div
@@ -442,7 +442,7 @@ export function Materials() {
                     ? 'bg-slate-300'
                     : isLowStock
                     ? 'bg-amber-400'
-                    : 'bg-[#0F6E8C]'
+                    : 'bg-action-primary'
                 }`}
               />
 
@@ -450,7 +450,7 @@ export function Materials() {
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="mb-2 flex flex-wrap items-center gap-2">
-                      <h3 className="text-lg font-semibold text-slate-900">{material.name}</h3>
+                      <h3 className="text-lg font-semibold text-ink-primary">{material.name}</h3>
 
                       {isLowStock && (
                         <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
@@ -459,13 +459,13 @@ export function Materials() {
                       )}
 
                       {isInactive && (
-                        <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700">
+                        <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-medium text-ink-secondary">
                           Inactive
                         </span>
                       )}
                     </div>
 
-                    <div className="flex flex-wrap gap-4 text-sm text-slate-600">
+                    <div className="flex flex-wrap gap-4 text-sm text-ink-secondary">
                       <span>Type: {capitalize(material.fabricType)}</span>
                       <span>Color: {material.color}</span>
                       <span>
@@ -475,7 +475,7 @@ export function Materials() {
                     </div>
 
                     {material.notes && (
-                      <p className="mt-3 text-sm text-slate-500">{material.notes}</p>
+                      <p className="mt-3 text-sm text-ink-muted">{material.notes}</p>
                     )}
 
                     {suggestion && !isInactive && (
@@ -493,7 +493,7 @@ export function Materials() {
                     )}
 
                     {isInactive && (
-                      <div className="mt-3 rounded-2xl bg-slate-100 p-3 text-sm text-slate-700">
+                      <div className="mt-3 rounded-2xl bg-action-secondary p-3 text-sm text-ink-secondary">
                         This material is inactive. It is excluded from low-stock alerts and
                         reorder suggestions until reactivated.
                       </div>
@@ -531,10 +531,10 @@ export function Materials() {
                   </div>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+                <div className="mt-4 flex flex-wrap gap-2 border-t border-line-subtle pt-4">
                   <button
                     onClick={() => setEditingMaterialId(material.id)}
-                    className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    className="rounded-xl border border-line px-3 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-workspace"
                   >
                     Edit
                   </button>
@@ -546,7 +546,7 @@ export function Materials() {
                     className={`rounded-xl px-3 py-2 text-sm font-medium ${
                       isInactive
                         ? 'border border-green-200 text-green-700 hover:bg-green-50'
-                        : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        : 'border border-line text-ink-secondary hover:bg-surface-workspace'
                     }`}
                   >
                     {isInactive ? 'Activate' : 'Mark Inactive'}
@@ -567,10 +567,10 @@ export function Materials() {
 
       {filteredMaterials.length === 0 && (
         <div className="py-12 text-center">
-          <div className="mx-auto max-w-md rounded-[24px] border border-dashed border-slate-200 bg-white p-8">
-            <Boxes className="mx-auto mb-3 h-8 w-8 text-slate-400" />
-            <h3 className="text-lg font-semibold text-slate-900">No materials found</h3>
-            <p className="mt-2 text-sm text-slate-500">
+          <div className="mx-auto max-w-md rounded-sf-lg border border-dashed border-line bg-surface-panel p-8">
+            <Boxes className="mx-auto mb-3 h-8 w-8 text-ink-muted" />
+            <h3 className="text-lg font-semibold text-ink-primary">No materials found</h3>
+            <p className="mt-2 text-sm text-ink-muted">
               Add a new material, adjust your search, or change the filter.
             </p>
           </div>
@@ -617,19 +617,19 @@ function SummaryCard({
   tone: 'brand' | 'sky' | 'slate' | 'amber';
 }) {
   const tones = {
-    brand: 'bg-sky-50 text-[#0F6E8C]',
-    sky: 'bg-cyan-50 text-cyan-700',
-    slate: 'bg-slate-100 text-slate-700',
+    brand: 'bg-action-secondary text-action-primary',
+    sky: 'bg-action-secondary text-action-primary',
+    slate: 'bg-action-secondary text-ink-secondary',
     amber: 'bg-amber-50 text-amber-700',
   };
 
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-sf-lg border border-line bg-surface-panel p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500">{title}</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
-          <p className="mt-1 text-xs text-slate-400">{subtitle}</p>
+          <p className="text-sm text-ink-muted">{title}</p>
+          <p className="mt-1 text-2xl font-bold text-ink-primary">{value}</p>
+          <p className="mt-1 text-xs text-ink-muted">{subtitle}</p>
         </div>
         <div className={`rounded-2xl p-3 ${tones[tone]}`}>
           <Icon className="h-5 w-5" />
@@ -647,11 +647,11 @@ function QuickReorderStat({
   value: string;
 }) {
   return (
-    <div className="rounded-xl bg-white px-4 py-3 text-sm shadow-sm">
+    <div className="rounded-xl bg-surface-panel px-4 py-3 text-sm shadow-sm">
       <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
         {label}
       </p>
-      <p className="mt-1 font-bold text-slate-900">{value}</p>
+      <p className="mt-1 font-bold text-ink-primary">{value}</p>
     </div>
   );
 }
@@ -666,10 +666,10 @@ function MiniInfoCard({
   tone: 'brand' | 'sky' | 'amber' | 'slate';
 }) {
   const tones = {
-    brand: 'bg-sky-50 text-[#0F6E8C]',
-    sky: 'bg-cyan-50 text-cyan-700',
+    brand: 'bg-action-secondary text-action-primary',
+    sky: 'bg-action-secondary text-action-primary',
     amber: 'bg-amber-50 text-amber-700',
-    slate: 'bg-slate-100 text-slate-700',
+    slate: 'bg-action-secondary text-ink-secondary',
   };
 
   return (
@@ -695,8 +695,8 @@ function FilterChip({
       onClick={onClick}
       className={`rounded-full px-3 py-2 text-sm font-medium transition ${
         active
-          ? 'bg-[#0F6E8C] text-white'
-          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+          ? 'bg-action-primary text-white'
+          : 'bg-action-secondary text-ink-secondary hover:bg-slate-200'
       }`}
     >
       {label}
@@ -744,11 +744,11 @@ function MaterialModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-[24px] bg-white shadow-xl">
-        <div className="h-1.5 w-full bg-[#0F6E8C]" />
+      <div className="w-full max-w-2xl rounded-sf-lg bg-surface-panel shadow-xl">
+        <div className="h-1.5 w-full bg-action-primary" />
 
-        <div className="border-b border-slate-200 p-4">
-          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+        <div className="border-b border-line p-4">
+          <h2 className="text-lg font-semibold text-ink-primary">{title}</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="max-h-[80vh] overflow-y-auto p-4">
@@ -757,7 +757,7 @@ function MaterialModal({
               <input
                 value={formData.name}
                 onChange={(e) => setFormData((s) => ({ ...s, name: e.target.value }))}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+                className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               />
             </Field>
 
@@ -767,7 +767,7 @@ function MaterialModal({
                 onChange={(e) =>
                   setFormData((s) => ({ ...s, fabricType: e.target.value }))
                 }
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+                className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               />
             </Field>
 
@@ -775,7 +775,7 @@ function MaterialModal({
               <input
                 value={formData.color}
                 onChange={(e) => setFormData((s) => ({ ...s, color: e.target.value }))}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+                className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               />
             </Field>
 
@@ -783,7 +783,7 @@ function MaterialModal({
               <input
                 value={formData.pattern}
                 onChange={(e) => setFormData((s) => ({ ...s, pattern: e.target.value }))}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+                className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               />
             </Field>
 
@@ -791,7 +791,7 @@ function MaterialModal({
               <input
                 value={formData.texture}
                 onChange={(e) => setFormData((s) => ({ ...s, texture: e.target.value }))}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+                className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               />
             </Field>
 
@@ -799,7 +799,7 @@ function MaterialModal({
               <input
                 value={formData.supplier}
                 onChange={(e) => setFormData((s) => ({ ...s, supplier: e.target.value }))}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+                className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               />
             </Field>
 
@@ -810,7 +810,7 @@ function MaterialModal({
                 onChange={(e) =>
                   setFormData((s) => ({ ...s, quantityInStock: e.target.value }))
                 }
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+                className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               />
             </Field>
 
@@ -818,7 +818,7 @@ function MaterialModal({
               <input
                 value={formData.unit}
                 onChange={(e) => setFormData((s) => ({ ...s, unit: e.target.value }))}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+                className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               />
             </Field>
 
@@ -829,7 +829,7 @@ function MaterialModal({
                 onChange={(e) =>
                   setFormData((s) => ({ ...s, costPerUnit: e.target.value }))
                 }
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+                className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               />
             </Field>
 
@@ -840,7 +840,7 @@ function MaterialModal({
                 onChange={(e) =>
                   setFormData((s) => ({ ...s, reorderLevel: e.target.value }))
                 }
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+                className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               />
             </Field>
           </div>
@@ -851,12 +851,12 @@ function MaterialModal({
                 value={formData.notes}
                 onChange={(e) => setFormData((s) => ({ ...s, notes: e.target.value }))}
                 rows={3}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+                className="w-full rounded-xl border border-line px-3 py-2 text-ink-secondary focus:outline-none focus:ring-2 focus:ring-action-primary"
               />
             </Field>
           </div>
 
-          <label className="mt-4 flex items-center gap-2 text-sm text-slate-700">
+          <label className="mt-4 flex items-center gap-2 text-sm text-ink-secondary">
             <input
               type="checkbox"
               checked={formData.isActive}
@@ -871,13 +871,13 @@ function MaterialModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 font-medium text-slate-700 hover:bg-slate-50"
+              className="flex-1 rounded-xl border border-line px-4 py-2.5 font-medium text-ink-secondary hover:bg-surface-workspace"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 rounded-xl bg-[#0F6E8C] px-4 py-2.5 font-medium text-white hover:bg-[#0C5C74]"
+              className="flex-1 rounded-xl bg-action-primary px-4 py-2.5 font-medium text-white hover:bg-action-hover"
             >
               Save Material
             </button>
@@ -897,7 +897,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-slate-700">{label}</label>
+      <label className="mb-1 block text-sm font-medium text-ink-secondary">{label}</label>
       {children}
     </div>
   );

@@ -108,20 +108,20 @@ export function Customers() {
     <div className="p-4 lg:p-8">
       <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-sm font-medium text-[#0F6E8C]">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-line bg-action-secondary px-3 py-1 text-sm font-medium text-action-primary">
             <Users className="h-4 w-4" />
             {BRAND.productName} Customer Management
           </div>
 
-          <h1 className="text-2xl font-bold text-slate-900">Customers</h1>
-          <p className="mt-1 text-slate-500">
+          <h1 className="text-2xl font-bold text-ink-primary">Customers</h1>
+          <p className="mt-1 text-ink-muted">
             View, create, edit, and inspect real customer records from the backend API.
           </p>
         </div>
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 rounded-xl bg-[#0F6E8C] px-4 py-2.5 font-medium text-white shadow-sm transition-colors hover:bg-[#0C5C74]"
+          className="flex items-center gap-2 rounded-xl bg-action-primary px-4 py-2.5 font-medium text-white shadow-sm transition-colors hover:bg-action-hover"
         >
           <Plus className="h-4 w-4" />
           Add Customer
@@ -154,20 +154,20 @@ export function Customers() {
         />
       </div>
 
-      <div className="relative mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+      <div className="relative mb-6 rounded-2xl border border-line bg-surface-panel shadow-sm">
+        <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-muted" />
         <input
           type="text"
           placeholder="Search customers by name, phone, or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-2xl py-3 pl-11 pr-4 text-slate-700 outline-none ring-0 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F6E8C]"
+          className="w-full rounded-2xl py-3 pl-11 pr-4 text-ink-secondary outline-none ring-0 placeholder:text-ink-muted focus:ring-2 focus:ring-action-primary"
         />
       </div>
 
       {loading && (
-        <div className="rounded-[24px] border border-slate-200 bg-white py-12 text-center">
-          <p className="text-slate-500">Loading customers...</p>
+        <div className="rounded-sf-lg border border-line bg-surface-panel py-12 text-center">
+          <p className="text-ink-muted">Loading customers...</p>
         </div>
       )}
 
@@ -185,7 +185,7 @@ export function Customers() {
             <button
               type="button"
               onClick={() => void loadCustomers()}
-              className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
+              className="rounded-lg border border-red-200 bg-surface-panel px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
             >
               Retry
             </button>
@@ -199,9 +199,9 @@ export function Customers() {
             {(filteredCustomers ?? []).map((customer) => (
               <div
                 key={customer.id}
-                className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="overflow-hidden rounded-sf-lg border border-line bg-surface-panel shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
-                <div className="h-1.5 w-full bg-[#0F6E8C]" />
+                <div className="h-1.5 w-full bg-action-primary" />
 
                 <div className="p-5">
                   <div
@@ -210,8 +210,8 @@ export function Customers() {
                   >
                     <div className="mb-4 flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-sky-100">
-                          <span className="font-semibold text-[#0F6E8C]">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-action-secondary">
+                          <span className="font-semibold text-action-primary">
                             {customer.fullName
                               .split(' ')
                               .map((n) => n[0])
@@ -220,8 +220,8 @@ export function Customers() {
                         </div>
 
                         <div>
-                          <h3 className="font-semibold text-slate-900">{customer.fullName}</h3>
-                          <p className="text-xs text-slate-400">
+                          <h3 className="font-semibold text-ink-primary">{customer.fullName}</h3>
+                          <p className="text-xs text-ink-muted">
                             Since{' '}
                             {customer.createdAt
                               ? format(new Date(customer.createdAt), 'MMM yyyy')
@@ -233,42 +233,42 @@ export function Customers() {
 
                     <div className="space-y-2 text-sm">
                       {customer.phone && (
-                        <div className="flex items-center gap-2 text-slate-600">
-                          <Phone className="h-4 w-4 text-slate-400" />
+                        <div className="flex items-center gap-2 text-ink-secondary">
+                          <Phone className="h-4 w-4 text-ink-muted" />
                           {customer.phone}
                         </div>
                       )}
 
                       {customer.email && (
-                        <div className="flex items-center gap-2 text-slate-600">
-                          <Mail className="h-4 w-4 text-slate-400" />
+                        <div className="flex items-center gap-2 text-ink-secondary">
+                          <Mail className="h-4 w-4 text-ink-muted" />
                           {customer.email}
                         </div>
                       )}
 
                       {customer.address && (
-                        <div className="flex items-start gap-2 text-slate-600">
-                          <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-400" />
+                        <div className="flex items-start gap-2 text-ink-secondary">
+                          <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-ink-muted" />
                           <span className="line-clamp-2">{customer.address}</span>
                         </div>
                       )}
                     </div>
 
                     {customer.notes && (
-                      <div className="mt-4 rounded-2xl bg-slate-50 p-3">
-                        <p className="line-clamp-2 text-xs text-slate-500">{customer.notes}</p>
+                      <div className="mt-4 rounded-2xl bg-surface-workspace p-3">
+                        <p className="line-clamp-2 text-xs text-ink-muted">{customer.notes}</p>
                       </div>
                     )}
 
                     <div className="mt-4 flex flex-wrap gap-2">
                       {customer.phone && (
-                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                        <span className="rounded-full bg-action-secondary px-2.5 py-1 text-xs font-medium text-ink-secondary">
                           Phone saved
                         </span>
                       )}
 
                       {customer.email && (
-                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                        <span className="rounded-full bg-action-secondary px-2.5 py-1 text-xs font-medium text-ink-secondary">
                           Email saved
                         </span>
                       )}
@@ -278,7 +278,7 @@ export function Customers() {
                   <div className="mt-4">
                     <button
                       onClick={() => setEditingCustomer(customer)}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-line px-3 py-2.5 text-sm font-medium text-ink-secondary hover:bg-surface-workspace"
                     >
                       <Pencil className="h-4 w-4" />
                       Edit
@@ -290,11 +290,11 @@ export function Customers() {
           </div>
 
           {filteredCustomers.length === 0 && (
-            <div className="rounded-[24px] border border-dashed border-slate-200 bg-white py-12 text-center">
-              <p className="font-medium text-slate-700">
+            <div className="rounded-sf-lg border border-dashed border-line bg-surface-panel py-12 text-center">
+              <p className="font-medium text-ink-secondary">
                 {customers.length === 0 ? 'No customers yet' : 'No customers match your search'}
               </p>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-ink-muted">
                 {customers.length === 0
                   ? 'Add your first customer to start creating orders and invoices.'
                   : 'Try a different name, phone number, or email.'}
@@ -365,35 +365,35 @@ function CustomerOrdersModal({
   return (
     <ModalShell title={customer.fullName} onClose={onClose}>
       <div className="space-y-6 p-4">
-        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+        <div className="rounded-2xl border border-line-subtle bg-surface-workspace p-4">
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="flex items-center gap-2 text-sm text-slate-700">
-              <Phone className="h-4 w-4 text-slate-400" />
+            <div className="flex items-center gap-2 text-sm text-ink-secondary">
+              <Phone className="h-4 w-4 text-ink-muted" />
               {customer.phone || 'No phone'}
             </div>
-            <div className="flex items-center gap-2 text-sm text-slate-700">
-              <Mail className="h-4 w-4 text-slate-400" />
+            <div className="flex items-center gap-2 text-sm text-ink-secondary">
+              <Mail className="h-4 w-4 text-ink-muted" />
               {customer.email || 'No email'}
             </div>
-            <div className="flex items-start gap-2 text-sm text-slate-700 md:col-span-2">
-              <MapPin className="mt-0.5 h-4 w-4 text-slate-400" />
+            <div className="flex items-start gap-2 text-sm text-ink-secondary md:col-span-2">
+              <MapPin className="mt-0.5 h-4 w-4 text-ink-muted" />
               {customer.address || 'No address'}
             </div>
           </div>
 
           {customer.notes && (
-            <p className="mt-3 text-sm text-slate-600">{customer.notes}</p>
+            <p className="mt-3 text-sm text-ink-secondary">{customer.notes}</p>
           )}
         </div>
 
         <div>
           <div className="mb-3 flex items-center gap-2">
-            <ClipboardList className="h-4 w-4 text-[#0F6E8C]" />
-            <h3 className="font-semibold text-slate-900">Order History</h3>
+            <ClipboardList className="h-4 w-4 text-action-primary" />
+            <h3 className="font-semibold text-ink-primary">Order History</h3>
           </div>
 
           {loading && (
-            <div className="rounded-2xl border border-dashed border-slate-200 p-4 text-sm text-slate-500">
+            <div className="rounded-2xl border border-dashed border-line p-4 text-sm text-ink-muted">
               Loading customer orders...
             </div>
           )}
@@ -405,7 +405,7 @@ function CustomerOrdersModal({
           )}
 
           {!loading && !error && orders.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-slate-200 p-4 text-sm text-slate-500">
+            <div className="rounded-2xl border border-dashed border-line p-4 text-sm text-ink-muted">
               No orders yet for this customer.
             </div>
           )}
@@ -415,23 +415,23 @@ function CustomerOrdersModal({
               {(orders ?? []).map((order) => (
                 <div
                   key={order.id}
-                  className="rounded-2xl border border-slate-200 bg-white p-4"
+                  className="rounded-2xl border border-line bg-surface-panel p-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="font-semibold text-slate-900">{order.orderNumber}</p>
+                        <p className="font-semibold text-ink-primary">{order.orderNumber}</p>
                         <OrderStatusBadge status={order.status} />
                       </div>
-                      <p className="mt-1 text-sm text-slate-500">{order.orderType}</p>
+                      <p className="mt-1 text-sm text-ink-muted">{order.orderType}</p>
                     </div>
 
                     <div className="text-right">
-                      <p className="font-semibold text-slate-900">
+                      <p className="font-semibold text-ink-primary">
                         {formatCurrency(order.totalAmount, safeCurrency(order.currency, 'GHS'))}
                       </p>
                       {order.createdAt && (
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-ink-muted">
                           {format(new Date(order.createdAt), 'MMM d, yyyy')}
                         </p>
                       )}
@@ -439,14 +439,14 @@ function CustomerOrdersModal({
                   </div>
 
                   {order.dueDate && (
-                    <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
+                    <div className="mt-3 flex items-center gap-2 text-sm text-ink-muted">
                       <Calendar className="h-4 w-4" />
                       Due {format(new Date(order.dueDate), 'MMM d, yyyy')}
                     </div>
                   )}
 
                   {order.notes && (
-                    <p className="mt-3 text-sm text-slate-500">{order.notes}</p>
+                    <p className="mt-3 text-sm text-ink-muted">{order.notes}</p>
                   )}
                 </div>
               ))}
@@ -530,14 +530,14 @@ function AddCustomerModal({
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 rounded-xl border border-line px-4 py-2.5 font-medium text-ink-secondary hover:bg-surface-workspace disabled:cursor-not-allowed disabled:opacity-60"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 rounded-xl bg-[#0F6E8C] px-4 py-2.5 font-medium text-white hover:bg-[#0C5C74] disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 rounded-xl bg-action-primary px-4 py-2.5 font-medium text-white hover:bg-action-hover disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? 'Saving...' : 'Add Customer'}
           </button>
@@ -623,14 +623,14 @@ function EditCustomerModal({
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 rounded-xl border border-line px-4 py-2.5 font-medium text-ink-secondary hover:bg-surface-workspace disabled:cursor-not-allowed disabled:opacity-60"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 rounded-xl bg-[#0F6E8C] px-4 py-2.5 font-medium text-white hover:bg-[#0C5C74] disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 rounded-xl bg-action-primary px-4 py-2.5 font-medium text-white hover:bg-action-hover disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
@@ -651,11 +651,11 @@ function ModalShell({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-[24px] bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b border-slate-200 p-4">
-          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-          <button onClick={onClose} className="rounded-lg p-1 hover:bg-slate-100">
-            <X className="h-5 w-5 text-slate-500" />
+      <div className="w-full max-w-2xl rounded-sf-lg bg-surface-panel shadow-xl">
+        <div className="flex items-center justify-between border-b border-line p-4">
+          <h2 className="text-lg font-semibold text-ink-primary">{title}</h2>
+          <button onClick={onClose} className="rounded-lg p-1 hover:bg-action-secondary">
+            <X className="h-5 w-5 text-ink-muted" />
           </button>
         </div>
         <div className="max-h-[85vh] overflow-y-auto">{children}</div>
@@ -678,18 +678,18 @@ function SummaryCard({
   tone: 'brand' | 'sky' | 'slate';
 }) {
   const tones = {
-    brand: 'bg-sky-50 text-[#0F6E8C]',
-    sky: 'bg-cyan-50 text-cyan-700',
-    slate: 'bg-slate-100 text-slate-700',
+    brand: 'bg-action-secondary text-action-primary',
+    sky: 'bg-action-secondary text-action-primary',
+    slate: 'bg-action-secondary text-ink-secondary',
   };
 
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500">{title}</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
-          <p className="mt-1 text-xs text-slate-400">{subtitle}</p>
+          <p className="text-sm text-ink-muted">{title}</p>
+          <p className="mt-1 text-2xl font-bold text-ink-primary">{value}</p>
+          <p className="mt-1 text-xs text-ink-muted">{subtitle}</p>
         </div>
 
         <div className={`rounded-2xl p-3 ${tones[tone]}`}>
@@ -702,10 +702,10 @@ function SummaryCard({
 
 function OrderStatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    draft: 'bg-slate-100 text-slate-700',
-    in_progress: 'bg-sky-100 text-sky-700',
+    draft: 'bg-action-secondary text-ink-secondary',
+    in_progress: 'bg-action-secondary text-action-primary',
     ready: 'bg-green-100 text-green-700',
-    delivered: 'bg-cyan-100 text-cyan-700',
+    delivered: 'bg-cyan-100 text-action-primary',
     cancelled: 'bg-red-100 text-red-700',
   };
 
@@ -744,66 +744,66 @@ function FormFields({
   return (
     <>
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">
+        <label className="mb-1 block text-sm font-medium text-ink-secondary">
           Full Name *
         </label>
         <input
           type="text"
           value={formData.fullName}
           onChange={(e) => setFormData((f) => ({ ...f, fullName: e.target.value }))}
-          className="w-full rounded-xl border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+          className="w-full rounded-xl border border-line px-3 py-2 focus:outline-none focus:ring-2 focus:ring-action-primary"
           placeholder="John Smith"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">
+        <label className="mb-1 block text-sm font-medium text-ink-secondary">
           Phone
         </label>
         <input
           type="tel"
           value={formData.phone}
           onChange={(e) => setFormData((f) => ({ ...f, phone: e.target.value }))}
-          className="w-full rounded-xl border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+          className="w-full rounded-xl border border-line px-3 py-2 focus:outline-none focus:ring-2 focus:ring-action-primary"
           placeholder="+233 24 000 0000"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">
+        <label className="mb-1 block text-sm font-medium text-ink-secondary">
           Email
         </label>
         <input
           type="email"
           value={formData.email}
           onChange={(e) => setFormData((f) => ({ ...f, email: e.target.value }))}
-          className="w-full rounded-xl border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+          className="w-full rounded-xl border border-line px-3 py-2 focus:outline-none focus:ring-2 focus:ring-action-primary"
           placeholder="john@example.com"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">
+        <label className="mb-1 block text-sm font-medium text-ink-secondary">
           Address
         </label>
         <textarea
           value={formData.address}
           onChange={(e) => setFormData((f) => ({ ...f, address: e.target.value }))}
           rows={2}
-          className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+          className="w-full resize-none rounded-xl border border-line px-3 py-2 focus:outline-none focus:ring-2 focus:ring-action-primary"
           placeholder="123 Main Street, City"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">
+        <label className="mb-1 block text-sm font-medium text-ink-secondary">
           Notes
         </label>
         <textarea
           value={formData.notes}
           onChange={(e) => setFormData((f) => ({ ...f, notes: e.target.value }))}
           rows={2}
-          className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0F6E8C]"
+          className="w-full resize-none rounded-xl border border-line px-3 py-2 focus:outline-none focus:ring-2 focus:ring-action-primary"
           placeholder="Any preferences or notes..."
         />
       </div>

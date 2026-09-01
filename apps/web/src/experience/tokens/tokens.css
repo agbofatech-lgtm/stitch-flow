@@ -3,6 +3,7 @@
   --sf-surface-workspace: #f7f3eb;
   --sf-surface-panel: #fbf8f2;
   --sf-surface-elevated: #fffcf7;
+  --sf-surface-floating: #fffcf7;
   --sf-text-primary: #1c1915;
   --sf-text-secondary: #3f3a33;
   --sf-text-muted: #6f675c;
@@ -14,9 +15,11 @@
   --sf-status-warning: #d97706;
   --sf-status-danger: #dc2626;
   --sf-status-info: #0284c7;
-  --sf-border-default: #d9e5ea;
-  --sf-border-strong: #b7c9d1;
+  --sf-border-subtle: #e7e1d6;
+  --sf-border-default: #d4cbbd;
+  --sf-border-strong: #b7a894;
   --sf-focus-ring: #0f6e8c;
+  --sf-disabled: #c4bdb2;
 
   --sf-font-sans: Inter, system-ui, sans-serif;
   --sf-font-display: 'Space Grotesk', Inter, system-ui, sans-serif;
@@ -40,6 +43,7 @@
   --sf-space-8: 2rem;
   --sf-space-10: 2.5rem;
   --sf-space-12: 3rem;
+  --sf-space-16: 4rem;
 
   --sf-radius-sm: 0.375rem;
   --sf-radius-md: 0.75rem;

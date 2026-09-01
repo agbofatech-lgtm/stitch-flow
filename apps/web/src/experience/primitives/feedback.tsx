@@ -1,6 +1,42 @@
 import type { ReactNode } from 'react';
 import { cn } from '../lib/cn';
 
+const STATUS_LABEL: Record<string, string> = {
+  draft: 'Draft',
+  active: 'Active',
+  pending: 'Pending',
+  processing: 'Processing',
+  in_progress: 'In progress',
+  ready: 'Ready',
+  completed: 'Completed',
+  delivered: 'Delivered',
+  failed: 'Failed',
+  cancelled: 'Cancelled',
+  archived: 'Archived',
+  overdue: 'Overdue',
+  offline: 'Offline',
+  syncing: 'Syncing',
+  unavailable: 'Unavailable',
+};
+
+export function StatusBadge({
+  status,
+}: {
+  status: string;
+}) {
+  const key = status.toLowerCase();
+  const tone =
+    key === 'completed' || key === 'delivered' || key === 'active' || key === 'ready'
+      ? 'success'
+      : key === 'failed' || key === 'cancelled' || key === 'overdue'
+        ? 'danger'
+        : key === 'pending' || key === 'processing' || key === 'in_progress' || key === 'syncing'
+          ? 'warning'
+          : 'neutral';
+  const label = STATUS_LABEL[key] || status.replace(/_/g, ' ');
+  return <Badge tone={tone}>{label}</Badge>;
+}
+
 export function Badge({
   tone = 'info',
   children,
@@ -40,7 +76,7 @@ export function ExperienceEmptyState({
   );
 }
 
-export function LoadingState({ label = 'Loading' }: { label?: string }) {
+export function LoadingState({ label = 'Preparing workspace…' }: { label?: string }) {
   return (
     <div role="status" className="flex items-center gap-2 text-body text-ink-muted">
       <span className="h-3 w-3 animate-pulse rounded-full bg-action-primary" />

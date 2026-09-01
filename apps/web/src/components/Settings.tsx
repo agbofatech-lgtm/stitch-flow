@@ -280,30 +280,30 @@ export function Settings() {
     tierSimulation === 'STUDIO'
       ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
       : tierSimulation === 'PRO'
-        ? 'bg-[#0F6E8C] text-white'
-        : 'bg-slate-100 text-slate-700';
+        ? 'bg-action-primary text-white'
+        : 'bg-action-secondary text-ink-secondary';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
+    <div className="min-h-screen bg-gradient-to-br from-surface-canvas via-surface-panel to-surface-workspace">
       <div className="mx-auto max-w-6xl p-4 lg:p-8">
-        <div className="mb-8 overflow-hidden rounded-[28px] border border-white/60 bg-white/80 p-6 shadow-xl backdrop-blur-sm">
+        <div className="mb-8 overflow-hidden rounded-sf-workspace border border-white/60 bg-surface-panel/80 p-6 shadow-xl backdrop-blur-sm">
           <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr] lg:items-center">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#0F6E8C]/10 px-3 py-1 text-sm font-medium text-[#0F6E8C]">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-action-primary/10 px-3 py-1 text-sm font-medium text-action-primary">
                 <Palette className="h-4 w-4" />
                 {BRAND.productName} by {BRAND.parentName}
               </div>
 
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 lg:text-3xl">
+              <h1 className="text-2xl font-bold tracking-tight text-ink-primary lg:text-3xl">
                 Settings
               </h1>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 lg:text-base">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-muted lg:text-base">
                 Manage your workspace profile, branding, subscription, and team access.
               </p>
             </div>
 
-            <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-5">
+            <div className="rounded-sf-lg border border-line bg-surface-workspace/80 p-5">
               <div className="mb-3 flex items-center gap-3">
                 <img
                   src={stitchflowLogo}
@@ -317,21 +317,21 @@ export function Settings() {
                 <span className="font-semibold">{currentPlan.name}</span>
               </div>
 
-              <p className="mt-3 text-sm text-slate-500">
+              <p className="mt-3 text-sm text-ink-muted">
                 Active workspace:{' '}
-                <span className="font-medium text-slate-800">{currentWorkspace.name}</span>
+                <span className="font-medium text-ink-primary">{currentWorkspace.name}</span>
               </p>
             </div>
           </div>
         </div>
 
         {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
-          <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
             {settingsLoading && (
-              <p className="text-sm text-slate-600">Loading backend settings...</p>
+              <p className="text-sm text-ink-secondary">Loading backend settings...</p>
             )}
             {settingsSaving && (
-              <p className="text-sm text-[#0F6E8C]">Saving settings...</p>
+              <p className="text-sm text-action-primary">Saving settings...</p>
             )}
             {settingsMessage && (
               <p className="text-sm text-green-700">{settingsMessage}</p>
@@ -342,18 +342,18 @@ export function Settings() {
           </div>
         )}
 
-        <div className="mb-6 rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
+        <div className="mb-6 rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
           <div className="mb-5">
-            <h2 className="text-lg font-semibold text-slate-900">Company Profile</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="text-lg font-semibold text-ink-primary">Company Profile</h2>
+            <p className="mt-1 text-sm text-ink-muted">
               Update the business information used across the app and branded invoice exports.
             </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
-  <label className="mb-1 flex items-center gap-2 text-sm font-medium text-slate-700">
-    <Users className="h-4 w-4 text-slate-400" />
+  <label className="mb-1 flex items-center gap-2 text-sm font-medium text-ink-secondary">
+    <Users className="h-4 w-4 text-ink-muted" />
     Owner Name
   </label>
   <input
@@ -362,13 +362,13 @@ export function Settings() {
     onChange={(e) =>
       setProfileForm((prev) => ({ ...prev, ownerName: e.target.value }))
     }
-    className="w-full rounded-xl border border-slate-200 px-3 py-2.5"
+    className="w-full rounded-xl border border-line px-3 py-2.5"
     placeholder="Enter owner name"
   />
 </div>
 <div className="md:col-span-2">
-              <label className="mb-1 flex items-center gap-2 text-sm font-medium text-slate-700">
-                <Building2 className="h-4 w-4 text-slate-400" />
+              <label className="mb-1 flex items-center gap-2 text-sm font-medium text-ink-secondary">
+                <Building2 className="h-4 w-4 text-ink-muted" />
                 Company Name
               </label>
               <input
@@ -377,14 +377,14 @@ export function Settings() {
                 onChange={(e) =>
                   setProfileForm((prev) => ({ ...prev, name: e.target.value }))
                 }
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
+                className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-ink-primary outline-none transition focus:border-action-primary focus:ring-2 focus:ring-action-primary/15"
                 placeholder="Enter company name"
               />
             </div>
 
             <div>
-              <label className="mb-1 flex items-center gap-2 text-sm font-medium text-slate-700">
-                <Palette className="h-4 w-4 text-slate-400" />
+              <label className="mb-1 flex items-center gap-2 text-sm font-medium text-ink-secondary">
+                <Palette className="h-4 w-4 text-ink-muted" />
                 Default Currency
               </label>
               <select
@@ -395,7 +395,7 @@ export function Settings() {
                     defaultCurrency: e.target.value,
                   }))
                 }
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
+                className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-ink-primary outline-none transition focus:border-action-primary focus:ring-2 focus:ring-action-primary/15"
               >
                 <option value="GHS">GHS</option>
                 <option value="USD">USD</option>
@@ -405,8 +405,8 @@ export function Settings() {
             </div>
 
             <div>
-              <label className="mb-1 flex items-center gap-2 text-sm font-medium text-slate-700">
-                <Phone className="h-4 w-4 text-slate-400" />
+              <label className="mb-1 flex items-center gap-2 text-sm font-medium text-ink-secondary">
+                <Phone className="h-4 w-4 text-ink-muted" />
                 Business Phone
               </label>
               <input
@@ -415,14 +415,14 @@ export function Settings() {
                 onChange={(e) =>
                   setProfileForm((prev) => ({ ...prev, phone: e.target.value }))
                 }
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
+                className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-ink-primary outline-none transition focus:border-action-primary focus:ring-2 focus:ring-action-primary/15"
                 placeholder="+233 24 000 0000"
               />
             </div>
 
             <div>
-              <label className="mb-1 flex items-center gap-2 text-sm font-medium text-slate-700">
-                <Mail className="h-4 w-4 text-slate-400" />
+              <label className="mb-1 flex items-center gap-2 text-sm font-medium text-ink-secondary">
+                <Mail className="h-4 w-4 text-ink-muted" />
                 Business Email
               </label>
               <input
@@ -431,14 +431,14 @@ export function Settings() {
                 onChange={(e) =>
                   setProfileForm((prev) => ({ ...prev, email: e.target.value }))
                 }
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
+                className="w-full rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-ink-primary outline-none transition focus:border-action-primary focus:ring-2 focus:ring-action-primary/15"
                 placeholder="studio@example.com"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1 flex items-center gap-2 text-sm font-medium text-slate-700">
-                <MapPin className="h-4 w-4 text-slate-400" />
+              <label className="mb-1 flex items-center gap-2 text-sm font-medium text-ink-secondary">
+                <MapPin className="h-4 w-4 text-ink-muted" />
                 Business Address
               </label>
               <textarea
@@ -447,7 +447,7 @@ export function Settings() {
                   setProfileForm((prev) => ({ ...prev, address: e.target.value }))
                 }
                 rows={3}
-                className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
+                className="w-full resize-none rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-ink-primary outline-none transition focus:border-action-primary focus:ring-2 focus:ring-action-primary/15"
                 placeholder="East Legon, Accra, Ghana"
               />
             </div>
@@ -456,7 +456,7 @@ export function Settings() {
           <div className="mt-5">
             <button
               onClick={handleSaveProfile}
-              className="rounded-xl bg-[#0F6E8C] px-4 py-2.5 font-medium text-white shadow-sm transition hover:bg-[#0C5C74]"
+              className="rounded-xl bg-action-primary px-4 py-2.5 font-medium text-white shadow-sm transition hover:bg-action-hover"
             >
               Save Company Profile
             </button>
@@ -464,12 +464,12 @@ export function Settings() {
         </div>
 
         {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
-          <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
             {settingsLoading && (
-              <p className="text-sm text-slate-600">Loading backend settings...</p>
+              <p className="text-sm text-ink-secondary">Loading backend settings...</p>
             )}
             {settingsSaving && (
-              <p className="text-sm text-[#0F6E8C]">Saving settings...</p>
+              <p className="text-sm text-action-primary">Saving settings...</p>
             )}
             {settingsMessage && (
               <p className="text-sm text-green-700">{settingsMessage}</p>
@@ -480,11 +480,11 @@ export function Settings() {
           </div>
         )}
 
-        <div className="mb-6 rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
+        <div className="mb-6 rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Current Plan</h2>
-              <p className="mt-1 text-sm text-slate-500">{currentWorkspace.name}</p>
+              <h2 className="text-lg font-semibold text-ink-primary">Current Plan</h2>
+              <p className="mt-1 text-sm text-ink-muted">{currentWorkspace.name}</p>
             </div>
 
             <div className={`flex items-center gap-2 rounded-xl px-4 py-2 ${planColors}`}>
@@ -494,9 +494,9 @@ export function Settings() {
           </div>
 
           {tierSimulation === 'BASIC' ? (
-            <div className="rounded-2xl border border-sky-100 bg-sky-50 p-4">
+            <div className="rounded-2xl border border-line bg-action-secondary p-4">
               <h3 className="mb-2 font-medium text-sky-900">Upgrade your workspace</h3>
-              <p className="mb-4 text-sm text-sky-700">
+              <p className="mb-4 text-sm text-action-primary">
                 Unlock PDF export, branding, advanced workflow tools, reports, and more.
               </p>
               <div className="flex flex-wrap gap-3">
@@ -505,8 +505,8 @@ export function Settings() {
                   disabled={!canManageBilling}
                   className={`rounded-xl px-4 py-2.5 font-medium ${
                     canManageBilling
-                      ? 'bg-[#0F6E8C] text-white hover:bg-[#0C5C74]'
-                      : 'cursor-not-allowed bg-slate-200 text-slate-400'
+                      ? 'bg-action-primary text-white hover:bg-action-hover'
+                      : 'cursor-not-allowed bg-slate-200 text-ink-muted'
                   }`}
                 >
                   {canManageBilling ? 'Upgrade to Pro' : 'Owner access required'}
@@ -518,7 +518,7 @@ export function Settings() {
                   className={`rounded-xl px-4 py-2.5 font-medium ${
                     canManageBilling
                       ? 'bg-amber-500 text-white hover:bg-amber-600'
-                      : 'cursor-not-allowed bg-slate-200 text-slate-400'
+                      : 'cursor-not-allowed bg-slate-200 text-ink-muted'
                   }`}
                 >
                   {canManageBilling ? 'Upgrade to Studio' : 'Owner access required'}
@@ -546,7 +546,7 @@ export function Settings() {
 
                   <button
                     onClick={() => simulateTier('BASIC')}
-                    className="rounded-xl px-4 py-2 text-sm text-slate-500 underline hover:text-slate-700"
+                    className="rounded-xl px-4 py-2 text-sm text-ink-muted underline hover:text-ink-secondary"
                   >
                     Simulate Basic plan
                   </button>
@@ -568,14 +568,14 @@ export function Settings() {
                 <div className="mt-3 flex flex-wrap gap-3">
                   <button
                     onClick={() => simulateTier('PRO')}
-                    className="rounded-xl bg-[#0F6E8C] px-4 py-2 text-sm font-medium text-white hover:bg-[#0C5C74]"
+                    className="rounded-xl bg-action-primary px-4 py-2 text-sm font-medium text-white hover:bg-action-hover"
                   >
                     Simulate Pro plan
                   </button>
 
                   <button
                     onClick={() => simulateTier('BASIC')}
-                    className="rounded-xl px-4 py-2 text-sm text-slate-500 underline hover:text-slate-700"
+                    className="rounded-xl px-4 py-2 text-sm text-ink-muted underline hover:text-ink-secondary"
                   >
                     Simulate Basic plan
                   </button>
@@ -586,12 +586,12 @@ export function Settings() {
         </div>
 
         {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
-          <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
             {settingsLoading && (
-              <p className="text-sm text-slate-600">Loading backend settings...</p>
+              <p className="text-sm text-ink-secondary">Loading backend settings...</p>
             )}
             {settingsSaving && (
-              <p className="text-sm text-[#0F6E8C]">Saving settings...</p>
+              <p className="text-sm text-action-primary">Saving settings...</p>
             )}
             {settingsMessage && (
               <p className="text-sm text-green-700">{settingsMessage}</p>
@@ -602,10 +602,10 @@ export function Settings() {
           </div>
         )}
 
-        <div className="mb-6 rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
+        <div className="mb-6 rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
           <div className="mb-5">
-            <h2 className="text-lg font-semibold text-slate-900">Branding</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="text-lg font-semibold text-ink-primary">Branding</h2>
+            <p className="mt-1 text-sm text-ink-muted">
               Upload your business logo so it appears on invoice PDFs and branded exports.
             </p>
           </div>
@@ -634,8 +634,8 @@ export function Settings() {
                 />
 
                 {currentWorkspace.logoUrl ? (
-                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-                    <div className="flex aspect-square items-center justify-center bg-white p-4">
+                  <div className="overflow-hidden rounded-2xl border border-line bg-surface-workspace">
+                    <div className="flex aspect-square items-center justify-center bg-surface-panel p-4">
                       <img
                         src={currentWorkspace.logoUrl}
                         alt="Workspace logo"
@@ -643,10 +643,10 @@ export function Settings() {
                       />
                     </div>
 
-                    <div className="flex gap-2 border-t border-slate-200 p-3">
+                    <div className="flex gap-2 border-t border-line p-3">
                       <button
                         onClick={() => logoInputRef.current?.click()}
-                        className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-line bg-surface-panel px-3 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-workspace"
                       >
                         <Upload className="h-4 w-4" />
                         Replace
@@ -683,11 +683,11 @@ export function Settings() {
                 ) : (
                   <button
                     onClick={() => logoInputRef.current?.click()}
-                    className="flex aspect-square w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center transition hover:border-[#0F6E8C] hover:bg-sky-50"
+                    className="flex aspect-square w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-surface-workspace p-6 text-center transition hover:border-action-primary hover:bg-action-secondary"
                   >
-                    <ImageIcon className="mb-3 h-8 w-8 text-slate-400" />
-                    <span className="font-medium text-slate-700">Upload Logo</span>
-                    <span className="mt-1 text-sm text-slate-500">
+                    <ImageIcon className="mb-3 h-8 w-8 text-ink-muted" />
+                    <span className="font-medium text-ink-secondary">Upload Logo</span>
+                    <span className="mt-1 text-sm text-ink-muted">
                       PNG, JPG, or other image formats
                     </span>
                   </button>
@@ -695,12 +695,12 @@ export function Settings() {
               </div>
 
               <div className="space-y-5">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                  <h3 className="mb-2 font-medium text-slate-900">Brand Settings</h3>
+                <div className="rounded-2xl border border-line bg-surface-workspace/80 p-4">
+                  <h3 className="mb-2 font-medium text-ink-primary">Brand Settings</h3>
 
                   <div className="space-y-4">
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-slate-700">
+                      <label className="mb-1 block text-sm font-medium text-ink-secondary">
                         Brand Color
                       </label>
                       <div className="flex items-center gap-3">
@@ -728,7 +728,7 @@ export function Settings() {
                               );
                             }
                           }}
-                          className="h-11 w-14 cursor-pointer rounded border border-slate-200 bg-white p-1"
+                          className="h-11 w-14 cursor-pointer rounded border border-line bg-surface-panel p-1"
                         />
                         <input
                           type="text"
@@ -754,13 +754,13 @@ export function Settings() {
                               );
                             }
                           }}
-                          className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
+                          className="flex-1 rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-sm text-ink-primary outline-none transition focus:border-action-primary focus:ring-2 focus:ring-action-primary/15"
                           placeholder="#0F6E8C"
                         />
                       </div>
                     </div>
 
-                    <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-3">
+                    <label className="flex items-start gap-3 rounded-xl border border-line bg-surface-panel p-3">
                       <input
                         type="checkbox"
                         checked={!!currentWorkspace.useLogoAsWatermark}
@@ -788,11 +788,11 @@ export function Settings() {
                         className="mt-1"
                       />
                       <div>
-                        <div className="flex items-center gap-2 font-medium text-slate-900">
-                          <Droplets className="h-4 w-4 text-slate-500" />
+                        <div className="flex items-center gap-2 font-medium text-ink-primary">
+                          <Droplets className="h-4 w-4 text-ink-muted" />
                           Use logo as watermark
                         </div>
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="mt-1 text-sm text-ink-muted">
                           When enabled, the uploaded logo appears faintly behind invoice PDF
                           content.
                         </p>
@@ -801,12 +801,12 @@ export function Settings() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <h3 className="mb-2 font-medium text-slate-900">How it works</h3>
-                  <ul className="space-y-2 text-sm text-slate-600">
-                    <li>• Your uploaded logo appears in invoice PDF exports.</li>
-                    <li>• Watermark uses the same uploaded logo.</li>
-                    <li>• Brand color can be reused across branded export styling.</li>
+                <div className="rounded-2xl border border-line bg-surface-panel p-4">
+                  <h3 className="mb-2 font-medium text-ink-primary">How it works</h3>
+                  <ul className="space-y-2 text-sm text-ink-secondary">
+                    <li>ï¿½ Your uploaded logo appears in invoice PDF exports.</li>
+                    <li>ï¿½ Watermark uses the same uploaded logo.</li>
+                    <li>ï¿½ Brand color can be reused across branded export styling.</li>
                   </ul>
                 </div>
               </div>
@@ -815,12 +815,12 @@ export function Settings() {
         </div>
 
         {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
-          <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
             {settingsLoading && (
-              <p className="text-sm text-slate-600">Loading backend settings...</p>
+              <p className="text-sm text-ink-secondary">Loading backend settings...</p>
             )}
             {settingsSaving && (
-              <p className="text-sm text-[#0F6E8C]">Saving settings...</p>
+              <p className="text-sm text-action-primary">Saving settings...</p>
             )}
             {settingsMessage && (
               <p className="text-sm text-green-700">{settingsMessage}</p>
@@ -831,35 +831,35 @@ export function Settings() {
           </div>
         )}
 
-        <div className="mb-6 rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
+        <div className="mb-6 rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
           <div className="mb-4 flex items-center gap-2">
-            <Info className="h-5 w-5 text-[#0F6E8C]" />
-            <h2 className="text-lg font-semibold text-slate-900">About</h2>
+            <Info className="h-5 w-5 text-action-primary" />
+            <h2 className="text-lg font-semibold text-ink-primary">About</h2>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <div className="rounded-2xl border border-line bg-surface-workspace p-5">
             <img
               src={stitchflowLogo}
               alt={`${BRAND.productName} logo`}
               className="h-11 w-auto"
             />
-            <p className="mt-3 text-sm text-slate-500">Version {BRAND.version}</p>
-            <p className="mt-3 text-sm leading-6 text-slate-700">
+            <p className="mt-3 text-sm text-ink-muted">Version {BRAND.version}</p>
+            <p className="mt-3 text-sm leading-6 text-ink-secondary">
               {BRAND.productName} is a tailoring business management platform for fashion SMEs.
             </p>
-            <p className="mt-2 text-sm font-medium text-[#0F6E8C]">
+            <p className="mt-2 text-sm font-medium text-action-primary">
               An {BRAND.parentName} Product
             </p>
           </div>
         </div>
 
         {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
-          <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
             {settingsLoading && (
-              <p className="text-sm text-slate-600">Loading backend settings...</p>
+              <p className="text-sm text-ink-secondary">Loading backend settings...</p>
             )}
             {settingsSaving && (
-              <p className="text-sm text-[#0F6E8C]">Saving settings...</p>
+              <p className="text-sm text-action-primary">Saving settings...</p>
             )}
             {settingsMessage && (
               <p className="text-sm text-green-700">{settingsMessage}</p>
@@ -870,16 +870,16 @@ export function Settings() {
           </div>
         )}
 
-        <div className="mb-6 rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">Plan Comparison</h2>
+        <div className="mb-6 rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
+          <h2 className="mb-4 text-lg font-semibold text-ink-primary">Plan Comparison</h2>
 
           <div className="overflow-x-auto">
             <div className="grid min-w-[720px] grid-cols-4 gap-4 text-sm">
-              <div className="font-medium text-slate-700">Feature</div>
-              <div className="text-center font-medium text-slate-700">
+              <div className="font-medium text-ink-secondary">Feature</div>
+              <div className="text-center font-medium text-ink-secondary">
                 {FEATURE_COMPARISON.BASIC.name}
               </div>
-              <div className="text-center font-medium text-[#0F6E8C]">
+              <div className="text-center font-medium text-action-primary">
                 {FEATURE_COMPARISON.PRO.name}
               </div>
               <div className="text-center font-medium text-amber-600">
@@ -888,29 +888,29 @@ export function Settings() {
 
               {(FEATURE_COMPARISON.BASIC.features ?? []).map((feature, i) => (
                 <div key={`row-${i}`} className="contents">
-                  <div className="border-t border-slate-100 py-2">{feature.name}</div>
+                  <div className="border-t border-line-subtle py-2">{feature.name}</div>
 
-                  <div className="flex justify-center border-t border-slate-100 py-2">
+                  <div className="flex justify-center border-t border-line-subtle py-2">
                     {FEATURE_COMPARISON.BASIC.features[i].included ? (
                       <Check className="h-5 w-5 text-green-500" />
                     ) : (
-                      <X className="h-5 w-5 text-slate-300" />
+                      <X className="h-5 w-5 text-ink-muted" />
                     )}
                   </div>
 
-                  <div className="flex justify-center border-t border-slate-100 py-2">
+                  <div className="flex justify-center border-t border-line-subtle py-2">
                     {FEATURE_COMPARISON.PRO.features[i]?.included ? (
                       <Check className="h-5 w-5 text-green-500" />
                     ) : (
-                      <X className="h-5 w-5 text-slate-300" />
+                      <X className="h-5 w-5 text-ink-muted" />
                     )}
                   </div>
 
-                  <div className="flex justify-center border-t border-slate-100 py-2">
+                  <div className="flex justify-center border-t border-line-subtle py-2">
                     {FEATURE_COMPARISON.STUDIO.features[i]?.included ? (
                       <Check className="h-5 w-5 text-green-500" />
                     ) : (
-                      <X className="h-5 w-5 text-slate-300" />
+                      <X className="h-5 w-5 text-ink-muted" />
                     )}
                   </div>
                 </div>
@@ -920,12 +920,12 @@ export function Settings() {
         </div>
 
         {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
-          <div className="mb-6 rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
             {settingsLoading && (
-              <p className="text-sm text-slate-600">Loading backend settings...</p>
+              <p className="text-sm text-ink-secondary">Loading backend settings...</p>
             )}
             {settingsSaving && (
-              <p className="text-sm text-[#0F6E8C]">Saving settings...</p>
+              <p className="text-sm text-action-primary">Saving settings...</p>
             )}
             {settingsMessage && (
               <p className="text-sm text-green-700">{settingsMessage}</p>
@@ -936,14 +936,14 @@ export function Settings() {
           </div>
         )}
 
-        <div className="mb-6 rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
+        <div className="mb-6 rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Team Members</h2>
-              <p className="text-sm text-slate-500">
+              <h2 className="text-lg font-semibold text-ink-primary">Team Members</h2>
+              <p className="text-sm text-ink-muted">
                 {members.length} member{members.length !== 1 && 's'}
                 {featureAccess.canInviteAssistant.limit !== undefined &&
-                  ` • ${featureAccess.canInviteAssistant.limit} assistant seats available`}
+                  ` ï¿½ ${featureAccess.canInviteAssistant.limit} assistant seats available`}
               </p>
             </div>
 
@@ -951,8 +951,8 @@ export function Settings() {
               disabled={!canManageAssistants || !featureAccess.canInviteAssistant.allowed}
               className={`flex items-center gap-2 rounded-xl px-4 py-2.5 font-medium ${
                 canManageAssistants && featureAccess.canInviteAssistant.allowed
-                  ? 'bg-[#0F6E8C] text-white hover:bg-[#0C5C74]'
-                  : 'cursor-not-allowed bg-slate-100 text-slate-400'
+                  ? 'bg-action-primary text-white hover:bg-action-hover'
+                  : 'cursor-not-allowed bg-action-secondary text-ink-muted'
               }`}
             >
               {!featureAccess.canInviteAssistant.allowed ? (
@@ -976,8 +976,8 @@ export function Settings() {
           )}
 
           {canManageAssistants && featureAccess.canInviteAssistant.allowed && (
-  <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-    <h3 className="mb-3 font-medium text-slate-900">Invite Assistant</h3>
+  <div className="mb-4 rounded-2xl border border-line bg-surface-workspace p-4">
+    <h3 className="mb-3 font-medium text-ink-primary">Invite Assistant</h3>
 
     <div className="grid gap-3 md:grid-cols-2">
       <input
@@ -987,7 +987,7 @@ export function Settings() {
         onChange={(e) =>
           setAssistantForm((prev) => ({ ...prev, fullName: e.target.value }))
         }
-        className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
+        className="rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-ink-primary outline-none transition focus:border-action-primary focus:ring-2 focus:ring-action-primary/15"
       />
 
       <input
@@ -997,7 +997,7 @@ export function Settings() {
         onChange={(e) =>
           setAssistantForm((prev) => ({ ...prev, email: e.target.value }))
         }
-        className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
+        className="rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-ink-primary outline-none transition focus:border-action-primary focus:ring-2 focus:ring-action-primary/15"
       />
 
       <input
@@ -1007,11 +1007,11 @@ export function Settings() {
         onChange={(e) =>
           setAssistantForm((prev) => ({ ...prev, phone: e.target.value }))
         }
-        className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 outline-none transition focus:border-[#0F6E8C] focus:ring-2 focus:ring-[#0F6E8C]/15"
+        className="rounded-xl border border-line bg-surface-panel px-3 py-2.5 text-ink-primary outline-none transition focus:border-action-primary focus:ring-2 focus:ring-action-primary/15"
       />
     </div>
 
-    <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-700">
+    <div className="mt-3 flex flex-wrap gap-4 text-sm text-ink-secondary">
       <label className="flex items-center gap-2">
         <input
           type="checkbox"
@@ -1059,7 +1059,7 @@ export function Settings() {
       <button
         onClick={handleAddAssistant}
         type="button"
-        className="rounded-xl bg-[#0F6E8C] px-4 py-2.5 font-medium text-white shadow-sm transition hover:bg-[#0C5C74]"
+        className="rounded-xl bg-action-primary px-4 py-2.5 font-medium text-white shadow-sm transition hover:bg-action-hover"
       >
         Add Assistant
       </button>
@@ -1070,11 +1070,11 @@ export function Settings() {
             {(members ?? []).filter((member) => member.role === 'assistant').map((member) => (
               <div
                 key={member.id}
-                className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/80 p-4"
+                className="flex items-center justify-between rounded-2xl border border-line bg-surface-workspace/80 p-4"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
-                    <span className="font-semibold text-[#0F6E8C]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-action-secondary">
+                    <span className="font-semibold text-action-primary">
                       {member.user.fullName
                         .split(' ')
                         .map((n) => n[0])
@@ -1084,21 +1084,21 @@ export function Settings() {
 
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-slate-900">{member.user.fullName}</span>
+                      <span className="font-medium text-ink-primary">{member.user.fullName}</span>
                       {member.role === 'owner' && (
                         <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
                           Owner
                         </span>
                       )}
                     </div>
-                    <span className="text-sm text-slate-500">{member.user.email}</span>
+                    <span className="text-sm text-ink-muted">{member.user.email}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                   {member.role === 'assistant' && (
                     <>
-                      <div className="space-x-2 text-xs text-slate-400">
+                      <div className="space-x-2 text-xs text-ink-muted">
                         {member.canManageCustomers && <span>Customers</span>}
                         {member.canManageOrders && <span>Orders</span>}
                         {member.canManagePayments && <span>Payments</span>}
@@ -1119,16 +1119,16 @@ export function Settings() {
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-white/60 bg-white/85 p-6 shadow-xl backdrop-blur-sm">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">Role Permissions</h2>
+        <div className="rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
+          <h2 className="mb-4 text-lg font-semibold text-ink-primary">Role Permissions</h2>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 p-4">
+            <div className="rounded-2xl border border-line p-4">
               <div className="mb-3 flex items-center gap-2">
                 <Crown className="h-5 w-5 text-amber-500" />
-                <span className="font-semibold text-slate-900">Owner</span>
+                <span className="font-semibold text-ink-primary">Owner</span>
               </div>
-              <ul className="space-y-2 text-sm text-slate-600">
+              <ul className="space-y-2 text-sm text-ink-secondary">
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-500" />
                   Manage billing & subscription
@@ -1148,12 +1148,12 @@ export function Settings() {
               </ul>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 p-4">
+            <div className="rounded-2xl border border-line p-4">
               <div className="mb-3 flex items-center gap-2">
                 <Shield className="h-5 w-5 text-blue-500" />
-                <span className="font-semibold text-slate-900">Assistant</span>
+                <span className="font-semibold text-ink-primary">Assistant</span>
               </div>
-              <ul className="space-y-2 text-sm text-slate-600">
+              <ul className="space-y-2 text-sm text-ink-secondary">
                 <li className="flex items-center gap-2">
                   <X className="h-4 w-4 text-red-400" />
                   Cannot manage billing
@@ -1174,7 +1174,7 @@ export function Settings() {
             </div>
           </div>
 
-          <p className="mt-8 text-center text-xs text-slate-400">{BRAND.footerText}</p>
+          <p className="mt-8 text-center text-xs text-ink-muted">{BRAND.footerText}</p>
         </div>
       </div>
     </div>

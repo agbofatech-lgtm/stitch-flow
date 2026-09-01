@@ -8,6 +8,7 @@ export const color = {
   workspace: 'var(--sf-surface-workspace)',
   panel: 'var(--sf-surface-panel)',
   elevated: 'var(--sf-surface-elevated)',
+  floating: 'var(--sf-surface-floating)',
   textPrimary: 'var(--sf-text-primary)',
   textSecondary: 'var(--sf-text-secondary)',
   textMuted: 'var(--sf-text-muted)',
@@ -19,6 +20,7 @@ export const color = {
   warning: 'var(--sf-status-warning)',
   danger: 'var(--sf-status-danger)',
   info: 'var(--sf-status-info)',
+  borderSubtle: 'var(--sf-border-subtle)',
   borderDefault: 'var(--sf-border-default)',
   borderStrong: 'var(--sf-border-strong)',
   focusRing: 'var(--sf-focus-ring)',
@@ -52,6 +54,7 @@ export const space = {
   8: 'var(--sf-space-8)',
   10: 'var(--sf-space-10)',
   12: 'var(--sf-space-12)',
+  16: 'var(--sf-space-16)',
 } as const;
 
 export const radius = {
