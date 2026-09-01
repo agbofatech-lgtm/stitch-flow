@@ -3,7 +3,8 @@
 | Field | Value |
 |---|---|
 | P19.0 Forensics | **COMPLETE** (`491cf70ca784f302b8a28b1c96ec8d805dc25ba5`) |
-| P19.1 Constitution | **COMPLETE** (this gate updated) |
+| P19.1 Constitution | **COMPLETE** |
+| P19.1.5 Decision package | **COMPLETE** (recommendations; Owner ticks pending) |
 | P19.2–P19.11 Implementation | **LOCKED** |
 | Billing / PSP / subscription tables | **NOT STARTED** |
 | Trusted Core | **UNTOUCHED** |

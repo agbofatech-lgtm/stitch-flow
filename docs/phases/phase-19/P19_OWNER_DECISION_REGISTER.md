@@ -1,65 +1,38 @@
 # P19 Owner Decision Register
 
-Owner: **Agbofa Benjamin**. Unticked boxes are not decisions. Agents must not tick these.
+Owner: **Agbofa Benjamin**. Agents must **not** tick these boxes. Recommendations are not acceptance.
 
-These decisions **block P19.2–P19.11 implementation**. Constitution (P19.1) may describe options.
-
----
-
-## OD-P19-01 — Tenant vs Workspace
-
-**FACT:** Glossary: Tenant = commercial/isolation boundary (not running). Workspace = operational unit inside a tenant (mock). Runtime has `workspaceId` only.
-
-**STOP-P19-C** if isolation is implemented before this decision.
-
-- [ ] **A.** Introduce Tenant as new platform entity; Workspace remains nested (matches glossary)
-- [ ] **B.** Temporary 1:1: existing Workspace **is** the Tenant until a parent is added
-- [ ] **C.** Freeze tenancy work; commercial waits
-- [ ] **Other:** ________________________________
-
-Owner / date: __________________
+P19.1.5 package: `P19_COMMERCIAL_ARCHITECTURE_DECISION_PACKAGE.md`.  
+P19.2 remains **LOCKED** until at least OD-P19-01 and OD-P19-05 are decided.
 
 ---
 
-## OD-P19-02 — Plan vocabulary
+## OD-P19-01 — Tenant authority
 
-**FACT:** `TierCode` BASIC/PRO/STUDIO vs `authService` free/pro/enterprise. ADR-003 already flags the synonym collision.
+**Question:** What is the canonical isolation boundary?
 
-**STOP-P19-E** if a new table or FeatureGate is aligned to one vocabulary in code without this tick.
+**Options considered:**  
+A. Workspace = Tenant  
+B. Tenant └── Workspace (1:1 bootstrap)  
+C. Freeze tenancy work  
 
-- [ ] Canonical codes **BASIC / PRO / STUDIO**
-- [ ] Canonical codes **FREE / PRO / ENTERPRISE** (or free/pro/enterprise)
-- [ ] New vocabulary (write canonical names): __________________
-- [ ] Defer — no plan catalog in code
+**Architect recommendation:** **B** — TENANT ≠ WORKSPACE. Bootstrap each current workspace 1:1 under a Tenant. Do not treat `workspaceId` as security.
 
-Owner / date: __________________
+**Why:** Glossary already splits them. `Workspace` mixing `billingStatus`/`tier` with shop branding is not proof of identity.
 
----
+**Consequences:** New platform entity later; product data keep `workspaceId` plus tenant scope; isolation must be server-side.
 
-## OD-P19-03 — Pricing currency and amounts
+**Security:** Never trust `X-Tenant-ID` / localStorage alone.
 
-**FACT:** `FEATURE_COMPARISON` USD $0 / $29 / $79. `TIER_META` GHS 0 / 45 / 90. ADR-006: do not add a third table.
+**Migration:** No data migration in this stage. Future mapping plan required.
 
-**STOP-P19-E**. Do not “pick GHS because Ghana” or “pick USD because FeatureGate” in implementation.
+**Trusted Core impact:** NONE (access only).
 
-- [ ] GHS is display currency; amounts TBD (do not treat 45/90 as law)
-- [ ] USD is display currency; amounts TBD (do not treat 29/79 as law)
-- [ ] Multi-currency later; no amounts in product code
-- [ ] Other: ________________________________
+**Owner decision:**
 
-Owner / date: __________________
-
----
-
-## OD-P19-04 — Billing provider
-
-**FACT:** No Stripe / Paystack / Flutterwave SDK. Must not select a provider in P19.1.
-
-**STOP-P19-G** if an adapter is added as if it were the domain.
-
-- [ ] Provider-neutral port only; no adapter this phase
-- [ ] Authorize named adapter(s): __________________
-- [ ] Defer billing runtime entirely
+- [ ] ACCEPT RECOMMENDATION (B)
+- [ ] SELECT ALTERNATIVE: A / C / other: ________
+- [ ] DEFER
 
 Owner / date: __________________
 
@@ -67,12 +40,102 @@ Owner / date: __________________
 
 ## OD-P19-05 — Authentication runtime
 
-**FACT:** Frontend JWT helpers and `authService` exist; backend `auth.ts` / `authRoutes.ts` are empty; ADR-009 one runtime.
+**Question:** What is the authoritative authentication runtime?
 
-**STOP-P19-B** if a second IdP/server is invented.
+**Options considered:**  
+A. Complete custom auth on existing `apps/backend` (JWT/bcrypt already declared; routes empty)  
+B. Managed IdP (named later) as adapter into that backend  
+C. Defer; keep mock AppContext session  
 
-- [ ] Complete authentication **on the existing** `apps/backend` runtime (ADR-009)
-- [ ] External IdP (name): __________________
-- [ ] Defer authentication runtime; keep mock session TRANSITIONAL
+**Architect recommendation:** **A**. JWT answers WHO (`sub`) only. Tenant/role/entitlement resolved after auth. Do not use `apps/api` or web `authService` as a second authority (ADR-009).
+
+**Consequences:** Must actually implement empty `auth.ts` / `authRoutes.ts` in a later authorized slice. Custom JWT has operational security burden.
+
+**Trusted Core impact:** NONE.
+
+**Owner decision:**
+
+- [ ] ACCEPT RECOMMENDATION (A)
+- [ ] SELECT ALTERNATIVE: B (IdP name: ________) / C
+- [ ] DEFER
+
+Owner / date: __________________
+
+---
+
+## OD-P19-02 — Plan taxonomy
+
+**Question:** Canonical **internal** plan taxonomy? (Not prices, not marketing copy.)
+
+**Options considered:**  
+A. Fixed enum BASIC/PRO/STUDIO in app code  
+B. Database/Control Center catalog only  
+C. Hybrid: opaque PlanCode + configuration-driven PlanDefinition; `can(capability)`  
+D. Defer — no new catalog in code  
+
+**Architect recommendation:** **C as target**, **D until this is ticked**. Seed identifiers may map legacy BASIC/PRO/STUDIO; do not promote free/pro/enterprise. Never `if (plan === "Professional 2026")`.
+
+**Consequences:** FeatureGate stays TRANSITIONAL until a resolver exists.
+
+**Trusted Core impact:** NONE if access-only.
+
+**Owner decision:**
+
+- [ ] ACCEPT RECOMMENDATION (C target / D until implementation authorized)
+- [ ] SELECT ALTERNATIVE: A / B / other codes: ________
+- [ ] DEFER
+
+Owner / date: __________________
+
+---
+
+## OD-P19-03 — Pricing and currency
+
+**Question:** How to represent prices without hardcoding market strategy?
+
+**Options considered:**  
+A. Single-currency SaaS  
+B. Multi-currency price catalog + launch-market activation  
+C. Provider-controlled currency  
+
+**Architect recommendation:** **B**. PLAN ≠ PRICE. **No amounts.** Do not treat USD 29/79 or GHS 45/90 as law. Shop `CurrencyCode` already includes GHS/USD/NGN/GBP.
+
+**Consequences:** Launch ISO code is a sub-decision; amounts remain a later commercial decision.
+
+**Trusted Core impact:** NONE.
+
+**Owner decision:**
+
+- [ ] ACCEPT RECOMMENDATION (B)
+- [ ] SELECT ALTERNATIVE: A (ISO: ________) / C
+- [ ] Launch display currency if B: [ ] GHS [ ] USD [ ] other: ________
+- [ ] DEFER
+
+Owner / date: __________________
+
+**Amounts:** not requested and not recommended.
+
+---
+
+## OD-P19-04 — Payment provider
+
+**Question:** Provider strategy? (No integration.)
+
+**Options considered:**  
+A. Provider-neutral port; no adapter  
+B. Name Paystack / Flutterwave / Stripe now  
+C. Defer billing runtime entirely  
+
+**Architect recommendation:** **DEFER SELECTION (A+C)**. Candidates may be studied later. Repo has **zero** merchant/webhook evidence (STOP-P19-1.5-F if selected now).
+
+**Consequences:** No SDK install; shop Mobile Money label remains shop-floor UX.
+
+**Trusted Core impact:** NONE.
+
+**Owner decision:**
+
+- [ ] ACCEPT RECOMMENDATION (defer provider; paper port only)
+- [ ] SELECT ALTERNATIVE: authorize adapter(s): ________
+- [ ] DEFER (explicit pause)
 
 Owner / date: __________________
