@@ -3,7 +3,7 @@
  * Server entitlement/access: GET /platform/entitlements, POST /platform/access/check.
  */
 import type { ReactNode } from 'react';
-import { ArrowRight, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
   getRequiredTierForFeature,
@@ -82,59 +82,34 @@ export function FeatureGate({
   }
 
   const requiredTier = TIER_META[getRequiredTierForFeature(feature)];
-  const resolvedTitle = title || `${requiredTier.name} feature`;
+  const resolvedTitle = title || `${requiredTier.name} capability`;
   const resolvedDescription = description || getTierUpgradeMessage(feature);
 
-  if (compact) {
-    return (
-      <div className="rounded-sf-lg border border-dashed border-status-warning/40 bg-status-warning/10 p-4">
-        <div className="flex items-start gap-3">
-          <div className="rounded-sf bg-surface-elevated p-2 text-status-warning">
-            <Lock className="h-4 w-4" />
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-slate-900">{resolvedTitle}</p>
-            <p className="mt-1 text-sm text-slate-600">{resolvedDescription}</p>
-
-            <button
-              type="button"
-              onClick={() =>
-                window.alert(
-                  `${requiredTier.name} plan • ${requiredTier.shortLabel}\n\nThis opens the upgrade flow in a full billing setup.`
-                )
-              }
-              className="sf-focus-ring mt-3 inline-flex items-center gap-2 rounded-sf bg-action-primary px-3 py-2 text-sm font-medium text-ink-inverse transition hover:bg-action-hover"
-            >
-              Upgrade to {requiredTier.name}
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
+  return (
+    <div
+      role="status"
+      className={
+        compact
+          ? 'rounded-sf-lg border border-dashed border-status-warning/40 bg-status-warning/10 p-4'
+          : 'rounded-sf-lg border border-dashed border-line bg-surface-workspace p-8 text-center'
+      }
+    >
+      <div className={compact ? 'flex items-start gap-3' : ''}>
+        <div className={compact ? 'rounded-sf bg-surface-elevated p-2 text-status-warning' : 'mx-auto mb-3'}>
+          <Lock className={compact ? 'h-4 w-4' : 'mx-auto h-10 w-10 text-ink-muted'} />
+        </div>
+        <div className={compact ? 'min-w-0 flex-1' : ''}>
+          <p className={compact ? 'text-sm font-semibold text-ink-primary' : 'font-display text-heading-sm text-ink-primary'}>
+            {resolvedTitle}
+          </p>
+          <p className={compact ? 'mt-1 text-sm text-ink-muted' : 'mx-auto mt-2 max-w-2xl text-body text-ink-muted'}>
+            {resolvedDescription}
+          </p>
+          <p className="mt-3 text-meta text-ink-muted">
+            FeatureGate is UX presentation only. Commercial grant remains server-side. Live billing is not opened from this screen.
+          </p>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="rounded-sf-lg border border-dashed border-line bg-surface-workspace p-8 text-center">
-      <Lock className="mx-auto mb-3 h-10 w-10 text-ink-muted" />
-      <h3 className="font-display text-heading-sm text-ink-primary">{resolvedTitle}</h3>
-      <p className="mx-auto mt-2 max-w-2xl text-body text-ink-muted">
-        {resolvedDescription}
-      </p>
-
-      <button
-        type="button"
-        onClick={() =>
-          window.alert(
-            `${requiredTier.name} plan • ${requiredTier.shortLabel}\n\nThis opens the upgrade flow in a full billing setup.`
-          )
-        }
-        className="sf-focus-ring mt-4 inline-flex items-center gap-2 rounded-sf bg-action-primary px-4 py-2.5 text-sm font-medium text-ink-inverse transition hover:bg-action-hover"
-      >
-        Upgrade to {requiredTier.name}
-        <ArrowRight className="h-4 w-4" />
-      </button>
     </div>
   );
 }

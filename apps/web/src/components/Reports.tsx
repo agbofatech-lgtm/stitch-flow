@@ -25,6 +25,7 @@ import measuringTapeSoft from '@shared/assets/measuring-tape-soft.svg';
 import sewingMachineSoft from '@shared/assets/sewing-machine-soft.svg';
 import needleSoft from '@shared/assets/needle-soft.svg';
 import { FeatureGate } from './FeatureGate';
+import { PageHeader, Workroom } from '../experience';
 import {
   buildOrdersByStage,
   filterOrdersByDateRange,
@@ -575,9 +576,15 @@ export function Reports() {
   }, [orders, materialUsages, fabricRecords, selectedProductionRange, now]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface-canvas via-surface-panel to-surface-workspace p-4 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <section className="relative overflow-hidden rounded-sf-workspace border border-white/50 bg-gradient-to-r from-action-primary via-action-primary to-action-hover p-6 text-white shadow-2xl">
+    <Workroom>
+      <div className="space-y-8">
+        <PageHeader
+          level={2}
+          kicker="Operations"
+          title="Reports"
+          description="Revenue, customers, materials, order demand, and studio performance from workspace records."
+        />
+        <section className="relative overflow-hidden rounded-sf-lg border border-line bg-action-primary p-6 text-ink-inverse">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.10),transparent_24%)]" />
 
           <img
@@ -1563,7 +1570,7 @@ export function Reports() {
           </FeatureGate>
         </section>
       </div>
-    </div>
+    </Workroom>
   );
 }
 

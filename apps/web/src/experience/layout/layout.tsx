@@ -160,22 +160,25 @@ export function PageHeader({
   title,
   description,
   actions,
+  level = 1,
 }: {
   kicker?: string;
   title: string;
   description?: string;
   actions?: ReactNode;
+  level?: 1 | 2;
 }) {
+  const Heading = level === 1 ? 'h1' : 'h2';
   return (
-    <header className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
+    <header className="flex flex-col gap-4 border-b border-line-subtle pb-6 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         {kicker ? (
           <p className="text-meta uppercase tracking-[0.18em] text-ink-muted">{kicker}</p>
         ) : null}
-        <h1 className="mt-1 font-display text-heading-lg text-ink-primary">{title}</h1>
+        <Heading className="mt-1 font-display text-heading-lg text-ink-primary">{title}</Heading>
         {description ? <p className="mt-2 max-w-2xl text-body text-ink-secondary">{description}</p> : null}
       </div>
-      {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
     </header>
   );
 }

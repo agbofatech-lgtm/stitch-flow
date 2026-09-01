@@ -33,6 +33,14 @@ import type { ApiOrder } from '@shared/api/orders';
 import { format } from 'date-fns';
 import { formatCurrency, safeCurrency } from '@shared/utils/currency';
 import { API_BASE } from '@shared/utils/api';
+import {
+  Button,
+  ErrorState,
+  ExperienceEmptyState,
+  LoadingState,
+  PageHeader,
+  Workroom,
+} from '../experience';
 
 function normalizeCustomerPayload(data: {
   fullName: string;
@@ -105,28 +113,19 @@ export function Customers() {
   const customersWithEmail = customers.filter((customer) => !!customer.email?.trim()).length;
 
   return (
-    <div className="p-4 lg:p-8">
-      <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
-        <div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-line bg-action-secondary px-3 py-1 text-sm font-medium text-action-primary">
-            <Users className="h-4 w-4" />
-            {BRAND.productName} Customer Management
-          </div>
-
-          <h1 className="text-2xl font-bold text-ink-primary">Customers</h1>
-          <p className="mt-1 text-ink-muted">
-            View, create, edit, and inspect real customer records from the backend API.
-          </p>
-        </div>
-
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 rounded-xl bg-action-primary px-4 py-2.5 font-medium text-white shadow-sm transition-colors hover:bg-action-hover"
-        >
-          <Plus className="h-4 w-4" />
-          Add Customer
-        </button>
-      </div>
+    <Workroom>
+      <PageHeader
+        level={2}
+        kicker="Client studio"
+        title="Customers"
+        description="View, create, edit, and inspect real customer records from the backend API."
+        actions={
+          <Button onClick={() => setShowAddModal(true)}>
+            <Plus className="h-4 w-4" />
+            Add Customer
+          </Button>
+        }
+      />
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <SummaryCard
@@ -165,32 +164,18 @@ export function Customers() {
         />
       </div>
 
-      {loading && (
-        <div className="rounded-sf-lg border border-line bg-surface-panel py-12 text-center">
-          <p className="text-ink-muted">Loading customers...</p>
-        </div>
-      )}
+      {loading && <LoadingState label="Loading customers…" />}
 
       {error && (
-        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-2 text-red-700">
-              <AlertCircle className="h-4 w-4" />
-              <div>
-              <p className="font-medium">{error}</p>
-              <p className="mt-1 text-xs text-red-600">Source: {`${API_BASE}/customers`}</p>
-            </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => void loadCustomers()}
-              className="rounded-lg border border-red-200 bg-surface-panel px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
-            >
+        <ErrorState
+          title="Customers could not load"
+          description={`${error} Source: ${API_BASE}/customers`}
+          action={
+            <Button variant="secondary" size="sm" onClick={() => void loadCustomers()}>
               Retry
-            </button>
-          </div>
-        </div>
+            </Button>
+          }
+        />
       )}
 
       {!loading && !error && (
@@ -290,16 +275,21 @@ export function Customers() {
           </div>
 
           {filteredCustomers.length === 0 && (
-            <div className="rounded-sf-lg border border-dashed border-line bg-surface-panel py-12 text-center">
-              <p className="font-medium text-ink-secondary">
-                {customers.length === 0 ? 'No customers yet' : 'No customers match your search'}
-              </p>
-              <p className="mt-2 text-sm text-ink-muted">
-                {customers.length === 0
+            <ExperienceEmptyState
+              title={customers.length === 0 ? 'No customers yet' : 'No customers match your search'}
+              description={
+                customers.length === 0
                   ? 'Add your first customer to start creating orders and invoices.'
-                  : 'Try a different name, phone number, or email.'}
-              </p>
-            </div>
+                  : 'Try a different name, phone number, or email.'
+              }
+              action={
+                customers.length === 0 ? (
+                  <Button size="sm" onClick={() => setShowAddModal(true)}>
+                    Add Customer
+                  </Button>
+                ) : undefined
+              }
+            />
           )}
         </>
       )}
@@ -332,7 +322,7 @@ export function Customers() {
           onClose={() => setSelectedCustomer(null)}
         />
       )}
-    </div>
+    </Workroom>
   );
 }
 
@@ -810,16 +800,3 @@ function FormFields({
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

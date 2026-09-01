@@ -32,6 +32,7 @@ import {
 import { getCustomers, type ApiCustomer } from '@shared/utils/customerApi';
 import { fetchOrders, type ApiOrder } from '@shared/api/orders';
 import { downloadInvoicePdf } from '@shared/utils/invoicePdf';
+import { Button, ErrorState, ExperienceEmptyState, LoadingState, PageHeader, Workroom } from '../experience';
 
 export function Invoices() {
   const { currentWorkspace } = useApp();
@@ -123,28 +124,19 @@ const [items, setItems] = useState([
   }
 
   return (
-    <div className="p-4 lg:p-8">
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-line bg-action-secondary px-3 py-1 text-sm font-medium text-action-primary">
-            <Receipt className="h-4 w-4" />
-            {BRAND.productName} Invoice Management
-          </div>
-
-          <h1 className="text-2xl font-bold text-ink-primary">Invoices</h1>
-          <p className="mt-1 text-ink-muted">
-            {invoices.length} total invoices from the backend database
-          </p>
-        </div>
-
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 rounded-2xl bg-action-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-action-hover"
-        >
-          <Plus className="h-4 w-4" />
-          New Invoice
-        </button>
-      </div>
+    <Workroom>
+      <PageHeader
+        level={2}
+        kicker="Operations"
+        title="Invoices"
+        description={`${invoices.length} invoices from the backend database.`}
+        actions={
+          <Button onClick={() => setShowCreateModal(true)}>
+            <Plus className="h-4 w-4" />
+            New Invoice
+          </Button>
+        }
+      />
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <SummaryCard
@@ -181,16 +173,14 @@ const [items, setItems] = useState([
         />
       </div>
 
-      {loading && (
-        <div className="rounded-sf-lg border border-line bg-surface-panel py-12 text-center">
-          <p className="text-ink-muted">Loading invoices...</p>
-        </div>
-      )}
+      {loading && <LoadingState label="Loading invoices…" />}
 
       {error && (
-        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error}
-        </div>
+        <ErrorState
+          title="Invoices could not load"
+          description={error}
+          action={<Button variant="secondary" size="sm" onClick={() => void loadData()}>Retry</Button>}
+        />
       )}
 
       {!loading && !error && (
@@ -305,9 +295,11 @@ const [items, setItems] = useState([
       )}
 
       {!loading && !error && filteredInvoices.length === 0 && (
-        <div className="rounded-sf-lg border border-dashed border-line bg-surface-panel py-12 text-center">
-          <p className="text-ink-muted">No invoices found</p>
-        </div>
+        <ExperienceEmptyState
+          title="No invoices found"
+          description="Create an invoice, or change the search."
+          action={<Button size="sm" onClick={() => setShowCreateModal(true)}>New Invoice</Button>}
+        />
       )}
 
       {selectedInvoice && (
@@ -371,7 +363,7 @@ const [items, setItems] = useState([
           }}
         />
       )}
-    </div>
+    </Workroom>
   );
 }
 

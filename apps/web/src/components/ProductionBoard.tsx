@@ -28,6 +28,7 @@ import {
 import { fetchOrders, type ApiOrder } from '@shared/api/orders';
 import { getCustomers, type ApiCustomer } from '@shared/utils/customerApi';
 import { API_BASE } from '@shared/utils/api';
+import { Button, ErrorState, ExperienceEmptyState, LoadingState, PageHeader, Workroom, WorkspaceSkeleton } from '../experience';
 import type {
   Order,
   OrderAlert,
@@ -494,56 +495,35 @@ export function ProductionBoard() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="rounded-2xl border border-line bg-surface-panel p-6 text-ink-muted">
-          Loading production board...
-        </div>
-      </div>
+      <Workroom>
+        <WorkspaceSkeleton label="Loading production board" />
+      </Workroom>
     );
   }
 
   if (error && orders.length === 0) {
     return (
-      <div className="p-6">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
-          <div>
-            <p className="font-medium">{error}</p>
-            <p className="mt-1 text-xs text-red-600">Orders source: {`${API_BASE}/orders`}</p>
-            <p className="mt-1 text-xs text-red-600">Customers source: {`${API_BASE}/customers`}</p>
-          </div>
-        </div>
-      </div>
+      <Workroom>
+        <ErrorState
+          title="Production board could not load"
+          description={`${error} Orders: ${API_BASE}/orders. Customers: ${API_BASE}/customers.`}
+          action={<Button variant="secondary" size="sm" onClick={() => void loadData()}>Retry</Button>}
+        />
+      </Workroom>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-surface-canvas via-surface-panel to-surface-workspace">
       <div className="flex flex-col gap-6 p-4 lg:p-8">
-        <div className="overflow-hidden rounded-sf-workspace border border-white/50 bg-gradient-to-r from-action-primary via-action-primary to-action-hover p-6 text-white shadow-2xl">
-          <div className="grid gap-6 lg:grid-cols-[1.35fr_0.85fr]">
-            <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-surface-panel/15 px-3 py-1 text-sm backdrop-blur-sm">
-                <ClipboardList className="h-4 w-4" />
-                Workshop Operations
-              </div>
+        <PageHeader
+          level={2}
+          kicker="Production floor"
+          title="Production Board"
+          description="Move orders from measurement to delivery with real backend stage persistence."
+        />
 
-              <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">Production Board</h1>
-
-              <p className="mt-3 max-w-2xl text-sm text-white/90 lg:text-base">
-                Move orders from measurement to delivery with real backend stage persistence.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <SummaryCard label="Orders" value={String(summary.total)} icon={Package} />
-              <SummaryCard label="In Progress" value={String(summary.inProgress)} icon={Scissors} />
-              <SummaryCard label="Issues" value={String(summary.issues)} icon={AlertTriangle} />
-              <SummaryCard label="Ready" value={String(summary.ready)} icon={CheckCircle2} />
-            </div>
-          </div>
-        </div>
-
-        {error && (
+                {error && (
           <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <div>
               <p className="font-medium">{error}</p>

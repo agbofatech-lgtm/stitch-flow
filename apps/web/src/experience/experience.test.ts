@@ -109,3 +109,19 @@ test('error state can include recovery action', () => {
   assert.match(html, /Retry/);
   assert.match(html, /role="alert"/);
 });
+
+test('page header can render as h2 so rooms do not duplicate shell h1', () => {
+  const { PageHeader } = require('./layout/layout') as typeof import('./layout/layout');
+  const html = renderToStaticMarkup(
+    createElement(PageHeader, { title: 'Customers', level: 2, kicker: 'Client studio' })
+  );
+  assert.match(html, /<h2/);
+  assert.equal(html.includes('<h1'), false);
+});
+
+test('feature gate does not open a fake billing flow', () => {
+  const source = readFileSync(new URL('../components/FeatureGate.tsx', import.meta.url), 'utf8');
+  assert.equal(source.includes('window.alert'), false);
+  assert.equal(source.includes('Upgrade to'), false);
+  assert.match(source, /UX presentation only/);
+});

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatCurrency, safeCurrency } from '@shared/utils/currency';
+import { Button, ExperienceEmptyState, PageHeader, Workroom } from '../experience';
 
 type MaterialFilter = 'all' | 'active' | 'inactive' | 'low_stock';
 
@@ -176,34 +177,19 @@ export function Materials() {
   }, [fabricRecords, search, filter]);
 
   return (
-    <div className="p-4 lg:p-8">
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-line bg-action-secondary px-3 py-1 text-sm font-medium text-action-primary">
-            <Warehouse className="h-4 w-4" />
-            {BRAND.productName} Materials Inventory
-          </div>
-
-          <h1 className="text-2xl font-bold text-ink-primary">Materials</h1>
-          <p className="mt-1 text-ink-muted">
-            Manage fabric inventory, stock levels, monthly consumption, reorder planning,
-            and inactive stock.
-          </p>
-        </div>
-
-        <button
-          onClick={() => setShowAddModal(true)}
-          disabled={!featureAccess.canManageMaterialInventory.allowed}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-colors ${
-            featureAccess.canManageMaterialInventory.allowed
-              ? 'bg-action-primary text-white shadow-sm hover:bg-action-hover'
-              : 'cursor-not-allowed bg-action-secondary text-ink-muted'
-          }`}
-        >
-          <Plus className="h-4 w-4" />
-          Add Material
-        </button>
-      </div>
+    <Workroom>
+      <PageHeader
+        level={2}
+        kicker="Operations"
+        title="Materials"
+        description="Manage fabric inventory, stock levels, monthly consumption, reorder planning, and inactive stock."
+        actions={
+          <Button onClick={() => setShowAddModal(true)} disabled={!featureAccess.canManageMaterialInventory.allowed}>
+            <Plus className="h-4 w-4" />
+            Add Material
+          </Button>
+        }
+      />
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <SummaryCard
@@ -566,15 +552,17 @@ export function Materials() {
       </div>
 
       {filteredMaterials.length === 0 && (
-        <div className="py-12 text-center">
-          <div className="mx-auto max-w-md rounded-sf-lg border border-dashed border-line bg-surface-panel p-8">
-            <Boxes className="mx-auto mb-3 h-8 w-8 text-ink-muted" />
-            <h3 className="text-lg font-semibold text-ink-primary">No materials found</h3>
-            <p className="mt-2 text-sm text-ink-muted">
-              Add a new material, adjust your search, or change the filter.
-            </p>
-          </div>
-        </div>
+        <ExperienceEmptyState
+          title="No materials found"
+          description="Add a new material, adjust your search, or change the filter."
+          action={
+            featureAccess.canManageMaterialInventory.allowed ? (
+              <Button size="sm" onClick={() => setShowAddModal(true)}>
+                Add Material
+              </Button>
+            ) : undefined
+          }
+        />
       )}
 
       {showAddModal && (
@@ -599,7 +587,7 @@ export function Materials() {
           }}
         />
       )}
-    </div>
+    </Workroom>
   );
 }
 

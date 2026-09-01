@@ -48,6 +48,7 @@ import {
   analyzeDesignInspiration,
   generateProductionPlan,
 } from '../application/tailoring';
+import { Button, ExperienceEmptyState, PageHeader, Workroom } from '../experience';
 
 const statusFilters = ['all', 'draft', 'in_progress', 'ready', 'delivered', 'cancelled'] as const;
 
@@ -374,28 +375,19 @@ export function Orders() {
   };
 
   return (
-    <div className="p-4 lg:p-8">
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-line bg-action-secondary px-3 py-1 text-sm font-medium text-action-primary">
-            <ClipboardList className="h-4 w-4" />
-            {BRAND.productName} Order Workflow
-          </div>
-
-          <h1 className="text-2xl font-bold text-ink-primary">Orders</h1>
-          <p className="mt-1 text-ink-muted">
-            {orders.length} total orders � linked to customers, garments, measurements, design work, and materials
-          </p>
-        </div>
-
-        <button
-          onClick={openCreateOrderModal}
-          className="inline-flex items-center gap-2 rounded-2xl bg-action-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-action-hover"
-        >
-          <Plus className="h-4 w-4" />
-          New Order
-        </button>
-      </div>
+    <Workroom>
+      <PageHeader
+        level={2}
+        kicker="Operations"
+        title="Orders"
+        description={`${orders.length} orders linked to customers, garments, measurements, design work, and materials.`}
+        actions={
+          <Button onClick={openCreateOrderModal}>
+            <Plus className="h-4 w-4" />
+            New Order
+          </Button>
+        }
+      />
 
       {stageActionError && (
         <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -753,15 +745,15 @@ export function Orders() {
       </div>
 
       {filteredOrders.length === 0 && (
-        <div className="py-12 text-center">
-          <div className="mx-auto max-w-md rounded-sf-lg border border-dashed border-line bg-surface-panel p-8">
-            <Boxes className="mx-auto mb-3 h-8 w-8 text-ink-muted" />
-            <h3 className="text-lg font-semibold text-ink-primary">No orders found</h3>
-            <p className="mt-2 text-sm text-ink-muted">
-              Create a new order, or change your search and filter.
-            </p>
-          </div>
-        </div>
+        <ExperienceEmptyState
+          title="No orders found"
+          description="Create a new order, or change your search and filter."
+          action={
+            <Button size="sm" onClick={openCreateOrderModal}>
+              New Order
+            </Button>
+          }
+        />
       )}
 
       {selectedMaterialOrder && (
@@ -809,7 +801,7 @@ export function Orders() {
           }}
         />
       )}
-    </div>
+    </Workroom>
   );
 }
 

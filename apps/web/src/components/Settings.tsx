@@ -495,9 +495,9 @@ export function Settings() {
 
           {tierSimulation === 'BASIC' ? (
             <div className="rounded-2xl border border-line bg-action-secondary p-4">
-              <h3 className="mb-2 font-medium text-sky-900">Upgrade your workspace</h3>
+              <h3 className="mb-2 font-medium text-sky-900">Plan simulation (UX only)</h3>
               <p className="mb-4 text-sm text-action-primary">
-                Unlock PDF export, branding, advanced workflow tools, reports, and more.
+                These buttons simulate FeatureGate presentation. They do not charge a card or change server entitlements.
               </p>
               <div className="flex flex-wrap gap-3">
                 <button
@@ -509,7 +509,7 @@ export function Settings() {
                       : 'cursor-not-allowed bg-slate-200 text-ink-muted'
                   }`}
                 >
-                  {canManageBilling ? 'Upgrade to Pro' : 'Owner access required'}
+                  {canManageBilling ? 'Simulate Pro' : 'Owner access required'}
                 </button>
 
                 <button
@@ -521,7 +521,7 @@ export function Settings() {
                       : 'cursor-not-allowed bg-slate-200 text-ink-muted'
                   }`}
                 >
-                  {canManageBilling ? 'Upgrade to Studio' : 'Owner access required'}
+                  {canManageBilling ? 'Simulate Studio' : 'Owner access required'}
                 </button>
               </div>
             </div>

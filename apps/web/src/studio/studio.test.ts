@@ -66,3 +66,10 @@ test('studio shell composes atelier primitives without engines', () => {
   assert.match(shell, /WorkspaceHeader/);
   assert.equal(shell.includes('patternEngine'), false);
 });
+
+test('control center presents API fields without inventing metrics', () => {
+  const source = readFileSync(new URL('../control/ControlCenter.tsx', import.meta.url), 'utf8');
+  assert.match(source, /CommandPayload/);
+  assert.equal(source.includes('totalRevenue'), false);
+  assert.match(source, /do not invent metrics/);
+});
