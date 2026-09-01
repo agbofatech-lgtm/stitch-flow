@@ -27,6 +27,38 @@ export class EntityRepository {
     return this.store.getRecord(this.entity, localId);
   }
 
+  /**
+   * SAC-2 local mirror. Canonical id = legacy entity id.
+   * Does not enqueue remote sync (SAC-5 locked). Frozen payloads are append-only.
+   */
+  async putLocalCanonical(payload: Record<string, unknown>, canonicalId: string) {
+    if (!canonicalId) {
+      throw new Error('STOP: canonical local id is required');
+    }
+    const existing = await this.store.getRecord(this.entity, canonicalId);
+    const frozen = existing?.payload && (existing.payload as { frozen?: unknown }).frozen === true;
+    if (frozen) {
+      return existing;
+    }
+    const timestamp = nowIso();
+    const metadata: SyncMetadata = existing
+      ? {
+          ...existing.metadata,
+          version: existing.metadata.version + 1,
+          updatedAt: timestamp,
+        }
+      : {
+          localId: canonicalId,
+          version: 1,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+          syncStatus: 'pending',
+        };
+    const record: StoredRecord = { entity: this.entity, payload, metadata };
+    await this.store.putRecord(record);
+    return record;
+  }
+
   async create(payload: Record<string, unknown>, operationId = newId()) {
     const existingOp = await this.store.getOperation(operationId);
     if (existingOp) {

@@ -38,6 +38,7 @@ import {
   inferGarmentTypeFromInspiration,
 } from '../application/tailoring';
 import { initializeAppStorage, saveAppStorage } from '@shared/lib/db';
+import { projectLegacyShopToT2 } from '../application/shop/legacyMirror';
 
 type AppState = Omit<
   AppContextShape,
@@ -517,7 +518,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(buildInitialState);
 
   useEffect(() => {
-    saveAppStorage({
+    const persisted = {
       currentWorkspaceId: state.currentWorkspace.id,
       currentMemberId: state.currentMember.id,
       tierSimulation: state.tierSimulation,
@@ -544,6 +545,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         fabricImage: state.fabricImage,
         selectedOrderId: state.selectedOrderId,
       },
+    };
+    saveAppStorage(persisted);
+    void projectLegacyShopToT2({
+      fabricRecords: persisted.fabricRecords,
+      designInspirations: persisted.designInspirations,
+      measurementProfiles: persisted.measurementProfiles,
+      orders: persisted.orders,
     });
   }, [
     state.currentWorkspace.id,
