@@ -17,6 +17,12 @@ const STATUS_LABEL: Record<string, string> = {
   offline: 'Offline',
   syncing: 'Syncing',
   unavailable: 'Unavailable',
+  local: 'Local workspace',
+  queued: 'Queued locally',
+  synced: 'Acknowledged remotely',
+  blocked: 'Blocked',
+  finalized: 'Finalized',
+  verified: 'Verified',
 };
 
 export function StatusBadge({
@@ -30,9 +36,11 @@ export function StatusBadge({
       ? 'success'
       : key === 'failed' || key === 'cancelled' || key === 'overdue'
         ? 'danger'
-        : key === 'pending' || key === 'processing' || key === 'in_progress' || key === 'syncing'
+        : key === 'pending' || key === 'processing' || key === 'in_progress' || key === 'syncing' || key === 'queued'
           ? 'warning'
-          : 'neutral';
+          : key === 'finalized' || key === 'verified' || key === 'synced'
+            ? 'info'
+            : 'neutral';
   const label = STATUS_LABEL[key] || status.replace(/_/g, ' ');
   return <Badge tone={tone}>{label}</Badge>;
 }

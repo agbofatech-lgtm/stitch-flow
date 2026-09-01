@@ -173,7 +173,7 @@ export function PageHeader({
     <header className="flex flex-col gap-4 border-b border-line-subtle pb-6 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         {kicker ? (
-          <p className="text-meta uppercase tracking-[0.18em] text-ink-muted">{kicker}</p>
+          <p className="text-meta text-ink-muted">{kicker}</p>
         ) : null}
         <Heading className="mt-1 font-display text-heading-lg text-ink-primary">{title}</Heading>
         {description ? <p className="mt-2 max-w-2xl text-body text-ink-secondary">{description}</p> : null}

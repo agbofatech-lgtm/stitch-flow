@@ -4,6 +4,8 @@
   --sf-surface-panel: #fbf8f2;
   --sf-surface-elevated: #fffcf7;
   --sf-surface-floating: #fffcf7;
+  --sf-surface-subtle: #efe8dc;
+  --sf-overlay-dim: rgb(28 25 21 / 0.4);
   --sf-text-primary: #1c1915;
   --sf-text-secondary: #3f3a33;
   --sf-text-muted: #6f675c;
@@ -20,6 +22,11 @@
   --sf-border-strong: #b7a894;
   --sf-focus-ring: #0f6e8c;
   --sf-disabled: #c4bdb2;
+  --sf-confidence-local: #6f675c;
+  --sf-confidence-queued: #d97706;
+  --sf-confidence-offline: #6f675c;
+  --sf-confidence-finalized: #0f6e8c;
+  --sf-touch-min: 2.75rem;
 
   --sf-font-sans: Inter, system-ui, sans-serif;
   --sf-font-display: 'Space Grotesk', Inter, system-ui, sans-serif;
@@ -78,6 +85,8 @@
   --sf-surface-panel: #1a2a31;
   --sf-surface-elevated: #21353e;
   --sf-surface-floating: #27414b;
+  --sf-surface-subtle: #0c1418;
+  --sf-overlay-dim: rgb(0 0 0 / 0.55);
   --sf-text-primary: #f8fbfc;
   --sf-text-secondary: #d9e5ea;
   --sf-text-muted: #93a4ad;
@@ -90,6 +99,10 @@
   --sf-border-strong: #3d5c69;
   --sf-focus-ring: #5bb4ce;
   --sf-disabled: #5a6d75;
+  --sf-confidence-local: #93a4ad;
+  --sf-confidence-queued: #d97706;
+  --sf-confidence-offline: #93a4ad;
+  --sf-confidence-finalized: #5bb4ce;
   --sf-elevation-sm: 0 1px 2px rgb(0 0 0 / 0.4);
   --sf-elevation-md: 0 8px 24px rgb(0 0 0 / 0.4);
   --sf-elevation-lg: 0 24px 48px rgb(0 0 0 / 0.55);
@@ -97,9 +110,22 @@
 
 .sf-atelier-atmosphere {
   background:
-    radial-gradient(1200px 420px at 0% -10%, rgb(15 110 140 / 0.07), transparent 58%),
-    radial-gradient(900px 360px at 100% 0%, rgb(183 168 148 / 0.16), transparent 52%),
+    radial-gradient(1100px 380px at 0% -8%, rgb(15 110 140 / 0.06), transparent 55%),
     var(--sf-surface-canvas);
+}
+
+.sf-paper {
+  background: var(--sf-surface-panel);
+  border: 1px solid var(--sf-border-default);
+  border-radius: var(--sf-radius-lg);
+  box-shadow: var(--sf-elevation-sm);
+  color: var(--sf-text-primary);
+}
+
+.sf-canvas-stage {
+  background: var(--sf-surface-workspace);
+  border: 1px solid var(--sf-border-subtle);
+  border-radius: var(--sf-radius-workspace);
 }
 
 .sf-nav-rail {

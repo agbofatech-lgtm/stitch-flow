@@ -12,6 +12,7 @@
     "test:composition": "tsx --test src/domain/composition/composition.p15.test.ts",
     "test:domain": "tsx --test src/domain/domain.test.ts src/domain/measurement/measurement.t8.test.ts src/domain/measurement/measurement.p13.test.ts src/domain/garment/garment.p14.test.ts src/domain/composition/composition.p15.test.ts",
     "test:experience": "tsx --test src/experience/experience.test.ts",
+    "lab:visual": "node ./scripts/visual-lab.mjs",
     "test:studio": "tsx --test src/studio/studio.test.ts",
     "test:workflow": "tsx --test src/workflow/workflow.test.ts",
     "test:design": "tsx --test src/application/design/design.test.ts src/application/design/trustedFinalization.test.ts",

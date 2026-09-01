@@ -30,8 +30,10 @@ import { Materials } from '../components/Materials';
 import { Reports } from '../components/Reports';
 import { Settings } from '../components/Settings';
 import {
+  AtelierConfidence,
   AtelierNavigation,
   AtelierShell,
+  AtelierThread,
   Badge,
   Button,
   CommandPalette,
@@ -45,6 +47,7 @@ import {
   WorkspaceHeader,
   cn,
   type CommandEntry,
+  type ConfidenceState,
   type NavSection,
   type ToastMessage,
 } from '../experience';
@@ -92,6 +95,7 @@ export function StudioShell() {
     customers,
     dueAlerts,
     selectOrder,
+    selectedOrderId,
   } = useApp();
 
   const [workspace, setWorkspace] = useState<StudioWorkspaceId>(() =>
@@ -191,6 +195,17 @@ export function StudioShell() {
   const meta = STUDIO_WORKSPACES.find((item) => item.id === workspace)!;
   const attention = (dueAlerts?.length || 0) + orders.filter((order) => order.status === 'in_progress').length;
   const plane = controlOpen ? 'control' : 'atelier';
+  const selectedOrder = orders.find((order) => order.id === selectedOrderId) || null;
+  const threadClient =
+    (selectedOrder && customers.find((customer) => customer.id === selectedOrder.customerId)?.fullName) || null;
+  const floorConfidence: ConfidenceState =
+    connectivity === 'offline'
+      ? 'offline'
+      : connectivity === 'syncing'
+        ? 'syncing'
+        : pendingOps > 0
+          ? 'queued'
+          : 'local';
 
   const canvas = useMemo(() => {
     if (controlOpen) return <ControlCenter onExit={() => setControlOpen(false)} />;
@@ -341,6 +356,13 @@ export function StudioShell() {
           description={headerCopy.description}
           state={
             <>
+              <div className="hidden max-w-xs lg:block">
+                <AtelierThread
+                  room={headerCopy.title}
+                  client={threadClient}
+                  order={selectedOrder?.orderNumber}
+                />
+              </div>
               {workspace === 'clients' ? (
                 <Badge tone="neutral">{customers.length} clients</Badge>
               ) : null}
@@ -421,10 +443,10 @@ export function StudioShell() {
             {currentMember.user.fullName} · {currentMember.role}
           </span>
           <span className="flex items-center gap-2">
-            <Badge tone={connectivity === 'online' ? 'success' : connectivity === 'offline' ? 'neutral' : 'warning'}>
-              {connectivity}
-            </Badge>
-            T2 sync queue {pendingOps}
+            <AtelierConfidence
+              state={floorConfidence}
+              detail={pendingOps > 0 ? `${pendingOps} outbox` : 'Remote sync is not claimed'}
+            />
           </span>
         </StatusBar>
       }

@@ -9,6 +9,8 @@ export const color = {
   panel: 'var(--sf-surface-panel)',
   elevated: 'var(--sf-surface-elevated)',
   floating: 'var(--sf-surface-floating)',
+  subtle: 'var(--sf-surface-subtle)',
+  overlayDim: 'var(--sf-overlay-dim)',
   textPrimary: 'var(--sf-text-primary)',
   textSecondary: 'var(--sf-text-secondary)',
   textMuted: 'var(--sf-text-muted)',
@@ -24,6 +26,14 @@ export const color = {
   borderDefault: 'var(--sf-border-default)',
   borderStrong: 'var(--sf-border-strong)',
   focusRing: 'var(--sf-focus-ring)',
+  confidenceLocal: 'var(--sf-confidence-local)',
+  confidenceQueued: 'var(--sf-confidence-queued)',
+  confidenceOffline: 'var(--sf-confidence-offline)',
+  confidenceFinalized: 'var(--sf-confidence-finalized)',
+} as const;
+
+export const touch = {
+  min: 'var(--sf-touch-min)',
 } as const;
 
 export const fontFamily = {

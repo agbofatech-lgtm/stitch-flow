@@ -1,6 +1,16 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Badge, Button, DataTable, ExperienceEmptyState, PageHeader, Panel, Select, Workroom } from '../experience';
+import {
+  AtelierConfidence,
+  AtelierPage,
+  AtelierThread,
+  Badge,
+  Button,
+  DataTable,
+  ExperienceEmptyState,
+  Panel,
+  Select,
+} from '../experience';
 import { separateLegacyMeasurementBlob } from '../domain/measurement/separate';
 import { persistSeparatedMeasurements } from '../domain/persistence/measurementStore';
 import { readMeasurementVersion } from '../domain/persistence/measurementVersionStore';
@@ -120,31 +130,33 @@ export function MeasurementWorkspace() {
     }
   }
 
+  const threadClient = rows[0]?.customer || null;
+
   if (rows.length === 0) {
     return (
-      <Workroom>
-        <PageHeader
-          level={2}
-          kicker="Atelier"
-          title="Measurements"
-          description="Body, garment, and derived pattern stay separate. Live profiles remain transitional."
-        />
+      <AtelierPage
+        kicker="Measurement table"
+        title="Measurements"
+        description="Body, garment, and derived pattern stay separate. Live profiles remain transitional."
+        thread={<AtelierThread room="Measurements" />}
+        confidence={<AtelierConfidence state="local" detail="Live profiles are not frozen shop snapshots." />}
+      >
         <ExperienceEmptyState
           title="No measurement profiles in this workspace"
-          description="Profiles still live in the transitional application store. T5 does not create a second measurement authority or localStorage key."
+          description="Profiles still live in the transitional application store. This table does not create a second measurement authority."
         />
-      </Workroom>
+      </AtelierPage>
     );
   }
 
   return (
-    <Workroom>
-      <PageHeader
-        level={2}
-        kicker="Atelier"
-        title="Measurements"
-        description="Body, garment, and derived pattern stay separate. Live profiles remain transitional."
-      />
+    <AtelierPage
+      kicker="Measurement table"
+      title="Measurements"
+      description="Body, garment, and derived pattern stay separate. Live profiles remain transitional."
+      thread={<AtelierThread room="Measurements" client={threadClient} />}
+      confidence={<AtelierConfidence state="local" detail="Live profiles are not frozen shop snapshots." />}
+    >
       <Panel>
         <p className="text-label text-action-primary">Measurement workspace</p>
         <h2 className="mt-1 text-heading text-ink-primary">Body, garment, pattern</h2>
@@ -276,6 +288,6 @@ export function MeasurementWorkspace() {
           </span>
         ))}
       </div>
-    </Workroom>
+    </AtelierPage>
   );
 }

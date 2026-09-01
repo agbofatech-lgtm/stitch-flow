@@ -15,10 +15,10 @@ export function WorkspaceHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="sticky top-0 z-sticky border-b border-line-subtle bg-surface-elevated/92 backdrop-blur-sm">
+    <header className="sticky top-0 z-sticky border-b border-line-subtle bg-surface-elevated">
       <div className="flex items-center gap-3 px-3 py-2.5 sm:px-4">
         <div className="min-w-0 flex-1">
-          <p className="text-meta uppercase tracking-[0.16em] text-ink-muted">{kicker}</p>
+          <p className="text-meta text-ink-muted">{kicker}</p>
           <h1 className="truncate font-display text-heading-sm text-ink-primary">{title}</h1>
           {description ? (
             <p className="mt-0.5 hidden truncate text-meta text-ink-muted md:block">{description}</p>

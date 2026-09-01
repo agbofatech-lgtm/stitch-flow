@@ -95,11 +95,11 @@ export function Dialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-modal flex items-end justify-center p-0 sm:items-center sm:p-4">
       <button
         type="button"
         aria-label="Close dialog overlay"
-        className="absolute inset-0 bg-ink-primary/40"
+        className="absolute inset-0 bg-[var(--sf-overlay-dim)]"
         onClick={onClose}
       />
       <div
@@ -109,8 +109,9 @@ export function Dialog({
         aria-labelledby={headingId}
         tabIndex={-1}
         className={cn(
-          'sf-focus-ring relative z-modal w-full rounded-sf-workspace bg-surface-elevated p-6 shadow-sf-lg',
-          size === 'lg' ? 'max-w-2xl' : 'max-w-lg'
+          'sf-focus-ring relative z-modal w-full rounded-t-sf-workspace bg-surface-elevated p-6 shadow-sf-lg sm:rounded-sf-workspace',
+          size === 'lg' ? 'max-w-2xl' : 'max-w-lg',
+          'max-h-[92vh] overflow-hidden'
         )}
       >
         <h2 id={headingId} className="font-display text-heading text-ink-primary">

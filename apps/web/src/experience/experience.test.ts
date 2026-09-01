@@ -67,9 +67,9 @@ test('experience layer does not import protected engines', () => {
   assert.equal(source.includes('localStorage'), false);
 });
 
-test('T2 domain-merge policy remains after T4', () => {
-  assert.equal(ENTITY_CONFLICT_POLICY.measurement, 'domain-merge');
-  assert.equal(ENTITY_CONFLICT_POLICY.order, 'domain-merge');
+test('shop-critical entities do not silent-merge after SAC-5', () => {
+  assert.equal(ENTITY_CONFLICT_POLICY.measurement, 'detect-only');
+  assert.equal(ENTITY_CONFLICT_POLICY.order, 'detect-only');
 });
 
 test('command palette groups and filters without inventing destinations', () => {
@@ -145,5 +145,23 @@ test('atelier atmosphere and skip link tokens exist', () => {
   const css = readFileSync(new URL('./tokens/tokens.css', import.meta.url), 'utf8');
   assert.match(css, /\.sf-atelier-atmosphere/);
   assert.match(css, /\.sf-skip-link/);
+  assert.match(css, /--sf-surface-subtle/);
+  assert.match(css, /--sf-confidence-local/);
+  assert.match(css, /--sf-touch-min/);
+});
+
+test('atelier thread and confidence do not claim remote sync', () => {
+  const { AtelierThread, AtelierConfidence } = require('./atelier/atelier') as typeof import('./atelier/atelier');
+  const thread = renderToStaticMarkup(
+    createElement(AtelierThread, { room: 'Floor', client: 'Ama' })
+  );
+  assert.match(thread, /Client Ama/);
+  const local = renderToStaticMarkup(createElement(AtelierConfidence, { state: 'local' }));
+  assert.match(local, /Local workspace/);
+  assert.equal(local.includes('Acknowledged remotely'), false);
+});
+
+test('reduced-motion foundation remains in tokens', () => {
+  const css = readFileSync(new URL('./tokens/tokens.css', import.meta.url), 'utf8');
   assert.match(css, /prefers-reduced-motion/);
 });

@@ -13,6 +13,7 @@ module.exports = {
           panel: "var(--sf-surface-panel)",
           elevated: "var(--sf-surface-elevated)",
           floating: "var(--sf-surface-floating)",
+          subtle: "var(--sf-surface-subtle)",
         },
         ink: {
           primary: "var(--sf-text-primary)",
