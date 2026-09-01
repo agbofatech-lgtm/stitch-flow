@@ -1,15 +1,10 @@
-import 'express';
+import type { TrustedPlatformContext } from '../platform/types';
 
 declare global {
   namespace Express {
-    interface UserJwtPayload {
-      sub: string;
-      email?: string;
-      role?: string;
-    }
-
     interface Request {
-      user?: UserJwtPayload;
+      platformIdentityId?: string;
+      platformContext?: TrustedPlatformContext;
     }
   }
 }

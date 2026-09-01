@@ -1,6 +1,10 @@
 import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { createPlatformStore } from './platform/store';
+import { createPlatformRuntime, type PlatformRuntime } from './platform/runtime';
+import { authRoutes } from './routes/authRoutes';
+import { platformRoutes } from './routes/platformRoutes';
 
 export type CreateAppOptions = {
   /**
@@ -8,11 +12,14 @@ export type CreateAppOptions = {
    * Default false — T1 must not expose previously unmounted CRUD (STOP D / T0 R4).
    */
   mountBusinessRoutes?: boolean;
+  platform?: PlatformRuntime;
 };
 
 export async function createApp(options: CreateAppOptions = {}): Promise<Express> {
   const mountBusinessRoutes = options.mountBusinessRoutes === true;
   const app = express();
+  const platform = options.platform ?? createPlatformRuntime(createPlatformStore());
+  app.locals.platform = platform;
 
   app.use(
     cors({
@@ -71,8 +78,12 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Express
       runtime: 'apps/backend/src/app.ts',
       businessRoutesMounted: mountBusinessRoutes,
       database: 'not-verified',
+      platformIam: 'in-memory-transitional',
     });
   });
+
+  app.use('/auth', authRoutes);
+  app.use('/platform', platformRoutes);
 
   if (mountBusinessRoutes) {
     const { dashboardRoutes } = await import('./routes/dashboardRoutes');
