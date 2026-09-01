@@ -22,7 +22,7 @@ platformRoutes.get('/context', requireIdentity, requireTenantContext, (req, res)
     },
     notes: {
       tenantEqualsWorkspace: ctx.tenant.id === ctx.workspace.id,
-      entitlementEvaluated: false,
+      entitlementEvaluated: true,
     },
   });
 });

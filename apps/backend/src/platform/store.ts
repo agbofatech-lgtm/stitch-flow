@@ -6,6 +6,14 @@ import type {
   TenantScopedRecord,
   TenantWorkspace,
 } from './types';
+import type {
+  CommercialAudit,
+  PlanDefinition,
+  PriceDefinition,
+  ProcessedBillingEvent,
+  SaasPayment,
+  Subscription,
+} from './commercial/types';
 
 export type PlatformStore = {
   identities: Map<string, Identity>;
@@ -14,6 +22,12 @@ export type PlatformStore = {
   workspaces: Map<string, TenantWorkspace>;
   memberships: Map<string, Membership>;
   records: Map<string, TenantScopedRecord>;
+  plans: Map<string, PlanDefinition>;
+  prices: Map<string, PriceDefinition>;
+  subscriptions: Map<string, Subscription>;
+  payments: Map<string, SaasPayment>;
+  billingEvents: Map<string, ProcessedBillingEvent>;
+  commercialAudit: CommercialAudit[];
 };
 
 export function createPlatformStore(): PlatformStore {
@@ -24,6 +38,12 @@ export function createPlatformStore(): PlatformStore {
     workspaces: new Map(),
     memberships: new Map(),
     records: new Map(),
+    plans: new Map(),
+    prices: new Map(),
+    subscriptions: new Map(),
+    payments: new Map(),
+    billingEvents: new Map(),
+    commercialAudit: [],
   };
 }
 

@@ -1,3 +1,7 @@
+/**
+ * TRANSITIONAL UX only (ADR-006). Not commercial authority.
+ * Server entitlement/access: GET /platform/entitlements, POST /platform/access/check.
+ */
 import type { ReactNode } from 'react';
 import { ArrowRight, Lock } from 'lucide-react';
 import { useApp } from '../context/AppContext';

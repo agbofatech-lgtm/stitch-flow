@@ -1,6 +1,8 @@
 import { newId, nowIso, slugify, type PlatformStore } from './store';
 import { hashPassword, verifyPassword } from './passwords';
 import { signAccessToken } from './tokens';
+import { PlatformError } from './errors';
+import { createCommercialService } from './commercial/service';
 import type {
   Identity,
   Membership,
@@ -11,15 +13,7 @@ import type {
   TrustedPlatformContext,
 } from './types';
 
-export class PlatformError extends Error {
-  constructor(
-    public status: number,
-    public code: string,
-    message: string
-  ) {
-    super(message);
-  }
-}
+export { PlatformError };
 
 function publicIdentity(identity: Identity): PublicIdentity {
   const { passwordHash: _pw, ...rest } = identity;
@@ -209,6 +203,8 @@ export function createPlatformRuntime(store: PlatformStore) {
     return record;
   }
 
+  const commercial = createCommercialService(store);
+
   return {
     store,
     register,
@@ -218,6 +214,7 @@ export function createPlatformRuntime(store: PlatformStore) {
     resolveContext,
     assertTenantRecord,
     createRecord,
+    commercial,
   };
 }
 

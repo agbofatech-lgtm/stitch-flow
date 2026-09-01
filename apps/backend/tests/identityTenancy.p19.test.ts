@@ -128,7 +128,7 @@ describe('P19.2+P19.3 identity, authentication, tenancy', () => {
     expect(ctx.body.tenant.id).toBe(created.body.tenant.id);
     expect(ctx.body.workspace.tenantId).toBe(ctx.body.tenant.id);
     expect(ctx.body.notes.tenantEqualsWorkspace).toBe(false);
-    expect(ctx.body.notes.entitlementEvaluated).toBe(false);
+    expect(ctx.body.notes.entitlementEvaluated).toBe(true);
     expect(ctx.body.membership.role).toBe('TENANT_OWNER');
   });
 

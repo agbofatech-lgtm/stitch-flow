@@ -5,6 +5,7 @@ import { createPlatformStore } from './platform/store';
 import { createPlatformRuntime, type PlatformRuntime } from './platform/runtime';
 import { authRoutes } from './routes/authRoutes';
 import { platformRoutes } from './routes/platformRoutes';
+import { commercialRoutes } from './routes/commercialRoutes';
 
 export type CreateAppOptions = {
   /**
@@ -84,6 +85,7 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Express
 
   app.use('/auth', authRoutes);
   app.use('/platform', platformRoutes);
+  app.use('/platform', commercialRoutes);
 
   if (mountBusinessRoutes) {
     const { dashboardRoutes } = await import('./routes/dashboardRoutes');
