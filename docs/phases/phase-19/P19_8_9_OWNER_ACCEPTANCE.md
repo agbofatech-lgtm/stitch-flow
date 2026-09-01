@@ -1,6 +1,8 @@
 # P19.8 + P19.9 Owner Acceptance
 
-Owner: Agbofa Benjamin. Agents must not tick.
+Owner: Agbofa Benjamin.
+
+Agents must not tick these boxes.
 
 ```
 [ ] ACCEPT
@@ -8,4 +10,9 @@ Owner: Agbofa Benjamin. Agents must not tick.
 [ ] REJECT
 ```
 
-No Phase 19 tag. P19.10+P19.11 locked.
+Date: _______________  
+Decision notes: _______________
+
+Checkpoint `transformation-phase-19-p19-8-9-durable-commercial-foundation-complete` must **not** be created until the owner records a decision above.
+
+P19.10 and P19.11 remain LOCKED regardless of this file until separately authorized.
