@@ -1,0 +1,18 @@
+{
+  "canonicalDirectory": "apps/backend/migrations",
+  "ledgerTable": "schema_migrations",
+  "active": [
+    "001_init_extensions.sql",
+    "007_shop_authority.sql"
+  ],
+  "historicalEmpty": [
+    "002_create_core_tables.sql",
+    "003_create_sync_tables.sql",
+    "004_create_indexes.sql",
+    "005_seed_admin.sql"
+  ],
+  "historicalUnappliedPlatform": [
+    "006_platform_commercial.sql"
+  ],
+  "historicalNestedDuplicate": "migrations/migrations/"
+}

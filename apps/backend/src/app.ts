@@ -9,6 +9,7 @@ import { commercialRoutes } from './routes/commercialRoutes';
 import { controlRoutes } from './routes/controlRoutes';
 import { shopRoutes } from './routes/shopRoutes';
 import { createShopService, type ShopService } from './shop/service';
+import { createConfiguredShopService } from './shop/runtime';
 
 export type CreateAppOptions = {
   /**
@@ -26,9 +27,14 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Express
   const loaded = loadOrCreateStore(process.env.PLATFORM_DATA_PATH);
   const platform = options.platform ?? createPlatformRuntime(loaded.store, { persist: loaded.persist });
   app.locals.platform = platform;
-  app.locals.shop = options.shop ?? createShopService();
+  const shopRuntime = options.shop
+    ? { shop: options.shop, mode: 'memory' as const, postgres: 'not-configured' as const, migrations: 'not-applicable' as const }
+    : await createConfiguredShopService();
+  app.locals.shop = shopRuntime.shop;
   app.locals.persistenceDriver = options.platform ? 'injected' : loaded.driver;
-  app.locals.shopPersistence = 'memory';
+  app.locals.shopPersistence = shopRuntime.mode;
+  app.locals.shopPostgres = shopRuntime.postgres;
+  app.locals.shopMigrations = shopRuntime.migrations;
 
   app.use(
     cors({
@@ -82,15 +88,23 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Express
   });
 
   app.get('/ready', (_req, res) => {
-    res.status(200).json({
-      ready: true,
+    const shopPostgres = app.locals.shopPostgres || 'not-configured';
+    const shopMigrations = app.locals.shopMigrations || 'not-applicable';
+    const shopMode = app.locals.shopPersistence || 'memory';
+    const ready = shopMode !== 'postgres' || shopPostgres === 'verified';
+    res.status(ready ? 200 : 503).json({
+      ready,
       runtime: 'apps/backend/src/app.ts',
       businessRoutesMounted: mountBusinessRoutes,
-      database: 'not-verified',
+      database: {
+        mode: shopMode,
+        postgres: shopPostgres,
+        migrations: shopMigrations,
+      },
       platformIam: 'durable-file-or-memory',
       persistence: process.env.PLATFORM_DATA_PATH ? 'file' : 'memory',
-      postgres: 'not-verified',
-      shopApi: 'authenticated-memory',
+      postgres: shopPostgres,
+      shopApi: shopMode === 'postgres' ? 'authenticated-postgres' : 'authenticated-memory',
       controlCenter: true,
       billingProvider: 'deferred',
     });

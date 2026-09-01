@@ -3,28 +3,32 @@ import { PlatformError } from '../platform/errors';
 import type { TrustedPlatformContext } from '../platform/types';
 import type { ProductionStageCode, StageAction } from '../services/productionStageService';
 import { applyStageAction, deriveOrderStatusFromStages, seedDraftStages } from './stageMachine';
-import type { ShopCustomer, ShopOrder, ShopStore, ShopTrustedArtifact } from './types';
+import type { ShopCustomer, ShopOrder, ShopTrustedArtifact } from './types';
+import type { ShopRepository, ShopScope } from './repository';
+import { createMemoryShopRepository } from './memoryRepository';
 
-export function createShopStore(): ShopStore {
-  return {
-    customers: new Map(),
-    orders: new Map(),
-    artifacts: new Map(),
-  };
+function scopeOf(ctx: TrustedPlatformContext, workspaceId: string): ShopScope {
+  return { tenantId: ctx.tenant.id, workspaceId };
 }
 
-export function createShopService(store: ShopStore = createShopStore()) {
-  function assertScope(record: { tenantId: string; workspaceId: string }, ctx: TrustedPlatformContext, workspaceId: string) {
-    if (record.tenantId !== ctx.tenant.id || record.workspaceId !== workspaceId) {
-      throw new PlatformError(403, 'SHOP_SCOPE', 'Record is outside the authorized shop scope');
-    }
+async function requireScoped<T>(
+  row: T | null,
+  exists: () => Promise<boolean>,
+  missing: { status: number; code: string; message: string }
+): Promise<T> {
+  if (row) return row;
+  if (await exists()) {
+    throw new PlatformError(403, 'SHOP_SCOPE', 'Record is outside the authorized shop scope');
   }
+  throw new PlatformError(missing.status, missing.code, missing.message);
+}
 
-  function createCustomer(
+export function createShopService(repo: ShopRepository = createMemoryShopRepository()) {
+  async function createCustomer(
     ctx: TrustedPlatformContext,
     workspaceId: string,
     input: { fullName?: string; phone?: string; email?: string; address?: string; notes?: string; tenantId?: string; workspaceId?: string; id?: string }
-  ): ShopCustomer {
+  ): Promise<ShopCustomer> {
     void input.tenantId;
     void input.workspaceId;
     void input.id;
@@ -45,24 +49,24 @@ export function createShopService(store: ShopStore = createShopStore()) {
       createdAt: now,
       updatedAt: now,
     };
-    store.customers.set(row.id, row);
+    await repo.insertCustomer(row);
     return row;
   }
 
-  function listCustomers(ctx: TrustedPlatformContext, workspaceId: string) {
-    return [...store.customers.values()].filter(
-      (row) => row.tenantId === ctx.tenant.id && row.workspaceId === workspaceId
-    );
+  async function listCustomers(ctx: TrustedPlatformContext, workspaceId: string) {
+    return repo.listCustomers(scopeOf(ctx, workspaceId));
   }
 
-  function getCustomer(ctx: TrustedPlatformContext, workspaceId: string, id: string) {
-    const row = store.customers.get(id);
-    if (!row) throw new PlatformError(404, 'CUSTOMER_MISSING', 'Customer not found');
-    assertScope(row, ctx, workspaceId);
-    return row;
+  async function getCustomer(ctx: TrustedPlatformContext, workspaceId: string, id: string) {
+    const scope = scopeOf(ctx, workspaceId);
+    return requireScoped(await repo.getCustomer(scope, id), () => repo.existsCustomer(id), {
+      status: 404,
+      code: 'CUSTOMER_MISSING',
+      message: 'Customer not found',
+    });
   }
 
-  function createOrder(
+  async function createOrder(
     ctx: TrustedPlatformContext,
     workspaceId: string,
     input: {
@@ -73,11 +77,11 @@ export function createShopService(store: ShopStore = createShopStore()) {
       workspaceId?: string;
       id?: string;
     }
-  ): ShopOrder {
+  ): Promise<ShopOrder> {
     void input.tenantId;
     void input.workspaceId;
     void input.id;
-    const customer = getCustomer(ctx, workspaceId, String(input.customerId || ''));
+    const customer = await getCustomer(ctx, workspaceId, String(input.customerId || ''));
     const now = new Date().toISOString();
     const stages = seedDraftStages();
     const row: ShopOrder = {
@@ -94,44 +98,44 @@ export function createShopService(store: ShopStore = createShopStore()) {
       createdAt: now,
       updatedAt: now,
     };
-    store.orders.set(row.id, row);
+    await repo.insertOrder(row);
     return row;
   }
 
-  function listOrders(ctx: TrustedPlatformContext, workspaceId: string) {
-    return [...store.orders.values()].filter(
-      (row) => row.tenantId === ctx.tenant.id && row.workspaceId === workspaceId
-    );
+  async function listOrders(ctx: TrustedPlatformContext, workspaceId: string) {
+    return repo.listOrders(scopeOf(ctx, workspaceId));
   }
 
-  function getOrder(ctx: TrustedPlatformContext, workspaceId: string, id: string) {
-    const row = store.orders.get(id);
-    if (!row) throw new PlatformError(404, 'ORDER_MISSING', 'Order not found');
-    assertScope(row, ctx, workspaceId);
-    return row;
+  async function getOrder(ctx: TrustedPlatformContext, workspaceId: string, id: string) {
+    const scope = scopeOf(ctx, workspaceId);
+    return requireScoped(await repo.getOrder(scope, id), () => repo.existsOrder(id), {
+      status: 404,
+      code: 'ORDER_MISSING',
+      message: 'Order not found',
+    });
   }
 
-  function putMeasurementSnapshot(
+  async function putMeasurementSnapshot(
     ctx: TrustedPlatformContext,
     workspaceId: string,
     orderId: string,
     snapshot: Record<string, unknown>
   ) {
-    const order = getOrder(ctx, workspaceId, orderId);
+    const order = await getOrder(ctx, workspaceId, orderId);
     order.measurementSnapshot = snapshot && typeof snapshot === 'object' ? { ...snapshot } : null;
     order.updatedAt = new Date().toISOString();
-    store.orders.set(order.id, order);
+    await repo.updateOrder(scopeOf(ctx, workspaceId), order);
     return order;
   }
 
-  function transitionStage(
+  async function transitionStage(
     ctx: TrustedPlatformContext,
     workspaceId: string,
     orderId: string,
     stageCode: ProductionStageCode,
     action: StageAction
   ) {
-    const order = getOrder(ctx, workspaceId, orderId);
+    const order = await getOrder(ctx, workspaceId, orderId);
     try {
       order.productionStages = applyStageAction(order.productionStages, stageCode, action);
     } catch (err) {
@@ -139,20 +143,20 @@ export function createShopService(store: ShopStore = createShopStore()) {
     }
     order.status = deriveOrderStatusFromStages(order.productionStages);
     order.updatedAt = new Date().toISOString();
-    store.orders.set(order.id, order);
+    await repo.updateOrder(scopeOf(ctx, workspaceId), order);
     return order;
   }
 
-  function appendTrustedArtifact(
+  async function appendTrustedArtifact(
     ctx: TrustedPlatformContext,
     workspaceId: string,
     input: { orderId?: string | null; fingerprint?: string; payload?: Record<string, unknown> }
-  ): ShopTrustedArtifact {
+  ): Promise<ShopTrustedArtifact> {
     const fingerprint = String(input.fingerprint || '').trim();
     if (!fingerprint) {
       throw new PlatformError(400, 'INVALID_ARTIFACT', 'fingerprint is required');
     }
-    if (input.orderId) getOrder(ctx, workspaceId, input.orderId);
+    if (input.orderId) await getOrder(ctx, workspaceId, input.orderId);
     const row: ShopTrustedArtifact = {
       id: randomUUID(),
       tenantId: ctx.tenant.id,
@@ -163,19 +167,20 @@ export function createShopService(store: ShopStore = createShopStore()) {
       payload: input.payload && typeof input.payload === 'object' ? { ...input.payload } : {},
       createdAt: new Date().toISOString(),
     };
-    store.artifacts.set(row.id, row);
+    await repo.insertArtifact(row);
     return row;
   }
 
-  function getTrustedArtifact(ctx: TrustedPlatformContext, workspaceId: string, id: string) {
-    const row = store.artifacts.get(id);
-    if (!row) throw new PlatformError(404, 'ARTIFACT_MISSING', 'Trusted artifact not found');
-    assertScope(row, ctx, workspaceId);
-    return row;
+  async function getTrustedArtifact(ctx: TrustedPlatformContext, workspaceId: string, id: string) {
+    const scope = scopeOf(ctx, workspaceId);
+    return requireScoped(await repo.getArtifact(scope, id), () => repo.existsArtifact(id), {
+      status: 404,
+      code: 'ARTIFACT_MISSING',
+      message: 'Trusted artifact not found',
+    });
   }
 
   return {
-    store,
     createCustomer,
     listCustomers,
     getCustomer,
@@ -190,3 +195,4 @@ export function createShopService(store: ShopStore = createShopStore()) {
 }
 
 export type ShopService = ReturnType<typeof createShopService>;
+export { createShopStore } from './store';

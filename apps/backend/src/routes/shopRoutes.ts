@@ -21,68 +21,68 @@ function handle(err: unknown, res: Response, next: NextFunction) {
   next(err);
 }
 
-shopRoutes.get('/customers', (req, res, next) => {
+shopRoutes.get('/customers', async (req, res, next) => {
   try {
     const ctx = req.platformContext!;
-    res.json({ customers: shopOf(req).listCustomers(ctx, req.shopWorkspaceId as string) });
+    res.json({ customers: await shopOf(req).listCustomers(ctx, req.shopWorkspaceId as string) });
   } catch (err) {
     handle(err, res, next);
   }
 });
 
-shopRoutes.post('/customers', (req, res, next) => {
+shopRoutes.post('/customers', async (req, res, next) => {
   try {
     const ctx = req.platformContext!;
-    const customer = shopOf(req).createCustomer(ctx, req.shopWorkspaceId as string, req.body || {});
+    const customer = await shopOf(req).createCustomer(ctx, req.shopWorkspaceId as string, req.body || {});
     res.status(201).json({ customer });
   } catch (err) {
     handle(err, res, next);
   }
 });
 
-shopRoutes.get('/customers/:id', (req, res, next) => {
+shopRoutes.get('/customers/:id', async (req, res, next) => {
   try {
     const ctx = req.platformContext!;
-    res.json({ customer: shopOf(req).getCustomer(ctx, req.shopWorkspaceId as string, req.params.id) });
+    res.json({ customer: await shopOf(req).getCustomer(ctx, req.shopWorkspaceId as string, req.params.id) });
   } catch (err) {
     handle(err, res, next);
   }
 });
 
-shopRoutes.get('/orders', (req, res, next) => {
+shopRoutes.get('/orders', async (req, res, next) => {
   try {
     const ctx = req.platformContext!;
-    res.json({ orders: shopOf(req).listOrders(ctx, req.shopWorkspaceId as string) });
+    res.json({ orders: await shopOf(req).listOrders(ctx, req.shopWorkspaceId as string) });
   } catch (err) {
     handle(err, res, next);
   }
 });
 
-shopRoutes.post('/orders', (req, res, next) => {
+shopRoutes.post('/orders', async (req, res, next) => {
   try {
     const ctx = req.platformContext!;
-    const order = shopOf(req).createOrder(ctx, req.shopWorkspaceId as string, req.body || {});
+    const order = await shopOf(req).createOrder(ctx, req.shopWorkspaceId as string, req.body || {});
     res.status(201).json({ order });
   } catch (err) {
     handle(err, res, next);
   }
 });
 
-shopRoutes.get('/orders/:id', (req, res, next) => {
+shopRoutes.get('/orders/:id', async (req, res, next) => {
   try {
     const ctx = req.platformContext!;
-    res.json({ order: shopOf(req).getOrder(ctx, req.shopWorkspaceId as string, req.params.id) });
+    res.json({ order: await shopOf(req).getOrder(ctx, req.shopWorkspaceId as string, req.params.id) });
   } catch (err) {
     handle(err, res, next);
   }
 });
 
-shopRoutes.put('/orders/:id/measurement-snapshot', (req, res, next) => {
+shopRoutes.put('/orders/:id/measurement-snapshot', async (req, res, next) => {
   try {
     const ctx = req.platformContext!;
     const snapshot =
       req.body?.snapshot && typeof req.body.snapshot === 'object' ? req.body.snapshot : req.body || {};
-    const order = shopOf(req).putMeasurementSnapshot(
+    const order = await shopOf(req).putMeasurementSnapshot(
       ctx,
       req.shopWorkspaceId as string,
       req.params.id,
@@ -94,10 +94,10 @@ shopRoutes.put('/orders/:id/measurement-snapshot', (req, res, next) => {
   }
 });
 
-shopRoutes.post('/orders/:id/production-stages/:code/transition', (req, res, next) => {
+shopRoutes.post('/orders/:id/production-stages/:code/transition', async (req, res, next) => {
   try {
     const ctx = req.platformContext!;
-    const order = shopOf(req).transitionStage(
+    const order = await shopOf(req).transitionStage(
       ctx,
       req.shopWorkspaceId as string,
       req.params.id,
@@ -110,21 +110,25 @@ shopRoutes.post('/orders/:id/production-stages/:code/transition', (req, res, nex
   }
 });
 
-shopRoutes.post('/trusted-artifacts', (req, res, next) => {
+shopRoutes.post('/trusted-artifacts', async (req, res, next) => {
   try {
     const ctx = req.platformContext!;
-    const artifact = shopOf(req).appendTrustedArtifact(ctx, req.shopWorkspaceId as string, req.body || {});
+    const artifact = await shopOf(req).appendTrustedArtifact(
+      ctx,
+      req.shopWorkspaceId as string,
+      req.body || {}
+    );
     res.status(201).json({ artifact });
   } catch (err) {
     handle(err, res, next);
   }
 });
 
-shopRoutes.get('/trusted-artifacts/:id', (req, res, next) => {
+shopRoutes.get('/trusted-artifacts/:id', async (req, res, next) => {
   try {
     const ctx = req.platformContext!;
     res.json({
-      artifact: shopOf(req).getTrustedArtifact(ctx, req.shopWorkspaceId as string, req.params.id),
+      artifact: await shopOf(req).getTrustedArtifact(ctx, req.shopWorkspaceId as string, req.params.id),
     });
   } catch (err) {
     handle(err, res, next);
@@ -142,5 +146,12 @@ shopRoutes.patch('/trusted-artifacts/:id', (_req, res) => {
   res.status(405).json({
     error: 'ARTIFACT_IMMUTABLE',
     message: 'Trusted artifacts are append-only. Mutation is forbidden.',
+  });
+});
+
+shopRoutes.delete('/trusted-artifacts/:id', (_req, res) => {
+  res.status(405).json({
+    error: 'ARTIFACT_IMMUTABLE',
+    message: 'Trusted artifacts are append-only. Deletion is forbidden.',
   });
 });
