@@ -21,4 +21,5 @@ This pack does not rewrite T0 maps, ADRs, or the continuity pack. Continuity des
 
 SAC-1 implementation (owner acceptance pending): [`sac-1/README.md`](./sac-1/README.md).  
 SAC-2 local T2 mirror (UI SoT still AppContext): [`sac-2/README.md`](./sac-2/README.md).  
-SAC-3 authenticated `/shop` API: [`sac-3/README.md`](./sac-3/README.md). SAC-4 remains locked.
+SAC-3 authenticated `/shop` API: [`sac-3/README.md`](./sac-3/README.md).  
+SAC-4 shop PostgreSQL: [`sac-4/README.md`](./sac-4/README.md). SAC-5 locked.
