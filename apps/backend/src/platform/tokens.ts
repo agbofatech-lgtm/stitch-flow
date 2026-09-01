@@ -27,7 +27,18 @@ export function verifyAccessToken(token: string | undefined): TokenVerifyResult 
     if (rec.typ !== 'access' || typeof rec.sub !== 'string' || rec.sub === '') {
       return { ok: false, reason: 'malformed' };
     }
-    if ('plan' in rec || 'billingStatus' in rec || 'permissions' in rec || 'tenantId' in rec) {
+    const forbidden = [
+      'plan',
+      'billingStatus',
+      'permissions',
+      'tenantId',
+      'role',
+      'operator',
+      'isPlatformOperator',
+      'entitlements',
+      'capabilities',
+    ];
+    if (forbidden.some((key) => key in rec)) {
       return { ok: false, reason: 'malformed' };
     }
     return { ok: true, identityId: rec.sub };

@@ -87,6 +87,16 @@ export function createPlatformRuntime(store: PlatformStore, options?: { persist?
     store.tenants.set(tenant.id, tenant);
     store.workspaces.set(workspace.id, workspace);
     store.memberships.set(membership.id, membership);
+    store.commercialAudit.push({
+      id: newId(),
+      tenantId: tenant.id,
+      actorId: identity.id,
+      eventId: null,
+      source: 'identity',
+      previousState: 'none',
+      newState: 'REGISTERED',
+      timestamp: ts,
+    });
     persist();
 
     return {
@@ -117,6 +127,17 @@ export function createPlatformRuntime(store: PlatformStore, options?: { persist?
     if (!match) {
       throw new PlatformError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
     }
+    store.commercialAudit.push({
+      id: newId(),
+      tenantId: membershipsFor(identity.id)[0]?.tenantId ?? '',
+      actorId: identity.id,
+      eventId: null,
+      source: 'identity',
+      previousState: 'anonymous',
+      newState: 'LOGIN',
+      timestamp: nowIso(),
+    });
+    persist();
     return { identity: publicIdentity(identity), accessToken: signAccessToken(identity.id) };
   }
 

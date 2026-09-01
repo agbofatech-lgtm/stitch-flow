@@ -1,5 +1,5 @@
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
-import { dirname } from 'path';
+import { mkdirSync, readFileSync, writeFileSync, existsSync, renameSync, unlinkSync } from 'fs';
+import { dirname, isAbsolute, resolve } from 'path';
 import { createPlatformStore, type PlatformStore } from './store';
 import { defaultPlatformConfiguration } from './configuration';
 import type { Identity, Membership, Tenant, TenantScopedRecord, TenantWorkspace } from './types';
@@ -11,6 +11,7 @@ import type {
   SaasPayment,
   Subscription,
 } from './commercial/types';
+import { PlatformError } from './errors';
 
 export const STORE_VERSION = 1;
 
@@ -36,6 +37,12 @@ function mapBy<T>(rows: T[], key: (row: T) => string): Map<string, T> {
   return new Map(rows.map((row) => [key(row), row]));
 }
 
+function assertArray(value: unknown, field: string): void {
+  if (!Array.isArray(value)) {
+    throw new PlatformError(500, 'STORE_CORRUPT', `Store snapshot field is not an array: ${field}`);
+  }
+}
+
 export function serializeStore(store: PlatformStore): Snapshot {
   return {
     version: STORE_VERSION,
@@ -57,8 +64,15 @@ export function serializeStore(store: PlatformStore): Snapshot {
 }
 
 export function hydrateStore(snapshot: Snapshot): PlatformStore {
+  if (!snapshot || snapshot.version !== STORE_VERSION) {
+    throw new PlatformError(500, 'STORE_CORRUPT', 'Store snapshot version is unsupported');
+  }
+  assertArray(snapshot.identities, 'identities');
+  assertArray(snapshot.tenants, 'tenants');
+  assertArray(snapshot.workspaces, 'workspaces');
+  assertArray(snapshot.memberships, 'memberships');
   const store = createPlatformStore();
-  for (const identity of snapshot.identities || []) {
+  for (const identity of snapshot.identities) {
     store.identities.set(identity.id, identity);
     store.identitiesByEmail.set(identity.email, identity.id);
   }
@@ -80,14 +94,38 @@ export function hydrateStore(snapshot: Snapshot): PlatformStore {
 
 export function writeStore(filePath: string, store: PlatformStore): void {
   mkdirSync(dirname(filePath), { recursive: true });
-  writeFileSync(filePath, JSON.stringify(serializeStore(store), null, 2), 'utf8');
+  const tmp = `${filePath}.tmp`;
+  writeFileSync(tmp, JSON.stringify(serializeStore(store), null, 2), { encoding: 'utf8', mode: 0o600 });
+  try {
+    renameSync(tmp, filePath);
+  } catch {
+    writeFileSync(filePath, JSON.stringify(serializeStore(store), null, 2), {
+      encoding: 'utf8',
+      mode: 0o600,
+    });
+    try {
+      unlinkSync(tmp);
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 export function readStore(filePath: string): PlatformStore | null {
   if (!existsSync(filePath)) return null;
-  const raw = JSON.parse(readFileSync(filePath, 'utf8')) as Snapshot;
-  if (!raw || raw.version !== STORE_VERSION) return null;
-  return hydrateStore(raw);
+  let raw: unknown;
+  try {
+    raw = JSON.parse(readFileSync(filePath, 'utf8'));
+  } catch {
+    throw new PlatformError(500, 'STORE_CORRUPT', 'Store snapshot is not valid JSON');
+  }
+  return hydrateStore(raw as Snapshot);
+}
+
+export function resolveDataPath(filePath: string | undefined): string | undefined {
+  if (!filePath || filePath.trim() === '') return undefined;
+  const trimmed = filePath.trim();
+  return isAbsolute(trimmed) ? trimmed : resolve(process.cwd(), trimmed);
 }
 
 export function loadOrCreateStore(filePath: string | undefined): {
@@ -95,14 +133,23 @@ export function loadOrCreateStore(filePath: string | undefined): {
   persist: () => void;
   driver: 'memory' | 'file';
 } {
-  if (!filePath) {
+  const resolved = resolveDataPath(filePath);
+  if (!resolved) {
     return { store: createPlatformStore(), persist: () => undefined, driver: 'memory' };
   }
-  const loaded = readStore(filePath);
+  const loaded = readStore(resolved);
   const store = loaded ?? createPlatformStore();
+  store.configuration['persistence.driver'] = {
+    ...store.configuration['persistence.driver'],
+    key: 'persistence.driver',
+    value: 'file',
+    classification: 'TRANSITIONAL_DEFAULT',
+    description:
+      'Transitional durable JSON file. Postgres exists in-repo but is NOT VERIFIED / not applied.',
+  };
   return {
     store,
-    persist: () => writeStore(filePath, store),
+    persist: () => writeStore(resolved, store),
     driver: 'file',
   };
 }

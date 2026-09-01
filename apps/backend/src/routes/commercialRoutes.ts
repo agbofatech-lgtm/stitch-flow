@@ -25,6 +25,9 @@ commercialRoutes.get('/entitlements', requireIdentity, requireTenantContext, (re
 commercialRoutes.post('/access/check', requireIdentity, requireTenantContext, (req, res) => {
   const ctx = req.platformContext!;
   const capability = String(req.body?.capability || '');
+  void req.body?.allowed;
+  void req.body?.entitled;
+  void req.body?.decision;
   res.json({
     decision: runtimeOf(req).commercial.decideAccess(ctx.tenant.id, capability, {
       principalId: ctx.identity.id,

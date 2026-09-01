@@ -11,7 +11,12 @@ function runtimeOf(req: Request): PlatformRuntime {
 controlRoutes.get('/status', requireIdentity, requirePlatformOperator, (req, res) => {
   res.json({
     plane: 'AGBOFA_PLATFORM_CONTROL_CENTER',
-    persistence: { driver: 'memory', classification: 'TRANSITIONAL', postgresApplied: false },
+    persistence: {
+      driver: req.app.locals.persistenceDriver || 'memory',
+      classification: 'TRANSITIONAL',
+      postgresApplied: false,
+      postgres: 'not-verified',
+    },
     billingProvider: { selected: null, status: 'DEFERRED' },
     operatorId: req.platformIdentityId,
     tailoringAuthority: false,
