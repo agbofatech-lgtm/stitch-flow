@@ -125,3 +125,18 @@ test('feature gate does not open a fake billing flow', () => {
   assert.equal(source.includes('Upgrade to'), false);
   assert.match(source, /UX presentation only/);
 });
+
+test('dialog traps tab and restores focus on escape path', () => {
+  const source = readFileSync(new URL('./primitives/overlays.tsx', import.meta.url), 'utf8');
+  assert.match(source, /event.key !== 'Tab'/);
+  assert.match(source, /Escape/);
+  assert.match(source, /previous\?\.focus/);
+  assert.match(source, /aria-modal/);
+});
+
+test('atelier atmosphere and skip link tokens exist', () => {
+  const css = readFileSync(new URL('./tokens/tokens.css', import.meta.url), 'utf8');
+  assert.match(css, /\.sf-atelier-atmosphere/);
+  assert.match(css, /\.sf-skip-link/);
+  assert.match(css, /prefers-reduced-motion/);
+});

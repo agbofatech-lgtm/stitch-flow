@@ -22,6 +22,7 @@ import { FEATURE_COMPARISON } from '@modules/services/tierEnforcement';
 import type { CurrencyCode } from '../types';
 import { BRAND } from '../config/brand';
 import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
+import { PageHeader, Workroom } from '../experience';
 import { fetchSettings, updateSetting } from '@shared/api/settings';
 import {
   fetchWorkspaceMembers,
@@ -284,9 +285,14 @@ export function Settings() {
         : 'bg-action-secondary text-ink-secondary';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface-canvas via-surface-panel to-surface-workspace">
-      <div className="mx-auto max-w-6xl p-4 lg:p-8">
-        <div className="mb-8 overflow-hidden rounded-sf-workspace border border-white/60 bg-surface-panel/80 p-6 shadow-xl backdrop-blur-sm">
+    <Workroom>
+        <PageHeader
+          level={2}
+          kicker="Workspace"
+          title="Settings"
+          description="Profile, branding, team, and UX-only plan simulation. This screen is not live billing."
+        />
+        <div className="mb-8 overflow-hidden rounded-sf-lg border border-line bg-surface-panel p-6">
           <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr] lg:items-center">
             <div>
               <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-action-primary/10 px-3 py-1 text-sm font-medium text-action-primary">
@@ -294,12 +300,9 @@ export function Settings() {
                 {BRAND.productName} by {BRAND.parentName}
               </div>
 
-              <h1 className="text-2xl font-bold tracking-tight text-ink-primary lg:text-3xl">
-                Settings
-              </h1>
-
+              <p className="font-display text-heading-sm text-ink-primary">Workspace identity</p>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-muted lg:text-base">
-                Manage your workspace profile, branding, subscription, and team access.
+                Profile and branding used on invoices. Subscription simulation is UX-only.
               </p>
             </div>
 
@@ -529,7 +532,7 @@ export function Settings() {
             <div className="rounded-2xl border border-green-100 bg-green-50 p-4">
               <div className="flex items-center gap-2 text-green-800">
                 <Check className="h-5 w-5" />
-                <span className="font-medium">You're on Pro</span>
+                <span className="font-medium">Simulating Pro (UX only)</span>
               </div>
               <p className="mt-1 text-sm text-green-700">
                 Branded exports, PDF downloads, analytics, and inventory tools are available.
@@ -541,7 +544,7 @@ export function Settings() {
                     onClick={() => simulateTier('STUDIO')}
                     className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600"
                   >
-                    Upgrade to Studio
+                    Simulate Studio
                   </button>
 
                   <button
@@ -557,7 +560,7 @@ export function Settings() {
             <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4">
               <div className="flex items-center gap-2 text-amber-800">
                 <Crown className="h-5 w-5" />
-                <span className="font-medium">You're on Studio</span>
+                <span className="font-medium">Simulating Studio (UX only)</span>
               </div>
               <p className="mt-1 text-sm text-amber-700">
                 Full branded exports, watermark support, advanced reports, and Studio insights are
@@ -619,7 +622,7 @@ export function Settings() {
                 </span>
               </div>
               <p className="mt-1 text-sm text-amber-700">
-                Upgrade to enable logo branding on invoices and exported documents.
+                FeatureGate presentation only. Live billing is not opened from this screen.
               </p>
             </div>
           ) : (
@@ -958,7 +961,7 @@ export function Settings() {
               {!featureAccess.canInviteAssistant.allowed ? (
                 <>
                   <Lock className="h-4 w-4" />
-                  Upgrade to Add
+                  Invite locked
                 </>
               ) : (
                 <>
@@ -1176,61 +1179,6 @@ export function Settings() {
 
           <p className="mt-8 text-center text-xs text-ink-muted">{BRAND.footerText}</p>
         </div>
-      </div>
-    </div>
+    </Workroom>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

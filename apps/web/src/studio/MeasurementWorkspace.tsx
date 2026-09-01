@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Badge, Button, DataTable, ExperienceEmptyState, Panel, Select } from '../experience';
+import { Badge, Button, DataTable, ExperienceEmptyState, PageHeader, Panel, Select, Workroom } from '../experience';
 import { separateLegacyMeasurementBlob } from '../domain/measurement/separate';
 import { persistSeparatedMeasurements } from '../domain/persistence/measurementStore';
 import { readMeasurementVersion } from '../domain/persistence/measurementVersionStore';
@@ -122,18 +122,32 @@ export function MeasurementWorkspace() {
 
   if (rows.length === 0) {
     return (
-      <ExperienceEmptyState
-        title="No measurement profiles in this workspace"
-        description="Profiles still live in the transitional application store. T5 does not create a second measurement authority or localStorage key."
-      />
+      <Workroom>
+        <PageHeader
+          level={2}
+          kicker="Atelier"
+          title="Measurements"
+          description="Body, garment, and derived pattern stay separate. Live profiles remain transitional."
+        />
+        <ExperienceEmptyState
+          title="No measurement profiles in this workspace"
+          description="Profiles still live in the transitional application store. T5 does not create a second measurement authority or localStorage key."
+        />
+      </Workroom>
     );
   }
 
   return (
-    <div className="space-y-4 p-4 lg:p-6">
+    <Workroom>
+      <PageHeader
+        level={2}
+        kicker="Atelier"
+        title="Measurements"
+        description="Body, garment, and derived pattern stay separate. Live profiles remain transitional."
+      />
       <Panel>
         <p className="text-label text-action-primary">Measurement workspace</p>
-        <h1 className="mt-1 text-heading text-ink-primary">Body, garment, pattern</h1>
+        <h2 className="mt-1 text-heading text-ink-primary">Body, garment, pattern</h2>
         <p className="mt-2 text-body text-ink-secondary">
           Live profiles stay transitional. Pattern values remain derived. Completeness uses T3 required keys and does not apply engine hip/bust defaults. Frozen MeasurementVersion is T2 create-only. Governed T10 execution requires a complete frozen version.
         </p>
@@ -262,6 +276,6 @@ export function MeasurementWorkspace() {
           </span>
         ))}
       </div>
-    </div>
+    </Workroom>
   );
 }

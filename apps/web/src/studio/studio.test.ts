@@ -72,4 +72,13 @@ test('control center presents API fields without inventing metrics', () => {
   assert.match(source, /CommandPayload/);
   assert.equal(source.includes('totalRevenue'), false);
   assert.match(source, /do not invent metrics/);
+  assert.match(source, /PLANE_GROUPS/);
+  assert.match(source, /\/control\/billing\/provider/);
+});
+
+test('design studio frame does not import engines', () => {
+  const source = readFileSync(new URL('../atelier/DesignStudioFrame.tsx', import.meta.url), 'utf8');
+  assert.equal(/from ['"].*patternEngine/.test(source), false);
+  assert.equal(/from ['"].*productionAssistant/.test(source), false);
+  assert.match(source, /Protected engine hosted/);
 });

@@ -2,12 +2,14 @@
 
 Owner: Agbofa Benjamin
 
+Independent recertification: CONDITIONALLY CERTIFIED. Numeric scores are NOT CLAIMED.
+
 Agents must not tick this register.
 
-- [ ] Owner accepts workspace grammar (Workroom + PageHeader h2)
-- [ ] Owner accepts FeatureGate as UX presentation only (no fake billing CTA)
+- [ ] Owner accepts Workroom + PageHeader h2 grammar
+- [ ] Owner accepts FeatureGate as UX presentation only
 - [ ] Owner accepts Control Center structured API presentation
-- [ ] Owner accepts scores 76/78/77 as CONDITIONAL, not 90+
-- [ ] Owner accepts that P7/P8 and a PEX checkpoint are not opened
+- [ ] Owner accepts CONDITIONAL status (Settings/Reports/Measurements residue at P5 close; P7/P8 addressed remaining chrome)
+- [ ] Owner accepts that no PEX checkpoint is created without owner instruction
 
-Until boxes are ticked by the owner, this phase is READY FOR OWNER ACCEPTANCE only.
+Until ticked by the owner: READY FOR OWNER ACCEPTANCE only.

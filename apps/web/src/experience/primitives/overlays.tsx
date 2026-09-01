@@ -51,10 +51,37 @@ export function Dialog({
 
   useEffect(() => {
     if (!open) return;
+    const root = dialogRef.current;
     const previous = document.activeElement as HTMLElement | null;
-    dialogRef.current?.focus();
+    const focusables = () =>
+      Array.from(
+        root?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        ) || []
+      );
+    const items = focusables();
+    (items[0] || root)?.focus();
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (event.key !== 'Tab' || !root) return;
+      const cycle = focusables();
+      if (cycle.length === 0) {
+        event.preventDefault();
+        root.focus();
+        return;
+      }
+      const first = cycle[0];
+      const last = cycle[cycle.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => {

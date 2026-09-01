@@ -23,6 +23,13 @@ const PLANES: Array<[Plane, string, string]> = [
   ['billing', 'Billing', 'Provider-neutral billing port from /control/billing/provider'],
 ];
 
+const PLANE_GROUPS: Array<{ label: string; planes: Plane[] }> = [
+  { label: 'System', planes: ['overview', 'configuration'] },
+  { label: 'Tenancy', planes: ['tenants'] },
+  { label: 'Commercial', planes: ['billing'] },
+  { label: 'Governance', planes: ['audit'] },
+];
+
 export function ControlCenter({ onExit }: { onExit: () => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -141,18 +148,30 @@ export function ControlCenter({ onExit }: { onExit: () => void }) {
           </Panel>
         ) : (
           <div className="grid gap-4 lg:grid-cols-[14rem_minmax(0,1fr)]">
-            <nav aria-label="Control Center" className="space-y-1">
-              {PLANES.map(([id, label]) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => void load(id)}
-                  className={`sf-focus-ring flex min-h-10 w-full rounded-sf px-3 py-2 text-left text-label ${
-                    plane === id ? 'bg-action-primary text-ink-inverse' : 'hover:bg-action-secondary'
-                  }`}
-                >
-                  {label}
-                </button>
+            <nav aria-label="Control Center" className="space-y-4">
+              {PLANE_GROUPS.map((group) => (
+                <div key={group.label}>
+                  <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
+                    {group.label}
+                  </p>
+                  <div className="space-y-1">
+                    {group.planes.map((id) => {
+                      const entry = PLANES.find((item) => item[0] === id)!;
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => void load(id)}
+                          className={`sf-focus-ring flex min-h-10 w-full rounded-sf px-3 py-2 text-left text-label ${
+                            plane === id ? 'bg-action-primary text-ink-inverse' : 'hover:bg-action-secondary'
+                          }`}
+                        >
+                          {entry[1]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               ))}
             </nav>
             <Panel>

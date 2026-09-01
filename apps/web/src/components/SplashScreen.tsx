@@ -287,8 +287,7 @@ export function SplashScreen({
         aria-busy={!ready}
         aria-label={`${BRAND.productName} is loading`}
         className={[
-          'relative flex min-h-screen items-center justify-center overflow-hidden px-6',
-          'bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.12),transparent_32%),linear-gradient(135deg,#f8fafc_0%,#ffffff_48%,#ecfeff_100%)]',
+          'relative flex min-h-screen items-center justify-center overflow-hidden bg-surface-canvas px-6',
           motionClass,
           isExiting ? 'opacity-0 scale-[1.015]' : 'opacity-100 scale-100',
         ].join(' ')}

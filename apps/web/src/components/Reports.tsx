@@ -584,83 +584,6 @@ export function Reports() {
           title="Reports"
           description="Revenue, customers, materials, order demand, and studio performance from workspace records."
         />
-        <section className="relative overflow-hidden rounded-sf-lg border border-line bg-action-primary p-6 text-ink-inverse">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.10),transparent_24%)]" />
-
-          <img
-            src={measuringTapeSoft}
-            alt=""
-            aria-hidden="true"
-            className="pointer-events-none absolute right-8 top-6 hidden h-20 w-20 rotate-6 opacity-[0.16] lg:block"
-          />
-          <img
-            src={sewingMachineSoft}
-            alt=""
-            aria-hidden="true"
-            className="pointer-events-none absolute right-32 bottom-6 hidden h-20 w-20 opacity-[0.14] lg:block"
-          />
-          <img
-            src={needleSoft}
-            alt=""
-            aria-hidden="true"
-            className="pointer-events-none absolute right-44 top-24 hidden h-14 w-14 opacity-[0.14] xl:block"
-          />
-
-          <div className="relative grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-            <div>
-              <div className="mb-4 flex flex-wrap items-center gap-3">
-                <div className="rounded-2xl bg-surface-panel px-3 py-2 shadow-sm">
-                  <img
-                    src={stitchflowLogo}
-                    alt={`${BRAND.productName} logo`}
-                    className="h-9 w-auto"
-                  />
-                </div>
-
-                <div className="inline-flex items-center gap-2 rounded-full bg-surface-panel/15 px-3 py-1 text-sm backdrop-blur-sm">
-                  <Sparkles className="h-4 w-4" />
-                  Business Intelligence
-                </div>
-              </div>
-
-              <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
-                Reports
-              </h1>
-
-              <p className="mt-3 max-w-2xl text-sm text-white/90 lg:text-base">
-                Revenue, customers, materials, order demand, and studio performance
-                insights in one place.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <TopInfoCard
-                label="This Month"
-                value={formatCurrency(
-                  reportData.revenueThisMonth,
-                  safeCurrency(workspaceCurrency)
-                )}
-                icon={DollarSign}
-              />
-              <TopInfoCard
-                label="Repeat Clients"
-                value={String(reportData.repeatCustomerCount)}
-                icon={RefreshCw}
-              />
-              <TopInfoCard
-                label="Top Order Type"
-                value={reportData.topOrderType?.name || 'N/A'}
-                icon={ShoppingBag}
-              />
-              <TopInfoCard
-                label="Completion"
-                value={`${(reportData.completionRate ?? 0).toFixed(0)}%`}
-                icon={CheckCircle2}
-              />
-            </div>
-          </div>
-        </section>
-
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <MetricCard
             title="Revenue This Month"
@@ -910,7 +833,7 @@ export function Reports() {
             <FeatureGate
               feature="advancedReports"
               title="Advanced Production Reports"
-              description="Upgrade to Studio to unlock material consumption and bottleneck timing across production."
+              description="Advanced production reports are locked in this FeatureGate presentation. Live billing is not opened here."
               compact
             >
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
@@ -1505,7 +1428,7 @@ export function Reports() {
           <FeatureGate
             feature="advancedReports"
             title="Advanced insights require Studio plan"
-            description="Unlock deeper reports, premium operational intelligence, multi-layer business visibility, and studio-grade reporting tools."
+            description="Advanced insights remain FeatureGate presentation. Commercial grant is server-side."
           >
             <>
               <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
