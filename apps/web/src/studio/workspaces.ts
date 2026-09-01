@@ -20,7 +20,7 @@ export type StudioWorkspace = {
 export const STUDIO_WORKSPACES: StudioWorkspace[] = [
   {
     id: 'command',
-    label: 'Command Center',
+    label: 'Atelier Home',
     purpose: 'Work requiring attention',
     legacyView: 'dashboard',
   },

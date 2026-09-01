@@ -1,15 +1,15 @@
 :root {
-  --sf-surface-canvas: #f4f8fa;
-  --sf-surface-workspace: #f8fbfc;
-  --sf-surface-panel: #ffffff;
-  --sf-surface-elevated: #ffffff;
-  --sf-text-primary: #1e2933;
-  --sf-text-secondary: #334155;
-  --sf-text-muted: #64748b;
-  --sf-text-inverse: #ffffff;
+  --sf-surface-canvas: #f3efe6;
+  --sf-surface-workspace: #f7f3eb;
+  --sf-surface-panel: #fbf8f2;
+  --sf-surface-elevated: #fffcf7;
+  --sf-text-primary: #1c1915;
+  --sf-text-secondary: #3f3a33;
+  --sf-text-muted: #6f675c;
+  --sf-text-inverse: #fffcf7;
   --sf-action-primary: #0f6e8c;
   --sf-action-primary-hover: #0c5c74;
-  --sf-action-secondary: #e8f2f6;
+  --sf-action-secondary: #e7eef1;
   --sf-status-success: #16a34a;
   --sf-status-warning: #d97706;
   --sf-status-danger: #dc2626;
@@ -19,10 +19,10 @@
   --sf-focus-ring: #0f6e8c;
 
   --sf-font-sans: Inter, system-ui, sans-serif;
-  --sf-font-display: Inter, system-ui, sans-serif;
-  --sf-font-numeric: Inter, ui-monospace, monospace;
+  --sf-font-display: 'Space Grotesk', Inter, system-ui, sans-serif;
+  --sf-font-numeric: 'IBM Plex Mono', ui-monospace, monospace;
 
-  --sf-text-display: 2rem;
+  --sf-text-display: 2.25rem;
   --sf-text-heading-lg: 1.5rem;
   --sf-text-heading: 1.25rem;
   --sf-text-heading-sm: 1.0625rem;

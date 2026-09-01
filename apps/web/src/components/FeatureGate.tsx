@@ -87,9 +87,9 @@ export function FeatureGate({
 
   if (compact) {
     return (
-      <div className="rounded-2xl border border-dashed border-amber-200 bg-amber-50 p-4">
+      <div className="rounded-sf-lg border border-dashed border-status-warning/40 bg-status-warning/10 p-4">
         <div className="flex items-start gap-3">
-          <div className="rounded-xl bg-white/80 p-2 text-amber-700">
+          <div className="rounded-sf bg-surface-elevated p-2 text-status-warning">
             <Lock className="h-4 w-4" />
           </div>
 
@@ -104,7 +104,7 @@ export function FeatureGate({
                   `${requiredTier.name} plan • ${requiredTier.shortLabel}\n\nThis opens the upgrade flow in a full billing setup.`
                 )
               }
-              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#0F6E8C] px-3 py-2 text-sm font-medium text-white transition hover:bg-[#0C5C74]"
+              className="sf-focus-ring mt-3 inline-flex items-center gap-2 rounded-sf bg-action-primary px-3 py-2 text-sm font-medium text-ink-inverse transition hover:bg-action-hover"
             >
               Upgrade to {requiredTier.name}
               <ArrowRight className="h-4 w-4" />
@@ -116,10 +116,10 @@ export function FeatureGate({
   }
 
   return (
-    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-      <Lock className="mx-auto mb-3 h-10 w-10 text-slate-400" />
-      <h3 className="text-lg font-semibold text-slate-900">{resolvedTitle}</h3>
-      <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-500">
+    <div className="rounded-sf-lg border border-dashed border-line bg-surface-workspace p-8 text-center">
+      <Lock className="mx-auto mb-3 h-10 w-10 text-ink-muted" />
+      <h3 className="font-display text-heading-sm text-ink-primary">{resolvedTitle}</h3>
+      <p className="mx-auto mt-2 max-w-2xl text-body text-ink-muted">
         {resolvedDescription}
       </p>
 
@@ -130,7 +130,7 @@ export function FeatureGate({
             `${requiredTier.name} plan • ${requiredTier.shortLabel}\n\nThis opens the upgrade flow in a full billing setup.`
           )
         }
-        className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#0F6E8C] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#0C5C74]"
+        className="sf-focus-ring mt-4 inline-flex items-center gap-2 rounded-sf bg-action-primary px-4 py-2.5 text-sm font-medium text-ink-inverse transition hover:bg-action-hover"
       >
         Upgrade to {requiredTier.name}
         <ArrowRight className="h-4 w-4" />

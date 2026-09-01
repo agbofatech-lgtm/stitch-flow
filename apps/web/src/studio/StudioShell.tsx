@@ -13,7 +13,9 @@ import {
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { Dashboard } from '../components/Dashboard';
+import { AtelierHome } from '../atelier/AtelierHome';
+import { DesignStudioFrame } from '../atelier/DesignStudioFrame';
+import { ControlCenter } from '../control/ControlCenter';
 import { Customers } from '../components/Customers';
 import { Orders } from '../components/Orders';
 import { ProductionBoard } from '../components/ProductionBoard';
@@ -81,6 +83,7 @@ export function StudioShell() {
   );
   const [commandOpen, setCommandOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [controlOpen, setControlOpen] = useState(false);
   const [connectivity, setConnectivity] = useState<ConnectivityState>('offline');
   const [pendingOps, setPendingOps] = useState(0);
 
@@ -120,23 +123,42 @@ export function StudioShell() {
   const attention = (dueAlerts?.length || 0) + orders.filter((order) => order.status === 'in_progress').length;
 
   const canvas = useMemo(() => {
+    if (controlOpen) return <ControlCenter onExit={() => setControlOpen(false)} />;
     if (settingsOpen) return <Settings />;
     if (workspace === 'measurements') return <MeasurementWorkspace />;
-    if (workspace === 'command') return <Dashboard />;
+    if (workspace === 'command') return <AtelierHome />;
     if (workspace === 'clients') return <Customers />;
-    if (workspace === 'design') return <DesignStudio />;
+    if (workspace === 'design') return (
+      <DesignStudioFrame>
+        <DesignStudio />
+      </DesignStudioFrame>
+    );
     if (workspace === 'production') return <ProductionBoard />;
     if (business === 'materials') return <Materials />;
     if (business === 'invoices') return <Invoices />;
     if (business === 'reports') return <Reports />;
     return <Orders />;
-  }, [business, settingsOpen, workspace]);
+  }, [business, controlOpen, settingsOpen, workspace]);
 
-  const commands = STUDIO_WORKSPACES.map((item) => ({
-    id: item.id,
-    label: item.label,
-    onSelect: () => goTo(item.id),
-  }));
+  const commands = [
+    ...STUDIO_WORKSPACES.map((item) => ({
+      id: item.id,
+      label: item.label,
+      onSelect: () => {
+        setControlOpen(false);
+        setSettingsOpen(false);
+        goTo(item.id);
+      },
+    })),
+    {
+      id: 'control-center',
+      label: 'Open Control Center',
+      onSelect: () => {
+        setSettingsOpen(false);
+        setControlOpen(true);
+      },
+    },
+  ];
 
   const motion = motionOrInstant(motionPresets.panel);
 
@@ -159,10 +181,10 @@ export function StudioShell() {
         )}
       >
         <div className="flex items-center gap-3 border-b border-line px-3 py-4">
-          <img src={stitchflowLogo} alt="" className="h-9 w-auto" />
+          <img src={stitchflowLogo} alt={BRAND.productName} className="h-9 w-auto" />
           {!navCollapsed ? (
             <div className="min-w-0">
-              <p className="truncate text-label text-ink-primary">{BRAND.productName} Studio</p>
+              <p className="truncate font-display text-label text-ink-primary">{BRAND.productName} Atelier</p>
               <p className="truncate text-meta text-ink-muted">{currentWorkspace.name}</p>
             </div>
           ) : null}
@@ -170,13 +192,14 @@ export function StudioShell() {
         <nav aria-label="Studio workspaces" className="flex-1 space-y-1 overflow-y-auto p-2">
           {STUDIO_WORKSPACES.map((item) => {
             const Icon = ICONS[item.id];
-            const active = item.id === workspace && !settingsOpen;
+            const active = item.id === workspace && !settingsOpen && !controlOpen;
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => {
                   setSettingsOpen(false);
+                  setControlOpen(false);
                   goTo(item.id);
                 }}
                 className={cn(
@@ -204,8 +227,12 @@ export function StudioShell() {
             <Menu className="h-4 w-4" />
           </IconButton>
           <div className="min-w-0 flex-1">
-            <p className="text-meta uppercase tracking-[0.16em] text-ink-muted">Workspace</p>
-            <h1 className="truncate text-heading-sm">{settingsOpen ? 'Settings' : meta.label}</h1>
+            <p className="text-meta uppercase tracking-[0.16em] text-ink-muted">
+              {controlOpen ? 'AGBOFA' : 'Atelier'}
+            </p>
+            <h1 className="truncate font-display text-heading-sm">
+              {controlOpen ? 'Control Center' : settingsOpen ? 'Settings' : meta.label}
+            </h1>
           </div>
           {workspace === 'business' && !settingsOpen ? (
             <div className="hidden gap-1 md:flex">
@@ -233,9 +260,21 @@ export function StudioShell() {
           >
             <PanelRight className="h-4 w-4" />
           </IconButton>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hidden md:inline-flex"
+            onClick={() => {
+              setSettingsOpen(false);
+              setControlOpen(true);
+            }}
+          >
+            Control Center
+          </Button>
           <IconButton
             label="Workspace settings"
             onClick={() => {
+              setControlOpen(false);
               setSettingsOpen(true);
               setView('settings');
             }}
@@ -247,7 +286,11 @@ export function StudioShell() {
         <div className="flex min-h-0 flex-1">
           <main className="min-w-0 flex-1 overflow-auto">
             <AnimatePresence mode="wait">
-              <motion.div key={`${workspace}-${business}-${settingsOpen}`} {...motion} className="min-h-full">
+              <motion.div
+                key={`${workspace}-${business}-${settingsOpen}-${controlOpen}`}
+                {...motion}
+                className="min-h-full"
+              >
                 {canvas}
               </motion.div>
             </AnimatePresence>
