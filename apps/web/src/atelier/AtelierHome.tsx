@@ -21,6 +21,7 @@ export function AtelierHome() {
     <AtelierCanvas>
       <Workroom>
         <PageHeader
+          level={2}
           kicker="Digital Atelier"
           title={`Good day, ${firstName}`}
           description={`${currentWorkspace.name} · work that needs a human, not a statistics wall.`}

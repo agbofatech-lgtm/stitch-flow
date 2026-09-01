@@ -18,7 +18,6 @@ import {
   Pencil,
   Users,
   AlertCircle,
-  X,
   ClipboardList,
   Calendar,
 } from 'lucide-react';
@@ -35,6 +34,7 @@ import { formatCurrency, safeCurrency } from '@shared/utils/currency';
 import { API_BASE } from '@shared/utils/api';
 import {
   Button,
+  Dialog,
   ErrorState,
   ExperienceEmptyState,
   LoadingState,
@@ -353,7 +353,7 @@ function CustomerOrdersModal({
   }, [customer.id]);
 
   return (
-    <ModalShell title={customer.fullName} onClose={onClose}>
+    <Dialog open title={customer.fullName} size="lg" onClose={onClose}>
       <div className="space-y-6 p-4">
         <div className="rounded-2xl border border-line-subtle bg-surface-workspace p-4">
           <div className="grid gap-3 md:grid-cols-2">
@@ -444,7 +444,7 @@ function CustomerOrdersModal({
           )}
         </div>
       </div>
-    </ModalShell>
+    </Dialog>
   );
 }
 
@@ -505,7 +505,7 @@ function AddCustomerModal({
   };
 
   return (
-    <ModalShell title="Add Customer" onClose={onClose}>
+    <Dialog open title="Add Customer" size="lg" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4 p-4">
         {error && (
           <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -533,7 +533,7 @@ function AddCustomerModal({
           </button>
         </div>
       </form>
-    </ModalShell>
+    </Dialog>
   );
 }
 
@@ -598,7 +598,7 @@ function EditCustomerModal({
   };
 
   return (
-    <ModalShell title="Edit Customer" onClose={onClose}>
+    <Dialog open title="Edit Customer" size="lg" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4 p-4">
         {error && (
           <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -626,31 +626,7 @@ function EditCustomerModal({
           </button>
         </div>
       </form>
-    </ModalShell>
-  );
-}
-
-function ModalShell({
-  title,
-  onClose,
-  children,
-}: {
-  title: string;
-  onClose: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-sf-lg bg-surface-panel shadow-xl">
-        <div className="flex items-center justify-between border-b border-line p-4">
-          <h2 className="text-lg font-semibold text-ink-primary">{title}</h2>
-          <button onClick={onClose} className="rounded-lg p-1 hover:bg-action-secondary">
-            <X className="h-5 w-5 text-ink-muted" />
-          </button>
-        </div>
-        <div className="max-h-[85vh] overflow-y-auto">{children}</div>
-      </div>
-    </div>
+    </Dialog>
   );
 }
 

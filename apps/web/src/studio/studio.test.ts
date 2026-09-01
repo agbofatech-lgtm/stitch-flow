@@ -58,6 +58,16 @@ test('navigation uses canonical rooms and does not invent garments or delivery',
   assert.ok(labels.includes('control center'));
 });
 
+test('command palette groups use existing rooms only', () => {
+  const source = readFileSync(new URL('./StudioShell.tsx', import.meta.url), 'utf8');
+  assert.match(source, /group: 'Navigate'/);
+  assert.match(source, /group: 'Operate'/);
+  assert.match(source, /group: 'Work'/);
+  assert.match(source, /group: 'Account'/);
+  assert.match(source, /group: 'Platform'/);
+  assert.equal(source.includes("group: 'Create'"), false);
+});
+
 test('studio shell composes atelier primitives without engines', () => {
   const shell = readFileSync(new URL('./StudioShell.tsx', import.meta.url), 'utf8');
   assert.match(shell, /AtelierShell/);

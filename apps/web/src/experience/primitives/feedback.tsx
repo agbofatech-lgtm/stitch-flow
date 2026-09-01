@@ -78,7 +78,7 @@ export function ExperienceEmptyState({
 
 export function LoadingState({ label = 'Preparing workspace…' }: { label?: string }) {
   return (
-    <div role="status" className="flex items-center gap-2 text-body text-ink-muted">
+    <div role="status" aria-live="polite" className="flex items-center gap-2 text-body text-ink-muted">
       <span className="h-3 w-3 animate-pulse rounded-full bg-action-primary" />
       {label}
     </div>

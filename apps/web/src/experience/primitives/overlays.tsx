@@ -40,11 +40,13 @@ export function Dialog({
   title,
   onClose,
   children,
+  size = 'md',
 }: {
   open: boolean;
   title: string;
   onClose: () => void;
   children: ReactNode;
+  size?: 'md' | 'lg';
 }) {
   const headingId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -106,12 +108,15 @@ export function Dialog({
         aria-modal="true"
         aria-labelledby={headingId}
         tabIndex={-1}
-        className="sf-focus-ring relative z-modal w-full max-w-lg rounded-sf-workspace bg-surface-elevated p-6 shadow-sf-lg"
+        className={cn(
+          'sf-focus-ring relative z-modal w-full rounded-sf-workspace bg-surface-elevated p-6 shadow-sf-lg',
+          size === 'lg' ? 'max-w-2xl' : 'max-w-lg'
+        )}
       >
-        <h2 id={headingId} className="text-heading text-ink-primary">
+        <h2 id={headingId} className="font-display text-heading text-ink-primary">
           {title}
         </h2>
-        <div className="mt-4">{children}</div>
+        <div className="mt-4 max-h-[75vh] overflow-y-auto">{children}</div>
       </div>
     </div>
   );

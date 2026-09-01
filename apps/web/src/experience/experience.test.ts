@@ -132,6 +132,13 @@ test('dialog traps tab and restores focus on escape path', () => {
   assert.match(source, /Escape/);
   assert.match(source, /previous\?\.focus/);
   assert.match(source, /aria-modal/);
+  assert.match(source, /size === 'lg'/);
+});
+
+test('customers workroom uses shared Dialog not ModalShell', () => {
+  const source = readFileSync(new URL('../components/Customers.tsx', import.meta.url), 'utf8');
+  assert.equal(source.includes('ModalShell'), false);
+  assert.match(source, /Dialog open/);
 });
 
 test('atelier atmosphere and skip link tokens exist', () => {

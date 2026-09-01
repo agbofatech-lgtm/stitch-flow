@@ -345,7 +345,8 @@ export function Settings() {
           </div>
         )}
 
-        <div className="mb-6 rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
+        <p className="text-meta uppercase tracking-[0.16em] text-ink-muted">Workspace settings</p>
+        <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-6">
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-ink-primary">Company Profile</h2>
             <p className="mt-1 text-sm text-ink-muted">
@@ -466,24 +467,9 @@ export function Settings() {
           </div>
         </div>
 
-        {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
-          <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
-            {settingsLoading && (
-              <p className="text-sm text-ink-secondary">Loading backend settings...</p>
-            )}
-            {settingsSaving && (
-              <p className="text-sm text-action-primary">Saving settings...</p>
-            )}
-            {settingsMessage && (
-              <p className="text-sm text-green-700">{settingsMessage}</p>
-            )}
-            {settingsError && (
-              <p className="text-sm text-red-700">{settingsError}</p>
-            )}
-          </div>
-        )}
 
-        <div className="mb-6 rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
+        <p className="text-meta uppercase tracking-[0.16em] text-ink-muted">Commercial status (UX simulation)</p>
+        <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-6">
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold text-ink-primary">Current Plan</h2>
@@ -588,24 +574,8 @@ export function Settings() {
           )}
         </div>
 
-        {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
-          <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
-            {settingsLoading && (
-              <p className="text-sm text-ink-secondary">Loading backend settings...</p>
-            )}
-            {settingsSaving && (
-              <p className="text-sm text-action-primary">Saving settings...</p>
-            )}
-            {settingsMessage && (
-              <p className="text-sm text-green-700">{settingsMessage}</p>
-            )}
-            {settingsError && (
-              <p className="text-sm text-red-700">{settingsError}</p>
-            )}
-          </div>
-        )}
 
-        <div className="mb-6 rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
+        <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-6">
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-ink-primary">Branding</h2>
             <p className="mt-1 text-sm text-ink-muted">
@@ -817,24 +787,8 @@ export function Settings() {
           )}
         </div>
 
-        {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
-          <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
-            {settingsLoading && (
-              <p className="text-sm text-ink-secondary">Loading backend settings...</p>
-            )}
-            {settingsSaving && (
-              <p className="text-sm text-action-primary">Saving settings...</p>
-            )}
-            {settingsMessage && (
-              <p className="text-sm text-green-700">{settingsMessage}</p>
-            )}
-            {settingsError && (
-              <p className="text-sm text-red-700">{settingsError}</p>
-            )}
-          </div>
-        )}
 
-        <div className="mb-6 rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
+        <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-6">
           <div className="mb-4 flex items-center gap-2">
             <Info className="h-5 w-5 text-action-primary" />
             <h2 className="text-lg font-semibold text-ink-primary">About</h2>
@@ -856,24 +810,8 @@ export function Settings() {
           </div>
         </div>
 
-        {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
-          <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
-            {settingsLoading && (
-              <p className="text-sm text-ink-secondary">Loading backend settings...</p>
-            )}
-            {settingsSaving && (
-              <p className="text-sm text-action-primary">Saving settings...</p>
-            )}
-            {settingsMessage && (
-              <p className="text-sm text-green-700">{settingsMessage}</p>
-            )}
-            {settingsError && (
-              <p className="text-sm text-red-700">{settingsError}</p>
-            )}
-          </div>
-        )}
 
-        <div className="mb-6 rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
+        <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-6">
           <h2 className="mb-4 text-lg font-semibold text-ink-primary">Plan Comparison</h2>
 
           <div className="overflow-x-auto">
@@ -922,24 +860,8 @@ export function Settings() {
           </div>
         </div>
 
-        {(settingsLoading || settingsSaving || settingsMessage || settingsError) && (
-          <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
-            {settingsLoading && (
-              <p className="text-sm text-ink-secondary">Loading backend settings...</p>
-            )}
-            {settingsSaving && (
-              <p className="text-sm text-action-primary">Saving settings...</p>
-            )}
-            {settingsMessage && (
-              <p className="text-sm text-green-700">{settingsMessage}</p>
-            )}
-            {settingsError && (
-              <p className="text-sm text-red-700">{settingsError}</p>
-            )}
-          </div>
-        )}
 
-        <div className="mb-6 rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
+        <div className="mb-6 rounded-sf-lg border border-line bg-surface-panel p-6">
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold text-ink-primary">Team Members</h2>
@@ -1122,7 +1044,7 @@ export function Settings() {
           </div>
         </div>
 
-        <div className="rounded-sf-workspace border border-white/60 bg-surface-panel/85 p-6 shadow-xl backdrop-blur-sm">
+        <div className="rounded-sf-lg border border-line bg-surface-panel p-6">
           <h2 className="mb-4 text-lg font-semibold text-ink-primary">Role Permissions</h2>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

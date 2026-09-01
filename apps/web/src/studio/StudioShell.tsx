@@ -245,13 +245,13 @@ export function StudioShell() {
     ...BUSINESS_SURFACES.map((surface) => ({
       id: `business:${surface.id}`,
       label: surface.label,
-      group: 'Operations',
+      group: 'Operate',
       onSelect: () => goTo('business', surface.id),
     })),
     ...customers.slice(0, 8).map((customer) => ({
       id: `client-${customer.id}`,
       label: customer.fullName,
-      group: 'Clients',
+      group: 'Work',
       keywords: `${customer.phone || ''} ${customer.email || ''}`,
       onSelect: () => goTo('clients'),
     })),
@@ -268,7 +268,7 @@ export function StudioShell() {
     {
       id: 'settings',
       label: 'Workspace settings',
-      group: 'Workspace',
+      group: 'Account',
       onSelect: () => selectNav('settings'),
     },
     {

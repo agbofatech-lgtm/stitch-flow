@@ -718,7 +718,7 @@ export function Reports() {
           </div>
 
           <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <div className="rounded-sf-lg border border-white/60 bg-surface-panel/90 p-6 shadow-lg">
+            <div className="rounded-sf-lg border border-line bg-surface-panel p-6">
               <div className="mb-4 flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-lg font-semibold text-ink-primary">
@@ -754,7 +754,7 @@ export function Reports() {
               )}
             </div>
 
-            <div className="rounded-sf-lg border border-white/60 bg-surface-panel/90 p-6 shadow-lg">
+            <div className="rounded-sf-lg border border-line bg-surface-panel p-6">
               <div className="mb-4 flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-lg font-semibold text-ink-primary">
@@ -1415,7 +1415,7 @@ export function Reports() {
           </div>
         </SectionShell>
 
-        <section className="relative overflow-hidden rounded-sf-lg border border-white/60 bg-surface-panel/90 p-6 shadow-lg">
+        <section className="relative overflow-hidden rounded-sf-lg border border-line bg-surface-panel p-6">
           <div className="mb-4">
             <h2 className="text-lg font-semibold text-ink-primary">
               Studio-only Advanced Insights
@@ -1513,7 +1513,7 @@ function SectionShell({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-sf-lg border border-white/60 bg-surface-panel/90 p-6 shadow-lg">
+    <section className="rounded-sf-lg border border-line bg-surface-panel p-6">
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-ink-primary">{title}</h2>
@@ -1585,7 +1585,7 @@ function MetricCard({
     <button
       type="button"
       onClick={onClick}
-      className="rounded-sf-lg border border-white/60 bg-surface-panel/90 p-5 text-left shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
+      className="rounded-sf-lg border border-line bg-surface-panel p-5 text-left shadow-sf-sm transition hover:shadow-sf-md"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -1621,7 +1621,7 @@ function ChartCard({
   };
 
   return (
-    <div className="rounded-sf-lg border border-white/60 bg-surface-panel/90 p-6 shadow-lg">
+    <div className="rounded-sf-lg border border-line bg-surface-panel p-6">
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-ink-primary">{title}</h2>
         <p className="text-sm text-ink-muted">{subtitle}</p>
@@ -1663,7 +1663,7 @@ function ComparisonCard({
   rightValue: string;
 }) {
   return (
-    <div className="rounded-sf-lg border border-white/60 bg-surface-panel/90 p-6 shadow-lg">
+    <div className="rounded-sf-lg border border-line bg-surface-panel p-6">
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-ink-primary">{title}</h2>
       </div>
