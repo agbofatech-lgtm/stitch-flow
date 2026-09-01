@@ -7,6 +7,8 @@ import { authRoutes } from './routes/authRoutes';
 import { platformRoutes } from './routes/platformRoutes';
 import { commercialRoutes } from './routes/commercialRoutes';
 import { controlRoutes } from './routes/controlRoutes';
+import { shopRoutes } from './routes/shopRoutes';
+import { createShopService, type ShopService } from './shop/service';
 
 export type CreateAppOptions = {
   /**
@@ -15,6 +17,7 @@ export type CreateAppOptions = {
    */
   mountBusinessRoutes?: boolean;
   platform?: PlatformRuntime;
+  shop?: ShopService;
 };
 
 export async function createApp(options: CreateAppOptions = {}): Promise<Express> {
@@ -23,7 +26,9 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Express
   const loaded = loadOrCreateStore(process.env.PLATFORM_DATA_PATH);
   const platform = options.platform ?? createPlatformRuntime(loaded.store, { persist: loaded.persist });
   app.locals.platform = platform;
+  app.locals.shop = options.shop ?? createShopService();
   app.locals.persistenceDriver = options.platform ? 'injected' : loaded.driver;
+  app.locals.shopPersistence = 'memory';
 
   app.use(
     cors({
@@ -85,6 +90,7 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Express
       platformIam: 'durable-file-or-memory',
       persistence: process.env.PLATFORM_DATA_PATH ? 'file' : 'memory',
       postgres: 'not-verified',
+      shopApi: 'authenticated-memory',
       controlCenter: true,
       billingProvider: 'deferred',
     });
@@ -94,6 +100,7 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Express
   app.use('/platform', platformRoutes);
   app.use('/platform', commercialRoutes);
   app.use('/control', controlRoutes);
+  app.use('/shop', shopRoutes);
 
   if (mountBusinessRoutes) {
     const { dashboardRoutes } = await import('./routes/dashboardRoutes');

@@ -2,6 +2,6 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testMatch: ['**/*.p19.test.ts'],
+  testMatch: ['**/*.p19.test.ts', '**/*.sac3.test.ts'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
 };

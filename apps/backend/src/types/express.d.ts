@@ -5,6 +5,7 @@ declare global {
     interface Request {
       platformIdentityId?: string;
       platformContext?: TrustedPlatformContext;
+      shopWorkspaceId?: string;
     }
   }
 }
