@@ -92,7 +92,8 @@ commercialRoutes.post('/billing/webhooks/:adapter', (req, res, next) => {
     const eventId = String(req.body?.eventId || '');
     const type = String(req.body?.type || '');
     const checkoutId = String(req.body?.checkoutId || '');
-    const rawBody = canonicalWebhookBody({ eventId, type, checkoutId });
+    const occurredAt = req.body?.occurredAt ? String(req.body.occurredAt) : undefined;
+    const rawBody = canonicalWebhookBody({ eventId, type, checkoutId, occurredAt });
     const signature = req.headers['x-billing-signature'];
     const result = runtimeOf(req).commercial.handleTestWebhook({
       adapter: String(req.params.adapter || ''),
@@ -101,6 +102,7 @@ commercialRoutes.post('/billing/webhooks/:adapter', (req, res, next) => {
       eventId,
       type,
       checkoutId,
+      occurredAt,
     });
     res.status(result.duplicate ? 200 : 201).json({
       duplicate: result.duplicate,

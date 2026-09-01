@@ -1,8 +1,8 @@
 import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { createPlatformStore } from './platform/store';
 import { createPlatformRuntime, type PlatformRuntime } from './platform/runtime';
+import { loadOrCreateStore } from './platform/persist';
 import { authRoutes } from './routes/authRoutes';
 import { platformRoutes } from './routes/platformRoutes';
 import { commercialRoutes } from './routes/commercialRoutes';
@@ -20,8 +20,10 @@ export type CreateAppOptions = {
 export async function createApp(options: CreateAppOptions = {}): Promise<Express> {
   const mountBusinessRoutes = options.mountBusinessRoutes === true;
   const app = express();
-  const platform = options.platform ?? createPlatformRuntime(createPlatformStore());
+  const loaded = loadOrCreateStore(process.env.PLATFORM_DATA_PATH);
+  const platform = options.platform ?? createPlatformRuntime(loaded.store, { persist: loaded.persist });
   app.locals.platform = platform;
+  app.locals.persistenceDriver = options.platform ? 'injected' : loaded.driver;
 
   app.use(
     cors({
@@ -80,8 +82,9 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Express
       runtime: 'apps/backend/src/app.ts',
       businessRoutesMounted: mountBusinessRoutes,
       database: 'not-verified',
-      platformIam: 'in-memory-transitional',
-      persistence: 'memory',
+      platformIam: 'durable-file-or-memory',
+      persistence: process.env.PLATFORM_DATA_PATH ? 'file' : 'memory',
+      postgres: 'not-verified',
       controlCenter: true,
       billingProvider: 'deferred',
     });

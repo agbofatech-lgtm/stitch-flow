@@ -30,8 +30,13 @@ async function register(app: Awaited<ReturnType<typeof createApp>>, email: strin
   return res.body;
 }
 
-function signedWebhook(eventId: string, type: string, checkoutId: string) {
-  const body = { eventId, type, checkoutId };
+function signedWebhook(
+  eventId: string,
+  type: string,
+  checkoutId: string,
+  occurredAt = '2026-09-01T12:00:00.000Z'
+) {
+  const body = { eventId, type, checkoutId, occurredAt };
   const raw = canonicalWebhookBody(body);
   return { body, headers: { 'X-Billing-Signature': signBillingPayload(raw) } };
 }

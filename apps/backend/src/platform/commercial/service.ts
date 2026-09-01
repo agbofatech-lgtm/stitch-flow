@@ -129,7 +129,7 @@ export function decideAccess(
   };
 }
 
-export function createCommercialService(store: PlatformStore) {
+export function createCommercialService(store: PlatformStore, persist: () => void = () => undefined) {
   seedCommercialCatalog(store);
 
   function requirePlan(planCode: string): PlanDefinition {
@@ -169,6 +169,7 @@ export function createCommercialService(store: PlatformStore) {
       previousState: 'none',
       newState: 'PAYMENT_PENDING',
     });
+    persist();
     return payment;
   }
 
@@ -206,6 +207,7 @@ export function createCommercialService(store: PlatformStore) {
       previousState: prev,
       newState: 'CANCELLED',
     });
+    persist();
     return sub;
   }
 
@@ -216,6 +218,7 @@ export function createCommercialService(store: PlatformStore) {
     eventId: string;
     type: string;
     checkoutId: string;
+    occurredAt?: string;
   }): { duplicate: boolean; payment: SaasPayment; subscription: Subscription | null } {
     if (input.adapter !== 'test') {
       throw new PlatformError(
@@ -246,6 +249,12 @@ export function createCommercialService(store: PlatformStore) {
     const payment = [...store.payments.values()].find((p) => p.checkoutId === input.checkoutId);
     if (!payment) {
       throw new PlatformError(404, 'CHECKOUT_MISSING', 'Checkout not found');
+    }
+
+    const occurredAt = input.occurredAt && input.occurredAt !== '' ? input.occurredAt : nowIso();
+    const watermark = store.billingWatermark.get(payment.tenantId);
+    if (watermark && occurredAt < watermark) {
+      throw new PlatformError(409, 'STALE_EVENT', 'Billing event is older than the last processed event');
     }
 
     const prevPay = payment.status;
@@ -288,7 +297,10 @@ export function createCommercialService(store: PlatformStore) {
         paymentId: payment.id,
         type: input.type,
         processedAt: nowIso(),
+        occurredAt,
       });
+      store.billingWatermark.set(payment.tenantId, occurredAt);
+      persist();
       return { duplicate: false, payment, subscription: sub };
     }
 
@@ -314,7 +326,10 @@ export function createCommercialService(store: PlatformStore) {
         paymentId: payment.id,
         type: input.type,
         processedAt: nowIso(),
+        occurredAt,
       });
+      store.billingWatermark.set(payment.tenantId, occurredAt);
+      persist();
       return { duplicate: false, payment, subscription: sub ?? null };
     }
 

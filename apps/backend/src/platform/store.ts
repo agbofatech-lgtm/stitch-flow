@@ -31,6 +31,8 @@ export type PlatformStore = {
   commercialAudit: CommercialAudit[];
   platformOperators: Set<string>;
   configuration: PlatformConfiguration;
+  /** tenantId → last successfully processed billing event occurredAt */
+  billingWatermark: Map<string, string>;
 };
 
 export function createPlatformStore(): PlatformStore {
@@ -49,6 +51,7 @@ export function createPlatformStore(): PlatformStore {
     commercialAudit: [],
     platformOperators: new Set(),
     configuration: defaultPlatformConfiguration(),
+    billingWatermark: new Map(),
   };
 }
 

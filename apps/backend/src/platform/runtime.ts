@@ -21,7 +21,8 @@ function publicIdentity(identity: Identity): PublicIdentity {
   return rest;
 }
 
-export function createPlatformRuntime(store: PlatformStore) {
+export function createPlatformRuntime(store: PlatformStore, options?: { persist?: () => void }) {
+  const persist = options?.persist ?? (() => undefined);
   async function register(input: {
     email: string;
     password: string;
@@ -86,6 +87,7 @@ export function createPlatformRuntime(store: PlatformStore) {
     store.tenants.set(tenant.id, tenant);
     store.workspaces.set(workspace.id, workspace);
     store.memberships.set(membership.id, membership);
+    persist();
 
     return {
       identity: publicIdentity(identity),
@@ -201,16 +203,18 @@ export function createPlatformRuntime(store: PlatformStore) {
       createdAt: nowIso(),
     };
     store.records.set(record.id, record);
+    persist();
     return record;
   }
 
-  const commercial = createCommercialService(store);
+  const commercial = createCommercialService(store, persist);
 
   function grantPlatformOperator(identityId: string): void {
     if (!store.identities.has(identityId)) {
       throw new PlatformError(404, 'IDENTITY_MISSING', 'Identity not found');
     }
     store.platformOperators.add(identityId);
+    persist();
   }
 
   function isPlatformOperator(identityId: string): boolean {
@@ -257,6 +261,7 @@ export function createPlatformRuntime(store: PlatformStore) {
         timestamp: nowIso(),
       });
     }
+    persist();
     return store.configuration;
   }
 

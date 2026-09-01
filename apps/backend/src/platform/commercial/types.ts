@@ -76,6 +76,7 @@ export type ProcessedBillingEvent = {
   paymentId: string;
   type: string;
   processedAt: string;
+  occurredAt?: string;
 };
 
 export type CommercialAudit = {

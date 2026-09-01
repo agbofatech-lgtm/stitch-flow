@@ -7,8 +7,9 @@
 | P19.1.5 Decision package | **COMPLETE** (recommendations; Owner ticks pending) |
 | P19.2+P19.3 Identity/tenancy | **IMPLEMENTED — CONDITIONAL** |
 | P19.4+P19.5 Entitlement/billing | **IMPLEMENTED — CONDITIONAL** |
-| P19.6+P19.7 Operations + Control Center | **IMPLEMENTED — CONDITIONAL** (memory persistence; API plane) |
-| P19.8–P19.11 | **LOCKED** |
+| P19.6+P19.7 Operations + Control Center | **IMPLEMENTED — CONDITIONAL** |
+| P19.8+P19.9 Persistence + runtime | **IMPLEMENTED — CONDITIONAL** (file durability; Postgres not verified; PSP deferred) |
+| P19.10–P19.11 | **LOCKED** |
 | Billing / PSP / subscription tables | **NOT STARTED** |
 | Trusted Core | **UNTOUCHED** |
 | Phase 18 conditions | **INHERITED** |
