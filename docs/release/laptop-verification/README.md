@@ -3,7 +3,8 @@
 This package prepares the **current** repository for independent owner inspection. It does not certify 3D, live billing, Postgres, or a new API platform.
 
 **Branch:** `arena/01a05677-stitch-flow`  
-**Predecessor HEAD (P9/P10):** `0525ef2f55dde07192edeea2daa7530a77daffa2`
+**Predecessor HEAD (P9/P10):** `0525ef2f55dde07192edeea2daa7530a77daffa2`  
+**Preparation package:** `49a1920c61523d3223f2dd896cd878954c3b83ae`
 
 ## Exact sequence
 
