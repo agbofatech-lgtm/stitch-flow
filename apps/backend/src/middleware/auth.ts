@@ -35,6 +35,22 @@ export function requireIdentity(req: Request, res: Response, next: NextFunction)
   }
 }
 
+export function requirePlatformOperator(req: Request, res: Response, next: NextFunction): void {
+  const identityId = req.platformIdentityId;
+  if (!identityId) {
+    res.status(401).json({ error: 'MISSING_TOKEN', message: 'Authentication required' });
+    return;
+  }
+  if (!platformOf(req).isPlatformOperator(identityId)) {
+    res.status(403).json({
+      error: 'PLATFORM_ADMIN_REQUIRED',
+      message: 'Tenant members cannot access the AGBOFA Control Center',
+    });
+    return;
+  }
+  next();
+}
+
 export function requireTenantContext(req: Request, res: Response, next: NextFunction): void {
   const identityId = req.platformIdentityId;
   if (!identityId) {

@@ -3,6 +3,7 @@ import { hashPassword, verifyPassword } from './passwords';
 import { signAccessToken } from './tokens';
 import { PlatformError } from './errors';
 import { createCommercialService } from './commercial/service';
+import { MUTABLE_CONTROL_KEYS } from './configuration';
 import type {
   Identity,
   Membership,
@@ -205,6 +206,60 @@ export function createPlatformRuntime(store: PlatformStore) {
 
   const commercial = createCommercialService(store);
 
+  function grantPlatformOperator(identityId: string): void {
+    if (!store.identities.has(identityId)) {
+      throw new PlatformError(404, 'IDENTITY_MISSING', 'Identity not found');
+    }
+    store.platformOperators.add(identityId);
+  }
+
+  function isPlatformOperator(identityId: string): boolean {
+    return store.platformOperators.has(identityId);
+  }
+
+  function listTenantsForControl() {
+    return [...store.tenants.values()].map((tenant) => ({
+      id: tenant.id,
+      name: tenant.name,
+      slug: tenant.slug,
+      status: tenant.status,
+      workspaceCount: [...store.workspaces.values()].filter((w) => w.tenantId === tenant.id).length,
+      hasSubscription: [...store.subscriptions.values()].some((s) => s.tenantId === tenant.id),
+    }));
+  }
+
+  function getConfiguration() {
+    return store.configuration;
+  }
+
+  function patchConfiguration(patch: Record<string, unknown>, actorId: string) {
+    for (const [key, value] of Object.entries(patch)) {
+      if (!MUTABLE_CONTROL_KEYS.has(key)) {
+        throw new PlatformError(403, 'CONFIG_IMMUTABLE', `Configuration key is not mutable: ${key}`);
+      }
+      if (key === 'disabledCapabilities' && !Array.isArray(value)) {
+        throw new PlatformError(400, 'INVALID_CONFIG', 'disabledCapabilities must be an array');
+      }
+      const current = store.configuration[key];
+      if (!current) {
+        throw new PlatformError(404, 'CONFIG_MISSING', key);
+      }
+      const prev = JSON.stringify(current.value);
+      current.value = value;
+      store.commercialAudit.push({
+        id: newId(),
+        tenantId: '',
+        actorId,
+        eventId: null,
+        source: 'control-center',
+        previousState: prev,
+        newState: JSON.stringify(value),
+        timestamp: nowIso(),
+      });
+    }
+    return store.configuration;
+  }
+
   return {
     store,
     register,
@@ -215,6 +270,11 @@ export function createPlatformRuntime(store: PlatformStore) {
     assertTenantRecord,
     createRecord,
     commercial,
+    grantPlatformOperator,
+    isPlatformOperator,
+    listTenantsForControl,
+    getConfiguration,
+    patchConfiguration,
   };
 }
 

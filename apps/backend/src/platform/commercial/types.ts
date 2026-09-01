@@ -89,11 +89,28 @@ export type CommercialAudit = {
   timestamp: string;
 };
 
+export type AccessReason =
+  | 'ALLOWED'
+  | 'ENTITLED'
+  | 'DENIED'
+  | 'NOT_ENTITLED'
+  | 'SUBSCRIPTION_REQUIRED'
+  | 'SUBSCRIPTION_CANCELLED'
+  | 'SUBSCRIPTION_EXPIRED'
+  | 'SUBSCRIPTION_PAST_DUE'
+  | 'UNKNOWN_CAPABILITY'
+  | 'UNKNOWN_PLAN'
+  | 'FEATURE_DISABLED'
+  | 'PERMISSION_REQUIRED'
+  | 'TENANT_CONTEXT_REQUIRED';
+
 export type AccessDecision = {
   capability: CapabilityCode;
   allowed: boolean;
   entitled: boolean;
-  reason: string;
+  reason: AccessReason | string;
   planCode?: PlanCode | null;
   subscriptionStatus?: SubscriptionStatus | null;
+  principalId?: string;
+  workspaceId?: string;
 };

@@ -63,14 +63,28 @@ export function decideAccess(
   store: PlatformStore,
   tenantId: string,
   capability: string,
-  now = new Date()
+  now = new Date(),
+  extras?: { principalId?: string; workspaceId?: string }
 ): AccessDecision {
+  const disabled = store.configuration.disabledCapabilities?.value;
+  if (Array.isArray(disabled) && disabled.includes(capability)) {
+    return {
+      capability,
+      allowed: false,
+      entitled: false,
+      reason: 'FEATURE_DISABLED',
+      principalId: extras?.principalId,
+      workspaceId: extras?.workspaceId,
+    };
+  }
   if (!knownCapability(capability)) {
     return {
       capability,
       allowed: false,
       entitled: false,
       reason: 'UNKNOWN_CAPABILITY',
+      principalId: extras?.principalId,
+      workspaceId: extras?.workspaceId,
     };
   }
   const sub = subscriptionForTenant(store, tenantId);
@@ -78,14 +92,30 @@ export function decideAccess(
   const entitlements = deriveEntitlements(store, tenantId, now);
   const hit = entitlements.find((e) => e.capability === capability && e.granted);
   if (!hit) {
-    return {
+    let reason: AccessDecision['reason'] = 'NOT_ENTITLED';
+    if (!sub) reason = 'SUBSCRIPTION_REQUIRED';
+    else if (status === 'CANCELLED') reason = 'SUBSCRIPTION_CANCELLED';
+    else if (status === 'EXPIRED') reason = 'SUBSCRIPTION_EXPIRED';
+    else if (status === 'PAST_DUE') reason = 'SUBSCRIPTION_PAST_DUE';
+    const decision: AccessDecision = {
       capability,
       allowed: false,
       entitled: false,
-      reason: sub && status && status !== 'ACTIVE' ? `SUBSCRIPTION_${status}` : 'NOT_ENTITLED',
+      reason,
       planCode: sub?.planCode ?? null,
       subscriptionStatus: status,
+      principalId: extras?.principalId,
+      workspaceId: extras?.workspaceId,
     };
+    audit(store, {
+      tenantId,
+      actorId: extras?.principalId ?? null,
+      eventId: null,
+      source: 'access',
+      previousState: status ?? 'none',
+      newState: `ACCESS_DENIED:${reason}`,
+    });
+    return decision;
   }
   return {
     capability,
@@ -94,6 +124,8 @@ export function decideAccess(
     reason: 'ENTITLED',
     planCode: hit.planCode,
     subscriptionStatus: status,
+    principalId: extras?.principalId,
+    workspaceId: extras?.workspaceId,
   };
 }
 
@@ -109,6 +141,9 @@ export function createCommercialService(store: PlatformStore) {
   }
 
   function createCheckout(ctx: TrustedPlatformContext, planCode: string): SaasPayment {
+    if (ctx.membership.role !== 'TENANT_OWNER') {
+      throw new PlatformError(403, 'PERMISSION_REQUIRED', 'Only tenant owners may start checkout');
+    }
     requirePlan(planCode);
     const existing = subscriptionForTenant(store, ctx.tenant.id);
     if (existing && effectiveStatus(existing, new Date()) === 'ACTIVE') {
@@ -152,6 +187,9 @@ export function createCommercialService(store: PlatformStore) {
   }
 
   function cancelSubscription(ctx: TrustedPlatformContext): Subscription {
+    if (ctx.membership.role !== 'TENANT_OWNER') {
+      throw new PlatformError(403, 'PERMISSION_REQUIRED', 'Only tenant owners may cancel');
+    }
     const sub = subscriptionForTenant(store, ctx.tenant.id);
     if (!sub) {
       throw new PlatformError(404, 'SUBSCRIPTION_MISSING', 'No subscription');
@@ -290,8 +328,14 @@ export function createCommercialService(store: PlatformStore) {
     cancelSubscription,
     handleTestWebhook,
     deriveEntitlements: (tenantId: string) => deriveEntitlements(store, tenantId),
-    decideAccess: (tenantId: string, capability: string) => decideAccess(store, tenantId, capability),
+    decideAccess: (
+      tenantId: string,
+      capability: string,
+      extras?: { principalId?: string; workspaceId?: string }
+    ) => decideAccess(store, tenantId, capability, new Date(), extras),
     listPlans: () => [...store.plans.values()].map((p) => ({ code: p.code, displayName: p.displayName })),
+    listCapabilities: () =>
+      [...store.plans.values()].flatMap((p) => p.capabilities).filter((v, i, a) => a.indexOf(v) === i),
   };
 }
 

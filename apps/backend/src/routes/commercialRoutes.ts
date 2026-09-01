@@ -26,7 +26,10 @@ commercialRoutes.post('/access/check', requireIdentity, requireTenantContext, (r
   const ctx = req.platformContext!;
   const capability = String(req.body?.capability || '');
   res.json({
-    decision: runtimeOf(req).commercial.decideAccess(ctx.tenant.id, capability),
+    decision: runtimeOf(req).commercial.decideAccess(ctx.tenant.id, capability, {
+      principalId: ctx.identity.id,
+      workspaceId: ctx.workspace.id,
+    }),
   });
 });
 

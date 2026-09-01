@@ -46,7 +46,7 @@ describe('P19.4+P19.5 entitlements and billing', () => {
       .send({ capability: CAPABILITY.PATTERN_GENERATION });
     expect(denied.status).toBe(200);
     expect(denied.body.decision.allowed).toBe(false);
-    expect(denied.body.decision.reason).toBe('NOT_ENTITLED');
+    expect(denied.body.decision.reason).toBe('SUBSCRIPTION_REQUIRED');
 
     const unknown = await request(app)
       .post('/platform/access/check')

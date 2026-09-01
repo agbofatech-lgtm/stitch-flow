@@ -14,6 +14,7 @@ import type {
   SaasPayment,
   Subscription,
 } from './commercial/types';
+import { defaultPlatformConfiguration, type PlatformConfiguration } from './configuration';
 
 export type PlatformStore = {
   identities: Map<string, Identity>;
@@ -28,6 +29,8 @@ export type PlatformStore = {
   payments: Map<string, SaasPayment>;
   billingEvents: Map<string, ProcessedBillingEvent>;
   commercialAudit: CommercialAudit[];
+  platformOperators: Set<string>;
+  configuration: PlatformConfiguration;
 };
 
 export function createPlatformStore(): PlatformStore {
@@ -44,6 +47,8 @@ export function createPlatformStore(): PlatformStore {
     payments: new Map(),
     billingEvents: new Map(),
     commercialAudit: [],
+    platformOperators: new Set(),
+    configuration: defaultPlatformConfiguration(),
   };
 }
 
