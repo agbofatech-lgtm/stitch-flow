@@ -5,10 +5,15 @@
     "apps/backend",
     "apps/web"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev:backend": "npm --workspace=apps/backend run dev",
     "dev:web": "npm --workspace=apps/web run dev",
-    "build": "npm run build --workspaces"
+    "build": "npm run build --workspaces",
+    "start": "npm --workspace=apps/backend run start",
+    "test:backend": "npm --workspace=apps/backend test"
   },
   "dependencies": {
     "@bull-board/api": "^6.20.5",
@@ -17,7 +22,7 @@
   },
   "version": "1.0.0",
   "description": "Production-ready Express + TypeScript + PostgreSQL backend for StitchFlow.",
-  "main": "index.js",
+  "main": "apps/backend/dist/server.js",
   "directories": {
     "doc": "docs",
     "test": "tests"

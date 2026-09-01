@@ -1,0 +1,27 @@
+{
+  "repository": "https://github.com/agbofatech-lgtm/stitch-flow.git",
+  "branch": "arena/01a05677-stitch-flow",
+  "predecessor_commit": "0525ef2f55dde07192edeea2daa7530a77daffa2",
+  "timestamp": "2026-09-01",
+  "node_version_required": ">=20",
+  "package_manager": "npm workspaces",
+  "frontend_version": "web@1.0.0",
+  "backend_version": "stitchflow-backend@1.0.0",
+  "build_status": "frontend vite PASS; backend tsc PASS",
+  "frontend_bundle": "main-CmHCTvjm.js 1016.24 kB gzip 294.04 kB (P9/P10; remeasure after this prep if JS unchanged)",
+  "test_status": "see PRE_LAPTOP_RELEASE_READINESS_REPORT.md",
+  "typescript_status": "backend PASS; web INHERITED FAILURE materials.ts reports.ts types.ts",
+  "protected_hash_status": "PASS",
+  "database_status": "NOT VERIFIED",
+  "commercial_status": "UX simulation + deferred billing port",
+  "railway_status": "CONDITIONAL — start script added; deploy NOT VERIFIED",
+  "3d_status": "NOT STARTED",
+  "api_status": "inventory only; platform NOT STARTED",
+  "known_conditions": [
+    "Postgres not verified",
+    "Live PSP deferred",
+    "Inherited web tsc FAIL",
+    "No service worker",
+    "Business CRUD unmounted by default"
+  ]
+}
