@@ -64,7 +64,7 @@ export const ATELIER_PLACES: Record<AtelierPlaceId, AtelierPlace> = {
     id: 'control',
     title: 'Control Center',
     kicker: 'Operator plane',
-    purpose: 'Same building, denser operations. Not the atelier floor.',
+    purpose: 'Operator plane of this StitchFlow workspace. Not the AGBOFA platform.',
     next: { label: 'Return to atelier', exit: 'control' },
   },
 };

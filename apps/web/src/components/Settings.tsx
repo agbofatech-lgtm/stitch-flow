@@ -22,7 +22,7 @@ import { FEATURE_COMPARISON } from '@modules/services/tierEnforcement';
 import type { CurrencyCode } from '../types';
 import { BRAND } from '../config/brand';
 import stitchflowLogo from '@shared/assets/stitchflow-logo.png';
-import { PageHeader, Workroom } from '../experience';
+import { AtelierConfidence, AtelierWorkroom, PageHeader } from '../experience';
 import { fetchSettings, updateSetting } from '@shared/api/settings';
 import {
   fetchWorkspaceMembers,
@@ -285,7 +285,14 @@ export function Settings() {
         : 'bg-action-secondary text-ink-secondary';
 
   return (
-    <Workroom>
+    <AtelierWorkroom
+      place="Workspace settings"
+      title="Workspace settings"
+      purpose="Profile, branding, team, and UX-only plan simulation. This screen is not live billing and not the AGBOFA platform."
+      confidence={
+        <AtelierConfidence state="local" detail="AppContext workspace profile. HTTP settings paths are not shop authority." />
+      }
+    >
         <PageHeader
           level={2}
           kicker="Workspace"
@@ -1101,6 +1108,6 @@ export function Settings() {
 
           <p className="mt-8 text-center text-xs text-ink-muted">{BRAND.footerText}</p>
         </div>
-    </Workroom>
+    </AtelierWorkroom>
   );
 }

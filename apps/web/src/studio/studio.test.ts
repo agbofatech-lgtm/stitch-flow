@@ -154,6 +154,24 @@ test('control center presents API fields without inventing metrics', () => {
   assert.match(source, /do not invent metrics/);
   assert.match(source, /PLANE_GROUPS/);
   assert.match(source, /\/control\/billing\/provider/);
+  assert.match(source, /AtelierWorkroom/);
+  assert.match(source, /Return to atelier/);
+  assert.match(source, /not connected in this runtime/);
+  assert.match(source, /Open workspace settings/);
+  assert.match(source, /Protected tailoring systems/);
+  assert.match(source, /FeatureGate is UX presentation only/);
+  assert.match(source, /ADR-007/);
+  assert.match(source, /data-control-section/);
+  assert.equal(source.includes('Synced'), false);
+  assert.equal(source.includes('Platform protected'), false);
+});
+
+test('studio shell quiets atelier chrome on the operator plane', () => {
+  const shell = readFileSync(new URL('./StudioShell.tsx', import.meta.url), 'utf8');
+  assert.match(shell, /!controlOpen && !settingsOpen/);
+  assert.match(shell, /controlOpen \? null/);
+  assert.match(shell, /StitchFlow operator plane/);
+  assert.match(shell, /onOpenSettings/);
 });
 
 test('ledger orders station uses AppContext commercial records, not unmounted HTTP', () => {

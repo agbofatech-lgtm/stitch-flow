@@ -227,7 +227,16 @@ export function StudioShell() {
           : 'local';
 
   const canvas = useMemo(() => {
-    if (controlOpen) return <ControlCenter onExit={() => setControlOpen(false)} />;
+    if (controlOpen) return (
+      <ControlCenter
+        onExit={() => setControlOpen(false)}
+        onOpenSettings={() => {
+          setControlOpen(false);
+          setSettingsOpen(true);
+          setView('settings');
+        }}
+      />
+    );
     if (settingsOpen) return <Settings />;
     if (workspace === 'measurements') return <MeasurementWorkspace />;
     if (workspace === 'command') return <AtelierHome />;
@@ -390,20 +399,22 @@ export function StudioShell() {
           description={headerCopy.description}
           state={
             <>
-              <div className="hidden max-w-xs lg:block">
-                <AtelierThread
-                  room={headerCopy.title}
-                  client={threadClient}
-                  order={selectedOrder?.orderNumber}
-                />
-              </div>
+              {controlOpen ? null : (
+                <div className="hidden max-w-xs lg:block">
+                  <AtelierThread
+                    room={headerCopy.title}
+                    client={threadClient}
+                    order={selectedOrder?.orderNumber}
+                  />
+                </div>
+              )}
               {workspace === 'clients' ? (
                 <Badge tone="neutral">{customers.length} clients</Badge>
               ) : null}
               {workspace === 'business' ? (
                 <Badge tone="neutral">{orders.length} orders</Badge>
               ) : null}
-              {attention > 0 && workspace === 'command' ? (
+              {attention > 0 && workspace === 'command' && !controlOpen && !settingsOpen ? (
                 <Badge tone="warning">{attention} needing attention</Badge>
               ) : null}
             </>
@@ -427,14 +438,16 @@ export function StudioShell() {
               >
                 <PanelRight className="h-4 w-4" />
               </IconButton>
-              <Button
-                variant="ghost"
-                size="md"
-                className="hidden md:inline-flex"
-                onClick={() => selectNav('control')}
-              >
-                Operator plane
-              </Button>
+              {controlOpen ? null : (
+                <Button
+                  variant="ghost"
+                  size="md"
+                  className="hidden md:inline-flex"
+                  onClick={() => selectNav('control')}
+                >
+                  Operator plane
+                </Button>
+              )}
               <IconButton label="Workspace settings" onClick={() => selectNav('settings')}>
                 <SettingsIcon className="h-4 w-4" />
               </IconButton>
@@ -450,11 +463,15 @@ export function StudioShell() {
               workspace === 'design' && !settingsOpen && !controlOpen ? 'sm:hidden' : undefined
             )}
           >
-            <AtelierThread
-              room={headerCopy.title}
-              client={threadClient}
-              order={selectedOrder?.orderNumber}
-            />
+            {controlOpen ? (
+              <p className="text-meta text-ink-muted">StitchFlow operator plane · not the AGBOFA platform</p>
+            ) : (
+              <AtelierThread
+                room={headerCopy.title}
+                client={threadClient}
+                order={selectedOrder?.orderNumber}
+              />
+            )}
             {showPlaceNext && place.next ? (
               <Button variant="secondary" size="md" className="sm:hidden" onClick={runPlaceNext}>
                 {place.next.label}

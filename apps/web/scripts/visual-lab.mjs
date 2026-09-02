@@ -158,6 +158,18 @@ async function clickAria(cdp, label) {
   );
 }
 
+async function clickControlSection(cdp, section) {
+  await evaluate(
+    cdp,
+    `(() => {
+      const el = document.querySelector('[data-control-section=${JSON.stringify(section)}]');
+      if (!el) throw new Error('missing control section ' + ${JSON.stringify(section)});
+      el.click();
+      return true;
+    })()`
+  );
+}
+
 async function setViewport(cdp, width, height, mobile) {
   await cdp.send('Emulation.setDeviceMetricsOverride', {
     width,
@@ -225,6 +237,42 @@ try {
   await sleep(200);
   await capture(cdp, 'floor-1280-reduced.png');
   await setReducedMotion(cdp, false);
+
+  await clickNav(cdp, 'Control Center');
+  await waitForPlace(cdp, 'control');
+  await waitForWorkroom(cdp, 'Control Center');
+  await sleep(600);
+  await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+  await sleep(200);
+  await capture(cdp, 'control-1280.png');
+  await setViewport(cdp, 768, 800, false);
+  await sleep(400);
+  await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+  await sleep(200);
+  await capture(cdp, 'control-768.png');
+  await setViewport(cdp, 390, 844, true);
+  await sleep(400);
+  await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+  await sleep(200);
+  await capture(cdp, 'control-390.png');
+  await setViewport(cdp, 1280, 800, false);
+  await sleep(400);
+  await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+  await clickControlSection(cdp, 'system');
+  await sleep(400);
+  await capture(cdp, 'control-system-1280.png');
+  await clickControlSection(cdp, 'operations');
+  await sleep(400);
+  await capture(cdp, 'control-operations-1280.png');
+  await clickControlSection(cdp, 'platform');
+  await sleep(400);
+  await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+  await sleep(200);
+  await capture(cdp, 'control-platform-1280.png');
+  await clickNav(cdp, 'Floor');
+  await waitForPlace(cdp, 'command');
+  await waitForWorkroom(cdp, 'Floor');
+  await sleep(300);
 
   await clickNav(cdp, 'Production floor');
   await waitForPlace(cdp, 'production');
@@ -327,13 +375,9 @@ try {
   await setViewport(cdp, 1280, 800, false);
   await sleep(400);
 
-  await clickNav(cdp, 'Control Center');
-  await waitForPlace(cdp, 'control');
-  await sleep(600);
-  await capture(cdp, 'control-1280.png');
-
-  await clickText(cdp, 'Return to atelier');
+  await clickNav(cdp, 'Floor');
   await waitForPlace(cdp, 'command');
+  await waitForWorkroom(cdp, 'Floor');
   await sleep(300);
   await clickAria(cdp, 'Search workspaces');
   await sleep(500);
