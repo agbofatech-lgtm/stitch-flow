@@ -9,8 +9,8 @@ Applied in F5:
 | Room | Wrapper | Interior |
 |---|---|---|
 | Floor | rebuilt | operational composition |
-| Client room | framing + honest HTTP language | list/CRUD deferred to F6 |
-| Measurement table | framing; thread from workflow, not `rows[0]` | freeze/governed tools unchanged |
+| Client room | framing + honest HTTP language | list/CRUD completed in F6 (AppContext dossier) |
+| Measurement table | framing; thread from workflow, not `rows[0]` | capture + body/garment completed in F6; freeze/governed tools unchanged |
 | Design table | host frame only | `DesignStudio.tsx` untouched |
 | Production floor | framing; gradient chrome removed | HTTP board interior deferred to F8 |
 | Ledger / Orders | framing | station interiors deferred to F9 |
