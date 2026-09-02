@@ -59,7 +59,7 @@ export function CommandPalette({
           }
         }}
       />
-      <div className="mt-3 max-h-72 overflow-auto">
+      <div className="mt-3 max-h-[min(18rem,45vh)] overflow-auto">
         {matches.length === 0 ? (
           <p className="px-3 py-6 text-center text-body text-ink-muted">No matching commands in this workspace.</p>
         ) : (

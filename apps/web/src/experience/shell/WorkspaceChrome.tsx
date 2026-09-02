@@ -19,13 +19,15 @@ export function WorkspaceHeader({
       <div className="flex items-center gap-3 px-3 py-2.5 sm:px-4">
         <div className="min-w-0 flex-1">
           <p className="text-meta text-ink-muted">{kicker}</p>
-          <h1 className="truncate font-display text-heading-sm text-ink-primary">{title}</h1>
+          <h1 className="font-display text-heading-sm leading-tight text-ink-primary">{title}</h1>
           {description ? (
-            <p className="mt-0.5 hidden truncate text-meta text-ink-muted md:block">{description}</p>
+            <p className="mt-0.5 hidden text-meta text-ink-muted lg:block">{description}</p>
           ) : null}
         </div>
-        {state ? <div className="hidden items-center gap-2 md:flex">{state}</div> : null}
-        {actions ? <div className="flex flex-wrap items-center justify-end gap-1">{actions}</div> : null}
+        {state ? <div className="hidden items-center gap-2 lg:flex">{state}</div> : null}
+        {actions ? (
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">{actions}</div>
+        ) : null}
       </div>
     </header>
   );

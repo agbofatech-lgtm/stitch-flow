@@ -99,7 +99,7 @@ async function waitForPlace(cdp, placeId, tries = 80) {
   throw new Error(`place ${placeId} not visible`);
 }
 
-async function waitForWorkroom(cdp, place, tries = 80) {
+async function waitForWorkroom(cdp, place, tries = 120) {
   for (let i = 0; i < tries; i += 1) {
     const found = await evaluate(cdp, `document.querySelector('[data-workroom=${JSON.stringify(place)}]') !== null`);
     if (found) {
@@ -185,10 +185,93 @@ async function setReducedMotion(cdp, reduce) {
   });
 }
 
+const F11_ALIASES = {
+  'floor-1280.png': 'f11-floor-1280.png',
+  'floor-768.png': 'f11-floor-768.png',
+  'floor-390.png': 'f11-floor-390.png',
+  'clients-1280.png': 'f11-clients-1280.png',
+  'clients-768.png': 'f11-clients-768.png',
+  'clients-390.png': 'f11-clients-390.png',
+  'measurements-1280.png': 'f11-measurements-1280.png',
+  'measurements-768.png': 'f11-measurements-768.png',
+  'measurements-390.png': 'f11-measurements-390.png',
+  'design-1280.png': 'f11-design-1280.png',
+  'design-768.png': 'f11-design-768.png',
+  'design-390.png': 'f11-design-390.png',
+  'production-1280.png': 'f11-production-1280.png',
+  'production-768.png': 'f11-production-768.png',
+  'production-390.png': 'f11-production-390.png',
+  'ledger-1280.png': 'f11-ledger-1280.png',
+  'ledger-768.png': 'f11-ledger-768.png',
+  'ledger-390.png': 'f11-ledger-390.png',
+  'control-1280.png': 'f11-control-1280.png',
+  'control-768.png': 'f11-control-768.png',
+  'control-390.png': 'f11-control-390.png',
+  'command-1280.png': 'f11-command-1280.png',
+  'command-390.png': 'f11-command-390.png',
+  'floor-390-nav.png': 'f11-drawer-390.png',
+};
+
+async function auditViewport(cdp, label) {
+  const report = await evaluate(
+    cdp,
+    `(() => {
+      const doc = document.documentElement;
+      const h1 = document.querySelector('header h1');
+      return {
+        overflowX: doc.scrollWidth > doc.clientWidth + 2,
+        scrollWidth: doc.scrollWidth,
+        clientWidth: doc.clientWidth,
+        title: h1 ? (h1.textContent || '').trim() : '',
+        titleClipped: h1 ? h1.scrollWidth > h1.clientWidth + 2 : false,
+      };
+    })()`
+  );
+  console.log('audit', label, JSON.stringify(report));
+  return report;
+}
+
 async function capture(cdp, file) {
   const shot = await cdp.send('Page.captureScreenshot', { format: 'png', fromSurface: true });
-  writeFileSync(join(outDir, file), Buffer.from(shot.data, 'base64'));
+  const buf = Buffer.from(shot.data, 'base64');
+  writeFileSync(join(outDir, file), buf);
   console.log('captured', file);
+  const alias = F11_ALIASES[file];
+  if (alias) {
+    writeFileSync(join(outDir, alias), buf);
+    console.log('captured', alias);
+  }
+  await auditViewport(cdp, alias || file);
+}
+
+async function goFloor(cdp) {
+  await setViewport(cdp, 1280, 800, false);
+  await sleep(400);
+  await pressEscape(cdp);
+  await sleep(200);
+  try {
+    await clickNav(cdp, 'Floor');
+  } catch {
+    try {
+      await clickAria(cdp, 'Open navigation');
+      await sleep(300);
+      await clickNav(cdp, 'Floor');
+    } catch {
+      /* reload below */
+    }
+  }
+  for (let i = 0; i < 16; i += 1) {
+    const found = await evaluate(cdp, `document.querySelector('[data-workroom="Floor"]') !== null`);
+    if (found) {
+      await sleep(300);
+      return;
+    }
+    await sleep(250);
+  }
+  await cdp.send('Page.navigate', { url });
+  await sleep(4000);
+  await waitForPlace(cdp, 'command');
+  await waitForWorkroom(cdp, 'Floor');
 }
 
 const profile = mkdtempSync(join(tmpdir(), 'sf-ser-lab-'));
@@ -238,6 +321,97 @@ try {
   await capture(cdp, 'floor-1280-reduced.png');
   await setReducedMotion(cdp, false);
 
+  const matrix = [
+    { nav: 'Floor', place: 'command', workroom: 'Floor', files: { 768: 'floor-768.png', 390: 'floor-390.png' } },
+    {
+      nav: 'Control Center',
+      place: 'control',
+      workroom: 'Control Center',
+      files: { 1280: 'control-1280.png', 768: 'control-768.png', 390: 'control-390.png' },
+    },
+    {
+      nav: 'Client room',
+      place: 'clients',
+      workroom: 'Client room',
+      files: { 1280: 'clients-1280.png', 768: 'clients-768.png', 390: 'clients-390.png' },
+    },
+    {
+      nav: 'Measurement table',
+      place: 'measurements',
+      workroom: 'Measurement table',
+      files: { 1280: 'measurements-1280.png', 768: 'measurements-768.png', 390: 'measurements-390.png' },
+    },
+    {
+      nav: 'Design table',
+      place: 'design',
+      workroom: 'Design table',
+      files: { 1280: 'design-1280.png', 768: 'design-768.png', 390: 'design-390.png' },
+    },
+    {
+      nav: 'Production floor',
+      place: 'production',
+      workroom: 'Production floor',
+      files: { 1280: 'production-1280.png', 768: 'production-768.png', 390: 'production-390.png' },
+    },
+    {
+      nav: 'Orders',
+      place: 'business',
+      workroom: 'Ledger',
+      files: { 1280: 'ledger-1280.png', 768: 'ledger-768.png', 390: 'ledger-390.png' },
+    },
+  ];
+
+  async function visitRoom(room) {
+    await setViewport(cdp, 1280, 800, false);
+    await sleep(300);
+    if (!room.nav) return;
+    await clickNav(cdp, room.nav);
+    await sleep(800);
+    await waitForPlace(cdp, room.place);
+    await waitForWorkroom(cdp, room.workroom);
+    await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+    await sleep(200);
+  }
+
+  async function captureSweep(width, height, mobile, key) {
+    for (const room of matrix) {
+      try {
+        await visitRoom(room);
+        await setViewport(cdp, width, height, Boolean(mobile));
+        await sleep(400);
+        await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+        await sleep(200);
+        await capture(cdp, room.files[key]);
+      } catch (error) {
+        console.error(
+          'VISUAL_LAB_ROOM',
+          room.workroom,
+          key,
+          error instanceof Error ? error.message : error
+        );
+      }
+    }
+  }
+
+  for (const room of matrix) {
+    try {
+      await visitRoom(room);
+      if (room.files[1280]) await capture(cdp, room.files[1280]);
+    } catch (error) {
+      console.error(
+        'VISUAL_LAB_ROOM',
+        room.workroom,
+        1280,
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+  await captureSweep(768, 800, false, 768);
+  await captureSweep(390, 844, true, 390);
+  await setViewport(cdp, 1280, 800, false);
+  await sleep(400);
+
+  try {
   await clickNav(cdp, 'Control Center');
   await waitForPlace(cdp, 'control');
   await waitForWorkroom(cdp, 'Control Center');
@@ -269,10 +443,7 @@ try {
   await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
   await sleep(200);
   await capture(cdp, 'control-platform-1280.png');
-  await clickNav(cdp, 'Floor');
-  await waitForPlace(cdp, 'command');
-  await waitForWorkroom(cdp, 'Floor');
-  await sleep(300);
+  await goFloor(cdp);
 
   await clickNav(cdp, 'Production floor');
   await waitForPlace(cdp, 'production');
@@ -303,12 +474,7 @@ try {
   await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
   await sleep(200);
   await capture(cdp, 'ledger-390.png');
-  await setViewport(cdp, 1280, 800, false);
-  await sleep(400);
-  await clickNav(cdp, 'Floor');
-  await waitForPlace(cdp, 'command');
-  await waitForWorkroom(cdp, 'Floor');
-  await sleep(300);
+  await goFloor(cdp);
   await clickNav(cdp, 'Production floor');
   await waitForPlace(cdp, 'production');
   await waitForWorkroom(cdp, 'Production floor');
@@ -323,12 +489,7 @@ try {
   await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
   await sleep(200);
   await capture(cdp, 'production-390.png');
-  await setViewport(cdp, 1280, 800, false);
-  await sleep(400);
-  await clickNav(cdp, 'Floor');
-  await waitForPlace(cdp, 'command');
-  await waitForWorkroom(cdp, 'Floor');
-  await sleep(300);
+  await goFloor(cdp);
 
   await clickNav(cdp, 'Client room');
   await waitForPlace(cdp, 'clients');
@@ -372,13 +533,7 @@ try {
   await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
   await sleep(200);
   await capture(cdp, 'design-390.png');
-  await setViewport(cdp, 1280, 800, false);
-  await sleep(400);
-
-  await clickNav(cdp, 'Floor');
-  await waitForPlace(cdp, 'command');
-  await waitForWorkroom(cdp, 'Floor');
-  await sleep(300);
+  await goFloor(cdp);
   await clickAria(cdp, 'Search workspaces');
   await sleep(500);
   await capture(cdp, 'command-1280.png');
@@ -418,6 +573,11 @@ try {
   await setViewport(cdp, 390, 844, true);
   await sleep(500);
   await capture(cdp, 'floor-390.png');
+  await clickAria(cdp, 'Search workspaces');
+  await sleep(400);
+  await capture(cdp, 'command-390.png');
+  await pressEscape(cdp);
+  await sleep(300);
   await clickAria(cdp, 'Open navigation');
   await sleep(400);
   await capture(cdp, 'floor-390-nav.png');
@@ -435,6 +595,9 @@ try {
   await pressEscape(cdp);
   await sleep(500);
   await capture(cdp, 'measurements-390.png');
+  } catch (error) {
+    console.error('VISUAL_LAB_JOURNEY', error instanceof Error ? error.message : error);
+  }
 
   ws.close();
 } catch (error) {

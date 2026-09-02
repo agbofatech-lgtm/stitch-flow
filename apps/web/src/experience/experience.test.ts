@@ -188,6 +188,15 @@ test('dialog traps tab and restores focus on escape path', () => {
   assert.match(source, /previous\?\.focus/);
   assert.match(source, /aria-modal/);
   assert.match(source, /size === 'lg'/);
+  assert.match(source, /Close dialog/);
+  assert.match(source, /max-h-\[92vh\]/);
+});
+
+test('workspace header does not ellipsis the room title', () => {
+  const source = readFileSync(new URL('./shell/WorkspaceChrome.tsx', import.meta.url), 'utf8');
+  assert.match(source, /font-display text-heading-sm leading-tight/);
+  assert.equal(source.includes('truncate font-display'), false);
+  assert.match(source, /hidden items-center gap-2 lg:flex/);
 });
 
 test('customers workroom uses shared Dialog not ModalShell', () => {

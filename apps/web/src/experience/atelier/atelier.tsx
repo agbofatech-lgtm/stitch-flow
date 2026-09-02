@@ -198,7 +198,7 @@ export function AtelierWorkroom({
         data-workroom={place}
         data-workroom-density="canvas"
       >
-        <div className="sticky top-0 z-[1] shrink-0 space-y-2 border-b border-line-subtle bg-surface-canvas px-4 py-3 sm:px-6">
+        <div className="sticky top-0 z-[1] shrink-0 space-y-2 border-b border-line-subtle bg-surface-canvas px-3 py-2 sm:px-6 sm:py-3">
           {thread}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">

@@ -168,16 +168,16 @@ export function ControlCenter({
         <AtelierStage className="mt-6">
           <p className="text-meta text-ink-muted">Workspace</p>
           <h2 className="mt-1 font-display text-heading text-ink-primary">{currentWorkspace.name}</h2>
-          <dl className="mt-4 space-y-2 text-body text-ink-secondary">
-            <div className="flex justify-between gap-3">
+          <dl className="mt-4 space-y-3 text-body text-ink-secondary">
+            <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:justify-between sm:gap-3">
               <dt>Workspace id</dt>
-              <dd className="font-numeric">{currentWorkspace.id}</dd>
+              <dd className="min-w-0 break-all font-numeric">{currentWorkspace.id}</dd>
             </div>
-            <div className="flex justify-between gap-3">
+            <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:justify-between sm:gap-3">
               <dt>Recorded currency</dt>
               <dd className="font-numeric">{currentWorkspace.defaultCurrency || 'Currency not recorded'}</dd>
             </div>
-            <div className="flex justify-between gap-3">
+            <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:justify-between sm:gap-3">
               <dt>Operator</dt>
               <dd>
                 {currentMember.user.fullName} · {currentMember.role}

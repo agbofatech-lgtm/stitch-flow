@@ -44,7 +44,7 @@ export function DesignStudioFrame({
       }
       confidence={<AtelierConfidence state="local" detail={detail} />}
     >
-      <div data-design-host="true" className="min-h-[70vh] overflow-auto">
+      <div data-design-host="true" className="min-h-0 overflow-x-auto">
         {children}
       </div>
     </AtelierWorkroom>

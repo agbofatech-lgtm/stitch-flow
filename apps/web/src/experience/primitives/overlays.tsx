@@ -124,10 +124,20 @@ export function Dialog({
             )}
             {...dialogMotion}
           >
-            <h2 id={headingId} className="font-display text-heading text-ink-primary">
-              {title}
-            </h2>
-            <div className="mt-4 max-h-[75vh] overflow-y-auto">{children}</div>
+            <div className="flex items-start justify-between gap-3">
+              <h2 id={headingId} className="min-w-0 font-display text-heading text-ink-primary">
+                {title}
+              </h2>
+              <button
+                type="button"
+                aria-label="Close dialog"
+                className="sf-focus-ring inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-sf text-label text-ink-secondary hover:bg-action-secondary"
+                onClick={onClose}
+              >
+                Close
+              </button>
+            </div>
+            <div className="mt-4 max-h-[min(75vh,28rem)] overflow-y-auto">{children}</div>
           </motion.div>
         </motion.div>
       ) : null}
@@ -175,7 +185,17 @@ export function Sheet({
             className="absolute inset-y-0 right-0 w-full max-w-md overflow-auto bg-surface-elevated p-6 shadow-sf-lg"
             {...sheetMotion}
           >
-            <h2 className="text-heading text-ink-primary">{title}</h2>
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="min-w-0 text-heading text-ink-primary">{title}</h2>
+              <button
+                type="button"
+                aria-label="Close sheet"
+                className="sf-focus-ring inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-sf text-label text-ink-secondary hover:bg-action-secondary"
+                onClick={onClose}
+              >
+                Close
+              </button>
+            </div>
             <div className="mt-4">{children}</div>
           </motion.aside>
         </motion.div>

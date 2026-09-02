@@ -442,7 +442,7 @@ export function StudioShell() {
                 <Button
                   variant="ghost"
                   size="md"
-                  className="hidden md:inline-flex"
+                  className="hidden lg:inline-flex"
                   onClick={() => selectNav('control')}
                 >
                   Operator plane
@@ -460,7 +460,7 @@ export function StudioShell() {
           <div
             className={cn(
               'flex flex-wrap items-center justify-between gap-2 border-b border-line-subtle bg-surface-panel px-3 py-2',
-              workspace === 'design' && !settingsOpen && !controlOpen ? 'sm:hidden' : undefined
+              workspace === 'design' && !settingsOpen && !controlOpen ? 'hidden' : undefined
             )}
           >
             {controlOpen ? (

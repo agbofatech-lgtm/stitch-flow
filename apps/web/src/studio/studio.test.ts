@@ -143,7 +143,8 @@ test('studio shell composes atelier primitives without engines', () => {
   assert.match(shell, /WorkspaceHeader/);
   assert.match(shell, /workflowCustomer/);
   assert.match(shell, /showPlaceNext/);
-  assert.match(shell, /workspace === 'design' && !settingsOpen && !controlOpen \? 'sm:hidden'/);
+  assert.match(shell, /workspace === 'design' && !settingsOpen && !controlOpen \? 'hidden'/);
+  assert.match(shell, /hidden lg:inline-flex/);
   assert.equal(shell.includes('patternEngine'), false);
 });
 
