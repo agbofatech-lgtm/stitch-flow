@@ -11,7 +11,7 @@ Applied in F5:
 | Floor | rebuilt | operational composition |
 | Client room | framing + honest HTTP language | list/CRUD completed in F6 (AppContext dossier) |
 | Measurement table | framing; thread from workflow, not `rows[0]` | capture + body/garment completed in F6; freeze/governed tools unchanged |
-| Design table | host frame only | `DesignStudio.tsx` untouched |
+| Design table | host frame (canvas density in F7) | `DesignStudio.tsx` untouched |
 | Production floor | framing; gradient chrome removed | HTTP board interior deferred to F8 |
 | Ledger / Orders | framing | station interiors deferred to F9 |
 
