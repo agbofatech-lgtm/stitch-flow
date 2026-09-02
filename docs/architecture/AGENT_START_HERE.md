@@ -60,7 +60,8 @@ SER-F0 frontend experience forensics: [`../experience/ser/f0/README.md`](../expe
 SER-F1 experience constitution: [`frontend/experience/README.md`](./frontend/experience/README.md).  
 SER-F2 visual language: [`frontend/experience/SER-F2_FINAL_REPORT.md`](./frontend/experience/SER-F2_FINAL_REPORT.md).  
 SER-F3 cinematic motion: [`frontend/experience/SER-F3_FINAL_REPORT.md`](./frontend/experience/SER-F3_FINAL_REPORT.md).  
-SER-F4 atelier shell: [`frontend/experience/SER-F4_FINAL_REPORT.md`](./frontend/experience/SER-F4_FINAL_REPORT.md). SER-F5 locked. 3D and Phase 20 remain locked.
+SER-F4 atelier shell: [`frontend/experience/SER-F4_FINAL_REPORT.md`](./frontend/experience/SER-F4_FINAL_REPORT.md).  
+SER-F5 Floor + workroom: [`frontend/experience/SER-F5_FINAL_REPORT.md`](./frontend/experience/SER-F5_FINAL_REPORT.md). SER-F6 locked. 3D and Phase 20 remain locked.
 
 ---
 
