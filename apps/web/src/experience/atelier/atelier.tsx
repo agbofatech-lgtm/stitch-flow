@@ -176,6 +176,7 @@ export function AtelierWorkroom({
   confidence,
   primaryAction,
   aside,
+  density = 'standard',
   children,
 }: {
   place: string;
@@ -185,8 +186,33 @@ export function AtelierWorkroom({
   confidence?: ReactNode;
   primaryAction?: ReactNode;
   aside?: ReactNode;
+  density?: 'standard' | 'canvas';
   children: ReactNode;
 }) {
+  if (density === 'canvas') {
+    return (
+      <div
+        className="flex min-h-full flex-col bg-surface-canvas text-ink-primary"
+        data-workroom={place}
+        data-workroom-density="canvas"
+      >
+        <div className="sticky top-0 z-[1] shrink-0 space-y-2 border-b border-line-subtle bg-surface-canvas px-4 py-3 sm:px-6">
+          {thread}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-meta text-ink-muted">{place}</p>
+              <h2 className="mt-0.5 font-display text-heading text-ink-primary">{title}</h2>
+              {purpose ? <p className="mt-1 max-w-3xl text-meta text-ink-secondary">{purpose}</p> : null}
+            </div>
+            {primaryAction ? <div className="flex flex-wrap items-center gap-2">{primaryAction}</div> : null}
+          </div>
+          {confidence}
+        </div>
+        <div className="min-w-0 flex-1">{children}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-full bg-surface-canvas text-ink-primary" data-workroom={place}>
       <Workroom className="space-y-6">

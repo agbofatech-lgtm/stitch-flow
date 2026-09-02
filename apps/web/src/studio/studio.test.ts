@@ -94,6 +94,7 @@ test('studio shell hosts Design Studio and does not import engines', () => {
   const shell = readFileSync(new URL('./StudioShell.tsx', import.meta.url), 'utf8');
   assert.match(shell, /DesignStudio/);
   assert.match(shell, /DesignStudioFrame/);
+  assert.match(shell, /garment=\{selectedOrder\?\.garmentType/);
   assert.match(shell, /AtelierHome/);
   assert.match(shell, /ControlCenter/);
   assert.match(shell, /WorkflowPanel/);
@@ -142,6 +143,7 @@ test('studio shell composes atelier primitives without engines', () => {
   assert.match(shell, /WorkspaceHeader/);
   assert.match(shell, /workflowCustomer/);
   assert.match(shell, /showPlaceNext/);
+  assert.match(shell, /workspace === 'design' && !settingsOpen && !controlOpen \? 'sm:hidden'/);
   assert.equal(shell.includes('patternEngine'), false);
 });
 
@@ -159,4 +161,9 @@ test('design studio frame does not import engines', () => {
   assert.equal(/from ['"].*patternEngine/.test(source), false);
   assert.equal(/from ['"].*productionAssistant/.test(source), false);
   assert.match(source, /Hosted — not rewritten/);
+  assert.match(source, /density="canvas"/);
+  assert.match(source, /data-design-host/);
+  assert.match(source, /AtelierJourney/);
+  assert.match(source, /does not invent a client/);
+  assert.equal(source.includes('Finalize for Production'), false);
 });

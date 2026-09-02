@@ -250,8 +250,26 @@ try {
 
   await clickNav(cdp, 'Design table');
   await waitForPlace(cdp, 'design');
+  await waitForWorkroom(cdp, 'Design table');
   await sleep(1200);
+  await evaluate(
+    cdp,
+    `document.querySelector('#workspace-main')?.scrollTo(0,0); document.querySelector('[data-workroom="Design table"]')?.scrollIntoView({ block: 'start' });`
+  );
+  await sleep(200);
   await capture(cdp, 'design-1280.png');
+  await setViewport(cdp, 768, 800, false);
+  await sleep(400);
+  await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+  await sleep(200);
+  await capture(cdp, 'design-768.png');
+  await setViewport(cdp, 390, 844, true);
+  await sleep(400);
+  await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+  await sleep(200);
+  await capture(cdp, 'design-390.png');
+  await setViewport(cdp, 1280, 800, false);
+  await sleep(400);
 
   await clickNav(cdp, 'Control Center');
   await waitForPlace(cdp, 'control');

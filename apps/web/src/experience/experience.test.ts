@@ -123,6 +123,17 @@ test('atelier workroom exposes place identity without a second layout system', (
   assert.match(html, /My Workspace/);
 });
 
+test('atelier workroom canvas density fills the host without a second layout system', () => {
+  const { AtelierWorkroom } = require('./atelier/atelier') as typeof import('./atelier/atelier');
+  const html = renderToStaticMarkup(
+    createElement(AtelierWorkroom, { place: 'Design table', title: 'Emma Thompson', density: 'canvas' }, 'studio')
+  );
+  assert.match(html, /data-workroom="Design table"/);
+  assert.match(html, /data-workroom-density="canvas"/);
+  assert.match(html, /Emma Thompson/);
+  assert.equal(html.includes('max-w-[1400px]'), false);
+});
+
 test('atelier journey is orientation, not a fake completion meter', () => {
   const { AtelierJourney } = require('./atelier/atelier') as typeof import('./atelier/atelier');
   const html = renderToStaticMarkup(createElement(AtelierJourney, { current: 'measurements' }));

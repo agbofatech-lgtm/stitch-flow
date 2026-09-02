@@ -65,8 +65,10 @@ export function WorkspaceInspector({
       {workspace === 'design' ? (
         <Panel>
           <p className="text-label">Protected design</p>
-          <p className="mt-2 text-body text-ink-secondary">
-            Design Studio is hosted, not extracted. Save studio output from the workflow inspector. Pattern Engine remains behind T3.
+          <p className="mt-2 text-body text-ink-primary">{clientName || 'No client on this thread'}</p>
+          {orderNumber ? <p className="mt-1 font-numeric text-meta text-ink-muted">{orderNumber}</p> : null}
+          <p className="mt-3 text-meta text-ink-muted">
+            Hosted studio. Finalize for Production stays inside Design Studio. This inspector does not create a second finalize. Pattern Engine remains behind T3.
           </p>
         </Panel>
       ) : null}

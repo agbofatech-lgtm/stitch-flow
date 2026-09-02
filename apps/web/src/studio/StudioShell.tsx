@@ -233,7 +233,11 @@ export function StudioShell() {
     if (workspace === 'command') return <AtelierHome />;
     if (workspace === 'clients') return <Customers />;
     if (workspace === 'design') return (
-      <DesignStudioFrame client={threadClient} order={selectedOrder?.orderNumber}>
+      <DesignStudioFrame
+        client={threadClient}
+        order={selectedOrder?.orderNumber}
+        garment={selectedOrder?.garmentType || null}
+      >
         <DesignStudio />
       </DesignStudioFrame>
     );
@@ -440,7 +444,12 @@ export function StudioShell() {
       }
       toolbar={
         <>
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line-subtle bg-surface-panel px-3 py-2">
+          <div
+            className={cn(
+              'flex flex-wrap items-center justify-between gap-2 border-b border-line-subtle bg-surface-panel px-3 py-2',
+              workspace === 'design' && !settingsOpen && !controlOpen ? 'sm:hidden' : undefined
+            )}
+          >
             <AtelierThread
               room={headerCopy.title}
               client={threadClient}

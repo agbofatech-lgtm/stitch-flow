@@ -36,7 +36,7 @@ export const ATELIER_PLACES: Record<AtelierPlaceId, AtelierPlace> = {
     id: 'design',
     title: 'Design table',
     kicker: 'Atelier',
-    purpose: 'Protected studio is hosted here. Geometry stays inside.',
+    purpose: 'Protected studio. Geometry stays inside.',
     next: { label: 'Open production floor', room: 'production' },
   },
   production: {
