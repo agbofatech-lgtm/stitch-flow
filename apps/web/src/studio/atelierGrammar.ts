@@ -50,7 +50,7 @@ export const ATELIER_PLACES: Record<AtelierPlaceId, AtelierPlace> = {
     id: 'business',
     title: 'Ledger',
     kicker: 'Atelier',
-    purpose: 'Orders, materials, invoices, and reports as stations.',
+    purpose: 'The commercial record of the garment. Not a payment processor.',
     next: { label: 'Return to floor', room: 'command' },
   },
   settings: {

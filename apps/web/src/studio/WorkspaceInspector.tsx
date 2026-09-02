@@ -91,7 +91,9 @@ export function WorkspaceInspector({
 
       {workspace === 'business' ? (
         <Panel>
-          <p className="text-label">Business surfaces</p>
+          <p className="text-label">Ledger</p>
+          <p className="mt-2 text-body text-ink-primary">{clientName || 'No client on this thread'}</p>
+          {orderNumber ? <p className="mt-1 font-numeric text-meta text-ink-muted">{orderNumber}</p> : null}
           <div className="mt-3 space-y-2">
             {BUSINESS_SURFACES.map((surface) => (
               <Button
@@ -105,7 +107,9 @@ export function WorkspaceInspector({
               </Button>
             ))}
           </div>
-          <p className="mt-3 text-meta text-ink-muted">{orders} local orders. Commercial platform is locked.</p>
+          <p className="mt-3 text-meta text-ink-muted">
+            {orders} local orders. Invoice and payment values are stored records. Live PSP is not this stage.
+          </p>
         </Panel>
       ) : null}
     </div>

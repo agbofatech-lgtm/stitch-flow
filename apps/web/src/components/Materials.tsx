@@ -22,7 +22,15 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatCurrency, safeCurrency } from '@shared/utils/currency';
-import { Button, ExperienceEmptyState, PageHeader, Workroom } from '../experience';
+import {
+  AtelierConfidence,
+  AtelierJourney,
+  AtelierThread,
+  AtelierWorkroom,
+  Button,
+  ExperienceEmptyState,
+} from '../experience';
+import { useWorkflow } from '../workflow/WorkflowContext';
 
 type MaterialFilter = 'all' | 'active' | 'inactive' | 'low_stock';
 
@@ -35,7 +43,14 @@ export function Materials() {
     updateFabricRecord,
     deleteFabricRecord,
     currentWorkspace,
+    orders,
+    customers,
+    selectedOrderId,
   } = useApp();
+  const workflow = useWorkflow();
+  const selectedOrder = orders.find((order) => order.id === (workflow.orderId || selectedOrderId)) || null;
+  const selectedClient =
+    (selectedOrder && customers.find((customer) => customer.id === selectedOrder.customerId)?.fullName) || null;
 
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -177,19 +192,24 @@ export function Materials() {
   }, [fabricRecords, search, filter]);
 
   return (
-    <Workroom>
-      <PageHeader
-        level={2}
-        kicker="Operations"
-        title="Materials"
-        description="Manage fabric inventory, stock levels, monthly consumption, reorder planning, and inactive stock."
-        actions={
-          <Button onClick={() => setShowAddModal(true)} disabled={!featureAccess.canManageMaterialInventory.allowed}>
-            <Plus className="h-4 w-4" />
-            Add Material
-          </Button>
-        }
-      />
+    <AtelierWorkroom
+      place="Ledger"
+      title="Materials station"
+      purpose="Fabric records in this workspace store. Not a live mill inventory. Not shop authority."
+      thread={
+        <div className="space-y-1">
+          <AtelierThread room="Ledger" client={selectedClient} order={selectedOrder?.orderNumber} />
+          <AtelierJourney current="ledger" />
+        </div>
+      }
+      confidence={<AtelierConfidence state="local" detail="AppContext fabric records. Remote sync is not claimed." />}
+      primaryAction={
+        <Button onClick={() => setShowAddModal(true)} disabled={!featureAccess.canManageMaterialInventory.allowed}>
+          <Plus className="h-4 w-4" />
+          Add material
+        </Button>
+      }
+    >
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <SummaryCard
@@ -587,7 +607,7 @@ export function Materials() {
           }}
         />
       )}
-    </Workroom>
+    </AtelierWorkroom>
   );
 }
 

@@ -25,7 +25,13 @@ import measuringTapeSoft from '@shared/assets/measuring-tape-soft.svg';
 import sewingMachineSoft from '@shared/assets/sewing-machine-soft.svg';
 import needleSoft from '@shared/assets/needle-soft.svg';
 import { FeatureGate } from './FeatureGate';
-import { PageHeader, Workroom } from '../experience';
+import {
+  AtelierConfidence,
+  AtelierJourney,
+  AtelierThread,
+  AtelierWorkroom,
+} from '../experience';
+import { useWorkflow } from '../workflow/WorkflowContext';
 import {
   buildOrdersByStage,
   filterOrdersByDateRange,
@@ -48,7 +54,12 @@ export function Reports() {
     materialUsages,
     currentWorkspace,
     setView,
+    selectedOrderId,
   } = useApp();
+  const workflow = useWorkflow();
+  const selectedOrder = orders.find((order) => order.id === (workflow.orderId || selectedOrderId)) || null;
+  const selectedClient =
+    (selectedOrder && customers.find((customer) => customer.id === selectedOrder.customerId)?.fullName) || null;
 
   const workspaceCurrency = currentWorkspace.defaultCurrency || 'GHS';
 
@@ -576,14 +587,19 @@ export function Reports() {
   }, [orders, materialUsages, fabricRecords, selectedProductionRange, now]);
 
   return (
-    <Workroom>
+    <AtelierWorkroom
+      place="Ledger"
+      title="Reports station"
+      purpose="Derived from this workspace store. Not shop authority. Not a payment processor."
+      thread={
+        <div className="space-y-1">
+          <AtelierThread room="Ledger" client={selectedClient} order={selectedOrder?.orderNumber} />
+          <AtelierJourney current="ledger" />
+        </div>
+      }
+      confidence={<AtelierConfidence state="local" detail="Local derived reports. Captured-payment totals are stored payment records, not PSP confirmation." />}
+    >
       <div className="space-y-8">
-        <PageHeader
-          level={2}
-          kicker="Operations"
-          title="Reports"
-          description="Revenue, customers, materials, order demand, and studio performance from workspace records."
-        />
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <MetricCard
             title="Revenue This Month"
@@ -1493,7 +1509,7 @@ export function Reports() {
           </FeatureGate>
         </section>
       </div>
-    </Workroom>
+    </AtelierWorkroom>
   );
 }
 

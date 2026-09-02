@@ -156,6 +156,34 @@ test('control center presents API fields without inventing metrics', () => {
   assert.match(source, /\/control\/billing\/provider/);
 });
 
+test('ledger orders station uses AppContext commercial records, not unmounted HTTP', () => {
+  const source = readFileSync(new URL('../components/Orders.tsx', import.meta.url), 'utf8');
+  assert.match(source, /AtelierWorkroom/);
+  assert.match(source, /selectOrder/);
+  assert.match(source, /does not invent an order/);
+  assert.match(source, /does not borrow the first order/);
+  assert.match(source, /No invoice record exists for this order/);
+  assert.match(source, /No payment record is available/);
+  assert.equal(source.includes('fetchOrders'), false);
+  assert.equal(source.includes('fetchOrderProductionStages'), false);
+  assert.equal(source.includes('transitionOrderProductionStage'), false);
+  assert.equal(source.includes('totalRevenue'), false);
+  assert.equal(source.includes('Stripe'), false);
+  assert.equal(source.includes('Paystack'), false);
+});
+
+test('ledger invoices station uses AppContext, not unmounted HTTP', () => {
+  const source = readFileSync(new URL('../components/Invoices.tsx', import.meta.url), 'utf8');
+  assert.match(source, /AtelierWorkroom/);
+  assert.match(source, /No invoice record exists for this order/);
+  assert.equal(source.includes('fetchInvoices'), false);
+  assert.equal(source.includes('getCustomers'), false);
+  assert.equal(source.includes('createInvoice'), false);
+  assert.equal(source.includes('createPayment'), false);
+  assert.equal(source.includes('API_BASE'), false);
+  assert.equal(source.includes('Paystack'), false);
+});
+
 test('production floor uses AppContext orders, not unmounted HTTP', () => {
   const source = readFileSync(new URL('../components/ProductionBoard.tsx', import.meta.url), 'utf8');
   assert.match(source, /AtelierWorkroom/);
