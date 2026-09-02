@@ -27,6 +27,13 @@ export {
 export { Tabs, Breadcrumb, CommandMenu } from './primitives/navigation';
 export { DataTable } from './primitives/DataTable';
 export * from './shell';
-export { AtelierConfidence, AtelierThread, AtelierPage, AtelierStage, AtelierMilestone } from './atelier/atelier';
+export {
+  AtelierConfidence,
+  AtelierThread,
+  AtelierPage,
+  AtelierStage,
+  AtelierMilestone,
+  AtelierWorkroom,
+} from './atelier/atelier';
 export type { ConfidenceState } from './atelier/atelier';
 export { goAtelierRoom, registerAtelierRoomHandler } from './atelier/navigate';

@@ -146,3 +146,42 @@ export function AtelierPage({
 export function AtelierStage({ className, children }: { className?: string; children: ReactNode }) {
   return <div className={cn('sf-canvas-stage p-4 sm:p-5', className)}>{children}</div>;
 }
+
+/** Reusable workroom grammar. Identity + thread + surface + optional aside. Not a second layout system. */
+export function AtelierWorkroom({
+  place,
+  title,
+  purpose,
+  thread,
+  confidence,
+  primaryAction,
+  aside,
+  children,
+}: {
+  place: string;
+  title: string;
+  purpose?: string;
+  thread?: ReactNode;
+  confidence?: ReactNode;
+  primaryAction?: ReactNode;
+  aside?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="min-h-full bg-surface-canvas text-ink-primary" data-workroom={place}>
+      <Workroom className="space-y-6">
+        <div className="space-y-3">
+          {thread}
+          <PageHeader level={2} kicker={place} title={title} description={purpose} actions={primaryAction} />
+          {confidence}
+        </div>
+        <div className={aside ? 'grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_17rem]' : undefined}>
+          <div className="min-w-0 space-y-6">{children}</div>
+          {aside ? (
+            <aside className="min-w-0 space-y-4 xl:sticky xl:top-4">{aside}</aside>
+          ) : null}
+        </div>
+      </Workroom>
+    </div>
+  );
+}

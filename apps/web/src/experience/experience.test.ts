@@ -114,6 +114,15 @@ test('atelier shell exposes skip link and workspace main', () => {
   assert.match(html, /data-plane="atelier"/);
 });
 
+test('atelier workroom exposes place identity without a second layout system', () => {
+  const { AtelierWorkroom } = require('./atelier/atelier') as typeof import('./atelier/atelier');
+  const html = renderToStaticMarkup(
+    createElement(AtelierWorkroom, { place: 'Floor', title: 'My Workspace' }, 'canvas')
+  );
+  assert.match(html, /data-workroom="Floor"/);
+  assert.match(html, /My Workspace/);
+});
+
 test('command palette is a room navigator with 44px targets', () => {
   const source = readFileSync(new URL('./shell/CommandPalette.tsx', import.meta.url), 'utf8');
   assert.match(source, /Go to a room/);

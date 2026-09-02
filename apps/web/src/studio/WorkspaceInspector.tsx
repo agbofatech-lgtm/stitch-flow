@@ -36,7 +36,7 @@ export function WorkspaceInspector({
 
       {workspace === 'clients' ? (
         <Panel>
-          <p className="text-label">Client studio</p>
+          <p className="text-label">Client room</p>
           <ul className="mt-3 space-y-1 text-body text-ink-secondary">
             <li>Identity</li>
             <li>Measurements</li>

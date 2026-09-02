@@ -14,6 +14,24 @@ test('floor thread uses selected order, not the first recent client', () => {
   assert.match(home, /selectedOrderId/);
   assert.equal(home.includes('recentCustomers[0]'), false);
   assert.match(home, /threadClient/);
+  assert.match(home, /No client selected/);
+  assert.match(home, /Work in motion/);
+  assert.match(home, /AtelierWorkroom/);
+  assert.equal(home.includes('totalRevenue'), false);
+});
+
+test('measurement table does not borrow the first profile as the thread', () => {
+  const source = readFileSync(new URL('./MeasurementWorkspace.tsx', import.meta.url), 'utf8');
+  assert.equal(source.includes('rows[0]?.customer'), false);
+  assert.match(source, /workflow.customerId/);
+  assert.match(source, /AtelierWorkroom/);
+});
+
+test('client room error does not expose unmounted API URLs', () => {
+  const source = readFileSync(new URL('../components/Customers.tsx', import.meta.url), 'utf8');
+  assert.match(source, /Client records are unavailable in this workspace/);
+  assert.equal(source.includes('Source:'), false);
+  assert.match(source, /AtelierWorkroom/);
 });
 
 test('atelier places use room vocabulary and real next rooms', () => {

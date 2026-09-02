@@ -215,12 +215,12 @@ try {
 
   await clickNav(cdp, 'Client room');
   await waitForPlace(cdp, 'clients');
-  await sleep(400);
+  await sleep(1200);
   await capture(cdp, 'clients-1280.png');
 
   await clickNav(cdp, 'Measurement table');
   await waitForPlace(cdp, 'measurements');
-  await sleep(400);
+  await sleep(800);
   await capture(cdp, 'measurements-1280.png');
 
   await clickNav(cdp, 'Design table');
@@ -255,6 +255,10 @@ try {
   await clickAria(cdp, 'Open navigation');
   await sleep(400);
   await capture(cdp, 'floor-390-nav.png');
+  await clickNav(cdp, 'Measurement table');
+  await waitForPlace(cdp, 'measurements');
+  await sleep(1200);
+  await capture(cdp, 'measurements-390.png');
 
   ws.close();
 } catch (error) {

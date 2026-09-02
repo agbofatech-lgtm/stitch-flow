@@ -48,7 +48,8 @@ import {
   analyzeDesignInspiration,
   generateProductionPlan,
 } from '../application/tailoring';
-import { Button, ExperienceEmptyState, PageHeader, Workroom } from '../experience';
+import { AtelierConfidence, AtelierThread, AtelierWorkroom, Button, ExperienceEmptyState } from '../experience';
+import { goAtelierRoom } from '../experience/atelier/navigate';
 
 const statusFilters = ['all', 'draft', 'in_progress', 'ready', 'delivered', 'cancelled'] as const;
 
@@ -231,6 +232,7 @@ export function Orders() {
     updateOrder,
     addOrder,
     selectOrder,
+    selectedOrderId,
     setView,
     currentWorkspace,
     fabricRecords,
@@ -374,20 +376,29 @@ export function Orders() {
     setOrderFormMode('edit');
   };
 
+  const selectedOrder = orders.find((order) => order.id === selectedOrderId) || null;
+  const threadClient =
+    (selectedOrder && customers.find((customer) => customer.id === selectedOrder.customerId)?.fullName) || null;
+
   return (
-    <Workroom>
-      <PageHeader
-        level={2}
-        kicker="Operations"
-        title="Orders"
-        description={`${orders.length} orders linked to customers, garments, measurements, design work, and materials.`}
-        actions={
-          <Button onClick={openCreateOrderModal}>
+    <AtelierWorkroom
+      place="Ledger"
+      title="Orders station"
+      purpose="Orders in this workspace store. Not authenticated /shop."
+      thread={<AtelierThread room="Ledger" client={threadClient} order={selectedOrder?.orderNumber} />}
+      confidence={<AtelierConfidence state="local" detail="AppContext orders. Remote sync is not claimed." />}
+      primaryAction={
+        <div className="flex flex-wrap gap-2">
+          <Button variant="primary" onClick={openCreateOrderModal}>
             <Plus className="h-4 w-4" />
-            New Order
+            New order
           </Button>
-        }
-      />
+          <Button variant="secondary" onClick={() => goAtelierRoom('command')}>
+            Return to floor
+          </Button>
+        </div>
+      }
+    >
 
       {stageActionError && (
         <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -801,7 +812,7 @@ export function Orders() {
           }}
         />
       )}
-    </Workroom>
+    </AtelierWorkroom>
   );
 }
 

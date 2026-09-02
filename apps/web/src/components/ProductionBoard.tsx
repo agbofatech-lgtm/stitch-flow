@@ -28,7 +28,17 @@ import {
 import { fetchOrders, type ApiOrder } from '@shared/api/orders';
 import { getCustomers, type ApiCustomer } from '@shared/utils/customerApi';
 import { API_BASE } from '@shared/utils/api';
-import { Button, ErrorState, ExperienceEmptyState, LoadingState, PageHeader, Workroom, WorkspaceSkeleton } from '../experience';
+import {
+  AtelierConfidence,
+  AtelierThread,
+  AtelierWorkroom,
+  Button,
+  ErrorState,
+  ExperienceEmptyState,
+  LoadingState,
+  WorkspaceSkeleton,
+} from '../experience';
+import { goAtelierRoom } from '../experience/atelier/navigate';
 import type {
   Order,
   OrderAlert,
@@ -203,7 +213,11 @@ async function safeJson(response: Response) {
 }
 
 export function ProductionBoard() {
-  const { currentWorkspace } = useApp();
+  const { currentWorkspace, selectedOrderId: workspaceOrderId, orders: workspaceOrders, customers: workspaceCustomers } =
+    useApp();
+  const threadOrder = workspaceOrders.find((order) => order.id === workspaceOrderId) || null;
+  const threadClient =
+    (threadOrder && workspaceCustomers.find((customer) => customer.id === threadOrder.customerId)?.fullName) || null;
   const [orders, setOrders] = useState<ProductionOrder[]>([]);
   const [customers, setCustomers] = useState<ApiCustomer[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -493,45 +507,53 @@ export function ProductionBoard() {
     });
   };
 
+  const workroom = {
+    place: 'Production floor',
+    title: 'Production',
+    purpose: 'Stages from measurement to delivery. This board still reads a separate HTTP population.',
+    thread: <AtelierThread room="Production floor" client={threadClient} order={threadOrder?.orderNumber} />,
+    confidence: (
+      <AtelierConfidence
+        state={error ? 'error' : loading ? 'pending' : 'local'}
+        detail="HTTP production board. Not shop authority."
+      />
+    ),
+    primaryAction: (
+      <Button variant="primary" onClick={() => goAtelierRoom('business')}>
+        Open ledger
+      </Button>
+    ),
+  };
+
   if (loading) {
     return (
-      <Workroom>
-        <WorkspaceSkeleton label="Loading production board" />
-      </Workroom>
+      <AtelierWorkroom {...workroom}>
+        <WorkspaceSkeleton label="Preparing production floor" />
+      </AtelierWorkroom>
     );
   }
 
   if (error && orders.length === 0) {
     return (
-      <Workroom>
+      <AtelierWorkroom {...workroom}>
         <ErrorState
-          title="Production board could not load"
-          description={`${error} Orders: ${API_BASE}/orders. Customers: ${API_BASE}/customers.`}
-          action={<Button variant="secondary" size="sm" onClick={() => void loadData()}>Retry</Button>}
+          title="Production records are unavailable in this workspace"
+          description="This floor still calls a shop HTTP path that is not the authenticated /shop boundary. Orders were not invented to fill the board."
+          action={<Button variant="secondary" onClick={() => void loadData()}>Retry</Button>}
         />
-      </Workroom>
+      </AtelierWorkroom>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface-canvas via-surface-panel to-surface-workspace">
-      <div className="flex flex-col gap-6 p-4 lg:p-8">
-        <PageHeader
-          level={2}
-          kicker="Production floor"
-          title="Production Board"
-          description="Move orders from measurement to delivery with real backend stage persistence."
-        />
-
-                {error && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            <div>
-              <p className="font-medium">{error}</p>
-              <p className="mt-1 text-xs text-red-600">Orders source: {`${API_BASE}/orders`}</p>
-              <p className="mt-1 text-xs text-red-600">Customers source: {`${API_BASE}/customers`}</p>
-            </div>
-          </div>
-        )}
+    <AtelierWorkroom {...workroom}>
+        {error ? (
+          <ErrorState
+            title="Production records are incomplete in this workspace"
+            description="The board could not refresh from its HTTP path. Showing whatever orders already loaded. Nothing was invented."
+            action={<Button variant="secondary" onClick={() => void loadData()}>Retry</Button>}
+          />
+        ) : null}
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
           <div className="overflow-hidden rounded-sf-workspace border border-line bg-surface-panel/90 shadow-xl backdrop-blur-sm">
@@ -913,8 +935,7 @@ export function ProductionBoard() {
             )}
           </div>
         </div>
-      </div>
-    </div>
+    </AtelierWorkroom>
   );
 }
 

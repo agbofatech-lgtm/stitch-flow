@@ -16,7 +16,6 @@ import {
   Mail,
   MapPin,
   Pencil,
-  Users,
   AlertCircle,
   ClipboardList,
   Calendar,
@@ -31,16 +30,18 @@ import { getCustomerOrders } from '@shared/utils/customerOrdersApi';
 import type { ApiOrder } from '@shared/api/orders';
 import { format } from 'date-fns';
 import { formatCurrency, safeCurrency } from '@shared/utils/currency';
-import { API_BASE } from '@shared/utils/api';
 import {
+  AtelierConfidence,
+  AtelierThread,
+  AtelierWorkroom,
   Button,
   Dialog,
   ErrorState,
   ExperienceEmptyState,
   LoadingState,
-  PageHeader,
-  Workroom,
 } from '../experience';
+import { useApp } from '../context/AppContext';
+import { goAtelierRoom } from '../experience/atelier/navigate';
 
 function normalizeCustomerPayload(data: {
   fullName: string;
@@ -64,6 +65,11 @@ function isValidEmail(email: string) {
 }
 
 export function Customers() {
+  const { selectedOrderId, orders, customers: workspaceCustomers } = useApp();
+  const selectedOrder = orders.find((order) => order.id === selectedOrderId) || null;
+  const threadClient =
+    (selectedOrder && workspaceCustomers.find((customer) => customer.id === selectedOrder.customerId)?.fullName) ||
+    null;
   const [customers, setCustomers] = useState<ApiCustomer[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -109,58 +115,38 @@ export function Customers() {
     });
   }, [customers, search]);
 
-  const customersWithPhone = customers.filter((customer) => !!customer.phone?.trim()).length;
-  const customersWithEmail = customers.filter((customer) => !!customer.email?.trim()).length;
-
   return (
-    <Workroom>
-      <PageHeader
-        level={2}
-        kicker="Client studio"
-        title="Customers"
-        description="View, create, edit, and inspect real customer records from the backend API."
-        actions={
-          <Button onClick={() => setShowAddModal(true)}>
-            <Plus className="h-4 w-4" />
-            Add Customer
+    <AtelierWorkroom
+      place="Client room"
+      title="Clients"
+      purpose="The person you are dressing. This room still reads a separate HTTP population; it is not /shop."
+      thread={<AtelierThread room="Client room" client={threadClient} order={selectedOrder?.orderNumber} />}
+      confidence={
+        <AtelierConfidence
+          state={error ? 'error' : loading ? 'pending' : 'local'}
+          detail={error ? 'Client records are unavailable in this workspace' : 'HTTP client list. Not shop authority.'}
+        />
+      }
+      primaryAction={
+        <div className="flex flex-wrap gap-2">
+          <Button variant="primary" onClick={() => goAtelierRoom('measurements')}>
+            Continue to measurements
           </Button>
-        }
-      />
-
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <SummaryCard
-          title="Total Customers"
-          value={String(customers.length)}
-          subtitle="Loaded from backend"
-          icon={Users}
-          tone="brand"
-        />
-
-        <SummaryCard
-          title="With Phone"
-          value={String(customersWithPhone)}
-          subtitle="Customers with phone number saved"
-          icon={Phone}
-          tone="sky"
-        />
-
-        <SummaryCard
-          title="With Email"
-          value={String(customersWithEmail)}
-          subtitle="Customers with email saved"
-          icon={Mail}
-          tone="slate"
-        />
-      </div>
-
-      <div className="relative mb-6 rounded-2xl border border-line bg-surface-panel shadow-sm">
+          <Button variant="secondary" onClick={() => setShowAddModal(true)}>
+            <Plus className="h-4 w-4" />
+            Add client
+          </Button>
+        </div>
+      }
+    >
+      <div className="relative rounded-sf-lg border border-line bg-surface-panel">
         <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-muted" />
         <input
           type="text"
           placeholder="Search customers by name, phone, or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-2xl py-3 pl-11 pr-4 text-ink-secondary outline-none ring-0 placeholder:text-ink-muted focus:ring-2 focus:ring-action-primary"
+          className="sf-focus-ring min-h-11 w-full rounded-sf py-3 pl-11 pr-4 text-ink-secondary outline-none placeholder:text-ink-muted"
         />
       </div>
 
@@ -168,10 +154,10 @@ export function Customers() {
 
       {error && (
         <ErrorState
-          title="Customers could not load"
-          description={`${error} Source: ${API_BASE}/customers`}
+          title="Client records are unavailable in this workspace"
+          description="This room still calls a shop HTTP path that is not the authenticated /shop boundary. Records were not invented to fill the table."
           action={
-            <Button variant="secondary" size="sm" onClick={() => void loadCustomers()}>
+            <Button variant="secondary" onClick={() => void loadCustomers()}>
               Retry
             </Button>
           }
@@ -322,7 +308,7 @@ export function Customers() {
           onClose={() => setSelectedCustomer(null)}
         />
       )}
-    </Workroom>
+    </AtelierWorkroom>
   );
 }
 
