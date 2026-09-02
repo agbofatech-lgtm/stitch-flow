@@ -65,7 +65,8 @@ SER-F5 Floor + workroom: [`frontend/experience/SER-F5_FINAL_REPORT.md`](./fronte
 SER-F6 Client + Measurement: [`frontend/experience/SER-F6_FINAL_REPORT.md`](./frontend/experience/SER-F6_FINAL_REPORT.md).  
 SER-F7 Design table: [`frontend/experience/SER-F7_FINAL_REPORT.md`](./frontend/experience/SER-F7_FINAL_REPORT.md).  
 SER-F8 Production floor: [`frontend/experience/SER-F8_FINAL_REPORT.md`](./frontend/experience/SER-F8_FINAL_REPORT.md).  
-SER-F9 Ledger: [`frontend/experience/SER-F9_FINAL_REPORT.md`](./frontend/experience/SER-F9_FINAL_REPORT.md). SER-F10 locked. 3D and Phase 20 remain locked.
+SER-F9 Ledger: [`frontend/experience/SER-F9_FINAL_REPORT.md`](./frontend/experience/SER-F9_FINAL_REPORT.md).  
+SER-F10 Control Center: [`frontend/experience/SER-F10_FINAL_REPORT.md`](./frontend/experience/SER-F10_FINAL_REPORT.md). SER-F11–F15 locked. 3D and Phase 20 remain locked.
 
 ---
 
