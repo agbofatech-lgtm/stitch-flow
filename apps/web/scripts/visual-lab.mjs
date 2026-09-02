@@ -226,6 +226,35 @@ try {
   await capture(cdp, 'floor-1280-reduced.png');
   await setReducedMotion(cdp, false);
 
+  await clickNav(cdp, 'Production floor');
+  await waitForPlace(cdp, 'production');
+  await waitForWorkroom(cdp, 'Production floor');
+  await sleep(600);
+  await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+  await sleep(200);
+  await capture(cdp, 'production-1280.png');
+  await clickText(cdp, 'ORD-2024-001');
+  await sleep(600);
+  await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+  await sleep(200);
+  await capture(cdp, 'production-active-1280.png');
+  await setViewport(cdp, 768, 800, false);
+  await sleep(400);
+  await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+  await sleep(200);
+  await capture(cdp, 'production-768.png');
+  await setViewport(cdp, 390, 844, true);
+  await sleep(400);
+  await evaluate(cdp, `document.querySelector('#workspace-main')?.scrollTo(0,0)`);
+  await sleep(200);
+  await capture(cdp, 'production-390.png');
+  await setViewport(cdp, 1280, 800, false);
+  await sleep(400);
+  await clickNav(cdp, 'Floor');
+  await waitForPlace(cdp, 'command');
+  await waitForWorkroom(cdp, 'Floor');
+  await sleep(300);
+
   await clickNav(cdp, 'Client room');
   await waitForPlace(cdp, 'clients');
   await waitForWorkroom(cdp, 'Client room');

@@ -156,6 +156,23 @@ test('control center presents API fields without inventing metrics', () => {
   assert.match(source, /\/control\/billing\/provider/);
 });
 
+test('production floor uses AppContext orders, not unmounted HTTP', () => {
+  const source = readFileSync(new URL('../components/ProductionBoard.tsx', import.meta.url), 'utf8');
+  assert.match(source, /AtelierWorkroom/);
+  assert.match(source, /selectOrder/);
+  assert.match(source, /PRODUCTION_STAGE_SEQUENCE/);
+  assert.match(source, /does not invent a garment in motion/);
+  assert.match(source, /does not borrow the first order/);
+  assert.equal(source.includes('fetchOrders'), false);
+  assert.equal(source.includes('getCustomers'), false);
+  assert.equal(source.includes('customerApi'), false);
+  assert.equal(source.includes('API_BASE'), false);
+  assert.equal(source.includes('buildStagesFromStatus'), false);
+  assert.equal(source.includes('filteredOrders[0]'), false);
+  assert.equal(source.includes('productionAssistant'), false);
+  assert.equal(/from ['"].*patternEngine/.test(source), false);
+});
+
 test('design studio frame does not import engines', () => {
   const source = readFileSync(new URL('../atelier/DesignStudioFrame.tsx', import.meta.url), 'utf8');
   assert.equal(/from ['"].*patternEngine/.test(source), false);

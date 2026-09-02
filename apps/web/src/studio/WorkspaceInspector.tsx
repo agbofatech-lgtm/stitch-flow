@@ -75,12 +75,17 @@ export function WorkspaceInspector({
 
       {workspace === 'production' ? (
         <Panel>
-          <p className="text-label">Stage sequence</p>
-          <ol className="mt-3 list-decimal space-y-1 pl-4 text-body text-ink-secondary">
+          <p className="text-label">Production floor</p>
+          <p className="mt-2 text-body text-ink-primary">{clientName || 'No client on this thread'}</p>
+          {orderNumber ? <p className="mt-1 font-numeric text-meta text-ink-muted">{orderNumber}</p> : null}
+          <ol className="mt-3 list-decimal space-y-1 pl-4 text-meta text-ink-secondary">
             {PRODUCTION_STAGE_SEQUENCE.map((code) => (
-              <li key={code}>{code.replace('_', ' ')}</li>
+              <li key={code}>{code.replace(/_/g, ' ')}</li>
             ))}
           </ol>
+          <p className="mt-3 text-meta text-ink-muted">
+            Canonical codes only. This inspector does not transition stages or remount shop HTTP.
+          </p>
         </Panel>
       ) : null}
 

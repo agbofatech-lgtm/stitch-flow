@@ -43,7 +43,7 @@ export const ATELIER_PLACES: Record<AtelierPlaceId, AtelierPlace> = {
     id: 'production',
     title: 'Production floor',
     kicker: 'Atelier',
-    purpose: 'Stages from measurement to delivery.',
+    purpose: 'The garment is made here. Stages come from the order record.',
     next: { label: 'Open ledger', room: 'business' },
   },
   business: {

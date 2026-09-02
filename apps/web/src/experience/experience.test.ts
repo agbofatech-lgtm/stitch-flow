@@ -141,6 +141,7 @@ test('atelier journey is orientation, not a fake completion meter', () => {
   assert.match(html, /Client/);
   assert.match(html, /Measurements/);
   assert.match(html, /Design/);
+  assert.match(html, /Production/);
   assert.equal(html.includes('%'), false);
   assert.equal(html.includes('synced'), false);
 });

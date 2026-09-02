@@ -151,6 +151,7 @@ const JOURNEY = [
   { id: 'clients', label: 'Client' },
   { id: 'measurements', label: 'Measurements' },
   { id: 'design', label: 'Design' },
+  { id: 'production', label: 'Production' },
 ] as const;
 
 /** Orientation only. Not a second router and not a fake progress meter. */

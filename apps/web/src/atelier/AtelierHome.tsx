@@ -26,7 +26,6 @@ export function AtelierHome() {
     dueAlerts,
     setView,
     selectedOrderId,
-    selectOrder,
   } = useApp();
   const workflow = useWorkflow();
   const active = orders.filter((order) => order.status === 'in_progress' || order.status === 'ready');
@@ -37,7 +36,7 @@ export function AtelierHome() {
     (selectedOrder && customers.find((customer) => customer.id === selectedOrder.customerId)?.fullName) || null;
 
   function openProduction(orderId: string) {
-    selectOrder(orderId);
+    workflow.selectOrder(orderId);
     setView('production-board');
   }
 
