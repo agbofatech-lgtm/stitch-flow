@@ -76,8 +76,8 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
       setProfileId(nextProfile?.id || null);
       const nextOrder = app.orders.find((item) => item.customerId === id) || null;
       setOrderId(nextOrder?.id || null);
-      if (nextOrder) app.selectOrder(nextOrder.id);
-      setLastMessage(id ? 'Customer selected for workflow context.' : 'Customer cleared.');
+      app.selectOrder(nextOrder?.id || null);
+      setLastMessage(id ? 'Client selected. Thread follows this person.' : 'Client cleared.');
     },
     [app]
   );
@@ -170,8 +170,6 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
     }
   }, [specification]);
 
-  const syncHint: SyncStatus | 'unknown' = getDataAuthorityRuntime() ? 'pending' : 'unknown';
-
   const value: WorkflowContextValue = {
     customerId,
     profileId,
@@ -180,7 +178,14 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
     patternSummary,
     lastError,
     lastMessage,
-    syncHint,
+    nextActions: workflowNextActions({
+      customerId,
+      profileId,
+      orderId,
+      specification,
+      patternPresent: Boolean(patternSummary),
+      productionPlanPresent: Boolean(order?.productionPlan),
+    }),
     selectCustomer,
     selectProfile,
     selectOrder,

@@ -74,7 +74,7 @@ export function WorkflowPanel() {
         {!app.customers.length ? (
           <ExperienceEmptyState
             title="No studio customers"
-            description="HTTP Customers screen is a separate population (T0 FACT). Workflow uses AppContext customers where measurement profiles live."
+            description="Workflow uses AppContext clients — the same population as the Client room. Not shop authority."
           />
         ) : null}
         {customer ? <p className="mt-2 text-meta text-ink-muted">{customer.phone || 'No phone'}</p> : null}

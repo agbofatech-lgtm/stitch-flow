@@ -47,7 +47,7 @@ export function WorkspaceInspector({
             <li>Timeline</li>
           </ul>
           <p className="mt-3 text-meta text-ink-muted">
-            {customers} AppContext customers (measurement chain). HTTP Customers screen is a separate T0 population.
+            {customers} people in this workspace store. Not shop authority.
           </p>
         </Panel>
       ) : null}

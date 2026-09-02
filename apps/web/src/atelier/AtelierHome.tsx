@@ -9,6 +9,7 @@ import {
 } from '../experience';
 import { useApp } from '../context/AppContext';
 import { goAtelierRoom } from '../experience/atelier/navigate';
+import { useWorkflow } from '../workflow/WorkflowContext';
 
 function alertLabel(type: string) {
   if (type === 'order_due_today') return 'Due today';
@@ -27,6 +28,7 @@ export function AtelierHome() {
     selectedOrderId,
     selectOrder,
   } = useApp();
+  const workflow = useWorkflow();
   const active = orders.filter((order) => order.status === 'in_progress' || order.status === 'ready');
   const people = customers.slice(0, 8);
   const openAlerts = (dueAlerts || []).filter((alert) => !alert.isResolved);
@@ -192,7 +194,10 @@ export function AtelierHome() {
               <li key={customer.id} className="border-b border-line-subtle last:border-0">
                 <button
                   type="button"
-                  onClick={() => setView('customers')}
+                  onClick={() => {
+                    workflow.selectCustomer(customer.id);
+                    setView('customers');
+                  }}
                   className="sf-focus-ring sf-micro-press flex min-h-11 w-full items-center justify-between py-3 text-left"
                 >
                   <span className="text-label text-ink-primary">{customer.fullName}</span>

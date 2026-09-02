@@ -170,6 +170,8 @@ test('customers workroom uses shared Dialog not ModalShell', () => {
   const source = readFileSync(new URL('../components/Customers.tsx', import.meta.url), 'utf8');
   assert.equal(source.includes('ModalShell'), false);
   assert.match(source, /Dialog open/);
+  assert.equal(source.includes('customerApi'), false);
+  assert.match(source, /Receive client/);
 });
 
 test('atelier atmosphere and skip link tokens exist', () => {

@@ -17,6 +17,7 @@ test('floor thread uses selected order, not the first recent client', () => {
   assert.match(home, /No client selected/);
   assert.match(home, /Work in motion/);
   assert.match(home, /AtelierWorkroom/);
+  assert.match(home, /selectCustomer/);
   assert.equal(home.includes('totalRevenue'), false);
 });
 
@@ -25,13 +26,27 @@ test('measurement table does not borrow the first profile as the thread', () => 
   assert.equal(source.includes('rows[0]?.customer'), false);
   assert.match(source, /workflow.customerId/);
   assert.match(source, /AtelierWorkroom/);
+  assert.match(source, /data-measurement-class="body"/);
+  assert.match(source, /data-measurement-class="garment"/);
+  assert.match(source, /data-measurement-class="pattern"/);
+  assert.match(source, /Begin a live profile/);
+  assert.match(source, /Freeze onto order/);
+  assert.equal(/from ['"].*patternEngine/.test(source), false);
 });
 
-test('client room error does not expose unmounted API URLs', () => {
+test('client room is an AppContext relationship workspace, not HTTP CRUD', () => {
   const source = readFileSync(new URL('../components/Customers.tsx', import.meta.url), 'utf8');
-  assert.match(source, /Client records are unavailable in this workspace/);
-  assert.equal(source.includes('Source:'), false);
   assert.match(source, /AtelierWorkroom/);
+  assert.match(source, /selectCustomer/);
+  assert.match(source, /Continue to measurements/);
+  assert.match(source, /Receive client/);
+  assert.match(source, /Garment history/);
+  assert.match(source, /Same people as the Floor/);
+  assert.equal(source.includes('customerApi'), false);
+  assert.equal(source.includes('getCustomers'), false);
+  assert.equal(source.includes('createCustomer'), false);
+  assert.equal(source.includes('Source:'), false);
+  assert.equal(source.includes('/customers'), false);
 });
 
 test('atelier places use room vocabulary and real next rooms', () => {

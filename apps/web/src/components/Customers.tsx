@@ -1,49 +1,43 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-  type Dispatch,
-  type ElementType,
-  type FormEvent,
-  type ReactNode,
-  type SetStateAction,
-} from 'react';
-import { BRAND } from '../config/brand';
-import {
-  Plus,
-  Search,
-  Phone,
-  Mail,
-  MapPin,
-  Pencil,
-  AlertCircle,
-  ClipboardList,
-  Calendar,
-} from 'lucide-react';
-import {
-  getCustomers,
-  createCustomer,
-  updateCustomer,
-  type ApiCustomer,
-} from '@shared/utils/customerApi';
-import { getCustomerOrders } from '@shared/utils/customerOrdersApi';
-import type { ApiOrder } from '@shared/api/orders';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { format } from 'date-fns';
-import { formatCurrency, safeCurrency } from '@shared/utils/currency';
+import { motion } from 'framer-motion';
+import { Mail, MapPin, Phone, Plus, Search } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 import {
   AtelierConfidence,
+  AtelierStage,
   AtelierThread,
   AtelierWorkroom,
   Button,
   Dialog,
-  ErrorState,
   ExperienceEmptyState,
-  LoadingState,
+  Field,
+  Input,
+  StatusBadge,
+  Textarea,
 } from '../experience';
-import { useApp } from '../context/AppContext';
 import { goAtelierRoom } from '../experience/atelier/navigate';
+import { motionOrInstant, motionPresets } from '../experience/motion/motion';
+import { formatCurrency, safeCurrency } from '@shared/utils/currency';
+import { useWorkflow } from '../workflow/WorkflowContext';
+import type { Customer } from '../shared/types';
 
-function normalizeCustomerPayload(data: {
+function initials(name: string) {
+  const parts = name.split(' ').filter(Boolean);
+  const letters = parts
+    .slice(0, 2)
+    .map((part) => part[0] || '')
+    .join('')
+    .toUpperCase();
+  return letters || '?';
+}
+
+function isValidEmail(email: string) {
+  if (!email.trim()) return true;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function normalizeClientPayload(data: {
   fullName: string;
   phone: string;
   email: string;
@@ -59,706 +53,444 @@ function normalizeCustomerPayload(data: {
   };
 }
 
-function isValidEmail(email: string) {
-  if (!email.trim()) return true;
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-}
-
 export function Customers() {
-  const { selectedOrderId, orders, customers: workspaceCustomers } = useApp();
-  const selectedOrder = orders.find((order) => order.id === selectedOrderId) || null;
-  const threadClient =
-    (selectedOrder && workspaceCustomers.find((customer) => customer.id === selectedOrder.customerId)?.fullName) ||
-    null;
-  const [customers, setCustomers] = useState<ApiCustomer[]>([]);
+  const {
+    customers,
+    orders,
+    measurementProfiles,
+    addCustomer,
+    updateCustomer,
+    getCustomerOrders,
+    getCustomerMeasurementProfiles,
+  } = useApp();
+  const workflow = useWorkflow();
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>('Customers screen mounted');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<ApiCustomer | null>(null);
-  const [selectedCustomer, setSelectedCustomer] = useState<ApiCustomer | null>(null);
+  const [listOpen, setListOpen] = useState(() => !workflow.customerId);
+  const [editor, setEditor] = useState<'receive' | Customer | null>(null);
+  const [pendingSelect, setPendingSelect] = useState<{ fullName: string; phone: string } | null>(null);
 
-  async function loadCustomers() {
-    try {
-      setDebugInfo('Starting customer load...');
-      setLoading(true);
-      setError(null);
-
-      setDebugInfo('Calling getCustomers()...');
-      const data = await getCustomers();
-
-      setDebugInfo(`Loaded ${data.length} customers successfully`);
-      setCustomers(data);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load customers';
-      setDebugInfo(`Customer load failed: ${message}`);
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const selected = customers.find((customer) => customer.id === workflow.customerId) || null;
+  const selectedOrder = orders.find((order) => order.id === workflow.orderId) || null;
+  const threadClient = selected?.fullName || null;
 
   useEffect(() => {
-    loadCustomers();
-  }, []);
+    if (!pendingSelect) return;
+    const found = customers.find(
+      (customer) => customer.fullName === pendingSelect.fullName && customer.phone === pendingSelect.phone
+    );
+    if (!found) return;
+    workflow.selectCustomer(found.id);
+    setPendingSelect(null);
+  }, [customers, pendingSelect, workflow]);
 
-  const filteredCustomers = useMemo(() => {
-    const query = (search ?? "").toLowerCase();
-
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return customers;
     return customers.filter((customer) => {
       return (
-        (customer.fullName ?? "").toLowerCase().includes(query) ||
+        customer.fullName.toLowerCase().includes(query) ||
         (customer.email || '').toLowerCase().includes(query) ||
-        (customer.phone || '').includes(search)
+        (customer.phone || '').includes(search.trim())
       );
     });
   }, [customers, search]);
+
+  function openClient(id: string) {
+    workflow.selectCustomer(id);
+    setListOpen(false);
+  }
+
+  const history = selected ? getCustomerOrders(selected.id) : [];
+  const profiles = selected ? getCustomerMeasurementProfiles(selected.id) : [];
+  const liveProfileCount = selected
+    ? measurementProfiles.filter((profile) => profile.customerId === selected.id).length
+    : 0;
 
   return (
     <AtelierWorkroom
       place="Client room"
       title="Clients"
-      purpose="The person you are dressing. This room still reads a separate HTTP population; it is not /shop."
+      purpose="The person you are dressing. Relationship and history live here."
       thread={<AtelierThread room="Client room" client={threadClient} order={selectedOrder?.orderNumber} />}
       confidence={
         <AtelierConfidence
-          state={error ? 'error' : loading ? 'pending' : 'local'}
-          detail={error ? 'Client records are unavailable in this workspace' : 'HTTP client list. Not shop authority.'}
+          state="local"
+          detail="AppContext workspace store. Same people as the Floor. Not shop authority."
         />
       }
       primaryAction={
-        <div className="flex flex-wrap gap-2">
+        selected ? (
           <Button variant="primary" onClick={() => goAtelierRoom('measurements')}>
             Continue to measurements
           </Button>
-          <Button variant="secondary" onClick={() => setShowAddModal(true)}>
+        ) : (
+          <Button variant="primary" onClick={() => setEditor('receive')}>
             <Plus className="h-4 w-4" />
-            Add client
+            Receive client
           </Button>
-        </div>
+        )
       }
     >
-      <div className="relative rounded-sf-lg border border-line bg-surface-panel">
-        <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-muted" />
-        <input
-          type="text"
-          placeholder="Search customers by name, phone, or email..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="sf-focus-ring min-h-11 w-full rounded-sf py-3 pl-11 pr-4 text-ink-secondary outline-none placeholder:text-ink-muted"
-        />
-      </div>
-
-      {loading && <LoadingState label="Loading customers…" />}
-
-      {error && (
-        <ErrorState
-          title="Client records are unavailable in this workspace"
-          description="This room still calls a shop HTTP path that is not the authenticated /shop boundary. Records were not invented to fill the table."
-          action={
-            <Button variant="secondary" onClick={() => void loadCustomers()}>
-              Retry
-            </Button>
-          }
-        />
-      )}
-
-      {!loading && !error && (
-        <>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {(filteredCustomers ?? []).map((customer) => (
-              <div
-                key={customer.id}
-                className="overflow-hidden rounded-sf-lg border border-line bg-surface-panel shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <div className="h-1.5 w-full bg-action-primary" />
-
-                <div className="p-5">
-                  <div
-                    className="cursor-pointer"
-                    onClick={() => setSelectedCustomer(customer)}
-                  >
-                    <div className="mb-4 flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-action-secondary">
-                          <span className="font-semibold text-action-primary">
-                            {customer.fullName
-                              .split(' ')
-                              .map((n) => n[0])
-                              .join('')}
-                          </span>
-                        </div>
-
-                        <div>
-                          <h3 className="font-semibold text-ink-primary">{customer.fullName}</h3>
-                          <p className="text-xs text-ink-muted">
-                            Since{' '}
-                            {customer.createdAt
-                              ? format(new Date(customer.createdAt), 'MMM yyyy')
-                              : 'N/A'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 text-sm">
-                      {customer.phone && (
-                        <div className="flex items-center gap-2 text-ink-secondary">
-                          <Phone className="h-4 w-4 text-ink-muted" />
-                          {customer.phone}
-                        </div>
-                      )}
-
-                      {customer.email && (
-                        <div className="flex items-center gap-2 text-ink-secondary">
-                          <Mail className="h-4 w-4 text-ink-muted" />
-                          {customer.email}
-                        </div>
-                      )}
-
-                      {customer.address && (
-                        <div className="flex items-start gap-2 text-ink-secondary">
-                          <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-ink-muted" />
-                          <span className="line-clamp-2">{customer.address}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {customer.notes && (
-                      <div className="mt-4 rounded-2xl bg-surface-workspace p-3">
-                        <p className="line-clamp-2 text-xs text-ink-muted">{customer.notes}</p>
-                      </div>
-                    )}
-
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {customer.phone && (
-                        <span className="rounded-full bg-action-secondary px-2.5 py-1 text-xs font-medium text-ink-secondary">
-                          Phone saved
-                        </span>
-                      )}
-
-                      {customer.email && (
-                        <span className="rounded-full bg-action-secondary px-2.5 py-1 text-xs font-medium text-ink-secondary">
-                          Email saved
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
+      <div className="grid items-start gap-6 xl:grid-cols-[18rem_minmax(0,1fr)]">
+        <section
+          data-client-list="true"
+          className={selected && !listOpen ? 'hidden xl:block' : selected ? 'order-2 xl:order-1' : undefined}
+        >
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search clients"
+              aria-label="Search clients"
+              className="sf-focus-ring min-h-11 w-full rounded-sf border border-line bg-surface-panel py-2 pl-10 pr-3 text-body text-ink-primary outline-none placeholder:text-ink-muted"
+            />
+          </div>
+          {customers.length === 0 ? (
+            <div className="mt-4">
+              <ExperienceEmptyState
+                title="No clients yet"
+                description="Receive the first person you will dress. This room does not invent records from an unmounted shop path."
+                action={
+                  <Button size="md" onClick={() => setEditor('receive')}>
+                    Receive client
+                  </Button>
+                }
+              />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="mt-4">
+              <ExperienceEmptyState
+                title="No clients match"
+                description="Try a different name, phone, or email."
+              />
+            </div>
+          ) : (
+            <ul className="mt-3 divide-y divide-line-subtle border-t border-line-subtle">
+              {filtered.map((customer) => {
+                const current = customer.id === selected?.id;
+                return (
+                  <li key={customer.id}>
                     <button
-                      onClick={() => setEditingCustomer(customer)}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-line px-3 py-2.5 text-sm font-medium text-ink-secondary hover:bg-surface-workspace"
+                      type="button"
+                      aria-current={current ? 'true' : undefined}
+                      onClick={() => openClient(customer.id)}
+                      className="sf-focus-ring sf-micro-press flex min-h-11 w-full items-center gap-3 py-3 text-left"
                     >
-                      <Pencil className="h-4 w-4" />
-                      Edit
+                      <span
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-meta font-semibold ${
+                          current ? 'bg-action-primary text-ink-inverse' : 'bg-action-secondary text-action-primary'
+                        }`}
+                      >
+                        {initials(customer.fullName)}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-label text-ink-primary">{customer.fullName}</span>
+                        <span className="block font-numeric text-meta text-ink-muted">
+                          {customer.phone || 'No phone'}
+                        </span>
+                      </span>
                     </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {customers.length > 0 ? (
+            <div className="mt-4">
+              <Button variant="secondary" className="w-full" onClick={() => setEditor('receive')}>
+                <Plus className="h-4 w-4" />
+                Receive client
+              </Button>
+            </div>
+          ) : null}
+        </section>
+
+        <section data-client-dossier="true" className={selected ? 'order-1 xl:order-2' : undefined}>
+          {selected ? (
+            <motion.div
+              key={selected.id}
+              data-motion-category="contextual"
+              {...motionOrInstant(motionPresets.contextual)}
+            >
+              <AtelierStage>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-meta text-ink-muted">Dossier</p>
+                    <h2 className="mt-1 font-display text-heading text-ink-primary">{selected.fullName}</h2>
+                    <p className="mt-1 text-meta text-ink-muted">
+                      In this workspace since{' '}
+                      {selected.createdAt ? format(new Date(selected.createdAt), 'MMM yyyy') : '—'}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="ghost" className="xl:hidden" onClick={() => setListOpen(true)}>
+                      All clients
+                    </Button>
+                    <Button variant="secondary" onClick={() => setEditor(selected)}>
+                      Edit dossier
+                    </Button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
 
-          {filteredCustomers.length === 0 && (
+                <ul className="mt-4 space-y-2 text-body text-ink-secondary">
+                  <li className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-ink-muted" aria-hidden="true" />
+                    <span className="font-numeric">{selected.phone || 'No phone'}</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-ink-muted" aria-hidden="true" />
+                    {selected.email || 'No email'}
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-ink-muted" aria-hidden="true" />
+                    <span>{selected.address || 'No address'}</span>
+                  </li>
+                </ul>
+
+                {selected.notes ? (
+                  <p className="mt-4 rounded-sf bg-surface-workspace p-3 text-body text-ink-secondary">{selected.notes}</p>
+                ) : null}
+
+                {selected.preferredStyle || (selected.preferredColors && selected.preferredColors.length) ? (
+                  <p className="mt-3 text-meta text-ink-muted">
+                    {selected.preferredStyle ? `Prefers ${selected.preferredStyle}` : 'Preferences on file'}
+                    {selected.preferredColors?.length ? ` · ${selected.preferredColors.join(', ')}` : ''}
+                  </p>
+                ) : null}
+
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Button onClick={() => goAtelierRoom('measurements')}>Continue to measurements</Button>
+                  <Button variant="ghost" onClick={() => goAtelierRoom('design')}>
+                    Open design table
+                  </Button>
+                </div>
+              </AtelierStage>
+
+              <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                <section>
+                  <h3 className="font-display text-heading-sm text-ink-primary">Live profiles</h3>
+                  <p className="mt-1 text-meta text-ink-muted">
+                    {liveProfileCount === 0
+                      ? 'No live measurement profile yet. Capture begins at the table.'
+                      : `${liveProfileCount} live ${liveProfileCount === 1 ? 'profile' : 'profiles'} in the workspace store.`}
+                  </p>
+                  {profiles.length === 0 ? (
+                    <div className="mt-3">
+                      <ExperienceEmptyState
+                        title="No measurements on this person"
+                        description="The measurement table captures body and garment separately. Live profiles stay transitional until frozen."
+                        action={
+                          <Button size="md" onClick={() => goAtelierRoom('measurements')}>
+                            Open measurement table
+                          </Button>
+                        }
+                      />
+                    </div>
+                  ) : (
+                    <ul className="mt-3 divide-y divide-line-subtle border-t border-line-subtle">
+                      {profiles.map((profile) => (
+                        <li key={profile.id} className="flex min-h-11 items-center justify-between py-3">
+                          <span className="text-label text-ink-primary">{profile.label}</span>
+                          {profile.isDefault ? <StatusBadge status="active" /> : null}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+
+                <section>
+                  <h3 className="font-display text-heading-sm text-ink-primary">Garment history</h3>
+                  <p className="mt-1 text-meta text-ink-muted">Orders from this workspace store. Not a remote shop ledger.</p>
+                  {history.length === 0 ? (
+                    <div className="mt-3">
+                      <ExperienceEmptyState
+                        title="No garments on record"
+                        description="When an order is cut for this client, it will appear here."
+                      />
+                    </div>
+                  ) : (
+                    <ul className="mt-3 divide-y divide-line-subtle border-t border-line-subtle">
+                      {history.map((order) => (
+                        <li key={order.id} className="flex min-h-11 items-center justify-between gap-3 py-3">
+                          <span>
+                            <span className="block font-numeric text-body text-ink-primary">{order.orderNumber}</span>
+                            <span className="block text-meta text-ink-muted">{order.orderType}</span>
+                          </span>
+                          <span className="text-right">
+                            <StatusBadge status={order.status} />
+                            <span className="mt-1 block font-numeric text-meta text-ink-muted">
+                              {formatCurrency(order.totalAmount, safeCurrency(order.currency, 'GHS'))}
+                            </span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              </div>
+            </motion.div>
+          ) : (
             <ExperienceEmptyState
-              title={customers.length === 0 ? 'No customers yet' : 'No customers match your search'}
-              description={
-                customers.length === 0
-                  ? 'Add your first customer to start creating orders and invoices.'
-                  : 'Try a different name, phone number, or email.'
-              }
+              title="No client selected"
+              description="Choose a person from the list to open their dossier. This room does not invent an active client."
               action={
                 customers.length === 0 ? (
-                  <Button size="sm" onClick={() => setShowAddModal(true)}>
-                    Add Customer
-                  </Button>
+                  <Button onClick={() => setEditor('receive')}>Receive client</Button>
                 ) : undefined
               }
             />
           )}
-        </>
-      )}
+        </section>
+      </div>
 
-      {showAddModal && (
-        <AddCustomerModal
-          onClose={() => setShowAddModal(false)}
-          onAdd={async (data) => {
-            await createCustomer(data);
-            await loadCustomers();
+      {editor ? (
+        <ClientEditorDialog
+          client={editor === 'receive' ? null : editor}
+          onClose={() => setEditor(null)}
+          onReceive={(payload) => {
+            const result = addCustomer(payload);
+            if (!result.success) return result;
+            setPendingSelect({ fullName: payload.fullName, phone: payload.phone });
+            setListOpen(false);
+            return result;
+          }}
+          onSave={(id, payload) => {
+            updateCustomer(id, payload);
           }}
         />
-      )}
-
-      {editingCustomer && (
-        <EditCustomerModal
-          customer={editingCustomer}
-          onClose={() => setEditingCustomer(null)}
-          onSave={async (customerId, updates) => {
-            await updateCustomer(customerId, updates);
-            setEditingCustomer(null);
-            await loadCustomers();
-          }}
-        />
-      )}
-
-      {selectedCustomer && (
-        <CustomerOrdersModal
-          customer={selectedCustomer}
-          onClose={() => setSelectedCustomer(null)}
-        />
-      )}
+      ) : null}
     </AtelierWorkroom>
   );
 }
 
-function CustomerOrdersModal({
-  customer,
+function ClientEditorDialog({
+  client,
   onClose,
-}: {
-  customer: ApiCustomer;
-  onClose: () => void;
-}) {
-  const [orders, setOrders] = useState<ApiOrder[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function loadOrders() {
-      try {
-        const data = await getCustomerOrders(customer.id);
-        setOrders(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load customer orders');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadOrders();
-  }, [customer.id]);
-
-  return (
-    <Dialog open title={customer.fullName} size="lg" onClose={onClose}>
-      <div className="space-y-6 p-4">
-        <div className="rounded-2xl border border-line-subtle bg-surface-workspace p-4">
-          <div className="grid gap-3 md:grid-cols-2">
-            <div className="flex items-center gap-2 text-sm text-ink-secondary">
-              <Phone className="h-4 w-4 text-ink-muted" />
-              {customer.phone || 'No phone'}
-            </div>
-            <div className="flex items-center gap-2 text-sm text-ink-secondary">
-              <Mail className="h-4 w-4 text-ink-muted" />
-              {customer.email || 'No email'}
-            </div>
-            <div className="flex items-start gap-2 text-sm text-ink-secondary md:col-span-2">
-              <MapPin className="mt-0.5 h-4 w-4 text-ink-muted" />
-              {customer.address || 'No address'}
-            </div>
-          </div>
-
-          {customer.notes && (
-            <p className="mt-3 text-sm text-ink-secondary">{customer.notes}</p>
-          )}
-        </div>
-
-        <div>
-          <div className="mb-3 flex items-center gap-2">
-            <ClipboardList className="h-4 w-4 text-action-primary" />
-            <h3 className="font-semibold text-ink-primary">Order History</h3>
-          </div>
-
-          {loading && (
-            <div className="rounded-2xl border border-dashed border-line p-4 text-sm text-ink-muted">
-              Loading customer orders...
-            </div>
-          )}
-
-          {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
-          {!loading && !error && orders.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-line p-4 text-sm text-ink-muted">
-              No orders yet for this customer.
-            </div>
-          )}
-
-          {!loading && !error && orders.length > 0 && (
-            <div className="space-y-3">
-              {(orders ?? []).map((order) => (
-                <div
-                  key={order.id}
-                  className="rounded-2xl border border-line bg-surface-panel p-4"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold text-ink-primary">{order.orderNumber}</p>
-                        <OrderStatusBadge status={order.status} />
-                      </div>
-                      <p className="mt-1 text-sm text-ink-muted">{order.orderType}</p>
-                    </div>
-
-                    <div className="text-right">
-                      <p className="font-semibold text-ink-primary">
-                        {formatCurrency(order.totalAmount, safeCurrency(order.currency, 'GHS'))}
-                      </p>
-                      {order.createdAt && (
-                        <p className="text-xs text-ink-muted">
-                          {format(new Date(order.createdAt), 'MMM d, yyyy')}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {order.dueDate && (
-                    <div className="mt-3 flex items-center gap-2 text-sm text-ink-muted">
-                      <Calendar className="h-4 w-4" />
-                      Due {format(new Date(order.dueDate), 'MMM d, yyyy')}
-                    </div>
-                  )}
-
-                  {order.notes && (
-                    <p className="mt-3 text-sm text-ink-muted">{order.notes}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </Dialog>
-  );
-}
-
-function AddCustomerModal({
-  onClose,
-  onAdd,
-}: {
-  onClose: () => void;
-  onAdd: (data: {
-    fullName: string;
-    phone: string;
-    email: string;
-    address: string;
-    notes: string;
-  }) => Promise<void>;
-}) {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    phone: '',
-    email: '',
-    address: '',
-    notes: '',
-  });
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (saving) return;
-
-    const payload = normalizeCustomerPayload(formData);
-
-    if (!payload.fullName) {
-      setError('Name is required');
-      return;
-    }
-
-    if (!payload.phone) {
-      setError('Phone number is required');
-      return;
-    }
-
-    if (!isValidEmail(payload.email)) {
-      setError('Enter a valid email address');
-      return;
-    }
-
-    try {
-      setSaving(true);
-      setError(null);
-      await onAdd(payload);
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add customer');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <Dialog open title="Add Customer" size="lg" onClose={onClose}>
-      <form onSubmit={handleSubmit} className="space-y-4 p-4">
-        {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        <FormFields formData={formData} setFormData={setFormData} />
-
-        <div className="flex gap-3 pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={saving}
-            className="flex-1 rounded-xl border border-line px-4 py-2.5 font-medium text-ink-secondary hover:bg-surface-workspace disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex-1 rounded-xl bg-action-primary px-4 py-2.5 font-medium text-white hover:bg-action-hover disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {saving ? 'Saving...' : 'Add Customer'}
-          </button>
-        </div>
-      </form>
-    </Dialog>
-  );
-}
-
-function EditCustomerModal({
-  customer,
-  onClose,
+  onReceive,
   onSave,
 }: {
-  customer: ApiCustomer;
+  client: Customer | null;
   onClose: () => void;
-  onSave: (
-    customerId: string,
-    updates: {
-      fullName: string;
-      phone: string;
-      email: string;
-      address: string;
-      notes: string;
-    }
-  ) => Promise<void>;
-}) {
-  const [formData, setFormData] = useState({
-    fullName: customer.fullName || '',
-    phone: customer.phone || '',
-    email: customer.email || '',
-    address: customer.address || '',
-    notes: customer.notes || '',
-  });
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (saving) return;
-
-    const payload = normalizeCustomerPayload(formData);
-
-    if (!payload.fullName) {
-      setError('Name is required');
-      return;
-    }
-
-    if (!payload.phone) {
-      setError('Phone number is required');
-      return;
-    }
-
-    if (!isValidEmail(payload.email)) {
-      setError('Enter a valid email address');
-      return;
-    }
-
-    try {
-      setSaving(true);
-      setError(null);
-      await onSave(customer.id, payload);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save customer');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <Dialog open title="Edit Customer" size="lg" onClose={onClose}>
-      <form onSubmit={handleSubmit} className="space-y-4 p-4">
-        {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        <FormFields formData={formData} setFormData={setFormData} />
-
-        <div className="flex gap-3 pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={saving}
-            className="flex-1 rounded-xl border border-line px-4 py-2.5 font-medium text-ink-secondary hover:bg-surface-workspace disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex-1 rounded-xl bg-action-primary px-4 py-2.5 font-medium text-white hover:bg-action-hover disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
-      </form>
-    </Dialog>
-  );
-}
-
-function SummaryCard({
-  title,
-  value,
-  subtitle,
-  icon: Icon,
-  tone,
-}: {
-  title: string;
-  value: string;
-  subtitle: string;
-  icon: ElementType;
-  tone: 'brand' | 'sky' | 'slate';
-}) {
-  const tones = {
-    brand: 'bg-action-secondary text-action-primary',
-    sky: 'bg-action-secondary text-action-primary',
-    slate: 'bg-action-secondary text-ink-secondary',
-  };
-
-  return (
-    <div className="rounded-sf-lg border border-line bg-surface-panel p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm text-ink-muted">{title}</p>
-          <p className="mt-1 text-2xl font-bold text-ink-primary">{value}</p>
-          <p className="mt-1 text-xs text-ink-muted">{subtitle}</p>
-        </div>
-
-        <div className={`rounded-2xl p-3 ${tones[tone]}`}>
-          <Icon className="h-5 w-5" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function OrderStatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    draft: 'bg-action-secondary text-ink-secondary',
-    in_progress: 'bg-action-secondary text-action-primary',
-    ready: 'bg-green-100 text-green-700',
-    delivered: 'bg-cyan-100 text-action-primary',
-    cancelled: 'bg-red-100 text-red-700',
-  };
-
-  return (
-    <span
-      className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
-        styles[status] || styles.draft
-      }`}
-    >
-      {status.replace('_', ' ')}
-    </span>
-  );
-}
-
-function FormFields({
-  formData,
-  setFormData,
-}: {
-  formData: {
+  onReceive: (data: {
     fullName: string;
     phone: string;
     email: string;
     address: string;
     notes: string;
-  };
-  setFormData: Dispatch<
-    SetStateAction<{
+  }) => { success: boolean; error?: string };
+  onSave: (
+    id: string,
+    data: {
       fullName: string;
       phone: string;
       email: string;
       address: string;
       notes: string;
-    }>
-  >;
+    }
+  ) => void;
 }) {
+  const [form, setForm] = useState({
+    fullName: client?.fullName || '',
+    phone: client?.phone || '',
+    email: client?.email || '',
+    address: client?.address || '',
+    notes: client?.notes || '',
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (saving) return;
+    const payload = normalizeClientPayload(form);
+    if (!payload.fullName) {
+      setError('A name is required.');
+      return;
+    }
+    if (!payload.phone) {
+      setError('A phone number is required.');
+      return;
+    }
+    if (!isValidEmail(payload.email)) {
+      setError('Enter a valid email, or leave it blank.');
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    if (client) {
+      onSave(client.id, payload);
+      onClose();
+      return;
+    }
+    const result = onReceive(payload);
+    setSaving(false);
+    if (!result.success) {
+      setError(result.error || 'This workspace could not receive the client.');
+      return;
+    }
+    onClose();
+  }
+
   return (
-    <>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink-secondary">
-          Full Name *
-        </label>
-        <input
-          type="text"
-          value={formData.fullName}
-          onChange={(e) => setFormData((f) => ({ ...f, fullName: e.target.value }))}
-          className="w-full rounded-xl border border-line px-3 py-2 focus:outline-none focus:ring-2 focus:ring-action-primary"
-          placeholder="John Smith"
-        />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink-secondary">
-          Phone
-        </label>
-        <input
-          type="tel"
-          value={formData.phone}
-          onChange={(e) => setFormData((f) => ({ ...f, phone: e.target.value }))}
-          className="w-full rounded-xl border border-line px-3 py-2 focus:outline-none focus:ring-2 focus:ring-action-primary"
-          placeholder="+233 24 000 0000"
-        />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink-secondary">
-          Email
-        </label>
-        <input
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData((f) => ({ ...f, email: e.target.value }))}
-          className="w-full rounded-xl border border-line px-3 py-2 focus:outline-none focus:ring-2 focus:ring-action-primary"
-          placeholder="john@example.com"
-        />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink-secondary">
-          Address
-        </label>
-        <textarea
-          value={formData.address}
-          onChange={(e) => setFormData((f) => ({ ...f, address: e.target.value }))}
-          rows={2}
-          className="w-full resize-none rounded-xl border border-line px-3 py-2 focus:outline-none focus:ring-2 focus:ring-action-primary"
-          placeholder="123 Main Street, City"
-        />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink-secondary">
-          Notes
-        </label>
-        <textarea
-          value={formData.notes}
-          onChange={(e) => setFormData((f) => ({ ...f, notes: e.target.value }))}
-          rows={2}
-          className="w-full resize-none rounded-xl border border-line px-3 py-2 focus:outline-none focus:ring-2 focus:ring-action-primary"
-          placeholder="Any preferences or notes..."
-        />
-      </div>
-    </>
+    <Dialog open title={client ? 'Edit dossier' : 'Receive client'} size="lg" onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-4 p-4">
+        {error ? (
+          <p role="alert" className="text-body text-status-danger">
+            {error}
+          </p>
+        ) : null}
+        <Field label="Full name" htmlFor="client-name" required>
+          <Input
+            id="client-name"
+            value={form.fullName}
+            onChange={(event) => setForm((current) => ({ ...current, fullName: event.target.value }))}
+            autoComplete="name"
+          />
+        </Field>
+        <Field label="Phone" htmlFor="client-phone" required>
+          <Input
+            id="client-phone"
+            type="tel"
+            className="font-numeric"
+            value={form.phone}
+            onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))}
+            autoComplete="tel"
+          />
+        </Field>
+        <Field label="Email" htmlFor="client-email">
+          <Input
+            id="client-email"
+            type="email"
+            value={form.email}
+            onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
+            autoComplete="email"
+          />
+        </Field>
+        <Field label="Address" htmlFor="client-address">
+          <Textarea
+            id="client-address"
+            value={form.address}
+            onChange={(event) => setForm((current) => ({ ...current, address: event.target.value }))}
+          />
+        </Field>
+        <Field label="Fitting notes" htmlFor="client-notes" hint="Preferences, allergies, and how this person likes to be dressed.">
+          <Textarea
+            id="client-notes"
+            value={form.notes}
+            onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))}
+          />
+        </Field>
+        <div className="flex gap-3 pt-2">
+          <Button type="button" variant="secondary" className="flex-1" onClick={onClose} disabled={saving}>
+            Cancel
+          </Button>
+          <Button type="submit" className="flex-1" loading={saving}>
+            {client ? 'Save dossier' : 'Receive client'}
+          </Button>
+        </div>
+      </form>
+    </Dialog>
   );
 }

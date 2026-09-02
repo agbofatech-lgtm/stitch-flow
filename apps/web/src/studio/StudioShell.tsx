@@ -71,6 +71,7 @@ import {
 import { ATELIER_PLACES, ledgerStationTitle } from './atelierGrammar';
 import { WorkspaceInspector } from './WorkspaceInspector';
 import { WorkflowPanel } from '../workflow/WorkflowPanel';
+import { useWorkflow } from '../workflow/WorkflowContext';
 
 const ICONS: Record<string, typeof LayoutDashboard> = {
   command: LayoutDashboard,
@@ -99,6 +100,7 @@ export function StudioShell() {
     selectOrder,
     selectedOrderId,
   } = useApp();
+  const workflow = useWorkflow();
 
   const [workspace, setWorkspace] = useState<StudioWorkspaceId>(() =>
     workspaceFromView(currentView)
@@ -275,7 +277,10 @@ export function StudioShell() {
       label: customer.fullName,
       group: 'Work',
       keywords: `${customer.phone || ''} ${customer.email || ''}`,
-      onSelect: () => goTo('clients'),
+      onSelect: () => {
+        workflow.selectCustomer(customer.id);
+        goTo('clients');
+      },
     })),
     ...orders.slice(0, 8).map((order) => ({
       id: `order-${order.id}`,
