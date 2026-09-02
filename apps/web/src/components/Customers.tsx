@@ -5,8 +5,8 @@ import { Mail, MapPin, Phone, Plus, Search } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
   AtelierConfidence,
+  AtelierJourney,
   AtelierStage,
-  AtelierThread,
   AtelierWorkroom,
   Button,
   Dialog,
@@ -71,7 +71,6 @@ export function Customers() {
 
   const selected = customers.find((customer) => customer.id === workflow.customerId) || null;
   const selectedOrder = orders.find((order) => order.id === workflow.orderId) || null;
-  const threadClient = selected?.fullName || null;
 
   useEffect(() => {
     if (!pendingSelect) return;
@@ -109,9 +108,12 @@ export function Customers() {
   return (
     <AtelierWorkroom
       place="Client room"
-      title="Clients"
-      purpose="The person you are dressing. Relationship and history live here."
-      thread={<AtelierThread room="Client room" client={threadClient} order={selectedOrder?.orderNumber} />}
+      title={selected ? selected.fullName : 'Select a client'}
+      purpose={
+        selected
+          ? 'Relationship and history for this fitting. Continue when you understand who you are dressing.'
+          : 'Open a dossier to begin this tailoring thread. This room does not invent an active client.'
+      }
       confidence={
         <AtelierConfidence
           state="local"
@@ -119,11 +121,7 @@ export function Customers() {
         />
       }
       primaryAction={
-        selected ? (
-          <Button variant="primary" onClick={() => goAtelierRoom('measurements')}>
-            Continue to measurements
-          </Button>
-        ) : (
+        selected ? undefined : (
           <Button variant="primary" onClick={() => setEditor('receive')}>
             <Plus className="h-4 w-4" />
             Receive client
@@ -136,7 +134,9 @@ export function Customers() {
           data-client-list="true"
           className={selected && !listOpen ? 'hidden xl:block' : selected ? 'order-2 xl:order-1' : undefined}
         >
-          <div className="relative">
+          <h3 className="font-display text-heading-sm text-ink-primary">People</h3>
+          <p className="mt-1 text-meta text-ink-muted">The atelier index. Selecting a person starts the thread.</p>
+          <div className="relative mt-3">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
             <input
               type="search"
@@ -211,6 +211,7 @@ export function Customers() {
           {selected ? (
             <motion.div
               key={selected.id}
+              data-client-identity={selected.id}
               data-motion-category="contextual"
               {...motionOrInstant(motionPresets.contextual)}
             >
@@ -218,8 +219,15 @@ export function Customers() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-meta text-ink-muted">Dossier</p>
-                    <h2 className="mt-1 font-display text-heading text-ink-primary">{selected.fullName}</h2>
-                    <p className="mt-1 text-meta text-ink-muted">
+                    <p className="mt-1 font-display text-heading text-ink-primary">{selected.fullName}</p>
+                    <div className="mt-2">
+                      <AtelierJourney current="clients" />
+                    </div>
+                    <p className="mt-2 text-meta text-ink-muted">
+                      {selectedOrder
+                        ? `Active garment ${selectedOrder.orderNumber}`
+                        : 'No garment on the thread yet'}
+                      <span aria-hidden="true"> · </span>
                       In this workspace since{' '}
                       {selected.createdAt ? format(new Date(selected.createdAt), 'MMM yyyy') : '—'}
                     </p>
@@ -263,7 +271,7 @@ export function Customers() {
                 <div className="mt-5 flex flex-wrap gap-2">
                   <Button onClick={() => goAtelierRoom('measurements')}>Continue to measurements</Button>
                   <Button variant="ghost" onClick={() => goAtelierRoom('design')}>
-                    Open design table
+                    Continue to design
                   </Button>
                 </div>
               </AtelierStage>
@@ -291,9 +299,18 @@ export function Customers() {
                   ) : (
                     <ul className="mt-3 divide-y divide-line-subtle border-t border-line-subtle">
                       {profiles.map((profile) => (
-                        <li key={profile.id} className="flex min-h-11 items-center justify-between py-3">
-                          <span className="text-label text-ink-primary">{profile.label}</span>
-                          {profile.isDefault ? <StatusBadge status="active" /> : null}
+                        <li key={profile.id}>
+                          <button
+                            type="button"
+                            className="sf-focus-ring sf-micro-press flex min-h-11 w-full items-center justify-between py-3 text-left"
+                            onClick={() => {
+                              workflow.selectProfile(profile.id);
+                              goAtelierRoom('measurements');
+                            }}
+                          >
+                            <span className="text-label text-ink-primary">{profile.label}</span>
+                            {profile.isDefault ? <StatusBadge status="active" /> : null}
+                          </button>
                         </li>
                       ))}
                     </ul>
@@ -312,20 +329,30 @@ export function Customers() {
                     </div>
                   ) : (
                     <ul className="mt-3 divide-y divide-line-subtle border-t border-line-subtle">
-                      {history.map((order) => (
-                        <li key={order.id} className="flex min-h-11 items-center justify-between gap-3 py-3">
-                          <span>
-                            <span className="block font-numeric text-body text-ink-primary">{order.orderNumber}</span>
-                            <span className="block text-meta text-ink-muted">{order.orderType}</span>
-                          </span>
-                          <span className="text-right">
-                            <StatusBadge status={order.status} />
-                            <span className="mt-1 block font-numeric text-meta text-ink-muted">
-                              {formatCurrency(order.totalAmount, safeCurrency(order.currency, 'GHS'))}
-                            </span>
-                          </span>
-                        </li>
-                      ))}
+                      {history.map((order) => {
+                        const current = order.id === selectedOrder?.id;
+                        return (
+                          <li key={order.id}>
+                            <button
+                              type="button"
+                              aria-current={current ? 'true' : undefined}
+                              className="sf-focus-ring sf-micro-press flex min-h-11 w-full items-center justify-between gap-3 py-3 text-left"
+                              onClick={() => workflow.selectOrder(order.id)}
+                            >
+                              <span>
+                                <span className="block font-numeric text-body text-ink-primary">{order.orderNumber}</span>
+                                <span className="block text-meta text-ink-muted">{order.orderType}</span>
+                              </span>
+                              <span className="text-right">
+                                <StatusBadge status={order.status} />
+                                <span className="mt-1 block font-numeric text-meta text-ink-muted">
+                                  {formatCurrency(order.totalAmount, safeCurrency(order.currency, 'GHS'))}
+                                </span>
+                              </span>
+                            </button>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </section>

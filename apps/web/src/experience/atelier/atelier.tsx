@@ -147,6 +147,26 @@ export function AtelierStage({ className, children }: { className?: string; chil
   return <div className={cn('sf-canvas-stage p-4 sm:p-5', className)}>{children}</div>;
 }
 
+const JOURNEY = [
+  { id: 'clients', label: 'Client' },
+  { id: 'measurements', label: 'Measurements' },
+  { id: 'design', label: 'Design' },
+] as const;
+
+/** Orientation only. Not a second router and not a fake progress meter. */
+export function AtelierJourney({ current }: { current: (typeof JOURNEY)[number]['id'] }) {
+  return (
+    <p className="text-meta text-ink-muted" data-atelier-journey={current}>
+      {JOURNEY.map((step, index) => (
+        <span key={step.id}>
+          {index > 0 ? <span aria-hidden="true"> → </span> : null}
+          <span className={step.id === current ? 'text-ink-primary' : undefined}>{step.label}</span>
+        </span>
+      ))}
+    </p>
+  );
+}
+
 /** Reusable workroom grammar. Identity + thread + surface + optional aside. Not a second layout system. */
 export function AtelierWorkroom({
   place,

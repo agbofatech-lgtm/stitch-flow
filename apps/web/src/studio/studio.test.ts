@@ -18,6 +18,8 @@ test('floor thread uses selected order, not the first recent client', () => {
   assert.match(home, /Work in motion/);
   assert.match(home, /AtelierWorkroom/);
   assert.match(home, /selectCustomer/);
+  assert.match(home, /continueToMeasurements/);
+  assert.match(home, /selectOrder/);
   assert.equal(home.includes('totalRevenue'), false);
 });
 
@@ -31,6 +33,12 @@ test('measurement table does not borrow the first profile as the thread', () => 
   assert.match(source, /data-measurement-class="pattern"/);
   assert.match(source, /Begin a live profile/);
   assert.match(source, /Freeze onto order/);
+  assert.match(source, /isFreezeMilestone/);
+  assert.match(source, /min-h-11 font-numeric/);
+  assert.match(source, /Show all body fields/);
+  assert.match(source, /Version and governed tools/);
+  assert.match(source, /AtelierJourney/);
+  assert.equal(source.includes('/frozen|fingerprint/i'), false);
   assert.equal(/from ['"].*patternEngine/.test(source), false);
 });
 
@@ -42,11 +50,16 @@ test('client room is an AppContext relationship workspace, not HTTP CRUD', () =>
   assert.match(source, /Receive client/);
   assert.match(source, /Garment history/);
   assert.match(source, /Same people as the Floor/);
+  assert.match(source, /Select a client/);
+  assert.match(source, /data-client-identity/);
+  assert.match(source, /AtelierJourney/);
+  assert.match(source, /selectOrder/);
   assert.equal(source.includes('customerApi'), false);
   assert.equal(source.includes('getCustomers'), false);
   assert.equal(source.includes('createCustomer'), false);
   assert.equal(source.includes('Source:'), false);
   assert.equal(source.includes('/customers'), false);
+  assert.equal(source.includes('recentCustomers[0]'), false);
 });
 
 test('atelier places use room vocabulary and real next rooms', () => {
@@ -127,6 +140,8 @@ test('studio shell composes atelier primitives without engines', () => {
   assert.match(shell, /AtelierNavigation/);
   assert.match(shell, /CommandPalette/);
   assert.match(shell, /WorkspaceHeader/);
+  assert.match(shell, /workflowCustomer/);
+  assert.match(shell, /showPlaceNext/);
   assert.equal(shell.includes('patternEngine'), false);
 });
 

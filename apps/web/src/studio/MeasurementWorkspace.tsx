@@ -3,9 +3,9 @@ import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import {
   AtelierConfidence,
+  AtelierJourney,
   AtelierMilestone,
   AtelierStage,
-  AtelierThread,
   AtelierWorkroom,
   Badge,
   Button,
@@ -57,6 +57,16 @@ function formatCm(value: number | undefined) {
   return String(value);
 }
 
+function isFreezeMilestone(message: string | null) {
+  if (!message) return false;
+  return (
+    /MeasurementVersion .+ frozen/.test(message) ||
+    /order snapshot frozen/i.test(message) ||
+    /fingerprint/.test(message) ||
+    /GarmentSpecificationVersion/.test(message)
+  );
+}
+
 export function MeasurementWorkspace() {
   const { measurementProfiles, customers, currentWorkspace, addCustomerMeasurementProfile, updateCustomerMeasurementProfile } =
     useApp();
@@ -68,6 +78,8 @@ export function MeasurementWorkspace() {
   const [garmentType, setGarmentType] = useState<KnownGarmentType | ''>('');
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [listOpen, setListOpen] = useState(() => !workflow.profileId);
+  const [showAllBody, setShowAllBody] = useState(false);
+  const [showAllGarment, setShowAllGarment] = useState(false);
 
   const selectedCustomer = workflow.customerId
     ? customers.find((customer) => customer.id === workflow.customerId) || null
@@ -225,23 +237,29 @@ export function MeasurementWorkspace() {
 
   const workroomProps = {
     place: 'Measurement table',
-    title: 'Measurements',
-    purpose: 'Body, garment, and derived pattern stay separate. Capture is precise. Live profiles remain transitional.',
-    thread: <AtelierThread room="Measurement table" client={selectedCustomer?.fullName || null} />,
+    title: selectedCustomer?.fullName || 'Select a client',
+    purpose: selectedCustomer
+      ? 'Capture centimetres for this person. Body and garment stay separate. Live values stay transitional until an explicit freeze.'
+      : 'Select a client before capturing. This table does not invent a body.',
     confidence: <AtelierConfidence state="local" detail="Live profiles are not frozen shop snapshots." />,
-    primaryAction: (
-      <Button variant="primary" onClick={() => goAtelierRoom('design')}>
-        Continue to design
+    primaryAction: selectedCustomer ? undefined : (
+      <Button variant="primary" onClick={() => goAtelierRoom('clients')}>
+        Open client room
       </Button>
     ),
   };
 
   const bodyKeys = selectedRow
-    ? captureKeys(patternKind, Object.keys(selectedRow.separated.body.fields), BODY_MEASUREMENT_FIELDS)
+    ? showAllBody
+      ? [...BODY_MEASUREMENT_FIELDS]
+      : captureKeys(patternKind, Object.keys(selectedRow.separated.body.fields), BODY_MEASUREMENT_FIELDS)
     : [];
   const garmentKeys = selectedRow
-    ? captureKeys(patternKind, Object.keys(selectedRow.separated.garment.fields), GARMENT_MEASUREMENT_FIELDS)
+    ? showAllGarment
+      ? GARMENT_MEASUREMENT_FIELDS.filter((key) => key !== 'notes')
+      : captureKeys(patternKind, Object.keys(selectedRow.separated.garment.fields), GARMENT_MEASUREMENT_FIELDS)
     : [];
+  const freezeMilestone = isFreezeMilestone(message);
 
   return (
     <AtelierWorkroom {...workroomProps}>
@@ -329,8 +347,11 @@ export function MeasurementWorkspace() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-meta text-ink-muted">Precision capture</p>
-                    <h2 className="mt-1 font-display text-heading text-ink-primary">{selectedRow.label}</h2>
-                    <p className="mt-1 text-meta text-ink-muted">
+                    <h3 className="mt-1 font-display text-heading text-ink-primary">{selectedRow.label}</h3>
+                    <div className="mt-2">
+                      <AtelierJourney current="measurements" />
+                    </div>
+                    <p className="mt-2 text-meta text-ink-muted">
                       {selectedRow.customer}
                       <span aria-hidden="true"> · </span>
                       {selectedRow.taxonomy}
@@ -350,7 +371,7 @@ export function MeasurementWorkspace() {
                     </label>
                     <Select
                       id="pattern-kind"
-                      className="mt-1"
+                      className="mt-1 min-h-11"
                       value={patternKind}
                       onChange={(event) => setPatternKind(event.target.value as PatternKind)}
                     >
@@ -377,11 +398,9 @@ export function MeasurementWorkspace() {
                 </p>
               </AtelierStage>
 
-              <AtelierMilestone active={Boolean(message && /frozen|fingerprint/i.test(message))}>
-                {message}
-              </AtelierMilestone>
-              {message && !/frozen|fingerprint/i.test(message) ? (
-                <p className="text-body text-status-success">{message}</p>
+              <AtelierMilestone active={freezeMilestone}>{message}</AtelierMilestone>
+              {message && !freezeMilestone ? (
+                <p className="mt-3 text-meta text-ink-secondary">{message}</p>
               ) : null}
               {error ? (
                 <p role="alert" className="text-body text-status-danger">
@@ -391,9 +410,16 @@ export function MeasurementWorkspace() {
 
               <div className="mt-6 grid gap-6 lg:grid-cols-2">
                 <section data-measurement-class="body">
-                  <h3 className="font-display text-heading-sm text-ink-primary">Body</h3>
-                  <p className="mt-1 text-meta text-ink-muted">The person. Not ease, not garment length.</p>
-                  <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div className="flex flex-wrap items-end justify-between gap-2">
+                    <div>
+                      <h3 className="font-display text-heading-sm text-ink-primary">Body</h3>
+                      <p className="mt-1 text-meta text-ink-muted">The person. Not ease, not garment length. Values are centimetres.</p>
+                    </div>
+                    <Button variant="ghost" onClick={() => setShowAllBody((value) => !value)}>
+                      {showAllBody ? 'Show fields for this kind' : 'Show all body fields'}
+                    </Button>
+                  </div>
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {bodyKeys.map((key) => (
                       <Field
                         key={key}
@@ -404,7 +430,7 @@ export function MeasurementWorkspace() {
                         <Input
                           id={`body-${key}`}
                           inputMode="decimal"
-                          className="font-numeric"
+                          className="min-h-11 font-numeric"
                           value={draft[key] ?? ''}
                           onChange={(event) => setDraft((current) => ({ ...current, [key]: event.target.value }))}
                           onBlur={(event) => commitField(key, event.target.value)}
@@ -418,9 +444,16 @@ export function MeasurementWorkspace() {
                 </section>
 
                 <section data-measurement-class="garment">
-                  <h3 className="font-display text-heading-sm text-ink-primary">Garment</h3>
-                  <p className="mt-1 text-meta text-ink-muted">Finished lengths and openings. Derived pattern is not captured here.</p>
-                  <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div className="flex flex-wrap items-end justify-between gap-2">
+                    <div>
+                      <h3 className="font-display text-heading-sm text-ink-primary">Garment</h3>
+                      <p className="mt-1 text-meta text-ink-muted">Finished lengths and openings. Derived pattern is not captured here.</p>
+                    </div>
+                    <Button variant="ghost" onClick={() => setShowAllGarment((value) => !value)}>
+                      {showAllGarment ? 'Show fields for this kind' : 'Show all garment fields'}
+                    </Button>
+                  </div>
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {garmentKeys.map((key) => (
                       <Field
                         key={key}
@@ -431,7 +464,7 @@ export function MeasurementWorkspace() {
                         <Input
                           id={`garment-${key}`}
                           inputMode="decimal"
-                          className="font-numeric"
+                          className="min-h-11 font-numeric"
                           value={draft[key] ?? ''}
                           onChange={(event) => setDraft((current) => ({ ...current, [key]: event.target.value }))}
                           onBlur={(event) => commitField(key, event.target.value)}
@@ -488,87 +521,98 @@ export function MeasurementWorkspace() {
                 >
                   Freeze onto order
                 </Button>
-                <Button variant="secondary" onClick={() => void freezeVersionToRepository(selectedRow)}>
-                  Freeze version to T2
-                </Button>
-                <Button variant="secondary" onClick={() => void runGovernedFromFrozenVersion()}>
-                  Governed pattern from frozen version
-                </Button>
-                <Button variant="ghost" onClick={() => void snapshotToRepository(selectedRow)}>
-                  Snapshot to T2
+                <Button variant="secondary" onClick={() => goAtelierRoom('design')}>
+                  Continue to design
                 </Button>
               </div>
 
-              <Panel className="mt-6">
-                <p className="text-label text-ink-primary">Garment specification</p>
-                <p className="mt-1 text-meta text-ink-muted">
-                  Studio intent only. Not pattern geometry. Live type remains mutable until frozen.
+              <details className="mt-8 rounded-sf-lg border border-line-subtle bg-surface-panel p-4">
+                <summary className="sf-focus-ring min-h-11 cursor-pointer text-label text-ink-primary">
+                  Version and governed tools
+                </summary>
+                <p className="mt-2 text-meta text-ink-muted">
+                  Existing T2 / T10 seams. Not a new measurement authority. Freeze onto the order remains the fitting commitment.
                 </p>
-                <label className="mt-3 block text-label text-ink-secondary" htmlFor="garment-spec-type">
-                  Garment type
-                </label>
-                <Select
-                  id="garment-spec-type"
-                  className="mt-1 max-w-xs"
-                  value={garmentType}
-                  onChange={(event) => setGarmentType(event.target.value as KnownGarmentType | '')}
-                >
-                  <option value="">Unset</option>
-                  {KNOWN_GARMENT_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </Select>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => {
-                      setError(null);
-                      const evaluated = evaluateStudioGarmentIntent({
-                        garmentType: garmentType || undefined,
-                        orderId: workflow.orderId,
-                        customerId: workflow.customerId,
-                      });
-                      setMessage(
-                        `Garment specification ${evaluated.completeness}. Type ${evaluated.canonical.garmentTypeStatus}. Optional absent: ${evaluated.optionalAbsent.join(', ') || 'none'}. Not pattern geometry.`
-                      );
-                    }}
-                  >
-                    Evaluate garment specification
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button variant="secondary" onClick={() => void freezeVersionToRepository(selectedRow)}>
+                    Freeze version to T2
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => {
-                      void (async () => {
-                        setError(null);
-                        setMessage(null);
-                        const runtime = getDataAuthorityRuntime();
-                        if (!runtime) {
-                          setError('T2 data authority runtime is not started. Specification was not written to a new store.');
-                          return;
-                        }
-                        try {
-                          const frozen = await freezeStudioGarmentSpecification(runtime.repositories.garment, {
-                            garmentType: garmentType || undefined,
-                            orderId: workflow.orderId,
-                            customerId: workflow.customerId,
-                          });
-                          setMessage(
-                            `GarmentSpecificationVersion ${frozen.version.id} frozen. Live Studio/Order type remains mutable. Fingerprint ${frozen.version.fingerprint.value}.`
-                          );
-                        } catch (err) {
-                          setError(err instanceof Error ? err.message : 'Specification freeze failed');
-                        }
-                      })();
-                    }}
-                  >
-                    Freeze garment specification
+                  <Button variant="secondary" onClick={() => void runGovernedFromFrozenVersion()}>
+                    Governed pattern from frozen version
+                  </Button>
+                  <Button variant="ghost" onClick={() => void snapshotToRepository(selectedRow)}>
+                    Snapshot to T2
                   </Button>
                 </div>
-              </Panel>
+                <Panel className="mt-4">
+                  <p className="text-label text-ink-primary">Garment specification</p>
+                  <p className="mt-1 text-meta text-ink-muted">
+                    Studio intent only. Not pattern geometry. Live type remains mutable until frozen.
+                  </p>
+                  <label className="mt-3 block text-label text-ink-secondary" htmlFor="garment-spec-type">
+                    Garment type
+                  </label>
+                  <Select
+                    id="garment-spec-type"
+                    className="mt-1 max-w-xs min-h-11"
+                    value={garmentType}
+                    onChange={(event) => setGarmentType(event.target.value as KnownGarmentType | '')}
+                  >
+                    <option value="">Unset</option>
+                    {KNOWN_GARMENT_TYPES.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </Select>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        setError(null);
+                        const evaluated = evaluateStudioGarmentIntent({
+                          garmentType: garmentType || undefined,
+                          orderId: workflow.orderId,
+                          customerId: workflow.customerId,
+                        });
+                        setMessage(
+                          `Garment specification ${evaluated.completeness}. Type ${evaluated.canonical.garmentTypeStatus}. Optional absent: ${evaluated.optionalAbsent.join(', ') || 'none'}. Not pattern geometry.`
+                        );
+                      }}
+                    >
+                      Evaluate garment specification
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        void (async () => {
+                          setError(null);
+                          setMessage(null);
+                          const runtime = getDataAuthorityRuntime();
+                          if (!runtime) {
+                            setError('T2 data authority runtime is not started. Specification was not written to a new store.');
+                            return;
+                          }
+                          try {
+                            const frozen = await freezeStudioGarmentSpecification(runtime.repositories.garment, {
+                              garmentType: garmentType || undefined,
+                              orderId: workflow.orderId,
+                              customerId: workflow.customerId,
+                            });
+                            setMessage(
+                              `GarmentSpecificationVersion ${frozen.version.id} frozen. Live Studio/Order type remains mutable. Fingerprint ${frozen.version.fingerprint.value}.`
+                            );
+                          } catch (err) {
+                            setError(err instanceof Error ? err.message : 'Specification freeze failed');
+                          }
+                        })();
+                      }}
+                    >
+                      Freeze garment specification
+                    </Button>
+                  </div>
+                </Panel>
+              </details>
             </motion.div>
           ) : rows.length === 0 ? null : (
             <ExperienceEmptyState

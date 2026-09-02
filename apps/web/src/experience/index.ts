@@ -34,6 +34,7 @@ export {
   AtelierStage,
   AtelierMilestone,
   AtelierWorkroom,
+  AtelierJourney,
 } from './atelier/atelier';
 export type { ConfidenceState } from './atelier/atelier';
 export { goAtelierRoom, registerAtelierRoomHandler } from './atelier/navigate';

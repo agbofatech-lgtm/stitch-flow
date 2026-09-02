@@ -9,6 +9,8 @@ export function WorkspaceInspector({
   customers,
   orders,
   attention,
+  clientName,
+  orderNumber,
   onOpenBusiness,
 }: {
   workspace: StudioWorkspaceId;
@@ -16,6 +18,8 @@ export function WorkspaceInspector({
   customers: number;
   orders: number;
   attention: number;
+  clientName?: string | null;
+  orderNumber?: string | null;
   onOpenBusiness: (id: BusinessSurface) => void;
 }) {
   return (
@@ -36,16 +40,9 @@ export function WorkspaceInspector({
 
       {workspace === 'clients' ? (
         <Panel>
-          <p className="text-label">Client room</p>
-          <ul className="mt-3 space-y-1 text-body text-ink-secondary">
-            <li>Identity</li>
-            <li>Measurements</li>
-            <li>Garment history</li>
-            <li>Orders</li>
-            <li>Preferences</li>
-            <li>Fitting notes</li>
-            <li>Timeline</li>
-          </ul>
+          <p className="text-label">Active relationship</p>
+          <p className="mt-2 text-body text-ink-primary">{clientName || 'No client selected'}</p>
+          {orderNumber ? <p className="mt-1 font-numeric text-meta text-ink-muted">{orderNumber}</p> : null}
           <p className="mt-3 text-meta text-ink-muted">
             {customers} people in this workspace store. Not shop authority.
           </p>
@@ -55,6 +52,7 @@ export function WorkspaceInspector({
       {workspace === 'measurements' ? (
         <Panel>
           <p className="text-label">Domain boundary</p>
+          <p className="mt-2 text-body text-ink-primary">{clientName || 'No client selected'}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Badge>Body</Badge>
             <Badge tone="neutral">Garment</Badge>

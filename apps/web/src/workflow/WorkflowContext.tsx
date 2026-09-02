@@ -44,9 +44,15 @@ const WorkflowContext = createContext<WorkflowContextValue | null>(null);
 
 export function WorkflowProvider({ children }: { children: ReactNode }) {
   const app = useApp();
-  const [customerId, setCustomerId] = useState<string | null>(null);
-  const [profileId, setProfileId] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(app.selectedOrderId);
+  const [customerId, setCustomerId] = useState<string | null>(() => {
+    const order = app.orders.find((item) => item.id === app.selectedOrderId);
+    return order?.customerId || null;
+  });
+  const [profileId, setProfileId] = useState<string | null>(() => {
+    const order = app.orders.find((item) => item.id === app.selectedOrderId);
+    return order?.selectedMeasurementProfileId || null;
+  });
   const [patternSummary, setPatternSummary] = useState<PatternArtifactSummary | null>(null);
   const [lastError, setLastError] = useState<string | null>(null);
   const [lastMessage, setLastMessage] = useState<string | null>(null);

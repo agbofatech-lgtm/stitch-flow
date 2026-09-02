@@ -99,6 +99,18 @@ async function waitForPlace(cdp, placeId, tries = 80) {
   throw new Error(`place ${placeId} not visible`);
 }
 
+async function waitForWorkroom(cdp, place, tries = 80) {
+  for (let i = 0; i < tries; i += 1) {
+    const found = await evaluate(cdp, `document.querySelector('[data-workroom=${JSON.stringify(place)}]') !== null`);
+    if (found) {
+      await sleep(500);
+      return;
+    }
+    await sleep(250);
+  }
+  throw new Error(`workroom ${place} not visible`);
+}
+
 async function clickText(cdp, text) {
   await evaluate(
     cdp,
@@ -203,6 +215,7 @@ try {
   await cdp.send('Page.navigate', { url });
   await sleep(4000);
   await waitForPlace(cdp, 'command');
+  await waitForWorkroom(cdp, 'Floor');
 
   await setViewport(cdp, 1280, 800, false);
   await sleep(400);
@@ -215,23 +228,23 @@ try {
 
   await clickNav(cdp, 'Client room');
   await waitForPlace(cdp, 'clients');
-  await sleep(1200);
+  await waitForWorkroom(cdp, 'Client room');
+  await sleep(400);
   await capture(cdp, 'clients-1280.png');
 
   await clickText(cdp, 'Emma Thompson');
-  await sleep(600);
-  await evaluate(cdp, `document.querySelector('[data-client-dossier]')?.scrollIntoView({ block: 'start' })`);
-  await sleep(200);
+  await sleep(800);
   await capture(cdp, 'clients-dossier-1280.png');
 
   await clickText(cdp, 'Continue to measurements');
   await waitForPlace(cdp, 'measurements');
-  await sleep(800);
+  await waitForWorkroom(cdp, 'Measurement table');
+  await sleep(400);
   await capture(cdp, 'measurements-1280.png');
 
   await clickText(cdp, 'Begin a live profile');
-  await sleep(800);
-  await evaluate(cdp, `document.querySelector('[data-measurement-class="body"]')?.scrollIntoView({ block: 'center' })`);
+  await sleep(1000);
+  await evaluate(cdp, `document.querySelector('[data-measurement-canvas]')?.scrollIntoView({ block: 'start' })`);
   await sleep(200);
   await capture(cdp, 'measurements-capture-1280.png');
 
@@ -256,16 +269,32 @@ try {
 
   await setViewport(cdp, 768, 800, false);
   await sleep(400);
+  await clickAria(cdp, 'Open navigation');
+  await sleep(300);
   await clickNav(cdp, 'Floor');
   await waitForPlace(cdp, 'command');
+  await waitForWorkroom(cdp, 'Floor');
   await sleep(300);
   await capture(cdp, 'floor-768.png');
+  await clickAria(cdp, 'Open navigation');
+  await sleep(300);
   await clickNav(cdp, 'Client room');
   await waitForPlace(cdp, 'clients');
-  await sleep(500);
+  await waitForWorkroom(cdp, 'Client room');
+  await sleep(400);
   await capture(cdp, 'clients-768.png');
+  await clickAria(cdp, 'Open navigation');
+  await sleep(300);
+  await clickNav(cdp, 'Measurement table');
+  await waitForPlace(cdp, 'measurements');
+  await waitForWorkroom(cdp, 'Measurement table');
+  await sleep(400);
+  await capture(cdp, 'measurements-768.png');
+  await clickAria(cdp, 'Open navigation');
+  await sleep(300);
   await clickNav(cdp, 'Floor');
   await waitForPlace(cdp, 'command');
+  await waitForWorkroom(cdp, 'Floor');
   await sleep(300);
 
   await setViewport(cdp, 390, 844, true);
@@ -276,14 +305,17 @@ try {
   await capture(cdp, 'floor-390-nav.png');
   await clickNav(cdp, 'Client room');
   await waitForPlace(cdp, 'clients');
+  await waitForWorkroom(cdp, 'Client room');
   await pressEscape(cdp);
-  await sleep(1200);
+  await sleep(500);
   await capture(cdp, 'clients-390.png');
   await clickAria(cdp, 'Open navigation');
   await sleep(400);
   await clickNav(cdp, 'Measurement table');
   await waitForPlace(cdp, 'measurements');
-  await sleep(1200);
+  await waitForWorkroom(cdp, 'Measurement table');
+  await pressEscape(cdp);
+  await sleep(500);
   await capture(cdp, 'measurements-390.png');
 
   ws.close();

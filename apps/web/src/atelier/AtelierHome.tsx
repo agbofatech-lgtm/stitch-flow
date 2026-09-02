@@ -41,6 +41,16 @@ export function AtelierHome() {
     setView('production-board');
   }
 
+  function openClientRoom() {
+    if (selectedOrder) workflow.selectOrder(selectedOrder.id);
+    setView('customers');
+  }
+
+  function continueToMeasurements() {
+    if (selectedOrder) workflow.selectOrder(selectedOrder.id);
+    goAtelierRoom('measurements');
+  }
+
   return (
     <AtelierWorkroom
       place="Floor"
@@ -52,11 +62,11 @@ export function AtelierHome() {
       }
       primaryAction={
         threadClient ? (
-          <Button variant="primary" onClick={() => goAtelierRoom('measurements')}>
+          <Button variant="primary" onClick={continueToMeasurements}>
             Continue to measurements
           </Button>
         ) : (
-          <Button variant="primary" onClick={() => setView('customers')}>
+          <Button variant="primary" onClick={openClientRoom}>
             Open client room
           </Button>
         )
@@ -92,7 +102,7 @@ export function AtelierHome() {
           <section>
             <p className="text-meta text-ink-muted">Begin</p>
             <div className="mt-2 flex flex-col gap-2">
-              <Button variant="secondary" onClick={() => setView('customers')}>
+              <Button variant="secondary" onClick={openClientRoom}>
                 Open client room
               </Button>
               <Button variant="ghost" onClick={() => goAtelierRoom('measurements')}>
@@ -116,7 +126,7 @@ export function AtelierHome() {
             <StatusBadge status={selectedOrder.status} />
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button onClick={() => goAtelierRoom('measurements')}>Continue to measurements</Button>
+            <Button onClick={continueToMeasurements}>Continue to measurements</Button>
             <Button variant="secondary" onClick={() => openProduction(selectedOrder.id)}>
               Open production floor
             </Button>
@@ -127,7 +137,7 @@ export function AtelierHome() {
           title="No client selected"
           description="The floor does not invent an active client. Open the client room to begin, or continue a garment already in motion."
           action={
-            <Button onClick={() => setView('customers')}>Open client room</Button>
+            <Button onClick={openClientRoom}>Open client room</Button>
           }
         />
       )}
@@ -184,7 +194,7 @@ export function AtelierHome() {
               title="No clients yet"
               description="Your first client dossier will appear here once you add a customer."
               action={
-                <Button onClick={() => setView('customers')}>Open client room</Button>
+                <Button onClick={openClientRoom}>Open client room</Button>
               }
             />
           </div>

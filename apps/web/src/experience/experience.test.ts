@@ -123,6 +123,17 @@ test('atelier workroom exposes place identity without a second layout system', (
   assert.match(html, /My Workspace/);
 });
 
+test('atelier journey is orientation, not a fake completion meter', () => {
+  const { AtelierJourney } = require('./atelier/atelier') as typeof import('./atelier/atelier');
+  const html = renderToStaticMarkup(createElement(AtelierJourney, { current: 'measurements' }));
+  assert.match(html, /data-atelier-journey="measurements"/);
+  assert.match(html, /Client/);
+  assert.match(html, /Measurements/);
+  assert.match(html, /Design/);
+  assert.equal(html.includes('%'), false);
+  assert.equal(html.includes('synced'), false);
+});
+
 test('command palette is a room navigator with 44px targets', () => {
   const source = readFileSync(new URL('./shell/CommandPalette.tsx', import.meta.url), 'utf8');
   assert.match(source, /Go to a room/);

@@ -205,9 +205,18 @@ export function StudioShell() {
 
   const attention = (dueAlerts?.length || 0) + orders.filter((order) => order.status === 'in_progress').length;
   const plane = controlOpen ? 'control' : 'atelier';
-  const selectedOrder = orders.find((order) => order.id === selectedOrderId) || null;
+  const workflowOrder = workflow.orderId
+    ? orders.find((order) => order.id === workflow.orderId) || null
+    : null;
+  const selectedOrder =
+    workflowOrder || orders.find((order) => order.id === selectedOrderId) || null;
+  const workflowCustomer = workflow.customerId
+    ? customers.find((customer) => customer.id === workflow.customerId) || null
+    : null;
   const threadClient =
-    (selectedOrder && customers.find((customer) => customer.id === selectedOrder.customerId)?.fullName) || null;
+    workflowCustomer?.fullName ||
+    (selectedOrder && customers.find((customer) => customer.id === selectedOrder.customerId)?.fullName) ||
+    null;
   const floorConfidence: ConfidenceState =
     connectivity === 'offline'
       ? 'offline'
@@ -246,6 +255,11 @@ export function StudioShell() {
     description: place.purpose,
   };
 
+  const showPlaceNext = Boolean(
+    place.next &&
+      !(workspace === 'clients' && !settingsOpen && !controlOpen && !workflow.customerId)
+  );
+
   function runPlaceNext() {
     const next = place.next;
     if (!next) return;
@@ -254,6 +268,9 @@ export function StudioShell() {
       else setSettingsOpen(false);
       goTo('command');
       return;
+    }
+    if (next.room === 'measurements' && selectedOrder && !workflow.customerId) {
+      workflow.selectOrder(selectedOrder.id);
     }
     goTo(next.room);
   }
@@ -395,7 +412,7 @@ export function StudioShell() {
               <IconButton label="Search workspaces" onClick={() => setCommandOpen(true)}>
                 <Search className="h-4 w-4" />
               </IconButton>
-              {place.next ? (
+              {showPlaceNext && place.next ? (
                 <Button variant="primary" size="md" className="hidden sm:inline-flex" onClick={runPlaceNext}>
                   {place.next.label}
                 </Button>
@@ -429,7 +446,7 @@ export function StudioShell() {
               client={threadClient}
               order={selectedOrder?.orderNumber}
             />
-            {place.next ? (
+            {showPlaceNext && place.next ? (
               <Button variant="secondary" size="md" className="sm:hidden" onClick={runPlaceNext}>
                 {place.next.label}
               </Button>
@@ -466,6 +483,8 @@ export function StudioShell() {
               customers={customers.length}
               orders={orders.length}
               attention={attention}
+              clientName={threadClient}
+              orderNumber={selectedOrder?.orderNumber || null}
               onOpenBusiness={(id) => goTo('business', id)}
             />
           </InspectorPanel>
@@ -528,6 +547,8 @@ export function StudioShell() {
             customers={customers.length}
             orders={orders.length}
             attention={attention}
+            clientName={threadClient}
+            orderNumber={selectedOrder?.orderNumber || null}
             onOpenBusiness={(id) => goTo('business', id)}
           />
         </Sheet>
