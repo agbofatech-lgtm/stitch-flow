@@ -59,7 +59,8 @@ SAC-5 offline sync (selected `/shop` domains, AppContext remains UI SoT): [`conv
 SER-F0 frontend experience forensics: [`../experience/ser/f0/README.md`](../experience/ser/f0/README.md).  
 SER-F1 experience constitution: [`frontend/experience/README.md`](./frontend/experience/README.md).  
 SER-F2 visual language: [`frontend/experience/SER-F2_FINAL_REPORT.md`](./frontend/experience/SER-F2_FINAL_REPORT.md).  
-SER-F3 cinematic motion: [`frontend/experience/SER-F3_FINAL_REPORT.md`](./frontend/experience/SER-F3_FINAL_REPORT.md). SER-F4 locked. 3D and Phase 20 remain locked.
+SER-F3 cinematic motion: [`frontend/experience/SER-F3_FINAL_REPORT.md`](./frontend/experience/SER-F3_FINAL_REPORT.md).  
+SER-F4 atelier shell: [`frontend/experience/SER-F4_FINAL_REPORT.md`](./frontend/experience/SER-F4_FINAL_REPORT.md). SER-F5 locked. 3D and Phase 20 remain locked.
 
 ---
 
