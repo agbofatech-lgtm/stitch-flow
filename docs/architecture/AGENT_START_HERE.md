@@ -63,7 +63,8 @@ SER-F3 cinematic motion: [`frontend/experience/SER-F3_FINAL_REPORT.md`](./fronte
 SER-F4 atelier shell: [`frontend/experience/SER-F4_FINAL_REPORT.md`](./frontend/experience/SER-F4_FINAL_REPORT.md).  
 SER-F5 Floor + workroom: [`frontend/experience/SER-F5_FINAL_REPORT.md`](./frontend/experience/SER-F5_FINAL_REPORT.md).  
 SER-F6 Client + Measurement: [`frontend/experience/SER-F6_FINAL_REPORT.md`](./frontend/experience/SER-F6_FINAL_REPORT.md).  
-SER-F7 Design table: [`frontend/experience/SER-F7_FINAL_REPORT.md`](./frontend/experience/SER-F7_FINAL_REPORT.md). SER-F8 locked. 3D and Phase 20 remain locked.
+SER-F7 Design table: [`frontend/experience/SER-F7_FINAL_REPORT.md`](./frontend/experience/SER-F7_FINAL_REPORT.md).  
+SER-F8 Production floor: [`frontend/experience/SER-F8_FINAL_REPORT.md`](./frontend/experience/SER-F8_FINAL_REPORT.md). SER-F9 locked. 3D and Phase 20 remain locked.
 
 ---
 
