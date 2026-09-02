@@ -29,12 +29,14 @@ export function CommandPalette({
   }, [query]);
 
   return (
-    <Dialog open={open} title="Command palette" onClose={onClose}>
-      <p className="mb-3 text-meta text-ink-muted">Navigate, search workspace records, or open Control Center. Authorization is unchanged.</p>
+    <Dialog open={open} title="Go to a room" onClose={onClose}>
+      <p className="mb-3 text-meta text-ink-muted">
+        Move through the atelier. Authorization and data stores are unchanged.
+      </p>
       <input
         autoFocus
         aria-label="Filter commands"
-        className="sf-focus-ring w-full rounded-sf border border-line px-3 py-2 text-body"
+        className="sf-focus-ring min-h-11 w-full rounded-sf border border-line px-3 py-2 text-body"
         placeholder="Search rooms, clients, or orders…"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
@@ -73,7 +75,7 @@ export function CommandPalette({
                     <li key={command.id}>
                       <button
                         type="button"
-                        className={`sf-focus-ring w-full rounded-sf px-3 py-2 text-left text-body ${
+                        className={`sf-focus-ring min-h-11 w-full rounded-sf px-3 py-2 text-left text-body ${
                           index === active ? 'bg-action-secondary text-ink-primary' : 'hover:bg-action-secondary'
                         }`}
                         onClick={() => {

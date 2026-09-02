@@ -68,6 +68,7 @@ import {
   type BusinessSurface,
   type StudioWorkspaceId,
 } from './workspaces';
+import { ATELIER_PLACES, ledgerStationTitle } from './atelierGrammar';
 import { WorkspaceInspector } from './WorkspaceInspector';
 import { WorkflowPanel } from '../workflow/WorkflowPanel';
 
@@ -139,8 +140,11 @@ export function StudioShell() {
         ...current.slice(-2),
         {
           id: `sync-${Date.now()}`,
-          tone: next === 'online' ? 'success' : next === 'offline' ? 'warning' : 'info',
-          children: `Workspace connectivity is ${next}. Queue remains T2 authority.`,
+          tone: next === 'offline' ? 'warning' : 'info',
+          children:
+            next === 'offline'
+              ? 'Workspace is offline. Local work remains.'
+              : 'Workspace probe reachable. UI store is still local.',
         },
       ]);
     });
@@ -197,7 +201,6 @@ export function StudioShell() {
     goTo(id as StudioWorkspaceId);
   }
 
-  const meta = STUDIO_WORKSPACES.find((item) => item.id === workspace)!;
   const attention = (dueAlerts?.length || 0) + orders.filter((order) => order.status === 'in_progress').length;
   const plane = controlOpen ? 'control' : 'atelier';
   const selectedOrder = orders.find((order) => order.id === selectedOrderId) || null;
@@ -219,7 +222,7 @@ export function StudioShell() {
     if (workspace === 'command') return <AtelierHome />;
     if (workspace === 'clients') return <Customers />;
     if (workspace === 'design') return (
-      <DesignStudioFrame>
+      <DesignStudioFrame client={threadClient} order={selectedOrder?.orderNumber}>
         <DesignStudio />
       </DesignStudioFrame>
     );
@@ -228,44 +231,43 @@ export function StudioShell() {
     if (business === 'invoices') return <Invoices />;
     if (business === 'reports') return <Reports />;
     return <Orders />;
-  }, [business, controlOpen, settingsOpen, workspace]);
+  }, [business, controlOpen, settingsOpen, workspace, threadClient, selectedOrder]);
 
-  const headerCopy = controlOpen
-    ? {
-        kicker: 'AGBOFA platform',
-        title: 'Control Center',
-        description: 'Operator command room. Tenant Settings is not this plane.',
-      }
+  const place = controlOpen
+    ? ATELIER_PLACES.control
     : settingsOpen
-      ? {
-          kicker: 'Workspace',
-          title: 'Settings',
-          description: 'Tenant workspace configuration. Not commercial authority.',
-        }
-      : workspace === 'business'
-        ? {
-            kicker: 'Operations',
-            title: BUSINESS_SURFACES.find((item) => item.id === business)?.label || 'Orders',
-            description: meta.purpose,
-          }
-        : {
-            kicker: 'Atelier',
-            title: meta.label,
-            description: meta.purpose,
-          };
+      ? ATELIER_PLACES.settings
+      : ATELIER_PLACES[workspace];
+  const headerCopy = {
+    kicker: place.kicker,
+    title: workspace === 'business' && !settingsOpen && !controlOpen ? ledgerStationTitle(business) : place.title,
+    description: place.purpose,
+  };
+
+  function runPlaceNext() {
+    const next = place.next;
+    if (!next) return;
+    if ('exit' in next) {
+      if (next.exit === 'control') setControlOpen(false);
+      else setSettingsOpen(false);
+      goTo('command');
+      return;
+    }
+    goTo(next.room);
+  }
 
   const commands: CommandEntry[] = [
     ...STUDIO_WORKSPACES.map((item) => ({
       id: item.id,
       label: item.label,
-      group: 'Navigate',
+      group: 'Rooms',
       keywords: item.purpose,
       onSelect: () => goTo(item.id),
     })),
     ...BUSINESS_SURFACES.map((surface) => ({
       id: `business:${surface.id}`,
       label: surface.label,
-      group: 'Operate',
+      group: 'Ledger',
       onSelect: () => goTo('business', surface.id),
     })),
     ...customers.slice(0, 8).map((customer) => ({
@@ -294,7 +296,7 @@ export function StudioShell() {
     {
       id: 'control-center',
       label: 'Open Control Center',
-      group: 'Platform',
+      group: 'Operator',
       onSelect: () => selectNav('control'),
     },
   ];
@@ -326,6 +328,7 @@ export function StudioShell() {
   return (
     <AtelierShell
       plane={plane}
+      placeId={place.id}
       navigation={
         <AtelierNavigation
           brand={
@@ -387,6 +390,11 @@ export function StudioShell() {
               <IconButton label="Search workspaces" onClick={() => setCommandOpen(true)}>
                 <Search className="h-4 w-4" />
               </IconButton>
+              {place.next ? (
+                <Button variant="primary" size="md" className="hidden sm:inline-flex" onClick={runPlaceNext}>
+                  {place.next.label}
+                </Button>
+              ) : null}
               <IconButton
                 label={inspectorOpen ? 'Hide inspector' : 'Show inspector'}
                 onClick={() => setInspectorOpen((value) => !value)}
@@ -395,11 +403,11 @@ export function StudioShell() {
               </IconButton>
               <Button
                 variant="ghost"
-                size="sm"
+                size="md"
                 className="hidden md:inline-flex"
                 onClick={() => selectNav('control')}
               >
-                Control Center
+                Operator plane
               </Button>
               <IconButton label="Workspace settings" onClick={() => selectNav('settings')}>
                 <SettingsIcon className="h-4 w-4" />
@@ -409,23 +417,39 @@ export function StudioShell() {
         />
       }
       toolbar={
-        workspace === 'business' && !settingsOpen && !controlOpen ? (
-          <ContextBar>
-            {BUSINESS_SURFACES.map((surface) => (
-              <button
-                key={surface.id}
-                type="button"
-                onClick={() => goTo('business', surface.id)}
-                className={cn(
-                  'sf-focus-ring min-h-10 rounded-sf-pill px-3 text-meta',
-                  business === surface.id ? 'bg-action-primary text-ink-inverse' : 'bg-action-secondary text-ink-secondary'
-                )}
-              >
-                {surface.label}
-              </button>
-            ))}
-          </ContextBar>
-        ) : undefined
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line-subtle bg-surface-panel px-3 py-2">
+            <AtelierThread
+              room={headerCopy.title}
+              client={threadClient}
+              order={selectedOrder?.orderNumber}
+            />
+            {place.next ? (
+              <Button variant="secondary" size="md" className="sm:hidden" onClick={runPlaceNext}>
+                {place.next.label}
+              </Button>
+            ) : null}
+          </div>
+          {workspace === 'business' && !settingsOpen && !controlOpen ? (
+            <ContextBar>
+              {BUSINESS_SURFACES.map((surface) => (
+                <button
+                  key={surface.id}
+                  type="button"
+                  onClick={() => goTo('business', surface.id)}
+                  className={cn(
+                    'sf-focus-ring min-h-11 rounded-sf-pill px-3 text-meta',
+                    business === surface.id
+                      ? 'bg-action-primary text-ink-inverse'
+                      : 'bg-action-secondary text-ink-secondary'
+                  )}
+                >
+                  {surface.label}
+                </button>
+              ))}
+            </ContextBar>
+          ) : null}
+        </>
       }
       inspector={
         inspectorOpen && !controlOpen ? (
@@ -465,7 +489,7 @@ export function StudioShell() {
                 key={item.id}
                 type="button"
                 className={cn(
-                  'sf-focus-ring flex min-h-12 flex-col items-center justify-center gap-1 text-[10px]',
+                  'sf-focus-ring flex min-h-12 min-w-11 flex-col items-center justify-center gap-1 px-1 text-[10px]',
                   active ? 'text-action-primary' : 'text-ink-muted'
                 )}
                 onClick={() => goTo(item.id)}

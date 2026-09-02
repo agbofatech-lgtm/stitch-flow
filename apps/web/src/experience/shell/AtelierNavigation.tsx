@@ -53,17 +53,13 @@ export function AtelierNavigation({
       >
         <div className="flex items-center gap-3 border-b border-line-subtle px-3 py-4">{brand}</div>
         {!collapsed && workspaceName ? (
-          <p className="truncate px-4 pt-3 text-meta uppercase tracking-[0.16em] text-ink-muted">
-            {workspaceName}
-          </p>
+          <p className="truncate px-4 pt-3 text-meta text-ink-muted">{workspaceName}</p>
         ) : null}
         <nav aria-label="Studio workspaces" className="flex-1 space-y-4 overflow-y-auto p-2">
           {sections.map((section) => (
             <div key={section.id}>
               {!collapsed || mobileOpen ? (
-                <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-muted">
-                  {section.label}
-                </p>
+                <p className="px-3 pb-1 text-meta text-ink-muted">{section.label}</p>
               ) : (
                 <p className="sr-only">{section.label}</p>
               )}
@@ -74,7 +70,7 @@ export function AtelierNavigation({
                     type="button"
                     onClick={() => onSelect(item.id)}
                     className={cn(
-                      'sf-focus-ring flex min-h-10 w-full items-center gap-3 rounded-sf px-3 py-2 text-left text-label',
+                      'sf-focus-ring sf-micro-press flex min-h-11 w-full items-center gap-3 rounded-sf px-3 py-2 text-left text-label',
                       item.current
                         ? 'bg-action-primary text-ink-inverse shadow-sf-sm'
                         : 'text-ink-secondary hover:bg-action-secondary'

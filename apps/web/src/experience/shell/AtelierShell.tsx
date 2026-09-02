@@ -5,6 +5,7 @@ export type ShellPlane = 'atelier' | 'control';
 
 export function AtelierShell({
   plane = 'atelier',
+  placeId,
   navigation,
   header,
   toolbar,
@@ -15,6 +16,7 @@ export function AtelierShell({
   toasts,
 }: {
   plane?: ShellPlane;
+  placeId?: string;
   navigation: ReactNode;
   header: ReactNode;
   toolbar?: ReactNode;
@@ -27,6 +29,7 @@ export function AtelierShell({
   return (
     <div
       data-plane={plane}
+      data-atelier-place={placeId}
       data-theme={plane === 'control' ? 'dark' : undefined}
       className={cn(
         'flex min-h-screen text-ink-primary',

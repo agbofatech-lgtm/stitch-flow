@@ -114,6 +114,13 @@ test('atelier shell exposes skip link and workspace main', () => {
   assert.match(html, /data-plane="atelier"/);
 });
 
+test('command palette is a room navigator with 44px targets', () => {
+  const source = readFileSync(new URL('./shell/CommandPalette.tsx', import.meta.url), 'utf8');
+  assert.match(source, /Go to a room/);
+  assert.match(source, /min-h-11/);
+  assert.equal(source.includes('Create invoice'), false);
+});
+
 test('error state can include recovery action', () => {
   const html = renderToStaticMarkup(
     createElement(ErrorState, {

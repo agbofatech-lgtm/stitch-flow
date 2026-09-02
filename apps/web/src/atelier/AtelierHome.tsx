@@ -21,9 +21,7 @@ export function AtelierHome() {
   const attentionCount = dueAlerts?.length || 0;
   const selectedOrder = orders.find((order) => order.id === selectedOrderId);
   const threadClient =
-    (selectedOrder && customers.find((customer) => customer.id === selectedOrder.customerId)?.fullName) ||
-    recentCustomers[0]?.fullName ||
-    null;
+    (selectedOrder && customers.find((customer) => customer.id === selectedOrder.customerId)?.fullName) || null;
 
   return (
     <AtelierCanvas>

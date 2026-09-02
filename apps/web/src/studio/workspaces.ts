@@ -20,36 +20,36 @@ export type StudioWorkspace = {
 export const STUDIO_WORKSPACES: StudioWorkspace[] = [
   {
     id: 'command',
-    label: 'Atelier Home',
-    purpose: 'Work requiring attention',
+    label: 'Floor',
+    purpose: 'Orient. Work that needs a human.',
     legacyView: 'dashboard',
   },
   {
     id: 'clients',
-    label: 'Client Studio',
-    purpose: 'Customer identity and history',
+    label: 'Client room',
+    purpose: 'The person you are dressing',
     legacyView: 'customers',
   },
   {
     id: 'measurements',
-    label: 'Measurements',
+    label: 'Measurement table',
     purpose: 'Body / garment / pattern boundary',
   },
   {
     id: 'design',
-    label: 'Design',
+    label: 'Design table',
     purpose: 'Host protected Design Studio',
     legacyView: 'design-studio',
   },
   {
     id: 'production',
-    label: 'Production',
+    label: 'Production floor',
     purpose: 'Cutting through delivery',
     legacyView: 'production-board',
   },
   {
     id: 'business',
-    label: 'Business',
+    label: 'Ledger',
     purpose: 'Orders, materials, invoices, reports',
     legacyView: 'orders',
   },
@@ -70,7 +70,7 @@ export const NAV_SECTIONS: Array<{
 }> = [
   {
     id: 'atelier',
-    label: 'Atelier',
+    label: 'Rooms',
     items: STUDIO_WORKSPACES.filter((item) => item.id !== 'business').map((item) => ({
       id: item.id,
       label: item.label,
@@ -79,7 +79,7 @@ export const NAV_SECTIONS: Array<{
   },
   {
     id: 'operations',
-    label: 'Operations',
+    label: 'Ledger',
     items: BUSINESS_SURFACES.map((surface) => ({
       id: `business:${surface.id}`,
       label: surface.label,
@@ -94,7 +94,7 @@ export const NAV_SECTIONS: Array<{
   },
   {
     id: 'platform',
-    label: 'Platform',
+    label: 'Operator',
     items: [{ id: 'control', label: 'Control Center' }],
   },
 ];
