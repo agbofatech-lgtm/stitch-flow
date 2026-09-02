@@ -13,6 +13,6 @@ Applied in F5:
 | Measurement table | framing; thread from workflow, not `rows[0]` | capture + body/garment completed in F6; freeze/governed tools unchanged |
 | Design table | host frame (canvas density in F7) | `DesignStudio.tsx` untouched |
 | Production floor | rebuilt in F8 (AppContext workroom) | HTTP board removed; stages from order record; transitions not remounted |
-| Ledger / Orders | framing | station interiors deferred to F9 |
+| Ledger / Orders | rebuilt in F9 | AppContext commercial record; invoices/payments stored; no PSP |
 
 Empty / loading / error copy names the workspace condition. It does not print unmounted API URLs.
